@@ -29,19 +29,27 @@ export default function GoogleAuthButton({ onClick, disabled, loading, label }) 
   const { t } = useTranslation()
 
   return (
-    <Button
-      type="button"
-      variant="outline"
-      className="w-full border-border bg-white hover:bg-background"
-      onClick={onClick}
-      disabled={disabled || loading}
-    >
-      {loading ? (
-        <Loader2 className="h-5 w-5 animate-spin text-muted" aria-hidden="true" />
-      ) : (
-        <GoogleIcon />
+    <div className="space-y-2">
+      <Button
+        type="button"
+        variant="outline"
+        className="w-full border-border bg-white hover:bg-background"
+        onClick={onClick}
+        disabled={disabled || loading}
+        aria-busy={loading}
+      >
+        {loading ? (
+          <Loader2 className="h-5 w-5 animate-spin text-muted" aria-hidden="true" />
+        ) : (
+          <GoogleIcon />
+        )}
+        {loading ? t('auth.googleSigningIn') : label || t('auth.continueWithGoogle')}
+      </Button>
+      {loading && (
+        <p className="text-center text-sm text-muted" role="status" aria-live="polite">
+          {t('auth.googleSigningInHint')}
+        </p>
       )}
-      {loading ? t('auth.googleSigningIn') : label || t('auth.continueWithGoogle')}
-    </Button>
+    </div>
   )
 }

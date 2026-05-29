@@ -1,14 +1,29 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useAuth } from './useAuth'
 import { useAuthPageSession } from './useAuthPage'
 import { useTranslation } from './useTranslation'
 import { clearOAuthStorage, isOAuthPendingStale } from '../lib/oauthStorage'
 
+async function waitForAuthReady(authReadyRef, maxMs = 8000) {
+  const started = Date.now()
+  while (!authReadyRef.current) {
+    if (Date.now() - started > maxMs) {
+      throw new Error('Auth page is still loading. Please try again.')
+    }
+    await new Promise((resolve) => setTimeout(resolve, 50))
+  }
+}
+
 export function useGoogleAuth({ role, onError } = {}) {
   const authReady = useAuthPageSession()
+  const authReadyRef = useRef(authReady)
   const { signInWithGoogle } = useAuth()
   const { t } = useTranslation()
   const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    authReadyRef.current = authReady
+  }, [authReady])
 
   const resetGoogleState = useCallback(() => {
     clearOAuthStorage()
@@ -47,21 +62,23 @@ export function useGoogleAuth({ role, onError } = {}) {
   }, [loading, resetGoogleState, onError, t])
 
   const startGoogleAuth = useCallback(async () => {
-    if (!authReady || loading) return
+    if (loading) return
 
     setLoading(true)
+
     try {
+      await waitForAuthReady(authReadyRef)
       await signInWithGoogle({ role })
     } catch (err) {
       resetGoogleState()
       onError?.(err.message || t('auth.googleError'))
     }
-  }, [authReady, loading, role, signInWithGoogle, resetGoogleState, onError, t])
+  }, [loading, role, signInWithGoogle, resetGoogleState, onError, t])
 
   return {
     startGoogleAuth,
     googleLoading: loading,
     authReady,
-    googleDisabled: !authReady || loading,
+    googleDisabled: loading,
   }
 }
