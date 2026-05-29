@@ -223,9 +223,3 @@ html[data-reduce-motion="true"] .skeleton {
   left: 1rem;
   top: 1rem;
 }
-
-.splash-logo {
-  transform: translateZ(0);
-  backface-visibility: hidden;
-  filter: drop-shadow(0 10px 36px rgba(0, 0, 0, 0.45));
-}

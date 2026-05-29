@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import Hero from '../components/home/Hero'
 import FeaturedListings from '../components/home/FeaturedListings'
 import HowItWorks, { TrustFeatures } from '../components/home/HowItWorks'
+import WelcomeBackBanner from '../components/home/WelcomeBackBanner'
 import FilterBar from '../components/listings/FilterBar'
 import { useListings } from '../hooks/useListings'
 import { useTranslation } from '../hooks/useTranslation'
@@ -17,6 +18,7 @@ export default function Home() {
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+      <WelcomeBackBanner />
       <Hero />
 
       <section className="relative border-y border-border bg-surface py-6 sm:py-8">

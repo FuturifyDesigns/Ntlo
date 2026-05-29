@@ -1,10 +1,9 @@
-import { useState, useCallback } from 'react'
 import { HashRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { AuthProvider } from './context/AuthContext'
 import { LocaleProvider } from './context/LocaleContext'
+import { WelcomeReturnProvider } from './context/WelcomeReturnContext'
 import ProtectedRoute from './components/layout/ProtectedRoute'
-import SplashScreen from './components/layout/SplashScreen'
 import Navbar from './components/layout/Navbar'
 import Footer from './components/layout/Footer'
 import MobileNav from './components/layout/MobileNav'
@@ -64,20 +63,13 @@ function AppRoutes() {
 }
 
 function AppShell() {
-  const [showSplash, setShowSplash] = useState(() => !sessionStorage.getItem('ntlo_splash_seen'))
   const { t } = useTranslation()
-
-  const handleSplashComplete = useCallback(() => {
-    sessionStorage.setItem('ntlo_splash_seen', '1')
-    setShowSplash(false)
-  }, [])
 
   return (
     <>
       <a href="#main-content" className="skip-link">{t('a11y.skipToContent')}</a>
-      {showSplash && <SplashScreen onComplete={handleSplashComplete} />}
-      {!showSplash && <GrainOverlay />}
-      <div className={`flex min-h-screen flex-col pb-16 transition-opacity duration-500 md:pb-0 ${showSplash ? 'opacity-0' : 'opacity-100'}`}>
+      <GrainOverlay />
+      <div className="flex min-h-screen flex-col pb-16 md:pb-0">
         <Navbar />
         <main id="main-content" className="flex-1">
           <AppRoutes />
@@ -95,7 +87,9 @@ export default function App() {
     <HashRouter>
       <LocaleProvider>
         <AuthProvider>
-          <AppShell />
+          <WelcomeReturnProvider>
+            <AppShell />
+          </WelcomeReturnProvider>
         </AuthProvider>
       </LocaleProvider>
     </HashRouter>

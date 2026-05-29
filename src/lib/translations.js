@@ -26,6 +26,11 @@ export const translations = {
       campuses: 'Campuses',
       verified: 'Verified',
     },
+    home: {
+      welcomeBackTitle: 'Welcome back',
+      welcomeBackSubtitle: 'Good to see you again — your campus home is ready.',
+      welcomeBackDismiss: 'Dismiss welcome message',
+    },
     filter: {
       searchPlaceholder: 'Search by area or university...',
       allUniversities: 'All Universities',
@@ -310,6 +315,11 @@ export const translations = {
       liveListings: 'Dilong tse di phelang',
       campuses: 'Di khamposi',
       verified: 'E netefaditswe',
+    },
+    home: {
+      welcomeBackTitle: 'O amogelwa gape',
+      welcomeBackSubtitle: 'Re itumetse go go bona gape — gae ga gago ga khamposi e emetse.',
+      welcomeBackDismiss: 'Tswala molaetsa wa go amogela',
     },
     filter: {
       searchPlaceholder: 'Batla ka kgaolo kgotsa yunivesiti...',
