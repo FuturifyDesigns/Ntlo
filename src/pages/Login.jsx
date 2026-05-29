@@ -112,6 +112,7 @@ export default function Login() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+          <p className="text-xs text-muted">{t('auth.requiredFieldsNote')}</p>
           <Input
             label={t('auth.email')}
             type="email"
@@ -122,6 +123,7 @@ export default function Login() {
             }}
             onBlur={() => validateField('email')}
             error={fieldErrors.email}
+            hint={!fieldErrors.email ? t('auth.emailHint') : undefined}
             required
             autoComplete="email"
           />
@@ -135,6 +137,7 @@ export default function Login() {
             }}
             onBlur={() => validateField('password')}
             error={fieldErrors.password}
+            hint={!fieldErrors.password ? t('auth.loginPasswordHint') : undefined}
             required
             autoComplete="current-password"
           />

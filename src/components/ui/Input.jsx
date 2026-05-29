@@ -1,16 +1,19 @@
 import { cn } from '../../lib/utils'
 
-export default function Input({ label, error, className, id, ...props }) {
+export default function Input({ label, error, hint, required, className, id, ...props }) {
   const inputId = id || label?.toLowerCase().replace(/\s+/g, '-')
   return (
     <div className="w-full">
       {label && (
         <label htmlFor={inputId} className="mb-1.5 block text-sm font-medium text-primary">
           {label}
+          {required && <span className="ml-0.5 text-error" aria-hidden="true">*</span>}
         </label>
       )}
       <input
         id={inputId}
+        aria-invalid={Boolean(error)}
+        aria-describedby={hint || error ? `${inputId}-help` : undefined}
         className={cn(
           'w-full rounded-lg border border-border bg-surface px-4 py-2.5 text-sm text-primary placeholder:text-muted outline-none transition-colors focus:border-accent focus:ring-2 focus:ring-accent/20',
           error && 'border-error focus:border-error focus:ring-error/20',
@@ -18,7 +21,11 @@ export default function Input({ label, error, className, id, ...props }) {
         )}
         {...props}
       />
-      {error && <p className="mt-1 text-xs text-error">{error}</p>}
+      {error ? (
+        <p id={`${inputId}-help`} className="mt-1 text-xs text-error">{error}</p>
+      ) : hint ? (
+        <p id={`${inputId}-help`} className="mt-1.5 text-xs text-muted">{hint}</p>
+      ) : null}
     </div>
   )
 }

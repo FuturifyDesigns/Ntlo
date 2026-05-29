@@ -1,8 +1,20 @@
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i
 const NAME_RE = /^[\p{L}\s'.-]{2,}$/u
+const BW_MOBILE_RE = /^7[1-9]\d{6}$/
 
 function t(messages, key) {
   return messages[key] || key
+}
+
+export function normalizeBotswanaPhone(phone) {
+  let digits = phone.replace(/\D/g, '')
+  if (digits.startsWith('267') && digits.length >= 11) {
+    digits = digits.slice(3)
+  }
+  if (digits.startsWith('0') && digits.length === 9) {
+    digits = digits.slice(1)
+  }
+  return digits
 }
 
 export function validateEmail(email, messages = {}) {
@@ -27,6 +39,12 @@ export function validatePassword(password, messages = {}, { forSignup = false } 
   return ''
 }
 
+export function validateConfirmPassword(password, confirmPassword, messages = {}) {
+  if (!confirmPassword) return t(messages, 'confirmPasswordRequired')
+  if (password !== confirmPassword) return t(messages, 'passwordMismatch')
+  return ''
+}
+
 export function validateFullName(name, messages = {}) {
   const value = name.trim()
   if (!value) return t(messages, 'nameRequired')
@@ -36,11 +54,26 @@ export function validateFullName(name, messages = {}) {
   return ''
 }
 
-export function validatePhone(phone, messages = {}) {
+export function validatePhone(phone, messages = {}, { required = false } = {}) {
   const value = phone.trim()
-  if (!value) return ''
-  const digits = value.replace(/\D/g, '')
-  if (digits.length < 8 || digits.length > 11) return t(messages, 'phoneInvalid')
+  if (!value) {
+    return required ? t(messages, 'phoneRequired') : ''
+  }
+
+  const digits = normalizeBotswanaPhone(value)
+  if (digits.length !== 8 || !BW_MOBILE_RE.test(digits)) {
+    return t(messages, 'phoneInvalid')
+  }
+  return ''
+}
+
+export function validateUniversity(form, messages = {}) {
+  if (form.role !== 'student') return ''
+  if (form.universityId === 'other') {
+    const name = form.customUniversity?.trim() || ''
+    if (!name) return t(messages, 'universityRequired')
+    if (name.length < 2) return t(messages, 'universityMin')
+  }
   return ''
 }
 
@@ -57,13 +90,17 @@ export function validateRegisterForm(form, messages = {}) {
   const errors = {}
   const nameError = validateFullName(form.fullName, messages)
   const emailError = validateEmail(form.email, messages)
+  const phoneError = validatePhone(form.phone, messages, { required: true })
   const passwordError = validatePassword(form.password, messages, { forSignup: true })
-  const phoneError = validatePhone(form.phone, messages)
+  const confirmError = validateConfirmPassword(form.password, form.confirmPassword, messages)
+  const universityError = validateUniversity(form, messages)
 
   if (nameError) errors.fullName = nameError
   if (emailError) errors.email = emailError
-  if (passwordError) errors.password = passwordError
   if (phoneError) errors.phone = phoneError
+  if (passwordError) errors.password = passwordError
+  if (confirmError) errors.confirmPassword = confirmError
+  if (universityError) errors.customUniversity = universityError
 
   return errors
 }

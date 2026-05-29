@@ -5,7 +5,7 @@ import { useAuth } from '../hooks/useAuth'
 import { useAuthPageSession, useResetGoogleLoading } from '../hooks/useAuthPage'
 import { submitUniversityRequest } from '../hooks/useStats'
 import { useTranslation } from '../hooks/useTranslation'
-import { validateRegisterForm, mapAuthError } from '../lib/authValidation'
+import { validateRegisterForm, mapAuthError, normalizeBotswanaPhone } from '../lib/authValidation'
 import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
 import GoogleAuthButton from '../components/auth/GoogleAuthButton'
@@ -19,6 +19,7 @@ export default function Register() {
     fullName: '',
     email: '',
     password: '',
+    confirmPassword: '',
     phone: '',
     role: defaultRole,
     universityId: '',
@@ -48,22 +49,39 @@ export default function Register() {
     passwordUpper: t('auth.validation.passwordUpper'),
     passwordNumber: t('auth.validation.passwordNumber'),
     passwordSpaces: t('auth.validation.passwordSpaces'),
+    confirmPasswordRequired: t('auth.validation.confirmPasswordRequired'),
+    passwordMismatch: t('auth.validation.passwordMismatch'),
+    phoneRequired: t('auth.validation.phoneRequired'),
     phoneInvalid: t('auth.validation.phoneInvalid'),
+    universityRequired: t('auth.validation.universityRequired'),
+    universityMin: t('auth.validation.universityMin'),
     emailTaken: t('auth.validation.emailTaken'),
     authFailed: t('auth.validation.authFailed'),
   }
 
+  function getFormSnapshot(overrides = {}) {
+    return { ...form, ...overrides }
+  }
+
   function update(field, value) {
-    setForm((f) => ({ ...f, [field]: value }))
-    if (fieldErrors[field]) {
-      const errors = validateRegisterForm({ ...form, [field]: value }, validationMessages)
-      setFieldErrors((prev) => ({ ...prev, [field]: errors[field] || '' }))
+    const next = getFormSnapshot({ [field]: value })
+    setForm(next)
+    if (fieldErrors[field] || (field === 'password' && fieldErrors.confirmPassword)) {
+      const errors = validateRegisterForm(next, validationMessages)
+      setFieldErrors((prev) => ({
+        ...prev,
+        [field]: errors[field] || '',
+        ...(field === 'password' ? { confirmPassword: errors.confirmPassword || '' } : {}),
+      }))
     }
   }
 
   function validateField(field) {
     const errors = validateRegisterForm(form, validationMessages)
     setFieldErrors((prev) => ({ ...prev, [field]: errors[field] || '' }))
+    if (field === 'password' && form.confirmPassword) {
+      setFieldErrors((prev) => ({ ...prev, confirmPassword: errors.confirmPassword || '' }))
+    }
   }
 
   async function handleSubmit(e) {
@@ -73,6 +91,8 @@ export default function Register() {
     setFieldErrors(errors)
     if (Object.keys(errors).length > 0) return
 
+    const normalizedPhone = normalizeBotswanaPhone(form.phone.trim())
+
     setLoading(true)
     try {
       const data = await signUp({
@@ -80,7 +100,7 @@ export default function Register() {
         password: form.password,
         fullName: form.fullName.trim(),
         role: form.role,
-        phone: form.phone.trim(),
+        phone: normalizedPhone,
       })
 
       if (form.role === 'student' && form.universityId === 'other' && form.customUniversity.trim()) {
@@ -176,12 +196,14 @@ export default function Register() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+          <p className="text-xs text-muted">{t('auth.requiredFieldsNote')}</p>
           <Input
             label={t('auth.fullName')}
             value={form.fullName}
             onChange={(e) => update('fullName', e.target.value)}
             onBlur={() => validateField('fullName')}
             error={fieldErrors.fullName}
+            hint={!fieldErrors.fullName ? t('auth.nameHint') : undefined}
             required
             autoComplete="name"
           />
@@ -192,41 +214,66 @@ export default function Register() {
             onChange={(e) => update('email', e.target.value)}
             onBlur={() => validateField('email')}
             error={fieldErrors.email}
+            hint={!fieldErrors.email ? t('auth.emailHint') : undefined}
             required
             autoComplete="email"
           />
           <Input
             label={t('auth.phone')}
             type="tel"
+            inputMode="numeric"
             placeholder="7X XXX XXX"
             value={form.phone}
             onChange={(e) => update('phone', e.target.value)}
             onBlur={() => validateField('phone')}
             error={fieldErrors.phone}
+            hint={!fieldErrors.phone ? t('auth.phoneHint') : undefined}
+            required
             autoComplete="tel"
           />
-          <div>
-            <Input
-              label={t('auth.password')}
-              type="password"
-              value={form.password}
-              onChange={(e) => update('password', e.target.value)}
-              onBlur={() => validateField('password')}
-              error={fieldErrors.password}
-              required
-              autoComplete="new-password"
-            />
-            <p className="mt-1.5 text-xs text-muted">{t('auth.passwordHint')}</p>
-          </div>
+          <Input
+            label={t('auth.password')}
+            type="password"
+            value={form.password}
+            onChange={(e) => update('password', e.target.value)}
+            onBlur={() => validateField('password')}
+            error={fieldErrors.password}
+            hint={!fieldErrors.password ? t('auth.passwordHint') : undefined}
+            required
+            autoComplete="new-password"
+          />
+          <Input
+            label={t('auth.confirmPassword')}
+            type="password"
+            value={form.confirmPassword}
+            onChange={(e) => update('confirmPassword', e.target.value)}
+            onBlur={() => validateField('confirmPassword')}
+            error={fieldErrors.confirmPassword}
+            hint={!fieldErrors.confirmPassword ? t('auth.confirmPasswordHint') : undefined}
+            required
+            autoComplete="new-password"
+          />
           {form.role === 'student' && (
-            <UniversitySelect
-              label={t('auth.yourUniversity')}
-              value={form.universityId}
-              onChange={(v) => update('universityId', v)}
-              otherValue={form.customUniversity}
-              onOtherChange={(v) => update('customUniversity', v)}
-              required={false}
-            />
+            <div>
+              <UniversitySelect
+                label={t('auth.yourUniversity')}
+                value={form.universityId}
+                onChange={(v) => update('universityId', v)}
+                otherValue={form.customUniversity}
+                onOtherChange={(v) => update('customUniversity', v)}
+                required={false}
+              />
+              {form.universityId === 'other' && (
+                <>
+                  {fieldErrors.customUniversity && (
+                    <p className="mt-1 text-xs text-error">{fieldErrors.customUniversity}</p>
+                  )}
+                  {!fieldErrors.customUniversity && (
+                    <p className="mt-1.5 text-xs text-muted">{t('auth.universityHint')}</p>
+                  )}
+                </>
+              )}
+            </div>
           )}
           {error && <p className="text-sm text-error">{error}</p>}
           <Button type="submit" className="w-full" disabled={loading || googleLoading}>
