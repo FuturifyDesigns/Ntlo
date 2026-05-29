@@ -1,30 +1,18 @@
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { Menu, X } from 'lucide-react'
 import { useState } from 'react'
 import { useAuth } from '../../hooks/useAuth'
 import { useTranslation } from '../../hooks/useTranslation'
+import { useNavLinks } from '../../hooks/useNavLinks'
 import Button from '../ui/Button'
+import UserMenu from './UserMenu'
 
 export default function Navbar() {
   const [open, setOpen] = useState(false)
-  const { user, profile, signOut, isLandlord } = useAuth()
+  const { user, isLandlord } = useAuth()
   const { t } = useTranslation()
   const location = useLocation()
-  const navigate = useNavigate()
-
-  const navLinks = [
-    { to: '/', label: t('nav.home') },
-    { to: '/listings', label: t('nav.listings') },
-    { to: '/universities', label: t('nav.universities') },
-    { to: '/pricing', label: t('nav.pricing') },
-    { to: '/student', label: t('nav.saved') },
-  ]
-
-  async function handleSignOut() {
-    await signOut()
-    navigate('/')
-    setOpen(false)
-  }
+  const navLinks = useNavLinks()
 
   const isActive = (path) => {
     if (path === '/') return location.pathname === '/'
@@ -59,22 +47,9 @@ export default function Navbar() {
           ))}
         </nav>
 
-        <div className="hidden items-center gap-2 md:flex">
+        <div className="hidden items-center gap-3 md:flex">
           {user ? (
-            <>
-              <Link
-                to={isLandlord ? '/landlord' : '/student'}
-                className="text-sm font-medium text-muted transition-colors hover:text-primary"
-              >
-                {profile?.full_name?.split(' ')[0] || t('nav.dashboard')}
-              </Link>
-              <button
-                onClick={handleSignOut}
-                className="text-sm font-medium text-muted transition-colors hover:text-primary"
-              >
-                {t('nav.signOut')}
-              </button>
-            </>
+            <UserMenu />
           ) : (
             <Link to="/login" className="text-sm font-medium text-muted transition-colors hover:text-primary">
               {t('nav.signIn')}
@@ -86,6 +61,7 @@ export default function Navbar() {
         </div>
 
         <div className="flex items-center gap-2 md:hidden">
+          {user && <UserMenu onNavigate={() => setOpen(false)} />}
           <button
             className="rounded-lg p-2 text-primary"
             onClick={() => setOpen(!open)}
@@ -112,23 +88,7 @@ export default function Navbar() {
                 {link.label}
               </Link>
             ))}
-            {user ? (
-              <>
-                <Link
-                  to={isLandlord ? '/landlord' : '/student'}
-                  onClick={() => setOpen(false)}
-                  className="rounded-lg px-3 py-2.5 text-sm font-medium text-primary hover:bg-background"
-                >
-                  {profile?.full_name || t('nav.dashboard')}
-                </Link>
-                <button
-                  onClick={handleSignOut}
-                  className="rounded-lg px-3 py-2.5 text-left text-sm font-medium text-primary hover:bg-background"
-                >
-                  {t('nav.signOut')}
-                </button>
-              </>
-            ) : (
+            {!user && (
               <Link
                 to="/login"
                 onClick={() => setOpen(false)}

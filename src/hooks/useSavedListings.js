@@ -3,17 +3,19 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from './useAuth'
 
 export function useSavedListings() {
-  const { user } = useAuth()
+  const { user, loading: authLoading } = useAuth()
   const [savedIds, setSavedIds] = useState(new Set())
   const [savedListings, setSavedListings] = useState([])
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
 
   const fetchSaved = useCallback(async () => {
     if (!user) {
       setSavedIds(new Set())
       setSavedListings([])
+      setLoading(false)
       return
     }
+
     setLoading(true)
     try {
       const { data, error } = await supabase
@@ -45,8 +47,9 @@ export function useSavedListings() {
   }, [user])
 
   useEffect(() => {
+    if (authLoading) return
     fetchSaved()
-  }, [fetchSaved])
+  }, [authLoading, fetchSaved])
 
   async function toggleSave(listingId) {
     if (!user) return { needsAuth: true }
@@ -80,5 +83,12 @@ export function useSavedListings() {
     return savedIds.has(listingId)
   }
 
-  return { savedListings, savedIds, loading, toggleSave, isSaved, refetch: fetchSaved }
+  return {
+    savedListings,
+    savedIds,
+    loading: authLoading || loading,
+    toggleSave,
+    isSaved,
+    refetch: fetchSaved,
+  }
 }

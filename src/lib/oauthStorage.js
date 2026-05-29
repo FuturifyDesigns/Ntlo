@@ -41,3 +41,22 @@ export function consumeOAuthIntent() {
 export function profileNeedsSetup(profile) {
   return !profile?.phone?.trim()
 }
+
+export function isNewOAuthUser(user) {
+  if (!user?.created_at) return false
+  const created = new Date(user.created_at).getTime()
+  const lastSignIn = user.last_sign_in_at ? new Date(user.last_sign_in_at).getTime() : created
+  return Math.abs(lastSignIn - created) < 60_000
+}
+
+export const OAUTH_NEW_SIGNUP_KEY = 'ntlo_oauth_new_signup'
+
+export function markOAuthNewSignup() {
+  sessionStorage.setItem(OAUTH_NEW_SIGNUP_KEY, '1')
+}
+
+export function consumeOAuthNewSignup() {
+  const value = sessionStorage.getItem(OAUTH_NEW_SIGNUP_KEY)
+  sessionStorage.removeItem(OAUTH_NEW_SIGNUP_KEY)
+  return value === '1'
+}

@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom'
-import { motion } from 'framer-motion'
 import { Heart, Search } from 'lucide-react'
 import { useSavedListings } from '../hooks/useSavedListings'
 import { useAuth } from '../hooks/useAuth'
@@ -10,50 +9,58 @@ import { ListingGridSkeleton } from '../components/ui/Skeleton'
 import { UNIVERSITIES } from '../lib/universities'
 
 export default function StudentDashboard() {
-  const { profile } = useAuth()
+  const { profile, profileLoading } = useAuth()
   const { savedListings, loading } = useSavedListings()
   const { t } = useTranslation()
   const myUni = UNIVERSITIES.find((u) => u.id === profile?.university_id)
+  const pageLoading = loading || profileLoading
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="mx-auto max-w-7xl px-4 py-5 sm:px-6 sm:py-8 lg:px-8"
-    >
-      <div className="mb-8">
-        <h1 className="font-display text-3xl font-bold text-primary">
-          {t('dashboard.hello')}, {profile?.full_name?.split(' ')[0] || t('dashboard.student')}
-        </h1>
-        <p className="mt-2 text-muted">{t('dashboard.savedTitle')}</p>
+    <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 sm:py-8 lg:px-8">
+      <div className="mb-8 min-h-[4.5rem]">
+        {pageLoading ? (
+          <div className="space-y-2 animate-pulse">
+            <div className="h-9 w-56 rounded-lg bg-border/60" />
+            <div className="h-5 w-40 rounded-lg bg-border/40" />
+          </div>
+        ) : (
+          <>
+            <h1 className="font-display text-3xl font-bold text-primary">
+              {t('dashboard.hello')}, {profile?.full_name?.split(' ')[0] || t('dashboard.student')}
+            </h1>
+            <p className="mt-2 text-muted">{t('dashboard.savedTitle')}</p>
+          </>
+        )}
       </div>
 
-      {loading ? (
-        <ListingGridSkeleton />
-      ) : savedListings.length === 0 ? (
-        <div className="rounded-xl border border-border bg-surface p-8 text-center sm:p-10">
-          <Heart className="mx-auto mb-4 text-muted" size={48} />
-          <p className="text-lg font-medium text-primary">{t('dashboard.noSaved')}</p>
-          <p className="mt-2 text-sm text-muted">{t('dashboard.noSavedDesc')}</p>
-          <div className="mt-6 flex flex-wrap justify-center gap-3">
-            <Button as={Link} to="/listings">
-              <Search size={16} />
-              {t('footer.browseListings')}
-            </Button>
-            {myUni && (
-              <Button as={Link} to={`/universities/${myUni.slug}`} variant="outline">
-                {t('dashboard.findNear')} {myUni.short_name}
+      <div className="min-h-[20rem]">
+        {pageLoading ? (
+          <ListingGridSkeleton />
+        ) : savedListings.length === 0 ? (
+          <div className="rounded-xl border border-border bg-surface p-8 text-center sm:p-10">
+            <Heart className="mx-auto mb-4 text-muted" size={48} />
+            <p className="text-lg font-medium text-primary">{t('dashboard.noSaved')}</p>
+            <p className="mt-2 text-sm text-muted">{t('dashboard.noSavedDesc')}</p>
+            <div className="mt-6 flex flex-wrap justify-center gap-3">
+              <Button as={Link} to="/listings">
+                <Search size={16} />
+                {t('footer.browseListings')}
               </Button>
-            )}
+              {myUni && (
+                <Button as={Link} to={`/universities/${myUni.slug}`} variant="outline">
+                  {t('dashboard.findNear')} {myUni.short_name}
+                </Button>
+              )}
+            </div>
           </div>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {savedListings.map((listing) => (
-            <ListingCard key={listing.id} listing={listing} />
-          ))}
-        </div>
-      )}
-    </motion.div>
+        ) : (
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {savedListings.map((listing) => (
+              <ListingCard key={listing.id} listing={listing} />
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
   )
 }

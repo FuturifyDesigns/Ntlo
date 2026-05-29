@@ -4,13 +4,13 @@ import { profileNeedsSetup } from '../../lib/oauthStorage'
 import { Skeleton } from '../ui/Skeleton'
 
 export default function ProtectedRoute({ children, role }) {
-  const { user, profile, loading } = useAuth()
+  const { user, profile, loading, profileLoading } = useAuth()
   const location = useLocation()
 
-  if (loading) {
+  if (loading || (user && profileLoading)) {
     return (
       <div className="mx-auto max-w-7xl px-4 py-12">
-        <Skeleton className="h-8 w-48 mb-6" />
+        <Skeleton className="mb-6 h-8 w-48" />
         <Skeleton className="h-64 w-full" />
       </div>
     )
@@ -35,8 +35,8 @@ export default function ProtectedRoute({ children, role }) {
     return <Navigate to="/complete-profile" replace />
   }
 
-  if (role && profile?.role !== role) {
-    const redirect = profile?.role === 'landlord' ? '/landlord' : '/student'
+  if (role && profile && profile.role !== role) {
+    const redirect = profile.role === 'landlord' ? '/landlord' : '/student'
     return <Navigate to={redirect} replace />
   }
 

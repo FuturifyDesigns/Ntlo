@@ -9,6 +9,7 @@ import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
 import AuthTransitionOverlay from '../components/auth/AuthTransitionOverlay'
 import { UniversitySelect } from '../components/universities/OtherUniversityModal'
+import { consumeOAuthNewSignup } from '../lib/oauthStorage'
 
 export default function CompleteProfile() {
   const [searchParams] = useSearchParams()
@@ -87,6 +88,14 @@ export default function CompleteProfile() {
 
       await refreshProfile()
       setTransitioning(true)
+
+      if (consumeOAuthNewSignup()) {
+        await supabase.auth.signOut()
+        window.setTimeout(() => {
+          navigate(`/check-email?oauth=1&email=${encodeURIComponent(user.email || '')}`, { replace: true })
+        }, 350)
+        return
+      }
 
       const destination = role === 'landlord' ? '/landlord' : '/student'
       window.setTimeout(() => {

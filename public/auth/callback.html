@@ -29,7 +29,7 @@
       <div class="icon-wrap error">!</div>
       <h1>Sign-in failed</h1>
       <p id="error-message">Something went wrong. Please try again.</p>
-      <a class="link" href="../#/login">Back to sign in</a>
+      <a class="link" id="error-link" href="../#/login">Back to sign in</a>
     </div>
   </div>
 
@@ -42,12 +42,14 @@
     const unverified = document.getElementById('state-unverified')
     const errorEl = document.getElementById('state-error')
     const errorMsg = document.getElementById('error-message')
+    const errorLink = document.getElementById('error-link')
 
     const OAUTH_KEYS = [
       'ntlo_oauth_pending',
       'ntlo_oauth_started_at',
       'ntlo_oauth_role',
       'ntlo_oauth_from',
+      'ntlo_oauth_new_signup',
     ]
 
     function clearOAuthStorage() {
@@ -66,11 +68,20 @@
       return !profile?.phone?.trim()
     }
 
-    function showError(message) {
+    function isNewOAuthUser(user) {
+      if (!user?.created_at) return false
+      const created = new Date(user.created_at).getTime()
+      const lastSignIn = user.last_sign_in_at ? new Date(user.last_sign_in_at).getTime() : created
+      return Math.abs(lastSignIn - created) < 60_000
+    }
+
+    function showError(message, linkHref = '../#/login', linkText = 'Back to sign in') {
       loading.classList.add('hidden')
       unverified.classList.add('hidden')
       errorEl.classList.remove('hidden')
       errorMsg.textContent = message
+      errorLink.href = linkHref
+      errorLink.textContent = linkText
       clearOAuthStorage()
     }
 
@@ -119,6 +130,19 @@
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) throw new Error('Could not load your account.')
 
+        const { from, role: pendingRole } = consumeOAuthIntent()
+        const isNewUser = isNewOAuthUser(user)
+
+        if (from === 'register' && !isNewUser) {
+          await supabase.auth.signOut()
+          showError(
+            'An account with this email already exists. Please sign in instead.',
+            '../#/login',
+            'Go to sign in'
+          )
+          return
+        }
+
         if (!isConfirmed(user)) {
           loading.classList.add('hidden')
           unverified.classList.remove('hidden')
@@ -130,7 +154,9 @@
           return
         }
 
-        const { from, role: pendingRole } = consumeOAuthIntent()
+        if (from === 'register' && isNewUser) {
+          sessionStorage.setItem('ntlo_oauth_new_signup', '1')
+        }
 
         if (pendingRole === 'student' || pendingRole === 'landlord') {
           await supabase.auth.updateUser({ data: { role: pendingRole } })
@@ -149,10 +175,31 @@
           return
         }
 
+        if (from === 'register' && isNewUser) {
+          await supabase.auth.signOut()
+          const email = encodeURIComponent(user.email || '')
+          window.location.replace(`../#/check-email?oauth=1&email=${email}`)
+          return
+        }
+
         const role = profile?.role || user.user_metadata?.role || 'student'
         const destination = role === 'landlord' ? '../#/landlord' : '../#/student'
         window.location.replace(destination)
       } catch (err) {
+        const message = (err.message || '').toLowerCase()
+        if (
+          message.includes('already exists') ||
+          message.includes('already registered') ||
+          message.includes('identity already exists')
+        ) {
+          await supabase.auth.signOut().catch(() => {})
+          showError(
+            'An account with this email already exists. Please sign in with your email and password.',
+            '../#/login',
+            'Go to sign in'
+          )
+          return
+        }
         showError(err.message || 'Sign-in failed.')
       }
     }

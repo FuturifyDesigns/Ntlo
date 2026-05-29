@@ -38,9 +38,10 @@ import { useTranslation } from './hooks/useTranslation'
 function AppRoutes() {
   const location = useLocation()
   const { prefs } = useLocale()
-  const isAuthRoute = ['/login', '/register', '/forgot-password', '/complete-profile'].includes(location.pathname)
-  const transition = isAuthRoute
-    ? { duration: prefs.reduceMotion ? 0 : 0.2, ease: 'easeOut' }
+  const isAuthRoute = ['/login', '/register', '/forgot-password', '/complete-profile', '/check-email'].includes(location.pathname)
+  const isDashboardRoute = location.pathname === '/student' || location.pathname === '/landlord' || location.pathname.startsWith('/landlord/')
+  const transition = isAuthRoute || isDashboardRoute
+    ? { duration: prefs.reduceMotion ? 0 : 0.15, ease: 'easeOut' }
     : { duration: prefs.reduceMotion ? 0 : 0.25 }
 
   return (

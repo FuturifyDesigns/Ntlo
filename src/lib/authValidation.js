@@ -109,7 +109,15 @@ export function mapAuthError(message, messages = {}) {
   const lower = (message || '').toLowerCase()
   if (lower.includes('invalid login credentials')) return t(messages, 'invalidCredentials')
   if (lower.includes('email not confirmed')) return t(messages, 'emailNotConfirmed')
-  if (lower.includes('user already registered')) return t(messages, 'emailTaken')
+  if (
+    lower.includes('user already registered') ||
+    lower.includes('already registered') ||
+    lower.includes('already exists') ||
+    lower.includes('identity already exists') ||
+    lower.includes('email address is already')
+  ) {
+    return t(messages, 'emailTaken')
+  }
   if (lower.includes('password')) return t(messages, 'authFailed')
   return message || t(messages, 'authFailed')
 }

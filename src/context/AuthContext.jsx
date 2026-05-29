@@ -9,28 +9,39 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [profile, setProfile] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [profileLoading, setProfileLoading] = useState(false)
 
   async function fetchProfile(userId) {
-    const { data } = await supabase
-      .from('profiles')
-      .select('id, full_name, phone, role, university_id, avatar_url, is_verified')
-      .eq('id', userId)
-      .maybeSingle()
-    setProfile(data)
-    return data
+    setProfileLoading(true)
+    try {
+      const { data } = await supabase
+        .from('profiles')
+        .select('id, full_name, phone, role, university_id, avatar_url, is_verified')
+        .eq('id', userId)
+        .maybeSingle()
+      setProfile(data)
+      return data
+    } finally {
+      setProfileLoading(false)
+    }
   }
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       setUser(session?.user ?? null)
-      if (session?.user) fetchProfile(session.user.id)
+      if (session?.user) {
+        await fetchProfile(session.user.id)
+      }
       setLoading(false)
     })
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null)
       if (session?.user) fetchProfile(session.user.id)
-      else setProfile(null)
+      else {
+        setProfile(null)
+        setProfileLoading(false)
+      }
     })
 
     return () => subscription.unsubscribe()
@@ -138,6 +149,7 @@ export function AuthProvider({ children }) {
       user,
       profile,
       loading,
+      profileLoading,
       signUp,
       signIn,
       signInWithGoogle,
@@ -148,7 +160,7 @@ export function AuthProvider({ children }) {
       isStudent: profile?.role === 'student',
       isLandlord: profile?.role === 'landlord',
     }),
-    [user, profile, loading, signOut]
+    [user, profile, loading, profileLoading, signOut]
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
