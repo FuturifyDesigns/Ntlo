@@ -1,0 +1,71 @@
+<!--
+  Ntlo — Confirm signup email template
+  Paste into Supabase → Authentication → Email Templates → Confirm signup
+
+  Subject line suggestion:
+  Confirm your Ntlo account
+
+  Logo URL (production):
+  https://futurifydesigns.github.io/Ntlo/logo-brand.png
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Confirm your Ntlo account</title>
+</head>
+<body style="margin:0;padding:0;background-color:#F8F7F4;font-family:'Segoe UI',Helvetica,Arial,sans-serif;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#F8F7F4;padding:32px 16px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:520px;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 8px 32px rgba(26,26,46,0.08);">
+          <!-- Header -->
+          <tr>
+            <td style="background:#1A1A2E;padding:28px 32px;text-align:center;">
+              <img src="https://futurifydesigns.github.io/Ntlo/logo-brand.png" alt="Ntlo" width="160" style="display:block;margin:0 auto;max-width:160px;height:auto;" />
+            </td>
+          </tr>
+          <!-- Gold line -->
+          <tr>
+            <td style="height:3px;background:linear-gradient(90deg,transparent,#C8A84B,transparent);"></td>
+          </tr>
+          <!-- Body -->
+          <tr>
+            <td style="padding:36px 32px 28px;text-align:center;">
+              <div style="width:56px;height:56px;margin:0 auto 20px;background:rgba(200,168,75,0.15);border-radius:50%;line-height:56px;font-size:26px;">✉️</div>
+              <h1 style="margin:0 0 12px;font-size:24px;font-weight:700;color:#1A1A2E;letter-spacing:-0.02em;">Confirm your email</h1>
+              <p style="margin:0 0 8px;font-size:15px;line-height:1.6;color:#6B7280;">
+                Welcome to Ntlo — your campus home, sorted.
+              </p>
+              <p style="margin:0 0 28px;font-size:15px;line-height:1.6;color:#6B7280;">
+                Tap the button below to verify <strong style="color:#1A1A2E;">{{ .Email }}</strong> and activate your account.
+              </p>
+              <a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#C8A84B;color:#1A1A2E;font-size:15px;font-weight:700;text-decoration:none;padding:14px 32px;border-radius:10px;box-shadow:0 4px 14px rgba(200,168,75,0.35);">
+                Verify my email
+              </a>
+              <p style="margin:28px 0 0;font-size:13px;line-height:1.5;color:#9CA3AF;">
+                After verifying, you can close that page and sign in to Ntlo.
+              </p>
+            </td>
+          </tr>
+          <!-- Footer -->
+          <tr>
+            <td style="padding:20px 32px 28px;border-top:1px solid #E5E3DF;text-align:center;">
+              <p style="margin:0 0 8px;font-size:12px;color:#9CA3AF;line-height:1.5;">
+                If the button doesn't work, copy this link into your browser:
+              </p>
+              <p style="margin:0;font-size:11px;word-break:break-all;">
+                <a href="{{ .ConfirmationURL }}" style="color:#C8A84B;text-decoration:none;">{{ .ConfirmationURL }}</a>
+              </p>
+              <p style="margin:20px 0 0;font-size:11px;color:#9CA3AF;">
+                © 2026 Futurify Designs · Ntlo — Built for Botswana students
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
