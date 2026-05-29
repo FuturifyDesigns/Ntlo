@@ -8,6 +8,7 @@ import { useTranslation } from '../hooks/useTranslation'
 import { validateRegisterForm, mapAuthError, normalizeBotswanaPhone } from '../lib/authValidation'
 import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
+import PasswordInput from '../components/ui/PasswordInput'
 import GoogleAuthButton from '../components/auth/GoogleAuthButton'
 import { UniversitySelect } from '../components/universities/OtherUniversityModal'
 
@@ -32,7 +33,7 @@ export default function Register() {
   const { signUp, signInWithGoogle } = useAuth()
   const navigate = useNavigate()
 
-  useAuthPageSession()
+  const authReady = useAuthPageSession()
   useResetGoogleLoading(setGoogleLoading)
 
   const validationMessages = {
@@ -231,9 +232,8 @@ export default function Register() {
             required
             autoComplete="tel"
           />
-          <Input
+          <PasswordInput
             label={t('auth.password')}
-            type="password"
             value={form.password}
             onChange={(e) => update('password', e.target.value)}
             onBlur={() => validateField('password')}
@@ -242,9 +242,8 @@ export default function Register() {
             required
             autoComplete="new-password"
           />
-          <Input
+          <PasswordInput
             label={t('auth.confirmPassword')}
-            type="password"
             value={form.confirmPassword}
             onChange={(e) => update('confirmPassword', e.target.value)}
             onBlur={() => validateField('confirmPassword')}
@@ -276,7 +275,7 @@ export default function Register() {
             </div>
           )}
           {error && <p className="text-sm text-error">{error}</p>}
-          <Button type="submit" className="w-full" disabled={loading || googleLoading}>
+          <Button type="submit" className="w-full" disabled={!authReady || loading || googleLoading}>
             {loading ? t('auth.creating') : t('auth.createAccount')}
           </Button>
         </form>

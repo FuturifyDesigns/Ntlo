@@ -101,9 +101,10 @@ label {
   margin-bottom: 0.35rem;
 }
 
-input[type="password"] {
+input[type="password"],
+input[type="text"].password-input {
   width: 100%;
-  padding: 0.65rem 0.875rem;
+  padding: 0.65rem 2.5rem 0.65rem 0.875rem;
   border: 1px solid #E5E3DF;
   border-radius: 0.5rem;
   font-size: 0.9375rem;
@@ -111,9 +112,70 @@ input[type="password"] {
   outline: none;
 }
 
-input[type="password"]:focus {
+input[type="password"]:focus,
+input[type="text"].password-input:focus {
   border-color: #C8A84B;
   box-shadow: 0 0 0 3px rgba(200, 168, 75, 0.2);
+}
+
+input.input-error {
+  border-color: #DC2626;
+}
+
+input.input-error:focus {
+  border-color: #DC2626;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15);
+}
+
+.password-field {
+  position: relative;
+  margin-bottom: 0.875rem;
+}
+
+.password-field input {
+  margin-bottom: 0;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  color: #6B7280;
+  cursor: pointer;
+  padding: 0.25rem;
+  line-height: 0;
+  border-radius: 0.25rem;
+}
+
+.password-toggle:hover {
+  color: #1A1A2E;
+}
+
+.form-error {
+  margin: 0 0 0.875rem;
+  padding: 0.65rem 0.875rem;
+  background: rgba(220, 38, 38, 0.08);
+  border: 1px solid rgba(220, 38, 38, 0.25);
+  border-radius: 0.5rem;
+  color: #DC2626;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+}
+
+.form-hint {
+  margin: -0.5rem 0 0.875rem;
+  font-size: 0.75rem;
+  color: #6B7280;
+  line-height: 1.45;
+}
+
+.field-error {
+  margin: 0.35rem 0 0;
+  font-size: 0.75rem;
+  color: #DC2626;
 }
 
 button.btn {

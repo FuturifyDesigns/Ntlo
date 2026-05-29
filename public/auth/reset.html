@@ -22,11 +22,34 @@
       <div class="icon-wrap loading">🔒</div>
       <h1>Set a new password</h1>
       <p>Choose a strong password for your Ntlo account.</p>
-      <form class="form-block" id="reset-form">
+      <form class="form-block" id="reset-form" novalidate>
+        <p class="form-hint">At least 8 characters with uppercase, lowercase, and a number.</p>
+        <div id="form-error" class="form-error hidden" role="alert"></div>
+
         <label for="password">New password</label>
-        <input id="password" type="password" minlength="6" required autocomplete="new-password" />
+        <div class="password-field">
+          <input id="password" type="password" required autocomplete="new-password" />
+          <button type="button" class="password-toggle" data-target="password" aria-label="Show password">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+          </button>
+        </div>
+        <p id="password-error" class="field-error hidden"></p>
+
         <label for="confirm">Confirm password</label>
-        <input id="confirm" type="password" minlength="6" required autocomplete="new-password" />
+        <div class="password-field">
+          <input id="confirm" type="password" required autocomplete="new-password" />
+          <button type="button" class="password-toggle" data-target="confirm" aria-label="Show password">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+          </button>
+        </div>
+        <p id="confirm-error" class="field-error hidden"></p>
+
         <button class="btn" type="submit" id="submit-btn">Update password</button>
       </form>
     </div>
@@ -36,7 +59,7 @@
       <h1>Password updated!</h1>
       <p>Your password has been changed successfully.</p>
       <p class="note">You can <strong>close this page</strong> and sign in with your new password.</p>
-      <a class="link" href="../#/login">Go to sign in</a>
+      <a class="link" href="../#/login?reset=1">Go to sign in</a>
     </div>
 
     <div id="state-error" class="hidden">
@@ -59,11 +82,88 @@
     const errorMsg = document.getElementById('error-message')
     const form = document.getElementById('reset-form')
     const submitBtn = document.getElementById('submit-btn')
+    const formError = document.getElementById('form-error')
+    const passwordInput = document.getElementById('password')
+    const confirmInput = document.getElementById('confirm')
+    const passwordError = document.getElementById('password-error')
+    const confirmError = document.getElementById('confirm-error')
+
+    const eyeIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`
+    const eyeOffIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"></path><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`
 
     function show(id) {
       ;[loading, formBlock, success, errorEl].forEach((el) => el.classList.add('hidden'))
       document.getElementById(id).classList.remove('hidden')
     }
+
+    function clearFormErrors() {
+      formError.classList.add('hidden')
+      formError.textContent = ''
+      passwordError.classList.add('hidden')
+      passwordError.textContent = ''
+      confirmError.classList.add('hidden')
+      confirmError.textContent = ''
+      passwordInput.classList.remove('input-error')
+      confirmInput.classList.remove('input-error')
+    }
+
+    function showFormError(message) {
+      formError.textContent = message
+      formError.classList.remove('hidden')
+    }
+
+    function showFieldError(input, errorElNode, message) {
+      errorElNode.textContent = message
+      errorElNode.classList.remove('hidden')
+      input.classList.add('input-error')
+    }
+
+    function validatePassword(password) {
+      if (!password) return 'Password is required'
+      if (password.length < 8) return 'Password must be at least 8 characters'
+      if (!/[a-z]/.test(password)) return 'Include at least one lowercase letter'
+      if (!/[A-Z]/.test(password)) return 'Include at least one uppercase letter'
+      if (!/[0-9]/.test(password)) return 'Include at least one number'
+      if (/\s/.test(password)) return 'Password cannot contain spaces'
+      return ''
+    }
+
+    function validateForm(password, confirm) {
+      clearFormErrors()
+      const passwordMsg = validatePassword(password)
+      const confirmMsg = !confirm
+        ? 'Please confirm your password'
+        : password !== confirm
+          ? 'Passwords do not match'
+          : ''
+
+      if (passwordMsg) showFieldError(passwordInput, passwordError, passwordMsg)
+      if (confirmMsg) showFieldError(confirmInput, confirmError, confirmMsg)
+
+      return !passwordMsg && !confirmMsg
+    }
+
+    function isSessionExpiredError(message) {
+      const lower = (message || '').toLowerCase()
+      return (
+        lower.includes('invalid or expired') ||
+        lower.includes('session') ||
+        lower.includes('jwt') ||
+        lower.includes('token') ||
+        lower.includes('not authenticated')
+      )
+    }
+
+    document.querySelectorAll('.password-toggle').forEach((button) => {
+      button.addEventListener('click', () => {
+        const input = document.getElementById(button.dataset.target)
+        const visible = input.type === 'text'
+        input.type = visible ? 'password' : 'text'
+        input.classList.toggle('password-input', !visible)
+        button.innerHTML = visible ? eyeIcon : eyeOffIcon
+        button.setAttribute('aria-label', visible ? 'Show password' : 'Hide password')
+      })
+    })
 
     let supabase
 
@@ -74,26 +174,33 @@
         return
       }
 
-      supabase = createClient(cfg.url, cfg.key)
+      supabase = createClient(cfg.url, cfg.key, {
+        auth: {
+          detectSessionInUrl: true,
+          persistSession: true,
+          flowType: 'pkce',
+        },
+      })
+
       const params = new URLSearchParams(window.location.search)
       const code = params.get('code')
       const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''))
       const accessToken = hashParams.get('access_token')
       const refreshToken = hashParams.get('refresh_token')
+      const type = hashParams.get('type')
 
       try {
         if (code) {
           const { error } = await supabase.auth.exchangeCodeForSession(code)
           if (error) throw error
-        } else if (accessToken && refreshToken) {
+        } else if (accessToken && refreshToken && type === 'recovery') {
           const { error } = await supabase.auth.setSession({
             access_token: accessToken,
             refresh_token: refreshToken,
           })
           if (error) throw error
         } else {
-          const { data: { session } } = await supabase.auth.getSession()
-          if (!session) throw new Error('Invalid or expired reset link.')
+          throw new Error('Invalid or expired reset link. Please request a new one.')
         }
 
         window.history.replaceState({}, '', window.location.pathname)
@@ -106,22 +213,22 @@
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault()
-      const password = document.getElementById('password').value
-      const confirm = document.getElementById('confirm').value
+      const password = passwordInput.value
+      const confirm = confirmInput.value
 
-      if (password !== confirm) {
-        errorMsg.textContent = 'Passwords do not match.'
-        show('state-error')
-        return
-      }
+      if (!validateForm(password, confirm)) return
 
       submitBtn.disabled = true
       submitBtn.textContent = 'Updating…'
 
       const { error } = await supabase.auth.updateUser({ password })
       if (error) {
-        errorMsg.textContent = error.message
-        show('state-error')
+        if (isSessionExpiredError(error.message)) {
+          errorMsg.textContent = error.message || 'This reset link has expired.'
+          show('state-error')
+        } else {
+          showFormError(error.message || 'Could not update password. Please try again.')
+        }
         submitBtn.disabled = false
         submitBtn.textContent = 'Update password'
         return

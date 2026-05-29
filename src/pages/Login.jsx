@@ -7,6 +7,7 @@ import { useTranslation } from '../hooks/useTranslation'
 import { validateLoginForm, mapAuthError } from '../lib/authValidation'
 import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
+import PasswordInput from '../components/ui/PasswordInput'
 import GoogleAuthButton from '../components/auth/GoogleAuthButton'
 
 export default function Login() {
@@ -23,8 +24,9 @@ export default function Login() {
   const [searchParams] = useSearchParams()
   const from = location.state?.from?.pathname || '/'
   const verified = searchParams.get('verified') === '1' || location.state?.verified
+  const passwordReset = searchParams.get('reset') === '1'
 
-  useAuthPageSession()
+  const authReady = useAuthPageSession()
   useResetGoogleLoading(setGoogleLoading)
 
   const validationMessages = {
@@ -97,6 +99,12 @@ export default function Login() {
         </p>
       )}
 
+      {passwordReset && (
+        <p className="mt-6 rounded-xl border border-success/30 bg-success/10 px-4 py-3 text-center text-sm text-success">
+          {t('auth.passwordResetSignIn')}
+        </p>
+      )}
+
       <div className="mt-8 space-y-4 rounded-xl border border-border bg-surface p-6 shadow-sm">
         <GoogleAuthButton
           onClick={handleGoogleSignIn}
@@ -127,9 +135,8 @@ export default function Login() {
             required
             autoComplete="email"
           />
-          <Input
+          <PasswordInput
             label={t('auth.password')}
-            type="password"
             value={password}
             onChange={(e) => {
               setPassword(e.target.value)
@@ -147,7 +154,7 @@ export default function Login() {
               {t('auth.forgotPassword')}
             </Link>
           </div>
-          <Button type="submit" className="w-full" disabled={loading || googleLoading}>
+          <Button type="submit" className="w-full" disabled={!authReady || loading || googleLoading}>
             {loading ? t('auth.signingIn') : t('auth.signIn')}
           </Button>
         </form>
