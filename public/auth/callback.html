@@ -18,6 +18,13 @@
       <p>Please wait while we connect your Google account.</p>
     </div>
 
+    <div id="state-unverified" class="hidden">
+      <div class="icon-wrap loading"><div class="spinner"></div></div>
+      <h1>Verify your email</h1>
+      <p>Your Google account needs email confirmation before you can use Ntlo.</p>
+      <p class="note">Redirecting you to the verification page…</p>
+    </div>
+
     <div id="state-error" class="hidden">
       <div class="icon-wrap error">!</div>
       <h1>Sign-in failed</h1>
@@ -32,13 +39,19 @@
 
     const cfg = window.__NTLO_SUPABASE__
     const loading = document.getElementById('state-loading')
+    const unverified = document.getElementById('state-unverified')
     const errorEl = document.getElementById('state-error')
     const errorMsg = document.getElementById('error-message')
 
     function showError(message) {
       loading.classList.add('hidden')
+      unverified.classList.add('hidden')
       errorEl.classList.remove('hidden')
       errorMsg.textContent = message
+    }
+
+    function isConfirmed(user) {
+      return Boolean(user?.email_confirmed_at || user?.confirmed_at)
     }
 
     async function run() {
@@ -46,6 +59,8 @@
         showError('App configuration is missing. Contact support.')
         return
       }
+
+      sessionStorage.removeItem('ntlo_oauth_pending')
 
       const supabase = createClient(cfg.url, cfg.key)
       const params = new URLSearchParams(window.location.search)
@@ -68,11 +83,24 @@
           throw new Error('No sign-in code found. Please try again from Ntlo.')
         }
 
-        const pendingRole = sessionStorage.getItem('ntlo_oauth_role')
-        sessionStorage.removeItem('ntlo_oauth_role')
+        window.history.replaceState({}, '', window.location.pathname)
 
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) throw new Error('Could not load your account.')
+
+        if (!isConfirmed(user)) {
+          loading.classList.add('hidden')
+          unverified.classList.remove('hidden')
+          await supabase.auth.signOut()
+          const email = encodeURIComponent(user.email || '')
+          setTimeout(() => {
+            window.location.replace(`../#/check-email?email=${email}`)
+          }, 1200)
+          return
+        }
+
+        const pendingRole = sessionStorage.getItem('ntlo_oauth_role')
+        sessionStorage.removeItem('ntlo_oauth_role')
 
         if (pendingRole === 'student' || pendingRole === 'landlord') {
           await supabase.auth.updateUser({ data: { role: pendingRole } })

@@ -49,8 +49,20 @@ export function AuthProvider({ children }) {
   }
 
   async function signIn(email, password) {
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: email.trim(),
+      password,
+    })
     if (error) throw error
+
+    const confirmed = data.user?.email_confirmed_at || data.user?.confirmed_at
+    if (data.user && !confirmed) {
+      await supabase.auth.signOut()
+      const err = new Error('Email not confirmed')
+      err.code = 'email_not_confirmed'
+      throw err
+    }
+
     return data
   }
 
@@ -68,7 +80,7 @@ export function AuthProvider({ children }) {
       sessionStorage.removeItem('ntlo_oauth_role')
     }
 
-    const { error } = await supabase.auth.signInWithOAuth({
+    const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
         redirectTo: getAuthCallbackUrl(),
@@ -77,6 +89,13 @@ export function AuthProvider({ children }) {
       },
     })
     if (error) throw error
+
+    if (data?.url) {
+      sessionStorage.setItem('ntlo_oauth_pending', '1')
+      window.location.assign(data.url)
+    }
+
+    return data
   }
 
   async function signOut() {

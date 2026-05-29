@@ -2,8 +2,10 @@ import { useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useAuth } from '../hooks/useAuth'
+import { useAuthPageSession, useResetGoogleLoading } from '../hooks/useAuthPage'
 import { submitUniversityRequest } from '../hooks/useStats'
 import { useTranslation } from '../hooks/useTranslation'
+import { validateRegisterForm, mapAuthError } from '../lib/authValidation'
 import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
 import GoogleAuthButton from '../components/auth/GoogleAuthButton'
@@ -22,27 +24,63 @@ export default function Register() {
     universityId: '',
     customUniversity: '',
   })
+  const [fieldErrors, setFieldErrors] = useState({})
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
   const { signUp, signInWithGoogle } = useAuth()
   const navigate = useNavigate()
 
+  useAuthPageSession()
+  useResetGoogleLoading(setGoogleLoading)
+
+  const validationMessages = {
+    nameRequired: t('auth.validation.nameRequired'),
+    nameMin: t('auth.validation.nameMin'),
+    nameMax: t('auth.validation.nameMax'),
+    nameInvalid: t('auth.validation.nameInvalid'),
+    emailRequired: t('auth.validation.emailRequired'),
+    emailInvalid: t('auth.validation.emailInvalid'),
+    emailTooLong: t('auth.validation.emailTooLong'),
+    passwordRequired: t('auth.validation.passwordRequired'),
+    passwordMin: t('auth.validation.passwordMin'),
+    passwordLower: t('auth.validation.passwordLower'),
+    passwordUpper: t('auth.validation.passwordUpper'),
+    passwordNumber: t('auth.validation.passwordNumber'),
+    passwordSpaces: t('auth.validation.passwordSpaces'),
+    phoneInvalid: t('auth.validation.phoneInvalid'),
+    emailTaken: t('auth.validation.emailTaken'),
+    authFailed: t('auth.validation.authFailed'),
+  }
+
   function update(field, value) {
     setForm((f) => ({ ...f, [field]: value }))
+    if (fieldErrors[field]) {
+      const errors = validateRegisterForm({ ...form, [field]: value }, validationMessages)
+      setFieldErrors((prev) => ({ ...prev, [field]: errors[field] || '' }))
+    }
+  }
+
+  function validateField(field) {
+    const errors = validateRegisterForm(form, validationMessages)
+    setFieldErrors((prev) => ({ ...prev, [field]: errors[field] || '' }))
   }
 
   async function handleSubmit(e) {
     e.preventDefault()
     setError('')
+    const errors = validateRegisterForm(form, validationMessages)
+    setFieldErrors(errors)
+    if (Object.keys(errors).length > 0) return
+
     setLoading(true)
     try {
       const data = await signUp({
-        email: form.email,
+        email: form.email.trim(),
         password: form.password,
-        fullName: form.fullName,
+        fullName: form.fullName.trim(),
         role: form.role,
-        phone: form.phone,
+        phone: form.phone.trim(),
       })
 
       if (form.role === 'student' && form.universityId === 'other' && form.customUniversity.trim()) {
@@ -50,7 +88,7 @@ export default function Register() {
           await submitUniversityRequest({
             name: form.customUniversity.trim(),
             city: 'Botswana',
-            email: form.email,
+            email: form.email.trim(),
           })
         } catch {
           // Non-blocking
@@ -58,13 +96,18 @@ export default function Register() {
       }
 
       if (data.user && !data.session) {
-        navigate('/check-email', { state: { email: form.email } })
+        navigate('/check-email', { state: { email: form.email.trim() } })
+        return
+      }
+
+      if (data.user && !data.user.email_confirmed_at && !data.user.confirmed_at) {
+        navigate('/check-email', { state: { email: form.email.trim() } })
         return
       }
 
       navigate(form.role === 'landlord' ? '/landlord' : '/student')
     } catch (err) {
-      setError(err.message || 'Registration failed')
+      setError(mapAuthError(err.message, validationMessages))
     } finally {
       setLoading(false)
     }
@@ -132,11 +175,49 @@ export default function Register() {
           <div className="h-px flex-1 bg-border" />
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <Input label={t('auth.fullName')} value={form.fullName} onChange={(e) => update('fullName', e.target.value)} required />
-          <Input label={t('auth.email')} type="email" value={form.email} onChange={(e) => update('email', e.target.value)} required />
-          <Input label={t('auth.phone')} type="tel" placeholder="7X XXX XXX" value={form.phone} onChange={(e) => update('phone', e.target.value)} />
-          <Input label={t('auth.password')} type="password" value={form.password} onChange={(e) => update('password', e.target.value)} required minLength={6} />
+        <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+          <Input
+            label={t('auth.fullName')}
+            value={form.fullName}
+            onChange={(e) => update('fullName', e.target.value)}
+            onBlur={() => validateField('fullName')}
+            error={fieldErrors.fullName}
+            required
+            autoComplete="name"
+          />
+          <Input
+            label={t('auth.email')}
+            type="email"
+            value={form.email}
+            onChange={(e) => update('email', e.target.value)}
+            onBlur={() => validateField('email')}
+            error={fieldErrors.email}
+            required
+            autoComplete="email"
+          />
+          <Input
+            label={t('auth.phone')}
+            type="tel"
+            placeholder="7X XXX XXX"
+            value={form.phone}
+            onChange={(e) => update('phone', e.target.value)}
+            onBlur={() => validateField('phone')}
+            error={fieldErrors.phone}
+            autoComplete="tel"
+          />
+          <div>
+            <Input
+              label={t('auth.password')}
+              type="password"
+              value={form.password}
+              onChange={(e) => update('password', e.target.value)}
+              onBlur={() => validateField('password')}
+              error={fieldErrors.password}
+              required
+              autoComplete="new-password"
+            />
+            <p className="mt-1.5 text-xs text-muted">{t('auth.passwordHint')}</p>
+          </div>
           {form.role === 'student' && (
             <UniversitySelect
               label={t('auth.yourUniversity')}

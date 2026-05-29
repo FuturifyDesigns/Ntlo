@@ -19,6 +19,17 @@ export default function ProtectedRoute({ children, role }) {
     return <Navigate to="/login" state={{ from: location }} replace />
   }
 
+  const emailConfirmed = user.email_confirmed_at || user.confirmed_at
+  if (!emailConfirmed) {
+    return (
+      <Navigate
+        to="/check-email"
+        state={{ email: user.email }}
+        replace
+      />
+    )
+  }
+
   if (role && profile?.role !== role) {
     const redirect = profile?.role === 'landlord' ? '/landlord' : '/student'
     return <Navigate to={redirect} replace />

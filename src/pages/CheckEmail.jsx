@@ -1,4 +1,4 @@
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { MailCheck } from 'lucide-react'
 import { useTranslation } from '../hooks/useTranslation'
@@ -6,7 +6,8 @@ import Button from '../components/ui/Button'
 
 export default function CheckEmail() {
   const { state } = useLocation()
-  const email = state?.email || 'your email'
+  const [searchParams] = useSearchParams()
+  const email = state?.email || searchParams.get('email') || 'your email'
   const { t } = useTranslation()
 
   return (
@@ -31,7 +32,7 @@ export default function CheckEmail() {
         <p className="mt-4 rounded-lg bg-background px-4 py-3 text-sm text-primary">
           {t('auth.checkEmailNote')}
         </p>
-        <Button as={Link} to="/login" className="mt-6 w-full">
+        <Button as={Link} to="/login?verified=0" state={{ verified: false }} className="mt-6 w-full">
           {t('auth.backToSignIn')}
         </Button>
       </div>

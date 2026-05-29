@@ -23,6 +23,7 @@
       <h1>You&apos;re verified!</h1>
       <p>Your Ntlo account is now active. You can sign in on the app anytime.</p>
       <p class="note">You can <strong>close this page</strong> now and return to Ntlo to sign in.</p>
+      <a class="link" href="../#/login?verified=1" style="margin-top: 1rem; display: inline-block;">Go to sign in</a>
     </div>
 
     <div id="state-error" class="hidden">
@@ -81,8 +82,9 @@
           if (!session) throw new Error('No verification code found in this link.')
         }
 
-        // Clean URL
+        // Clean URL — verify only, do not keep user signed in
         window.history.replaceState({}, '', window.location.pathname)
+        await supabase.auth.signOut()
         show('state-success')
       } catch (err) {
         errorMsg.textContent = err.message || 'Verification failed.'

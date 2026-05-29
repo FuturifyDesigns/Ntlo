@@ -1,8 +1,10 @@
 import { useState } from 'react'
-import { Link, useNavigate, useLocation } from 'react-router-dom'
+import { Link, useNavigate, useLocation, useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useAuth } from '../hooks/useAuth'
+import { useAuthPageSession, useResetGoogleLoading } from '../hooks/useAuthPage'
 import { useTranslation } from '../hooks/useTranslation'
+import { validateLoginForm, mapAuthError } from '../lib/authValidation'
 import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
 import GoogleAuthButton from '../components/auth/GoogleAuthButton'
@@ -10,6 +12,7 @@ import GoogleAuthButton from '../components/auth/GoogleAuthButton'
 export default function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [fieldErrors, setFieldErrors] = useState({})
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
@@ -17,11 +20,36 @@ export default function Login() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
+  const [searchParams] = useSearchParams()
   const from = location.state?.from?.pathname || '/'
+  const verified = searchParams.get('verified') === '1' || location.state?.verified
+
+  useAuthPageSession()
+  useResetGoogleLoading(setGoogleLoading)
+
+  const validationMessages = {
+    emailRequired: t('auth.validation.emailRequired'),
+    emailInvalid: t('auth.validation.emailInvalid'),
+    emailTooLong: t('auth.validation.emailTooLong'),
+    passwordRequired: t('auth.validation.passwordRequired'),
+    passwordShort: t('auth.validation.passwordShort'),
+    invalidCredentials: t('auth.validation.invalidCredentials'),
+    emailNotConfirmed: t('auth.validation.emailNotConfirmed'),
+    authFailed: t('auth.validation.authFailed'),
+  }
+
+  function validateField(field) {
+    const errors = validateLoginForm({ email, password }, validationMessages)
+    setFieldErrors((prev) => ({ ...prev, [field]: errors[field] || '' }))
+  }
 
   async function handleSubmit(e) {
     e.preventDefault()
     setError('')
+    const errors = validateLoginForm({ email, password }, validationMessages)
+    setFieldErrors(errors)
+    if (Object.keys(errors).length > 0) return
+
     setLoading(true)
     try {
       const { data } = await signIn(email, password)
@@ -34,7 +62,7 @@ export default function Login() {
             : '/student'
       navigate(destination, { replace: true })
     } catch (err) {
-      setError(err.message || 'Invalid email or password')
+      setError(mapAuthError(err.message, validationMessages))
     } finally {
       setLoading(false)
     }
@@ -63,6 +91,12 @@ export default function Login() {
         <p className="mt-2 text-muted">{t('auth.signInSubtitle')}</p>
       </div>
 
+      {verified && (
+        <p className="mt-6 rounded-xl border border-success/30 bg-success/10 px-4 py-3 text-center text-sm text-success">
+          {t('auth.emailVerifiedSignIn')}
+        </p>
+      )}
+
       <div className="mt-8 space-y-4 rounded-xl border border-border bg-surface p-6 shadow-sm">
         <GoogleAuthButton
           onClick={handleGoogleSignIn}
@@ -77,12 +111,17 @@ export default function Login() {
           <div className="h-px flex-1 bg-border" />
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4" noValidate>
           <Input
             label={t('auth.email')}
             type="email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => {
+              setEmail(e.target.value)
+              if (fieldErrors.email) validateField('email')
+            }}
+            onBlur={() => validateField('email')}
+            error={fieldErrors.email}
             required
             autoComplete="email"
           />
@@ -90,7 +129,12 @@ export default function Login() {
             label={t('auth.password')}
             type="password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => {
+              setPassword(e.target.value)
+              if (fieldErrors.password) validateField('password')
+            }}
+            onBlur={() => validateField('password')}
+            error={fieldErrors.password}
             required
             autoComplete="current-password"
           />
