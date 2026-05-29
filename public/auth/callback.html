@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Signing you in — Ntlo</title>
+  <link rel="icon" type="image/png" href="../favicon.png" sizes="512x512" />
+  <link rel="stylesheet" href="auth-shared.css" />
+</head>
+<body>
+  <div class="bg-mesh"></div>
+  <div class="card">
+    <img class="logo" src="../logo-brand.png" alt="Ntlo" />
+
+    <div id="state-loading">
+      <div class="icon-wrap loading"><div class="spinner"></div></div>
+      <h1>Signing you in</h1>
+      <p>Please wait while we connect your Google account.</p>
+    </div>
+
+    <div id="state-error" class="hidden">
+      <div class="icon-wrap error">!</div>
+      <h1>Sign-in failed</h1>
+      <p id="error-message">Something went wrong. Please try again.</p>
+      <a class="link" href="../#/login">Back to sign in</a>
+    </div>
+  </div>
+
+  <script src="config.js"></script>
+  <script type="module">
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.1'
+
+    const cfg = window.__NTLO_SUPABASE__
+    const loading = document.getElementById('state-loading')
+    const errorEl = document.getElementById('state-error')
+    const errorMsg = document.getElementById('error-message')
+
+    function showError(message) {
+      loading.classList.add('hidden')
+      errorEl.classList.remove('hidden')
+      errorMsg.textContent = message
+    }
+
+    async function run() {
+      if (!cfg?.url || !cfg?.key) {
+        showError('App configuration is missing. Contact support.')
+        return
+      }
+
+      const supabase = createClient(cfg.url, cfg.key)
+      const params = new URLSearchParams(window.location.search)
+      const code = params.get('code')
+      const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''))
+      const accessToken = hashParams.get('access_token')
+      const refreshToken = hashParams.get('refresh_token')
+
+      try {
+        if (code) {
+          const { error } = await supabase.auth.exchangeCodeForSession(code)
+          if (error) throw error
+        } else if (accessToken && refreshToken) {
+          const { error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+          })
+          if (error) throw error
+        } else {
+          throw new Error('No sign-in code found. Please try again from Ntlo.')
+        }
+
+        const pendingRole = sessionStorage.getItem('ntlo_oauth_role')
+        sessionStorage.removeItem('ntlo_oauth_role')
+
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) throw new Error('Could not load your account.')
+
+        if (pendingRole === 'student' || pendingRole === 'landlord') {
+          await supabase.auth.updateUser({ data: { role: pendingRole } })
+          await supabase.from('profiles').update({ role: pendingRole }).eq('id', user.id)
+        }
+
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .maybeSingle()
+
+        const role = profile?.role || user.user_metadata?.role || 'student'
+        const destination = role === 'landlord' ? '../#/landlord' : '../#/student'
+        window.location.replace(destination)
+      } catch (err) {
+        showError(err.message || 'Sign-in failed.')
+      }
+    }
+
+    run()
+  </script>
+</body>
+</html>

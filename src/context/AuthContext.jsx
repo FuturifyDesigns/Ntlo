@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
-import { getAuthResetUrl, getAuthVerifyUrl } from '../lib/authUrls'
+import { getAuthCallbackUrl, getAuthResetUrl, getAuthVerifyUrl } from '../lib/authUrls'
 
 const AuthContext = createContext(null)
 
@@ -61,6 +61,24 @@ export function AuthProvider({ children }) {
     if (error) throw error
   }
 
+  async function signInWithGoogle({ role } = {}) {
+    if (role === 'student' || role === 'landlord') {
+      sessionStorage.setItem('ntlo_oauth_role', role)
+    } else {
+      sessionStorage.removeItem('ntlo_oauth_role')
+    }
+
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: getAuthCallbackUrl(),
+        queryParams: { prompt: 'select_account' },
+        scopes: 'email profile',
+      },
+    })
+    if (error) throw error
+  }
+
   async function signOut() {
     const { error } = await supabase.auth.signOut()
     if (error) throw error
@@ -86,6 +104,7 @@ export function AuthProvider({ children }) {
     loading,
     signUp,
     signIn,
+    signInWithGoogle,
     signOut,
     resetPassword,
     updateProfile,

@@ -25,7 +25,7 @@ import EditListing from './pages/EditListing'
 import NotFound from './pages/NotFound'
 import Pricing from './pages/Pricing'
 import GrainOverlay from './components/ui/Motion'
-import CookieConsentBanner from './components/layout/CookieConsentBanner'
+import CookieFeedbackToast from './components/layout/CookieFeedbackToast'
 import CookiePreferencesModal from './components/layout/CookiePreferencesModal'
 import ExitIntentModal from './components/layout/ExitIntentModal'
 import AnalyticsTracker from './components/layout/AnalyticsTracker'
@@ -84,6 +84,7 @@ function AppShell() {
         <AccessibilityMenu />
         <CookieConsentBanner />
         <CookiePreferencesModal />
+        <CookieFeedbackToast />
         <ExitIntentModal />
         <AnalyticsTracker />
       </div>

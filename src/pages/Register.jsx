@@ -6,6 +6,7 @@ import { submitUniversityRequest } from '../hooks/useStats'
 import { useTranslation } from '../hooks/useTranslation'
 import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
+import GoogleAuthButton from '../components/auth/GoogleAuthButton'
 import { UniversitySelect } from '../components/universities/OtherUniversityModal'
 
 export default function Register() {
@@ -23,7 +24,8 @@ export default function Register() {
   })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const { signUp } = useAuth()
+  const [googleLoading, setGoogleLoading] = useState(false)
+  const { signUp, signInWithGoogle } = useAuth()
   const navigate = useNavigate()
 
   function update(field, value) {
@@ -68,6 +70,17 @@ export default function Register() {
     }
   }
 
+  async function handleGoogleSignUp() {
+    setError('')
+    setGoogleLoading(true)
+    try {
+      await signInWithGoogle({ role: form.role })
+    } catch (err) {
+      setError(err.message || t('auth.googleError'))
+      setGoogleLoading(false)
+    }
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -105,26 +118,41 @@ export default function Register() {
         </button>
       </div>
 
-      <form onSubmit={handleSubmit} className="mt-6 space-y-4 rounded-xl border border-border bg-surface p-6 shadow-sm">
-        <Input label={t('auth.fullName')} value={form.fullName} onChange={(e) => update('fullName', e.target.value)} required />
-        <Input label={t('auth.email')} type="email" value={form.email} onChange={(e) => update('email', e.target.value)} required />
-        <Input label={t('auth.phone')} type="tel" placeholder="7X XXX XXX" value={form.phone} onChange={(e) => update('phone', e.target.value)} />
-        <Input label={t('auth.password')} type="password" value={form.password} onChange={(e) => update('password', e.target.value)} required minLength={6} />
-        {form.role === 'student' && (
-          <UniversitySelect
-            label={t('auth.yourUniversity')}
-            value={form.universityId}
-            onChange={(v) => update('universityId', v)}
-            otherValue={form.customUniversity}
-            onOtherChange={(v) => update('customUniversity', v)}
-            required={false}
-          />
-        )}
-        {error && <p className="text-sm text-error">{error}</p>}
-        <Button type="submit" className="w-full" disabled={loading}>
-          {loading ? t('auth.creating') : t('auth.createAccount')}
-        </Button>
-      </form>
+      <div className="mt-6 space-y-4 rounded-xl border border-border bg-surface p-6 shadow-sm">
+        <GoogleAuthButton
+          onClick={handleGoogleSignUp}
+          loading={googleLoading}
+          disabled={loading}
+          label={t('auth.signUpWithGoogle')}
+        />
+
+        <div className="flex items-center gap-3">
+          <div className="h-px flex-1 bg-border" />
+          <span className="text-xs font-medium uppercase tracking-wider text-muted">{t('auth.orEmail')}</span>
+          <div className="h-px flex-1 bg-border" />
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <Input label={t('auth.fullName')} value={form.fullName} onChange={(e) => update('fullName', e.target.value)} required />
+          <Input label={t('auth.email')} type="email" value={form.email} onChange={(e) => update('email', e.target.value)} required />
+          <Input label={t('auth.phone')} type="tel" placeholder="7X XXX XXX" value={form.phone} onChange={(e) => update('phone', e.target.value)} />
+          <Input label={t('auth.password')} type="password" value={form.password} onChange={(e) => update('password', e.target.value)} required minLength={6} />
+          {form.role === 'student' && (
+            <UniversitySelect
+              label={t('auth.yourUniversity')}
+              value={form.universityId}
+              onChange={(v) => update('universityId', v)}
+              otherValue={form.customUniversity}
+              onOtherChange={(v) => update('customUniversity', v)}
+              required={false}
+            />
+          )}
+          {error && <p className="text-sm text-error">{error}</p>}
+          <Button type="submit" className="w-full" disabled={loading || googleLoading}>
+            {loading ? t('auth.creating') : t('auth.createAccount')}
+          </Button>
+        </form>
+      </div>
 
       <p className="mt-6 text-center text-sm text-muted">
         {t('auth.haveAccount')}{' '}

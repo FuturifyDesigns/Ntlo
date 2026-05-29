@@ -11,6 +11,8 @@
 | | `https://futurifydesigns.github.io/Ntlo/auth/reset.html` |
 | | `http://localhost:5173/auth/verify.html` |
 | | `http://localhost:5173/auth/reset.html` |
+| | `https://futurifydesigns.github.io/Ntlo/auth/callback.html` |
+| | `http://localhost:5173/auth/callback.html` |
 
 ## 2. Email templates
 

@@ -139,6 +139,11 @@ export const translations = {
       checkEmailTitle: 'Verify your email',
       checkEmailSubtitle: 'We sent a confirmation link to {email}. Click the link to activate your account.',
       checkEmailNote: 'After verifying, you can close that page and sign in here.',
+      continueWithGoogle: 'Continue with Google',
+      signUpWithGoogle: 'Sign up with Google',
+      googleSigningIn: 'Redirecting to Google…',
+      googleError: 'Google sign-in failed. Please try again.',
+      orEmail: 'or use email',
     },
     dashboard: {
       hello: 'Hello',
@@ -233,6 +238,11 @@ export const translations = {
       analyticsDesc: 'Helps us understand which pages are visited so we can improve Ntlo.',
       savePrefs: 'Save preferences',
       close: 'Close',
+      feedback: {
+        accepted_all: 'All cookies accepted. Your preferences and analytics are now enabled.',
+        essential_only: 'Only essential cookies are active. Analytics cookies are turned off.',
+        saved_custom: 'Your cookie preferences were saved successfully.',
+      },
     },
     exit: {
       title: 'Leaving already?',
@@ -456,6 +466,11 @@ export const translations = {
       checkEmailTitle: 'Netefatsa imeile ya gago',
       checkEmailSubtitle: 'Re rometse link ya netefatso go {email}. Tobetsa link go tsenya akhaonte.',
       checkEmailNote: 'Fa o netefaditse, o ka tswala tsebe eo mme o tsenye fa.',
+      continueWithGoogle: 'Tswela pele ka Google',
+      signUpWithGoogle: 'Ikwadise ka Google',
+      googleSigningIn: 'Re go fetisetsa go Google…',
+      googleError: 'Go tsenya ka Google go palelwe. Leka gape.',
+      orEmail: 'kgotsa dirisa imeile',
     },
     dashboard: {
       hello: 'Dumela',
@@ -550,6 +565,11 @@ export const translations = {
       analyticsDesc: 'Di re thusa go utlwisisa matlakala a o etelang go re nne re ka tokafatsa Ntlo.',
       savePrefs: 'Boloka dikgetho',
       close: 'Tswala',
+      feedback: {
+        accepted_all: 'Di-cookie tsotlhe di amogediwe. Dikgatlhego tsa gago le tshekatsheko di tsentswe.',
+        essential_only: 'Di-cookie tse di tlhokegang fela di a bereka. Di-cookie tsa tshekatsheko di timilwe.',
+        saved_custom: 'Dikgetho tsa gago tsa di-cookie di bolokilwe ka katlego.',
+      },
     },
     exit: {
       title: 'O tswa already?',

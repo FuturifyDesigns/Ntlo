@@ -34,14 +34,29 @@ In **Authentication** → **Providers**, ensure Email is enabled.
 
 Configure redirect URLs and paste email templates — see `supabase/email-templates/README.md`.
 
-## 4. GitHub Actions secrets
+## 4. Enable Google sign-in
+
+1. **Authentication** → **Providers** → **Google** → Enable
+2. Create OAuth credentials in [Google Cloud Console](https://console.cloud.google.com/apis/credentials):
+   - Application type: **Web application**
+   - **Authorized JavaScript origins:**
+     - `https://futurifydesigns.github.io`
+     - `http://localhost:5173`
+   - **Authorized redirect URIs:**
+     - `https://kbpoljwacmzrakztnlkd.supabase.co/auth/v1/callback`
+3. Paste the **Client ID** and **Client Secret** into Supabase Google provider settings
+4. In **Authentication** → **URL Configuration**, add redirect URLs:
+   - `https://futurifydesigns.github.io/Ntlo/auth/callback.html`
+   - `http://localhost:5173/auth/callback.html`
+
+## 5. GitHub Actions secrets
 
 In your GitHub repo → **Settings** → **Secrets and variables** → **Actions**, add:
 
 - `VITE_SUPABASE_URL` = `https://kbpoljwacmzrakztnlkd.supabase.co`
 - `VITE_SUPABASE_ANON_KEY` = your anon key
 
-## 5. GitHub Pages
+## 6. GitHub Pages
 
 In repo **Settings** → **Pages** → Source: **GitHub Actions**
 

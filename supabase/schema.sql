@@ -115,7 +115,12 @@ begin
   insert into public.profiles (id, full_name, role, phone)
   values (
     new.id,
-    coalesce(new.raw_user_meta_data->>'full_name', 'User'),
+    coalesce(
+      new.raw_user_meta_data->>'full_name',
+      new.raw_user_meta_data->>'name',
+      split_part(new.email, '@', 1),
+      'User'
+    ),
     coalesce(new.raw_user_meta_data->>'role', 'student'),
     new.raw_user_meta_data->>'phone'
   );
