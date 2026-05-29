@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { AuthProvider } from './context/AuthContext'
 import { LocaleProvider } from './context/LocaleContext'
 import { WelcomeReturnProvider } from './context/WelcomeReturnContext'
+import { CookieConsentProvider } from './context/CookieConsentContext'
 import ProtectedRoute from './components/layout/ProtectedRoute'
 import Navbar from './components/layout/Navbar'
 import Footer from './components/layout/Footer'
@@ -24,6 +25,10 @@ import EditListing from './pages/EditListing'
 import NotFound from './pages/NotFound'
 import Pricing from './pages/Pricing'
 import GrainOverlay from './components/ui/Motion'
+import CookieConsentBanner from './components/layout/CookieConsentBanner'
+import CookiePreferencesModal from './components/layout/CookiePreferencesModal'
+import ExitIntentModal from './components/layout/ExitIntentModal'
+import AnalyticsTracker from './components/layout/AnalyticsTracker'
 import { useLocale } from './context/LocaleContext'
 import { useTranslation } from './hooks/useTranslation'
 
@@ -77,6 +82,10 @@ function AppShell() {
         <Footer />
         <MobileNav />
         <AccessibilityMenu />
+        <CookieConsentBanner />
+        <CookiePreferencesModal />
+        <ExitIntentModal />
+        <AnalyticsTracker />
       </div>
     </>
   )
@@ -87,9 +96,11 @@ export default function App() {
     <HashRouter>
       <LocaleProvider>
         <AuthProvider>
-          <WelcomeReturnProvider>
-            <AppShell />
-          </WelcomeReturnProvider>
+          <CookieConsentProvider>
+            <WelcomeReturnProvider>
+              <AppShell />
+            </WelcomeReturnProvider>
+          </CookieConsentProvider>
         </AuthProvider>
       </LocaleProvider>
     </HashRouter>

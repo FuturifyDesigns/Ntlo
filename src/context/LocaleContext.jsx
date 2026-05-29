@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react'
+import { isFunctionalAllowed } from '../lib/cookies'
 
 const LocaleContext = createContext(null)
 
@@ -25,7 +26,18 @@ export function LocaleProvider({ children }) {
   const [prefs, setPrefs] = useState(loadPrefs)
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs))
+    function syncStorage() {
+      if (isFunctionalAllowed()) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs))
+      }
+    }
+
+    syncStorage()
+    window.addEventListener('ntlo:consent-change', syncStorage)
+    return () => window.removeEventListener('ntlo:consent-change', syncStorage)
+  }, [prefs])
+
+  useEffect(() => {
     const root = document.documentElement
     root.lang = prefs.lang === 'tn' ? 'tn' : 'en'
     root.dataset.fontSize = prefs.fontSize

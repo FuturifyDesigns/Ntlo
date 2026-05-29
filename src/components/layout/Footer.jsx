@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { ArrowRight, Mail, Globe, Search, GraduationCap, Tag, Home } from 'lucide-react'
 import { useTranslation } from '../../hooks/useTranslation'
+import { useCookieConsent } from '../../context/CookieConsentContext'
 import { PatternBotswana } from '../ui/Icons'
 
 const exploreLinks = [
@@ -66,6 +67,7 @@ function ContactLink({ href, icon: Icon, children, external }) {
 
 export default function Footer() {
   const { t } = useTranslation()
+  const { openPreferences } = useCookieConsent()
 
   return (
     <footer className="relative mt-auto overflow-hidden bg-primary text-white">
@@ -143,7 +145,14 @@ export default function Footer() {
           transition={{ delay: 0.3 }}
           className="mt-8 border-t border-white/8 pt-5 text-center text-xs text-white/40 sm:mt-10 sm:pt-6"
         >
-          {t('footer.copyright')}
+          <p>{t('footer.copyright')}</p>
+          <button
+            type="button"
+            onClick={openPreferences}
+            className="mt-2 text-white/50 underline-offset-2 transition-colors hover:text-accent hover:underline"
+          >
+            {t('footer.cookieSettings')}
+          </button>
         </motion.div>
       </div>
     </footer>
