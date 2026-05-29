@@ -3,156 +3,122 @@ import { motion, AnimatePresence } from 'framer-motion'
 
 export default function SplashScreen({ onComplete }) {
   const [visible, setVisible] = useState(true)
-  const [phase, setPhase] = useState('loading') // loading → reveal → exit
-  const [progress, setProgress] = useState(0)
+  const [phase, setPhase] = useState('enter') // enter → hold → exit
 
   useEffect(() => {
-    const progressInterval = setInterval(() => {
-      setProgress((p) => Math.min(p + 2, 100))
-    }, 50)
-
-    const t1 = setTimeout(() => setPhase('reveal'), 600)
-    const t2 = setTimeout(() => setPhase('exit'), 2600)
+    const t1 = setTimeout(() => setPhase('hold'), 400)
+    const t2 = setTimeout(() => setPhase('exit'), 2200)
     const t3 = setTimeout(() => {
-      clearInterval(progressInterval)
       setVisible(false)
       onComplete()
-    }, 3200)
+    }, 2800)
 
     return () => {
-      clearInterval(progressInterval)
       clearTimeout(t1)
       clearTimeout(t2)
       clearTimeout(t3)
     }
   }, [onComplete])
 
+  const base = import.meta.env.BASE_URL
+
   return (
     <AnimatePresence>
       {visible && (
         <motion.div
-          className="fixed inset-0 z-[100] overflow-hidden"
+          className="fixed inset-0 z-[100] flex items-center justify-center overflow-hidden bg-[#F8F7F4]"
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+          aria-hidden="true"
         >
-          {/* Apartment photo background */}
-          <div className="absolute inset-0">
-            <motion.img
-              src={`${import.meta.env.BASE_URL}hero/bg.jpg`}
-              alt=""
-              className="h-full w-full object-cover"
-              initial={{ scale: 1.15 }}
-              animate={{ scale: phase === 'exit' ? 1.05 : 1.08 }}
-              transition={{ duration: 3, ease: 'easeOut' }}
-            />
-            <div className="absolute inset-0 bg-primary/90" />
-            <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/80 to-primary/60" />
+          {/* Soft ambient glow */}
+          <div className="pointer-events-none absolute inset-0">
+            <div className="absolute left-1/2 top-1/3 h-[420px] w-[420px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent/[0.07] blur-3xl" />
+            <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
           </div>
 
-          {/* Gold accent lines */}
-          <motion.div
-            initial={{ scaleX: 0 }}
-            animate={{ scaleX: phase === 'exit' ? 0 : 1 }}
-            transition={{ duration: 1, delay: 0.3 }}
-            className="absolute left-0 top-0 h-1 w-full origin-left bg-accent"
-          />
-          <motion.div
-            initial={{ scaleY: 0 }}
-            animate={{ scaleY: phase === 'exit' ? 0 : 1 }}
-            transition={{ duration: 0.8, delay: 0.5 }}
-            className="absolute left-0 top-0 h-full w-1 origin-top bg-accent/60"
-          />
-
-          {/* Content */}
-          <div className="relative flex h-full flex-col items-center justify-center px-6">
-            {/* Progress ring */}
+          <div className="relative flex flex-col items-center px-6 text-center">
+            {/* Icon card */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.5 }}
+              initial={{ opacity: 0, scale: 0.88, y: 12 }}
               animate={
                 phase === 'exit'
-                  ? { opacity: 0, scale: 1.2 }
-                  : { opacity: 1, scale: 1 }
+                  ? { opacity: 0, scale: 0.96, y: -8 }
+                  : { opacity: 1, scale: 1, y: 0 }
               }
-              transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-              className="relative mb-10"
+              transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+              className="relative"
             >
-              <svg className="h-28 w-28 -rotate-90 sm:h-32 sm:w-32" viewBox="0 0 120 120">
-                <circle cx="60" cy="60" r="54" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="2" />
-                <circle
-                  cx="60"
-                  cy="60"
-                  r="54"
-                  fill="none"
-                  stroke="#C8A84B"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeDasharray={`${2 * Math.PI * 54}`}
-                  strokeDashoffset={`${2 * Math.PI * 54 * (1 - progress / 100)}`}
-                  style={{ transition: 'stroke-dashoffset 0.1s linear' }}
-                />
-              </svg>
-
-              <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.4, duration: 0.5 }}
-                className="absolute inset-0 flex items-center justify-center"
-              >
+              <div className="rounded-[28px] border border-border/80 bg-white p-5 shadow-[0_20px_60px_-12px_rgba(26,26,46,0.12)] sm:p-6">
                 <img
-                  src={`${import.meta.env.BASE_URL}logo-brand.png`}
-                  alt="Ntlo"
-                  className="h-16 w-auto max-w-[140px] object-contain sm:h-20 sm:max-w-[160px]"
+                  src={`${base}favicon.png`}
+                  alt=""
+                  className="h-20 w-20 object-contain sm:h-24 sm:w-24"
+                  width={96}
+                  height={96}
                 />
-              </motion.div>
+              </div>
+              <motion.div
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: phase === 'exit' ? 0 : 1 }}
+                transition={{ duration: 0.7, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
+                className="mx-auto mt-5 h-0.5 w-12 origin-center rounded-full bg-accent"
+              />
             </motion.div>
 
-            {/* Brand name + tagline */}
+            {/* Wordmark */}
             <motion.div
-              initial={{ opacity: 0, y: 16 }}
+              initial={{ opacity: 0, y: 14 }}
               animate={
-                phase === 'reveal' || phase === 'exit'
-                  ? phase === 'exit'
-                    ? { opacity: 0, y: -12 }
-                    : { opacity: 1, y: 0 }
-                  : { opacity: 0, y: 16 }
+                phase === 'exit'
+                  ? { opacity: 0, y: -6 }
+                  : phase === 'hold' || phase === 'enter'
+                    ? { opacity: 1, y: 0 }
+                    : { opacity: 0, y: 14 }
               }
-              transition={{ duration: 0.5 }}
-              className="text-center"
+              transition={{ duration: 0.5, delay: phase === 'enter' ? 0.15 : 0 }}
+              className="mt-8"
             >
-              <h1 className="font-display text-3xl font-bold tracking-tight text-white sm:text-4xl">
+              <h1 className="font-display text-[2rem] font-bold tracking-tight text-primary sm:text-[2.25rem]">
                 Ntlo
               </h1>
-              <p className="mt-3 font-display text-sm tracking-[0.25em] text-accent sm:text-base">
+              <p className="mt-2 text-sm font-medium tracking-wide text-muted sm:text-base">
                 Your campus home, sorted.
               </p>
             </motion.div>
 
-            {/* Loading bar */}
+            {/* Subtle loader */}
             <motion.div
               initial={{ opacity: 0 }}
-              animate={{ opacity: phase === 'exit' ? 0 : 0.8 }}
-              className="absolute bottom-10 left-1/2 w-48 -translate-x-1/2 sm:bottom-14 sm:w-56"
+              animate={{ opacity: phase === 'exit' ? 0 : 1 }}
+              transition={{ delay: 0.5, duration: 0.4 }}
+              className="mt-10 flex items-center gap-1.5"
             >
-              <div className="h-px w-full overflow-hidden bg-white/10">
-                <motion.div
-                  className="h-full bg-accent"
-                  style={{ width: `${progress}%` }}
+              {[0, 1, 2].map((i) => (
+                <motion.span
+                  key={i}
+                  className="h-1.5 w-1.5 rounded-full bg-accent/70"
+                  animate={{ opacity: [0.35, 1, 0.35], scale: [0.85, 1, 0.85] }}
+                  transition={{
+                    duration: 1.1,
+                    repeat: Infinity,
+                    delay: i * 0.18,
+                    ease: 'easeInOut',
+                  }}
                 />
-              </div>
-              <p className="mt-2 text-center text-[10px] uppercase tracking-[0.2em] text-white/40">
-                Loading
-              </p>
+              ))}
             </motion.div>
           </div>
 
-          {/* Exit curtain wipe */}
-          <motion.div
-            initial={{ scaleY: 0 }}
-            animate={{ scaleY: phase === 'exit' ? 1 : 0 }}
-            transition={{ duration: 0.55, ease: [0.76, 0, 0.24, 1] }}
-            className="absolute inset-0 origin-top bg-primary"
-          />
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: phase === 'exit' ? 0 : 0.45 }}
+            transition={{ delay: 0.6, duration: 0.5 }}
+            className="absolute bottom-8 text-[11px] font-medium tracking-[0.18em] text-muted uppercase"
+          >
+            Futurify Designs
+          </motion.p>
         </motion.div>
       )}
     </AnimatePresence>
