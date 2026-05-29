@@ -50,20 +50,10 @@ export function useExitIntent({ enabled = true } = {}) {
       setOpen(true)
     }
 
-    function onBeforeUnload(e) {
-      if (allowLeaveRef.current || sessionStorage.getItem(SESSION_KEY)) return
-      if (!readyRef.current) return
-      if (Date.now() - mountedAtRef.current < MIN_TIME_MS) return
-      e.preventDefault()
-      e.returnValue = ''
-    }
-
     document.addEventListener('mouseleave', onMouseLeave)
-    window.addEventListener('beforeunload', onBeforeUnload)
 
     return () => {
       document.removeEventListener('mouseleave', onMouseLeave)
-      window.removeEventListener('beforeunload', onBeforeUnload)
     }
   }, [enabled])
 

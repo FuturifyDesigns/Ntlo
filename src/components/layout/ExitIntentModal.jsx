@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Heart, Search, X } from 'lucide-react'
 import { useExitIntent } from '../../hooks/useExitIntent'
@@ -7,10 +7,14 @@ import { useTranslation } from '../../hooks/useTranslation'
 import { useLocale } from '../../context/LocaleContext'
 import Button from '../ui/Button'
 
+const AUTH_PATHS = ['/login', '/register', '/forgot-password', '/check-email', '/complete-profile']
+
 export default function ExitIntentModal() {
+  const location = useLocation()
+  const isAuthPage = AUTH_PATHS.includes(location.pathname)
   const { hasDecided, showBanner } = useCookieConsent()
   const { open, stay, confirmLeave } = useExitIntent({
-    enabled: hasDecided && !showBanner,
+    enabled: hasDecided && !showBanner && !isAuthPage,
   })
   const { t } = useTranslation()
   const { prefs } = useLocale()
