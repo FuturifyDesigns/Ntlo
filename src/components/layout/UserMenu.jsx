@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { ChevronDown, LayoutDashboard, LogOut, Heart, Home } from 'lucide-react'
+import { ChevronDown, LogOut, Heart, Home } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 import { useTranslation } from '../../hooks/useTranslation'
 import { cn } from '../../lib/utils'
@@ -101,16 +101,6 @@ export default function UserMenu({ onNavigate, className }) {
           >
             {isLandlord ? <Home size={16} /> : <Heart size={16} />}
             {isLandlord ? t('nav.myListings') : t('nav.saved')}
-          </Link>
-
-          <Link
-            to={dashboardPath}
-            role="menuitem"
-            onClick={closeAndNavigate}
-            className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-primary hover:bg-background"
-          >
-            <LayoutDashboard size={16} />
-            {t('nav.dashboard')}
           </Link>
 
           <button
