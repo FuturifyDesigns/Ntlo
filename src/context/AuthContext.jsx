@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { getAuthCallbackUrl, getAuthResetUrl, getAuthVerifyUrl } from '../lib/authUrls'
 
@@ -58,9 +58,16 @@ export function AuthProvider({ children }) {
     const confirmed = data?.user?.email_confirmed_at || data?.user?.confirmed_at
     if (data?.user && !confirmed) {
       await supabase.auth.signOut()
+      setUser(null)
+      setProfile(null)
       const err = new Error('Email not confirmed')
       err.code = 'email_not_confirmed'
       throw err
+    }
+
+    if (data?.user) {
+      setUser(data.user)
+      await fetchProfile(data.user.id)
     }
 
     return data
@@ -98,11 +105,12 @@ export function AuthProvider({ children }) {
     return data
   }
 
-  async function signOut() {
+  const signOut = useCallback(async () => {
     const { error } = await supabase.auth.signOut()
     if (error) throw error
+    setUser(null)
     setProfile(null)
-  }
+  }, [])
 
   async function updateProfile(updates) {
     if (!user) return
@@ -117,20 +125,23 @@ export function AuthProvider({ children }) {
     return data
   }
 
-  const value = {
-    user,
-    profile,
-    loading,
-    signUp,
-    signIn,
-    signInWithGoogle,
-    signOut,
-    resetPassword,
-    updateProfile,
-    refreshProfile: () => user && fetchProfile(user.id),
-    isStudent: profile?.role === 'student',
-    isLandlord: profile?.role === 'landlord',
-  }
+  const value = useMemo(
+    () => ({
+      user,
+      profile,
+      loading,
+      signUp,
+      signIn,
+      signInWithGoogle,
+      signOut,
+      resetPassword,
+      updateProfile,
+      refreshProfile: () => user && fetchProfile(user.id),
+      isStudent: profile?.role === 'student',
+      isLandlord: profile?.role === 'landlord',
+    }),
+    [user, profile, loading, signOut]
+  )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

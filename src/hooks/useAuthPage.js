@@ -1,22 +1,32 @@
-import { useEffect, useState } from 'react'
-import { useAuth } from './useAuth'
+import { useCallback, useEffect, useState } from 'react'
+import { supabase } from '../lib/supabase'
 
-/** Clears stale sessions (verify link, recovery, etc.) before auth forms run */
+/** Clears stale sessions (verify link, recovery, etc.) once when an auth page loads */
 export function useAuthPageSession() {
-  const { signOut } = useAuth()
   const [ready, setReady] = useState(false)
 
   useEffect(() => {
     let alive = true
-    signOut()
-      .catch(() => {})
-      .finally(() => {
+
+    async function prepareAuthPage() {
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        if (!alive) return
+        if (session) {
+          await supabase.auth.signOut()
+        }
+      } catch {
+        // Ignore — form can still be used
+      } finally {
         if (alive) setReady(true)
-      })
+      }
+    }
+
+    prepareAuthPage()
     return () => {
       alive = false
     }
-  }, [signOut])
+  }, [])
 
   return ready
 }
