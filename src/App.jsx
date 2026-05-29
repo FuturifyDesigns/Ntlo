@@ -18,6 +18,8 @@ import Login from './pages/Login'
 import Register from './pages/Register'
 import ForgotPassword from './pages/ForgotPassword'
 import CheckEmail from './pages/CheckEmail'
+import CompleteProfile from './pages/CompleteProfile'
+import OAuthSetupRoute from './components/layout/OAuthSetupRoute'
 import StudentDashboard from './pages/StudentDashboard'
 import LandlordDashboard from './pages/LandlordDashboard'
 import CreateListing from './pages/CreateListing'
@@ -36,6 +38,10 @@ import { useTranslation } from './hooks/useTranslation'
 function AppRoutes() {
   const location = useLocation()
   const { prefs } = useLocale()
+  const isAuthRoute = ['/login', '/register', '/forgot-password', '/complete-profile'].includes(location.pathname)
+  const transition = isAuthRoute
+    ? { duration: prefs.reduceMotion ? 0 : 0.2, ease: 'easeOut' }
+    : { duration: prefs.reduceMotion ? 0 : 0.25 }
 
   return (
     <AnimatePresence mode="wait">
@@ -44,7 +50,7 @@ function AppRoutes() {
         initial={prefs.reduceMotion ? false : { opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={prefs.reduceMotion ? false : { opacity: 0 }}
-        transition={{ duration: prefs.reduceMotion ? 0 : 0.25 }}
+        transition={transition}
       >
         <Routes location={location}>
           <Route path="/" element={<Home />} />
@@ -56,6 +62,7 @@ function AppRoutes() {
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/check-email" element={<CheckEmail />} />
+          <Route path="/complete-profile" element={<OAuthSetupRoute><CompleteProfile /></OAuthSetupRoute>} />
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/student" element={<ProtectedRoute role="student"><StudentDashboard /></ProtectedRoute>} />
           <Route path="/landlord" element={<ProtectedRoute role="landlord"><LandlordDashboard /></ProtectedRoute>} />

@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { getAuthCallbackUrl, getAuthResetUrl, getAuthVerifyUrl } from '../lib/authUrls'
+import { clearOAuthStorage, markOAuthPending, setOAuthIntent } from '../lib/oauthStorage'
 
 const AuthContext = createContext(null)
 
@@ -81,31 +82,38 @@ export function AuthProvider({ children }) {
   }
 
   async function signInWithGoogle({ role } = {}) {
-    if (role === 'student' || role === 'landlord') {
-      sessionStorage.setItem('ntlo_oauth_role', role)
-    } else {
-      sessionStorage.removeItem('ntlo_oauth_role')
-    }
+    clearOAuthStorage()
+    setOAuthIntent({ from: role ? 'register' : 'login', role })
 
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
         redirectTo: getAuthCallbackUrl(),
-        queryParams: { prompt: 'select_account' },
-        scopes: 'email profile',
+        queryParams: {
+          prompt: 'select_account',
+          access_type: 'online',
+        },
+        scopes: 'openid email profile',
       },
     })
-    if (error) throw error
 
-    if (data?.url) {
-      sessionStorage.setItem('ntlo_oauth_pending', '1')
-      window.location.assign(data.url)
+    if (error) {
+      clearOAuthStorage()
+      throw error
     }
 
+    if (!data?.url) {
+      clearOAuthStorage()
+      throw new Error('Could not start Google sign-in. Please try again.')
+    }
+
+    markOAuthPending()
+    window.location.assign(data.url)
     return data
   }
 
   const signOut = useCallback(async () => {
+    clearOAuthStorage()
     const { error } = await supabase.auth.signOut()
     if (error) throw error
     setUser(null)

@@ -30,11 +30,3 @@ export function useAuthPageSession() {
 
   return ready
 }
-
-/** Resets Google redirect loading if user returns without leaving the page */
-export function useResetGoogleLoading(setGoogleLoading) {
-  useEffect(() => {
-    setGoogleLoading(false)
-    sessionStorage.removeItem('ntlo_oauth_pending')
-  }, [setGoogleLoading])
-}

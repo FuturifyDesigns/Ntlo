@@ -1,5 +1,6 @@
 import { Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
+import { profileNeedsSetup } from '../../lib/oauthStorage'
 import { Skeleton } from '../ui/Skeleton'
 
 export default function ProtectedRoute({ children, role }) {
@@ -28,6 +29,10 @@ export default function ProtectedRoute({ children, role }) {
         replace
       />
     )
+  }
+
+  if (profileNeedsSetup(profile)) {
+    return <Navigate to="/complete-profile" replace />
   }
 
   if (role && profile?.role !== role) {

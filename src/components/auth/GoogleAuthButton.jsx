@@ -1,3 +1,4 @@
+import { Loader2 } from 'lucide-react'
 import Button from '../ui/Button'
 import { useTranslation } from '../../hooks/useTranslation'
 
@@ -35,7 +36,11 @@ export default function GoogleAuthButton({ onClick, disabled, loading, label }) 
       onClick={onClick}
       disabled={disabled || loading}
     >
-      <GoogleIcon />
+      {loading ? (
+        <Loader2 className="h-5 w-5 animate-spin text-muted" aria-hidden="true" />
+      ) : (
+        <GoogleIcon />
+      )}
       {loading ? t('auth.googleSigningIn') : label || t('auth.continueWithGoogle')}
     </Button>
   )

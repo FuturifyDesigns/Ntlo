@@ -1,8 +1,8 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useAuth } from '../hooks/useAuth'
-import { useAuthPageSession, useResetGoogleLoading } from '../hooks/useAuthPage'
+import { useGoogleAuth } from '../hooks/useGoogleAuth'
 import { submitUniversityRequest } from '../hooks/useStats'
 import { useTranslation } from '../hooks/useTranslation'
 import { validateRegisterForm, mapAuthError, normalizeBotswanaPhone } from '../lib/authValidation'
@@ -10,6 +10,7 @@ import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
 import PasswordInput from '../components/ui/PasswordInput'
 import GoogleAuthButton from '../components/auth/GoogleAuthButton'
+import AuthTransitionOverlay from '../components/auth/AuthTransitionOverlay'
 import { UniversitySelect } from '../components/universities/OtherUniversityModal'
 
 export default function Register() {
@@ -29,12 +30,18 @@ export default function Register() {
   const [fieldErrors, setFieldErrors] = useState({})
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const [googleLoading, setGoogleLoading] = useState(false)
-  const { signUp, signInWithGoogle } = useAuth()
+  const [transitioning, setTransitioning] = useState(false)
+  const { signUp } = useAuth()
   const navigate = useNavigate()
 
-  const authReady = useAuthPageSession()
-  useResetGoogleLoading(setGoogleLoading)
+  const handleGoogleError = useCallback((message) => {
+    setError(message)
+  }, [])
+
+  const { startGoogleAuth, googleLoading, authReady, googleDisabled } = useGoogleAuth({
+    role: form.role,
+    onError: handleGoogleError,
+  })
 
   const validationMessages = {
     nameRequired: t('auth.validation.nameRequired'),
@@ -134,23 +141,18 @@ export default function Register() {
     }
   }
 
-  async function handleGoogleSignUp() {
-    setError('')
-    setGoogleLoading(true)
-    try {
-      await signInWithGoogle({ role: form.role })
-    } catch (err) {
-      setError(err.message || t('auth.googleError'))
-      setGoogleLoading(false)
-    }
-  }
-
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="mx-auto max-w-md px-4 py-8 sm:py-10"
-    >
+    <>
+      <AuthTransitionOverlay
+        show={transitioning || googleLoading}
+        message={googleLoading ? t('auth.googleSigningIn') : t('auth.signingInSmooth')}
+      />
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.35, ease: 'easeOut' }}
+        className="mx-auto max-w-md px-4 py-8 sm:py-10"
+      >
       <div className="text-center">
         <img src={`${import.meta.env.BASE_URL}logo-brand.png`} alt="Ntlo" className="mx-auto mb-4 h-16 w-auto max-w-[220px]" />
         <h1 className="font-display text-3xl font-semibold tracking-tight text-primary">{t('auth.joinNtlo')}</h1>
@@ -184,9 +186,9 @@ export default function Register() {
 
       <div className="mt-6 space-y-4 rounded-xl border border-border bg-surface p-6 shadow-sm">
         <GoogleAuthButton
-          onClick={handleGoogleSignUp}
+          onClick={startGoogleAuth}
           loading={googleLoading}
-          disabled={loading}
+          disabled={loading || googleDisabled}
           label={t('auth.signUpWithGoogle')}
         />
 
@@ -275,7 +277,7 @@ export default function Register() {
             </div>
           )}
           {error && <p className="text-sm text-error">{error}</p>}
-          <Button type="submit" className="w-full" disabled={!authReady || loading || googleLoading}>
+          <Button type="submit" className="w-full" disabled={!authReady || loading || googleLoading || transitioning}>
             {loading ? t('auth.creating') : t('auth.createAccount')}
           </Button>
         </form>
@@ -285,6 +287,7 @@ export default function Register() {
         {t('auth.haveAccount')}{' '}
         <Link to="/login" className="font-semibold text-accent hover:underline">{t('auth.signIn')}</Link>
       </p>
-    </motion.div>
+      </motion.div>
+    </>
   )
 }
