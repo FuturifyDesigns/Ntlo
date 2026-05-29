@@ -146,6 +146,7 @@ export default function Register() {
       <AuthTransitionOverlay
         show={transitioning || googleLoading}
         message={googleLoading ? t('auth.googleSigningIn') : t('auth.signingInSmooth')}
+        hint={googleLoading ? t('auth.googleSigningInHint') : undefined}
       />
       <motion.div
         initial={{ opacity: 0 }}

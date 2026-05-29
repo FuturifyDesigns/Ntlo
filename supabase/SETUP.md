@@ -55,8 +55,25 @@ In your GitHub repo → **Settings** → **Secrets and variables** → **Actions
 
 - `VITE_SUPABASE_URL` = `https://kbpoljwacmzrakztnlkd.supabase.co`
 - `VITE_SUPABASE_ANON_KEY` = your anon key
+- `VITE_GOOGLE_MAPS_API_KEY` = your Google Maps JavaScript API key
 
-## 6. GitHub Pages
+## 6. Google Maps (listings + landlord location picker)
+
+1. In [Google Cloud Console](https://console.cloud.google.com/apis/library), enable **Maps JavaScript API**
+2. Create an API key under **APIs & Services** → **Credentials**
+3. Restrict the key (recommended):
+   - **Application restrictions:** HTTP referrers
+   - Add `https://futurifydesigns.github.io/*` and `http://localhost:5173/*`
+   - **API restrictions:** Maps JavaScript API
+4. Add to local `.env`:
+   ```
+   VITE_GOOGLE_MAPS_API_KEY=your-key-here
+   ```
+5. Add the same value as GitHub Actions secret `VITE_GOOGLE_MAPS_API_KEY`
+
+Maps appear on browse (map view), listing detail, landlord dashboard, and the create/edit listing location step.
+
+## 7. GitHub Pages
 
 In repo **Settings** → **Pages** → Source: **GitHub Actions**
 

@@ -10,6 +10,8 @@ import Badge from '../components/ui/Badge'
 import Card from '../components/ui/Card'
 import { Skeleton } from '../components/ui/Skeleton'
 import { formatPrice, getCoverPhoto } from '../lib/utils'
+import ListingMap from '../components/listings/ListingMap'
+import { MAPS_ENABLED } from '../lib/googleMaps'
 
 const PLACEHOLDER = 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400&q=80'
 
@@ -26,7 +28,7 @@ export default function LandlordDashboard() {
     const { data } = await supabase
       .from('listings')
       .select(`
-        id, title, price, area, city, available, views, is_verified, created_at,
+        id, title, price, area, city, lat, lng, available, views, is_verified, created_at,
         cover_photo:listing_photos(url, is_cover)
       `)
       .eq('landlord_id', user.id)
@@ -97,6 +99,15 @@ export default function LandlordDashboard() {
           <p className="font-display text-3xl font-bold text-accent">{totalViews}</p>
         </Card>
       </div>
+
+      {!loading && listings.some((l) => l.lat && l.lng) && (
+        <div className="mb-8">
+          <h2 className="mb-3 font-display text-lg font-semibold text-primary">
+            {MAPS_ENABLED ? 'Your listings on the map' : 'Listing locations'}
+          </h2>
+          <ListingMap listings={listings} height="320px" />
+        </div>
+      )}
 
       <div className="mb-6 flex gap-2">
         {['all', 'active', 'inactive'].map((f) => (

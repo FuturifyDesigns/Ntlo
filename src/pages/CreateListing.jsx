@@ -10,6 +10,7 @@ import { AMENITIES, ROOM_TYPES, calculateDistance, formatPrice } from '../lib/ut
 import Button from '../components/ui/Button'
 import Input, { Select, Textarea } from '../components/ui/Input'
 import { UniversitySelect } from '../components/universities/OtherUniversityModal'
+import { LocationPicker } from '../components/maps/ListingMap'
 
 const STEPS = ['Basics', 'Location', 'Photos', 'Amenities', 'Contact', 'Review']
 
@@ -210,9 +211,17 @@ export default function CreateListing() {
                   onOtherChange={(v) => update('custom_university_name', v)}
                   required
                 />
+                <LocationPicker
+                  lat={form.lat}
+                  lng={form.lng}
+                  onChange={({ lat, lng }) => {
+                    setForm((f) => ({ ...f, lat: String(lat), lng: String(lng) }))
+                  }}
+                  hint="Pin your listing on the map so students can see where it is."
+                />
                 <div className="grid grid-cols-2 gap-4">
-                  <Input label="Latitude (optional)" type="number" step="any" value={form.lat} onChange={(e) => update('lat', e.target.value)} placeholder="-24.6556" />
-                  <Input label="Longitude (optional)" type="number" step="any" value={form.lng} onChange={(e) => update('lng', e.target.value)} placeholder="25.9090" />
+                  <Input label="Latitude" type="number" step="any" value={form.lat} onChange={(e) => update('lat', e.target.value)} placeholder="-24.6556" />
+                  <Input label="Longitude" type="number" step="any" value={form.lng} onChange={(e) => update('lng', e.target.value)} placeholder="25.9090" />
                 </div>
               </div>
             )}

@@ -6,6 +6,7 @@ import { UNIVERSITIES } from '../lib/universities'
 import { AMENITIES, ROOM_TYPES, calculateDistance } from '../lib/utils'
 import Button from '../components/ui/Button'
 import Input, { Select, Textarea } from '../components/ui/Input'
+import { LocationPicker } from '../components/maps/ListingMap'
 import { Skeleton } from '../components/ui/Skeleton'
 
 export default function EditListing() {
@@ -110,6 +111,19 @@ export default function EditListing() {
         <Input label="Address" value={form.address} onChange={(e) => update('address', e.target.value)} required />
         <Input label="Area" value={form.area || ''} onChange={(e) => update('area', e.target.value)} />
         <Input label="City" value={form.city} onChange={(e) => update('city', e.target.value)} required />
+        <LocationPicker
+          lat={form.lat}
+          lng={form.lng}
+          onChange={({ lat, lng }) => {
+            update('lat', lat)
+            update('lng', lng)
+          }}
+          hint="Update the map pin for this listing."
+        />
+        <div className="grid grid-cols-2 gap-4">
+          <Input label="Latitude" type="number" step="any" value={form.lat ?? ''} onChange={(e) => update('lat', e.target.value)} />
+          <Input label="Longitude" type="number" step="any" value={form.lng ?? ''} onChange={(e) => update('lng', e.target.value)} />
+        </div>
         <Select label="Nearest university" value={form.nearest_university_id || ''} onChange={(e) => update('nearest_university_id', e.target.value)}>
           <option value="">Select</option>
           {UNIVERSITIES.map((u) => <option key={u.id} value={u.id}>{u.short_name}</option>)}

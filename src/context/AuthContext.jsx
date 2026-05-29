@@ -119,6 +119,9 @@ export function AuthProvider({ children }) {
     }
 
     markOAuthPending()
+    await new Promise((resolve) => {
+      requestAnimationFrame(() => requestAnimationFrame(resolve))
+    })
     window.location.assign(data.url)
     return data
   }

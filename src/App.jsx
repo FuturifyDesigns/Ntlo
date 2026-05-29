@@ -32,6 +32,7 @@ import CookieFeedbackToast from './components/layout/CookieFeedbackToast'
 import CookiePreferencesModal from './components/layout/CookiePreferencesModal'
 import ExitIntentModal from './components/layout/ExitIntentModal'
 import AnalyticsTracker from './components/layout/AnalyticsTracker'
+import GoogleMapsProvider from './components/maps/GoogleMapsProvider'
 import { useLocale } from './context/LocaleContext'
 import { useTranslation } from './hooks/useTranslation'
 
@@ -106,11 +107,13 @@ export default function App() {
     <HashRouter>
       <LocaleProvider>
         <AuthProvider>
-          <CookieConsentProvider>
-            <WelcomeReturnProvider>
-              <AppShell />
-            </WelcomeReturnProvider>
-          </CookieConsentProvider>
+          <GoogleMapsProvider>
+            <CookieConsentProvider>
+              <WelcomeReturnProvider>
+                <AppShell />
+              </WelcomeReturnProvider>
+            </CookieConsentProvider>
+          </GoogleMapsProvider>
         </AuthProvider>
       </LocaleProvider>
     </HashRouter>
