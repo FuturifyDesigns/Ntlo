@@ -55,8 +55,8 @@ export function AuthProvider({ children }) {
     })
     if (error) throw error
 
-    const confirmed = data.user?.email_confirmed_at || data.user?.confirmed_at
-    if (data.user && !confirmed) {
+    const confirmed = data?.user?.email_confirmed_at || data?.user?.confirmed_at
+    if (data?.user && !confirmed) {
       await supabase.auth.signOut()
       const err = new Error('Email not confirmed')
       err.code = 'email_not_confirmed'

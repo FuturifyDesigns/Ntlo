@@ -54,8 +54,8 @@ export default function Login() {
 
     setLoading(true)
     try {
-      const { data } = await signIn(email, password)
-      const role = data.user?.user_metadata?.role
+      const data = await signIn(email, password)
+      const role = data?.user?.user_metadata?.role
       const destination =
         from !== '/login' && from !== '/'
           ? from
