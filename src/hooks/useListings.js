@@ -32,11 +32,11 @@ export function useListings(filters = {}) {
         .from('listings')
         .select(
           `
-          id, title, price, room_type, area, city, address,
+          id, title, price, room_type, area, city, address, lat, lng,
           distance_to_campus, available, is_verified, featured,
           whatsapp_number, amenities, gender_preference, created_at, views,
           nearest_university_id, custom_university_name,
-          nearest_university:universities(id, short_name, name),
+          nearest_university:universities(id, short_name, name, lat, lng),
           cover_photo:listing_photos(url, is_cover)
         `,
           { count: 'exact' }
@@ -74,7 +74,11 @@ export function useListings(filters = {}) {
         query = query.order('featured', { ascending: false }).order('created_at', { ascending: false })
       }
 
-      query = query.range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1)
+      if (filters.mapMode) {
+        query = query.limit(200)
+      } else {
+        query = query.range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1)
+      }
 
       const { data, error: queryError, count: total } = await query
       if (queryError) throw queryError

@@ -16,3 +16,15 @@ export function toLatLng(lat, lng) {
 export function hasValidCoords(lat, lng) {
   return toLatLng(lat, lng) !== null
 }
+
+/** Exact pin, or approximate campus area when listing has no lat/lng */
+export function getListingPosition(listing) {
+  const exact = toLatLng(listing?.lat, listing?.lng)
+  if (exact) return { ...exact, approximate: false }
+
+  const uni = listing?.nearest_university
+  const campus = toLatLng(uni?.lat, uni?.lng)
+  if (campus) return { ...campus, approximate: true }
+
+  return null
+}

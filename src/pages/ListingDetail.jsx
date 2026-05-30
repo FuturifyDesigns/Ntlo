@@ -122,7 +122,7 @@ export default function ListingDetail() {
 
             <div>
               <h2 className="mb-3 font-display text-lg font-semibold">{t('listingDetail.location')}</h2>
-              <SingleListingMap lat={listing.lat} lng={listing.lng} />
+              <SingleListingMap listing={listing} lat={listing.lat} lng={listing.lng} title={listing.title} />
             </div>
 
             <ReviewSection listingId={listing.id} />

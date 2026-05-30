@@ -30,7 +30,10 @@ export default function Browse() {
     if (search) setFilters((f) => ({ ...f, search }))
   }, [searchParams])
 
-  const { listings, loading, error, count, page, setPage, pageSize } = useListings(filters)
+  const { listings, loading, error, count, page, setPage, pageSize } = useListings({
+    ...filters,
+    mapMode: view === 'map',
+  })
   const uni = filters.universityId ? getUniversityById(filters.universityId) : null
 
   return (
@@ -79,7 +82,16 @@ export default function Browse() {
       </div>
 
       {view === 'map' ? (
-        <ListingMap listings={listings} height="500px" />
+        <>
+          {loading && (
+            <p className="mb-3 text-sm text-muted">{t('listings.loadingMap')}</p>
+          )}
+          <ListingMap
+            listings={listings}
+            height="500px"
+            emptyHint={t('listings.mapNoLocations')}
+          />
+        </>
       ) : (
         <ListingGrid
           listings={listings}
