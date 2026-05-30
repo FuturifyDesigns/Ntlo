@@ -107,7 +107,8 @@ function MapWithMarkers({
   const hiddenPinCount = campusLocked ? listings.length - plotted.length : 0
 
   return (
-    <div className={`relative overflow-hidden rounded-xl border border-border ${className}`} style={{ height }}>
+    <div className={`space-y-2 ${className}`}>
+      <div className="relative overflow-hidden rounded-xl border border-border" style={{ height }}>
       {emptyHint && plotted.length === 0 && !campusLocked && (
         <div className="absolute inset-x-0 top-0 z-10 border-b border-border bg-surface/95 px-4 py-2 text-center text-sm text-muted">
           {emptyHint}
@@ -116,6 +117,7 @@ function MapWithMarkers({
       {campusLocked && (
         <div className="absolute inset-x-0 top-0 z-10 space-y-0.5 border-b border-border bg-primary/90 px-4 py-2 text-center text-sm font-medium text-white">
           <p>{t('listings.mapCampusFocus', { campus: viewport.label || t('listings.mapCampusDefault') })}</p>
+          <p className="text-xs font-normal text-white/80">{t('listings.mapCampusPinNote')}</p>
           {hiddenPinCount > 0 && (
             <p className="text-xs font-normal text-white/80">
               {t('listings.mapHiddenPins', { count: hiddenPinCount })}
@@ -188,6 +190,8 @@ function MapWithMarkers({
           </InfoWindow>
         )}
       </Map>
+      </div>
+      <p className="text-xs leading-relaxed text-muted">{t('listings.mapAreaDisclaimer')}</p>
     </div>
   )
 }
@@ -230,6 +234,7 @@ export default function ListingMap({
 }
 
 export function SingleListingMap({ lat, lng, listing, height = '280px', title }) {
+  const { t } = useTranslation()
   const position = listing ? getListingPosition(listing) : toLatLng(lat, lng)
   const coords = position ? { lat: position.lat, lng: position.lng } : null
   const approximate = position?.approximate
@@ -245,17 +250,20 @@ export function SingleListingMap({ lat, lng, listing, height = '280px', title })
 
   if (!coords) {
     return (
-      <MapUnavailable
-        height={height}
-        message="Approximate area — exact location shared on contact"
-      />
+      <div className="space-y-2">
+        <MapUnavailable
+          height={height}
+          message={t('listings.mapSingleUnavailable')}
+        />
+        <p className="text-xs leading-relaxed text-muted">{t('listings.mapAreaDisclaimer')}</p>
+      </div>
     )
   }
 
   return (
     <div className="space-y-2">
       {approximate && (
-        <p className="text-xs text-muted">Pin shows campus area — exact address shared when you contact the landlord.</p>
+        <p className="text-xs text-muted">{t('listings.mapSingleApprox')}</p>
       )}
       <div className="overflow-hidden rounded-xl border border-border" style={{ height }}>
         <Map
@@ -267,6 +275,7 @@ export function SingleListingMap({ lat, lng, listing, height = '280px', title })
           <Marker position={coords} title={title || listing?.title || 'Listing location'} />
         </Map>
       </div>
+      <p className="text-xs leading-relaxed text-muted">{t('listings.mapAreaDisclaimer')}</p>
     </div>
   )
 }
