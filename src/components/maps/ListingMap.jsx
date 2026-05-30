@@ -307,13 +307,14 @@ export function SingleListingMap({ lat, lng, listing, height = '280px', title })
   )
 }
 
-/** One-shot camera move — does not fight user pan/zoom after. */
-function MapCameraController({ command }) {
+/** One-shot camera move — skipped after the user pans/zooms the map themselves. */
+function MapCameraController({ command, disabledRef, programmaticRef }) {
   const map = useMap()
 
   useEffect(() => {
-    if (!map || !command) return
+    if (!map || !command || disabledRef?.current) return
 
+    programmaticRef.current = true
     const { campus, pin, zoom } = command
 
     if (campus && pin) {
@@ -321,14 +322,44 @@ function MapCameraController({ command }) {
       bounds.extend(campus)
       bounds.extend(pin)
       map.fitBounds(bounds, 56)
-      return
+    } else {
+      const target = pin || campus
+      if (target) {
+        map.panTo(target)
+        map.setZoom(zoom ?? (pin ? SINGLE_LISTING_ZOOM : CAMPUS_MAP_ZOOM))
+      }
     }
 
-    const target = pin || campus
-    if (!target) return
-    map.panTo(target)
-    map.setZoom(zoom ?? (pin ? SINGLE_LISTING_ZOOM : CAMPUS_MAP_ZOOM))
-  }, [map, command?.id])
+    const idle = map.addListener('idle', () => {
+      programmaticRef.current = false
+      google.maps.event.removeListener(idle)
+    })
+  }, [map, command?.id, disabledRef, programmaticRef])
+
+  return null
+}
+
+/** After the user pans or zooms, stop programmatic camera moves until address/uni changes. */
+function MapUserInteractionGuard({ disabledRef, programmaticRef }) {
+  const map = useMap()
+
+  useEffect(() => {
+    if (!map) return undefined
+
+    const markUser = () => {
+      if (!programmaticRef.current) {
+        disabledRef.current = true
+      }
+    }
+
+    const drag = map.addListener('dragstart', markUser)
+    const zoom = map.addListener('zoom_changed', markUser)
+
+    return () => {
+      google.maps.event.removeListener(drag)
+      google.maps.event.removeListener(zoom)
+    }
+  }, [map, disabledRef, programmaticRef])
 
   return null
 }
@@ -387,11 +418,24 @@ export function LocationPicker({
   const pinLockedRef = useRef(false)
   const prevUniversityIdRef = useRef('')
   const cameraIdRef = useRef(0)
+  const userMapControlRef = useRef(false)
+  const programmaticCameraRef = useRef(false)
+  const campusCoordsRef = useRef(campusCoords)
+  const latRef = useRef(lat)
+  const lngRef = useRef(lng)
+  campusCoordsRef.current = campusCoords
+  latRef.current = lat
+  lngRef.current = lng
   onChangeRef.current = onChange
 
   const addressKey = `${address?.trim()}|${area?.trim()}|${city?.trim()}`
 
+  const allowCamera = useCallback(() => {
+    userMapControlRef.current = false
+  }, [])
+
   const pushCamera = useCallback((payload) => {
+    if (userMapControlRef.current) return
     cameraIdRef.current += 1
     setCameraCommand({ id: cameraIdRef.current, ...payload })
   }, [])
@@ -405,13 +449,11 @@ export function LocationPicker({
   const handleMapClick = useCallback((event) => {
     if (!event.detail.latLng) return
     markPinManual()
-    const coords = {
+    onChange({
       lat: event.detail.latLng.lat,
       lng: event.detail.latLng.lng,
-    }
-    onChange(coords)
-    pushCamera({ pin: coords, zoom: SINGLE_LISTING_ZOOM })
-  }, [markPinManual, onChange, pushCamera])
+    })
+  }, [markPinManual, onChange])
 
   const handleDragEnd = useCallback((event) => {
     const ll = event.detail?.latLng || event.latLng
@@ -421,8 +463,7 @@ export function LocationPicker({
       ? { lat: ll.lat(), lng: ll.lng() }
       : { lat: ll.lat, lng: ll.lng }
     onChange(coords)
-    pushCamera({ pin: coords, zoom: SINGLE_LISTING_ZOOM })
-  }, [markPinManual, onChange, pushCamera])
+  }, [markPinManual, onChange])
 
   const useCurrentLocation = useCallback(async () => {
     if (!navigator.geolocation) {
@@ -445,6 +486,7 @@ export function LocationPicker({
     }
     navigator.geolocation.getCurrentPosition(
       (pos) => {
+        allowCamera()
         pinLockedRef.current = true
         setPinLocked(true)
         const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude }
@@ -465,7 +507,7 @@ export function LocationPicker({
       },
       { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 }
     )
-  }, [onChange, pushCamera, t])
+  }, [onChange, pushCamera, allowCamera, t])
 
   // Geocode listing address → pin (only when address text changes)
   useEffect(() => {
@@ -474,16 +516,23 @@ export function LocationPicker({
 
     if (!hasText && !cityOnly) return undefined
 
+    // Already geocoded this exact address and pin isn't locked for manual edit
+    if (addressKey === lastAddressKeyRef.current && lastAddressKeyRef.current !== '') {
+      return undefined
+    }
+
     if (addressKey !== lastAddressKeyRef.current) {
       pinLockedRef.current = false
       setPinLocked(false)
+      allowCamera()
     }
 
-    if (pinLockedRef.current && addressKey === lastAddressKeyRef.current) return undefined
+    if (pinLockedRef.current) return undefined
 
     if (geocodeTimerRef.current) clearTimeout(geocodeTimerRef.current)
     geocodeTimerRef.current = setTimeout(async () => {
-      if (pinLockedRef.current && addressKey === lastAddressKeyRef.current) return
+      if (pinLockedRef.current) return
+      if (addressKey === lastAddressKeyRef.current && lastAddressKeyRef.current !== '') return
 
       if (cityOnly && !hasText) {
         if (geocoder) {
@@ -492,6 +541,7 @@ export function LocationPicker({
             pushCamera({ pin: cityResult, zoom: DEFAULT_MAP_ZOOM })
           }
         }
+        lastAddressKeyRef.current = addressKey
         return
       }
 
@@ -506,7 +556,7 @@ export function LocationPicker({
       if (result && !pinLockedRef.current) {
         onChangeRef.current({ lat: result.lat, lng: result.lng })
         const coords = { lat: result.lat, lng: result.lng }
-        const campus = campusCoords || otherCampus
+        const campus = campusCoordsRef.current || null
         pushCamera(
           campus
             ? { campus, pin: coords, zoom: SINGLE_LISTING_ZOOM }
@@ -515,20 +565,18 @@ export function LocationPicker({
         setGeocodeHint(t('listingForm.pinFromAddress'))
         setGeoError('')
       } else if (hasText && (address?.trim().length >= 3 || area?.trim().length >= 2)) {
-        setGeocodeHint(
-          pinLockedRef.current ? t('listingForm.pinManual') : t('listingForm.geocodeMiss')
-        )
+        setGeocodeHint(t('listingForm.geocodeMiss'))
       } else {
-        setGeocodeHint(pinLockedRef.current ? t('listingForm.pinManual') : '')
+        setGeocodeHint('')
       }
     }, 900)
 
     return () => {
       if (geocodeTimerRef.current) clearTimeout(geocodeTimerRef.current)
     }
-  }, [addressKey, geocoder, campusCoords, otherCampus, pushCamera, t, city, address, area])
+  }, [addressKey, geocoder, allowCamera, pushCamera, t, address, area, city])
 
-  // Geocode "other" university for campus reference marker
+  // Geocode "other" university for campus reference marker only
   useEffect(() => {
     if (universityId !== 'other' || !customUniversityName?.trim()) {
       setOtherCampus(null)
@@ -545,37 +593,38 @@ export function LocationPicker({
       if (result) {
         const campus = { lat: result.lat, lng: result.lng }
         setOtherCampus(campus)
+        allowCamera()
+        const pin = toLatLng(latRef.current, lngRef.current)
         pushCamera(
-          position
-            ? { campus, pin: position, zoom: SINGLE_LISTING_ZOOM }
+          pin
+            ? { campus, pin, zoom: SINGLE_LISTING_ZOOM }
             : { campus, zoom: CAMPUS_MAP_ZOOM }
         )
       }
     }, 700)
 
     return () => clearTimeout(timer)
-  }, [
-    universityId,
-    customUniversityName,
-    customUniversityCity,
-    city,
-    geocoder,
-    position?.lat,
-    position?.lng,
-    pushCamera,
-  ])
+  }, [universityId, customUniversityName, customUniversityCity, city, geocoder, allowCamera, pushCamera])
 
-  // When a known university is selected, pan to show campus (+ pin) — does NOT move the listing pin
+  // Pan to campus when university selection changes (does not move the listing pin)
   useEffect(() => {
-    if (!campusCoords || universityId === 'other' || !universityId) return
+    if (!universityId || universityId === 'other') {
+      prevUniversityIdRef.current = universityId || ''
+      return
+    }
+    const campus = campusCoordsRef.current
+    if (!campus?.lat) return
     if (prevUniversityIdRef.current === universityId) return
+
     prevUniversityIdRef.current = universityId
+    allowCamera()
+    const pin = toLatLng(latRef.current, lngRef.current)
     pushCamera(
-      position
-        ? { campus: campusCoords, pin: position, zoom: SINGLE_LISTING_ZOOM }
-        : { campus: campusCoords, zoom: CAMPUS_MAP_ZOOM }
+      pin
+        ? { campus, pin, zoom: SINGLE_LISTING_ZOOM }
+        : { campus, zoom: CAMPUS_MAP_ZOOM }
     )
-  }, [universityId, campusCoords?.lat, campusCoords?.lng, position?.lat, position?.lng, pushCamera])
+  }, [universityId, allowCamera, pushCamera])
 
   const activeCampus = universityId === 'other' ? otherCampus : campusCoords
   const activeCampusLabel = universityId === 'other'
@@ -618,7 +667,7 @@ export function LocationPicker({
             {t('listingForm.geocodeSearching')}
           </span>
         )}
-        {position && !geocodeBusy && (
+        {position && (
           <span className="inline-flex items-center gap-1.5 rounded-lg border border-success/30 bg-success/5 px-3 py-2 text-xs font-medium text-success">
             <MapPin size={14} />
             {pinLocked ? t('listingForm.pinManualShort') : t('listingForm.pinSet')}
@@ -639,14 +688,15 @@ export function LocationPicker({
       <div className="overflow-hidden rounded-xl border border-border" style={{ height }}>
         <Map
           mapId={GOOGLE_MAPS_MAP_ID}
-          defaultCenter={position || DEFAULT_MAP_CENTER}
-          defaultZoom={position ? SINGLE_LISTING_ZOOM : DEFAULT_MAP_ZOOM}
+          defaultCenter={DEFAULT_MAP_CENTER}
+          defaultZoom={DEFAULT_MAP_ZOOM}
           gestureHandling="greedy"
           disableDefaultUI={false}
           onClick={handleMapClick}
           style={{ width: '100%', height: '100%' }}
         >
-          <MapCameraController command={cameraCommand} />
+          <MapUserInteractionGuard disabledRef={userMapControlRef} programmaticRef={programmaticCameraRef} />
+          <MapCameraController command={cameraCommand} disabledRef={userMapControlRef} programmaticRef={programmaticCameraRef} />
           {activeCampus && activeCampusLabel && (
             <CampusReferenceMarker position={activeCampus} label={activeCampusLabel} />
           )}
