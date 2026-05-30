@@ -2,6 +2,8 @@ import { getUniversityById } from './universities'
 import { calculateDistance } from './utils'
 
 export const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || ''
+/** Cloud map style ID — required for AdvancedMarker. Create one in Google Cloud → Map Management. */
+export const GOOGLE_MAPS_MAP_ID = import.meta.env.VITE_GOOGLE_MAPS_MAP_ID || 'DEMO_MAP_ID'
 export const MAPS_ENABLED = Boolean(GOOGLE_MAPS_API_KEY)
 
 /** Gaborone / UB area when no campus filter is active */

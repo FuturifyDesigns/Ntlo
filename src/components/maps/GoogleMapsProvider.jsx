@@ -5,7 +5,7 @@ export default function GoogleMapsProvider({ children }) {
   if (!MAPS_ENABLED) return children
 
   return (
-    <APIProvider apiKey={GOOGLE_MAPS_API_KEY}>
+    <APIProvider apiKey={GOOGLE_MAPS_API_KEY} libraries={['marker']}>
       {children}
     </APIProvider>
   )
