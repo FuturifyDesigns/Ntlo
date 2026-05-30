@@ -94,9 +94,10 @@ export function getCoverPhoto(listing) {
 }
 
 export function getListingPhotos(listing) {
-  if (listing?.listing_photos?.length) return listing.listing_photos
-  if (listing?.cover_photo?.length) return listing.cover_photo
-  return []
+  const raw = listing?.listing_photos ?? listing?.cover_photo
+  if (!raw) return []
+  const list = Array.isArray(raw) ? raw : [raw]
+  return [...list].sort((a, b) => (a.display_order || 0) - (b.display_order || 0))
 }
 
 export function getNearestUniversity(listing) {

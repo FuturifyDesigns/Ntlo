@@ -3,25 +3,30 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { cn } from '../../lib/utils'
 
 const PLACEHOLDER = 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=1200&q=80'
-const DEFAULT_INTERVAL = 4000
+const DEFAULT_INTERVAL = 3500
+const CARD_INTERVAL = 3000
 
 function normalizePhotos(photos) {
-  const sorted = [...photos].sort((a, b) => (a.display_order || 0) - (b.display_order || 0))
+  if (!photos) return [PLACEHOLDER]
+  const list = Array.isArray(photos) ? photos : [photos]
+  const sorted = [...list].sort((a, b) => (a.display_order || 0) - (b.display_order || 0))
   return sorted.length ? sorted.map((p) => (typeof p === 'string' ? p : p.url)) : [PLACEHOLDER]
 }
 
 export default function PhotoCarousel({
   photos = [],
   autoPlay = true,
-  interval = DEFAULT_INTERVAL,
+  interval,
   showArrows = true,
   showDots = true,
   compact = false,
+  pauseOnHover = true,
   startDelay = 0,
   className,
   aspectClass = 'aspect-[16/10] sm:aspect-[16/9]',
   altPrefix = 'Photo',
 }) {
+  const slideInterval = interval ?? (compact ? CARD_INTERVAL : DEFAULT_INTERVAL)
   const images = normalizePhotos(photos)
   const [index, setIndex] = useState(0)
   const [paused, setPaused] = useState(false)
@@ -37,14 +42,14 @@ export default function PhotoCarousel({
     const startTimer = setTimeout(() => {
       intervalId = setInterval(() => {
         setIndex((i) => (i + 1) % images.length)
-      }, interval)
+      }, slideInterval)
     }, startDelay)
 
     return () => {
       clearTimeout(startTimer)
       if (intervalId) clearInterval(intervalId)
     }
-  }, [autoPlay, images.length, paused, interval, startDelay])
+  }, [autoPlay, images.length, paused, slideInterval, startDelay])
 
   function prev(e) {
     e?.stopPropagation()
@@ -64,10 +69,10 @@ export default function PhotoCarousel({
   return (
     <div
       className={cn('relative overflow-hidden rounded-xl bg-background', className)}
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
-      onFocus={() => setPaused(true)}
-      onBlur={() => setPaused(false)}
+      onMouseEnter={pauseOnHover ? () => setPaused(true) : undefined}
+      onMouseLeave={pauseOnHover ? () => setPaused(false) : undefined}
+      onFocus={pauseOnHover ? () => setPaused(true) : undefined}
+      onBlur={pauseOnHover ? () => setPaused(false) : undefined}
     >
       <div className={cn('relative', aspectClass)}>
         {images.map((url, i) => (

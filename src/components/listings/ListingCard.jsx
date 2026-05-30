@@ -22,6 +22,7 @@ export default function ListingCard({ listing, compact = false, carouselIndex = 
 
   const uni = getNearestUniversity(listing)
   const listingPhotos = getListingPhotos(listing)
+  const hasMultiplePhotos = listingPhotos.length > 1
   const saved = isSaved(listing.id)
   const trustLevel = resolveListingTrustBadge(listing)
 
@@ -48,16 +49,17 @@ export default function ListingCard({ listing, compact = false, carouselIndex = 
             photos={listingPhotos}
             compact
             showArrows={false}
-            showDots={false}
+            showDots={hasMultiplePhotos}
+            pauseOnHover={false}
             startDelay={carouselIndex * 600}
             className="h-full rounded-none"
             aspectClass="h-full w-full"
             altPrefix={listing.title}
           />
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-primary/50 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+          <div className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-t from-primary/50 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 
           {uni && (
-            <div className="absolute left-3 top-3">
+            <div className="absolute left-3 top-3 z-[2]">
               <span className="inline-flex items-center gap-1 rounded-full bg-primary/85 px-2.5 py-1 text-xs font-semibold text-white backdrop-blur-sm">
                 <IconLocation className="h-3 w-3" />
                 {formatDistance(listing.distance_to_campus, getUniversityDisplayName(uni))}
@@ -69,7 +71,7 @@ export default function ListingCard({ listing, compact = false, carouselIndex = 
             onClick={handleSave}
             disabled={saving}
             className={cn(
-              'absolute right-3 top-3 rounded-full p-2 shadow-md transition-all',
+              'absolute right-3 top-3 z-[2] rounded-full p-2 shadow-md transition-all',
               saved
                 ? 'bg-accent text-primary scale-110'
                 : 'bg-white/95 text-muted hover:text-error hover:scale-105'
@@ -80,13 +82,13 @@ export default function ListingCard({ listing, compact = false, carouselIndex = 
           </button>
 
           {!listing.available && (
-            <div className="absolute inset-0 flex items-center justify-center bg-primary/70 backdrop-blur-[2px]">
+            <div className="absolute inset-0 z-[3] flex items-center justify-center bg-primary/70 backdrop-blur-[2px]">
               <Badge variant="error">{t('listings.unavailable')}</Badge>
             </div>
           )}
 
           {trustLevel && (
-            <div className="absolute bottom-3 right-3">
+            <div className="absolute bottom-3 right-3 z-[2]">
               <TrustedBadge level={trustLevel} compact />
             </div>
           )}

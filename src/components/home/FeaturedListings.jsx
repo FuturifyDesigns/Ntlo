@@ -41,7 +41,7 @@ export default function FeaturedListings({ listings }) {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.08, duration: 0.4 }}
               >
-                <ListingCard listing={listing} />
+                <ListingCard listing={listing} carouselIndex={i} />
               </motion.div>
             ))}
           </motion.div>

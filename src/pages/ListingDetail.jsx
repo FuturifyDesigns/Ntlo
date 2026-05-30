@@ -156,8 +156,8 @@ export default function ListingDetail() {
           <div className="mt-12">
             <h2 className="mb-6 font-display text-xl font-semibold">{t('listingDetail.moreByLandlord')}</h2>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
-              {relatedListings.map((l) => (
-                <ListingCard key={l.id} listing={l} />
+              {relatedListings.map((l, i) => (
+                <ListingCard key={l.id} listing={l} carouselIndex={i} />
               ))}
             </div>
           </div>
