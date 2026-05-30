@@ -5,6 +5,7 @@ import { formatPrice, formatDistance, getCoverPhoto, getNearestUniversity, ROOM_
 import * as LucideIcons from 'lucide-react'
 import { useSavedListings } from '../../hooks/useSavedListings'
 import { useAuth } from '../../hooks/useAuth'
+import { useTranslation } from '../../hooks/useTranslation'
 import { getUniversityDisplayName } from '../../lib/universityNames'
 import Badge from '../ui/Badge'
 import { IconLocation, IconVerified } from '../ui/Icons'
