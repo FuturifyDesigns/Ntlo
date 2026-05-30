@@ -80,10 +80,14 @@ export default function CompleteProfile() {
         updates.university_id = Number(universityId)
       }
 
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .update(updates)
-        .eq('id', user.id)
+      const { error: profileError } = await supabase.rpc('complete_own_profile', {
+        p_phone: normalizedPhone,
+        p_role: role,
+        p_full_name: updates.full_name,
+        p_university_id: role === 'student' && universityId && universityId !== 'other'
+          ? Number(universityId)
+          : null,
+      })
 
       if (profileError) throw profileError
 

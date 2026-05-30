@@ -121,3 +121,11 @@ Campus coordinates are stored in Supabase and loaded at runtime. When an admin *
 
 Ensure **Geocoding API** is enabled in [Google Cloud Console](https://console.cloud.google.com/) for your maps key.
 
+## 11. OAuth / Google sign-in (403 on profile update)
+
+If Google sign-up fails with **403 Forbidden** on `profiles`, run:
+
+`supabase/migrations/008_oauth_profile_setup.sql`
+
+This allows students/landlords to set their role and phone during the first profile setup step (migration 002 accidentally blocked role changes).
+

@@ -95,8 +95,6 @@
         return
       }
 
-      clearOAuthStorage()
-
       const supabase = createClient(cfg.url, cfg.key, {
         auth: {
           detectSessionInUrl: true,
@@ -160,8 +158,15 @@
 
         if (pendingRole === 'student' || pendingRole === 'landlord') {
           await supabase.auth.updateUser({ data: { role: pendingRole } })
-          await supabase.from('profiles').update({ role: pendingRole }).eq('id', user.id)
+          const { error: roleError } = await supabase
+            .from('profiles')
+            .update({ role: pendingRole })
+            .eq('id', user.id)
+          if (roleError) throw roleError
         }
+
+        sessionStorage.removeItem('ntlo_oauth_pending')
+        sessionStorage.removeItem('ntlo_oauth_started_at')
 
         const { data: profile } = await supabase
           .from('profiles')
