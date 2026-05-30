@@ -70,7 +70,7 @@ export async function submitApplication({ listingId, landlordId, moveInDate, dur
 
   const missing = APPLICATION_DOC_TYPES.filter((t) => !documents?.[t.id])
   if (missing.length) {
-    throw new Error('Please upload all required documents before submitting.')
+    throw new Error('Please upload Omang/passport and registration proof before submitting.')
   }
 
   const { data, error } = await supabase

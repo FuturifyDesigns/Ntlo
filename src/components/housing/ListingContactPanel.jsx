@@ -10,6 +10,7 @@ import Input, { Textarea } from '../ui/Input'
 import { getWhatsAppLink } from '../../lib/utils'
 import { createViewingRequest, submitApplication, isLandlordVerified, mapHousingError } from '../../lib/housing'
 import ApplicationDocFields from './ApplicationDocFields'
+import ApplicationRequirementsList from './ApplicationRequirementsList'
 import { APPLICATION_DOC_TYPES } from '../../lib/applicationDocs'
 import { canStudentApplyToListing } from '../../lib/applicationRules'
 import { useStudentHousing } from '../../hooks/useHousing'
@@ -296,6 +297,7 @@ export default function ListingContactPanel({ listing }) {
           <p className="text-sm text-success">{t('housing.applicationSent')}</p>
         ) : (
           <form onSubmit={submitApply} className="space-y-4">
+            <ApplicationRequirementsList />
             <ApplicationDocFields files={applyDocs} onChange={setApplyDocs} disabled={applyBusy} />
             <Input
               label={t('housing.moveInDate')}

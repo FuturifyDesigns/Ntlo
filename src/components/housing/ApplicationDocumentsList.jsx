@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { FileText, ExternalLink, Loader2 } from 'lucide-react'
 import { useTranslation } from '../../hooks/useTranslation'
-import { APPLICATION_DOC_TYPES, getSignedApplicationDocUrl } from '../../lib/applicationDocs'
+import { APPLICATION_DOC_TYPES, getApplicationDocLabelKey, getSignedApplicationDocUrl } from '../../lib/applicationDocs'
 import Button from '../ui/Button'
 
 export default function ApplicationDocumentsList({ documents, onPreview }) {
@@ -28,11 +28,16 @@ export default function ApplicationDocumentsList({ documents, onPreview }) {
 
   const byType = Object.fromEntries(documents.map((d) => [d.doc_type, d]))
 
+  const docTypes = documents.length
+    ? documents.map((d) => d.doc_type)
+    : APPLICATION_DOC_TYPES.map((t) => t.id)
+
   return (
     <div className="space-y-2">
       <p className="text-xs font-semibold uppercase tracking-wide text-muted">{t('housing.studentDocuments')}</p>
-      {APPLICATION_DOC_TYPES.map(({ id, labelKey }) => {
+      {docTypes.map((id) => {
         const doc = byType[id]
+        const labelKey = getApplicationDocLabelKey(id)
         return (
           <div key={id} className="flex items-center justify-between gap-2 rounded-lg border border-border px-3 py-2">
             <div className="flex min-w-0 items-center gap-2">
