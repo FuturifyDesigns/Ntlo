@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Shield, Clock, XCircle, CheckCircle, AlertCircle } from 'lucide-react'
+import { IconTrustedHome } from '../components/ui/Icons'
 import { useAuth } from '../hooks/useAuth'
 import { useTranslation } from '../hooks/useTranslation'
 import { supabase } from '../lib/supabase'
@@ -109,7 +110,7 @@ export default function LandlordVerify() {
         className="mx-auto max-w-lg px-4 py-16 text-center sm:px-6"
       >
         <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-success/10">
-          <CheckCircle size={34} className="text-success" />
+          <IconTrustedHome className="h-9 w-9 text-success" />
         </div>
         <h1 className="font-display text-3xl font-bold text-primary">{t('verification.approvedTitle')}</h1>
         <p className="mt-3 text-muted">{t('verification.approvedDesc')}</p>
@@ -138,7 +139,7 @@ export default function LandlordVerify() {
     >
       <div className="mb-8 text-center">
         <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-accent/10">
-          <Shield size={28} className="text-accent" />
+          <IconTrustedHome className="h-8 w-8 text-accent" />
         </div>
         <h1 className="font-display text-3xl font-bold text-primary">{t('verification.landlordTitle')}</h1>
         <p className="mt-2 text-muted">{t('verification.landlordSubtitle')}</p>

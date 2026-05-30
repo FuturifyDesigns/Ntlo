@@ -1,10 +1,42 @@
-export function IconVerified({ className = 'w-6 h-6', ...props }) {
+export function IconListedHome({ className = 'w-6 h-6', ...props }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className} {...props}>
-      <path d="M12 2l2.4 1.2 2.6-.2 1.4 2.2 2.4 1.2-.2 2.6 1.2 2.4-2.2 1.4-1.2 2.4-2.6-.2-2.4 1.2L12 22l-2.4-1.2-2.6.2-1.4-2.2-2.4-1.2.2-2.6L2.2 13.4l2.2-1.4 1.2-2.4 2.6.2L12 2z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
-      <path d="M8.5 12.5l2.5 2.5 5-5" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+      <path
+        d="M4 10.5L12 4l8 6.5V20a1 1 0 01-1 1h-5v-6H10v6H5a1 1 0 01-1-1v-9.5z"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+      />
+      <path d="M9 7l3-2.5L15 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
     </svg>
   )
+}
+
+/** Trusted home — house with check mark in the centre. */
+export function IconTrustedHome({ className = 'w-6 h-6', ...props }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} {...props}>
+      <path
+        d="M3.5 10.5L12 3.5l8.5 7V20a1 1 0 01-1 1h-5.5v-6h-4v6H4.5a1 1 0 01-1-1v-9.5z"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+      />
+      <circle cx="12" cy="13.25" r="3.35" fill="currentColor" fillOpacity="0.12" stroke="currentColor" strokeWidth="1.25" />
+      <path
+        d="M10.35 13.25l1.15 1.15 2.5-2.5"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
+/** @deprecated Use IconTrustedHome — kept for imports that expect IconVerified */
+export function IconVerified(props) {
+  return <IconTrustedHome {...props} />
 }
 
 export function IconLocation({ className = 'w-6 h-6', ...props }) {

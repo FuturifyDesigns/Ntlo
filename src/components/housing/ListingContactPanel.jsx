@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Calendar, FileText, MessageCircle, Send, Loader2 } from 'lucide-react'
 import { useTranslation } from '../../hooks/useTranslation'
 import { useAuth } from '../../hooks/useAuth'
@@ -8,7 +8,9 @@ import Button from '../ui/Button'
 import Modal from '../ui/Modal'
 import Input, { Textarea } from '../ui/Input'
 import { getWhatsAppLink } from '../../lib/utils'
-import { createViewingRequest, submitApplication, isLandlordVerified, mapHousingError } from '../../lib/housing'
+import { createViewingRequest, submitApplication, mapHousingError } from '../../lib/housing'
+import TrustedBadge from '../trust/TrustedBadge'
+import { resolveListingTrustBadge } from '../../lib/tierBenefits'
 import ApplicationDocFields from './ApplicationDocFields'
 import ApplicationRequirementsList from './ApplicationRequirementsList'
 import { APPLICATION_DOC_TYPES } from '../../lib/applicationDocs'
@@ -110,8 +112,9 @@ export default function ListingContactPanel({ listing }) {
   const [applyError, setApplyError] = useState('')
 
   const landlordName = listing.landlord_display_name || listing.landlord?.full_name || 'Landlord'
-  const landlordVerified = isLandlordVerified(listing)
+  const trustLevel = resolveListingTrustBadge(listing)
   const isStudent = profile?.role === 'student'
+  const isGuest = !user
   const canContact = listing.available && user && isStudent
   const applyCheck = isStudent ? canStudentApplyToListing(profile, listing) : { ok: false }
   const currentlyRented = myApplications?.some((a) => a.status === 'rented')
@@ -213,13 +216,25 @@ export default function ListingContactPanel({ listing }) {
         <div>
           <p className="text-sm text-muted">{t('listingDetail.listedBy')}</p>
           <p className="font-semibold">{landlordName}</p>
-          {landlordVerified && (
-            <p className="mt-1 text-xs font-semibold text-accent">{t('listings.verifiedLandlord')}</p>
+          {trustLevel && (
+            <div className="mt-2">
+              <TrustedBadge level={trustLevel} compact />
+            </div>
           )}
         </div>
 
-        {listing.is_verified && (
-          <p className="text-xs font-medium text-accent">{t('listings.verifiedListing')}</p>
+        {listing.available && isGuest && (
+          <div className="rounded-lg border border-border bg-background p-4 text-center">
+            <p className="text-sm text-muted">{t('listingDetail.signInPrompt')}</p>
+            <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:justify-center">
+              <Button as={Link} to="/register" variant="outline" size="sm" className="w-full sm:w-auto">
+                {t('auth.register')}
+              </Button>
+              <Button as={Link} to="/login" size="sm" className="w-full sm:w-auto">
+                {t('auth.signIn')}
+              </Button>
+            </div>
+          </div>
         )}
 
         {canContact && (
@@ -236,6 +251,18 @@ export default function ListingContactPanel({ listing }) {
               <FileText size={18} />
               {t('housing.applyNow')}
             </Button>
+            <Button
+              as="a"
+              href={getWhatsAppLink(listing.whatsapp_number, listing.title)}
+              target="_blank"
+              rel="noopener noreferrer"
+              variant="whatsapp"
+              size="lg"
+              className="w-full"
+            >
+              <WhatsAppIcon />
+              {t('listings.chatWhatsApp')}
+            </Button>
             {applyBlockedReason && applyBlockedReason !== 'genderRequired' && (
               <p className="text-xs text-error">{t(`housing.errors.${applyBlockedReason}`)}</p>
             )}
@@ -246,22 +273,9 @@ export default function ListingContactPanel({ listing }) {
           </>
         )}
 
-        {listing.available && (
-          <Button
-            as="a"
-            href={getWhatsAppLink(listing.whatsapp_number, listing.title)}
-            target="_blank"
-            rel="noopener noreferrer"
-            variant="whatsapp"
-            size="lg"
-            className="w-full"
-          >
-            <WhatsAppIcon />
-            {t('listings.chatWhatsApp')}
-          </Button>
+        {canContact && (
+          <p className="text-xs text-muted text-center">{t('listingDetail.paymentNote')}</p>
         )}
-
-        <p className="text-xs text-muted text-center">{t('listingDetail.paymentNote')}</p>
       </div>
 
       <Modal open={chatOpen} onClose={() => setChatOpen(false)} title={t('housing.chatInApp')}>
@@ -331,20 +345,16 @@ export default function ListingContactPanel({ listing }) {
         )}
       </Modal>
 
-      {listing.available && (
+      {canContact && (
         <div className="fixed bottom-16 left-0 right-0 z-40 border-t border-border bg-surface p-3 md:hidden">
           <div className="flex gap-2">
-            {canContact ? (
-              <>
-                <Button onClick={openChat} disabled={chatBusy} size="sm" className="flex-1">
-                  {chatBusy ? <Loader2 size={16} className="animate-spin" /> : <MessageCircle size={16} />}
-                  {t('housing.chatInApp')}
-                </Button>
-                <Button variant="outline" size="sm" className="flex-1" onClick={() => requireAuth(tryOpenApply)}>
-                  {t('housing.applyNow')}
-                </Button>
-              </>
-            ) : null}
+            <Button onClick={openChat} disabled={chatBusy} size="sm" className="flex-1">
+              {chatBusy ? <Loader2 size={16} className="animate-spin" /> : <MessageCircle size={16} />}
+              {t('housing.chatInApp')}
+            </Button>
+            <Button variant="outline" size="sm" className="flex-1" onClick={() => requireAuth(tryOpenApply)}>
+              {t('housing.applyNow')}
+            </Button>
             <Button
               as="a"
               href={getWhatsAppLink(listing.whatsapp_number, listing.title)}
@@ -352,10 +362,9 @@ export default function ListingContactPanel({ listing }) {
               rel="noopener noreferrer"
               variant="whatsapp"
               size="sm"
-              className={canContact ? 'shrink-0 px-3' : 'flex-1'}
+              className="shrink-0 px-3"
             >
               <WhatsAppIcon size={18} />
-              {!canContact && t('listings.chatWhatsApp')}
             </Button>
           </div>
         </div>

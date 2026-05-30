@@ -6,7 +6,7 @@ import {
   IconWhatsApp,
   IconUpload,
   IconShield,
-  IconVerified,
+  IconTrustedHome,
   IconHeart,
 } from '../ui/Icons'
 import { useStats } from '../../hooks/useStats'
@@ -27,7 +27,7 @@ export default function HowItWorks() {
   const landlordSteps = useMemo(() => [
     { icon: IconUpload, title: t('howItWorks.landlordStep1Title'), desc: t('howItWorks.landlordStep1Desc') },
     { icon: IconShield, title: t('howItWorks.landlordStep2Title'), desc: t('howItWorks.landlordStep2Desc') },
-    { icon: IconVerified, title: t('howItWorks.landlordStep3Title'), desc: t('howItWorks.landlordStep3Desc') },
+    { icon: IconTrustedHome, title: t('howItWorks.landlordStep3Title'), desc: t('howItWorks.landlordStep3Desc') },
   ], [t])
 
   const steps = tab === 'student' ? studentSteps : landlordSteps
@@ -112,7 +112,7 @@ export function TrustFeatures() {
   const { t } = useTranslation()
 
   const features = [
-    { icon: IconVerified, label: t('trust.verified') },
+    { icon: IconTrustedHome, label: t('trust.verified') },
     { icon: IconLocation, label: t('trust.distance') },
     { icon: IconShield, label: t('trust.trusted') },
     { icon: IconHeart, label: t('trust.save') },

@@ -8,7 +8,7 @@ export const LANDLORD_TIERS = [
     featured: false,
     maxListings: 2,
     maxPhotos: 3,
-    features: ['tierBasicListings', 'tierBasicPhotos', 'tierBasicExtras'],
+    features: ['tierBasicListings', 'tierBasicPhotos', 'tierBasicBadge', 'tierBasicExtras'],
     whyKey: 'whyBasic',
   },
   {
@@ -17,7 +17,7 @@ export const LANDLORD_TIERS = [
     featured: true,
     maxListings: 8,
     maxPhotos: 8,
-    features: ['tierStandardListings', 'tierStandardPhotos', 'tierStandardExtras'],
+    features: ['tierStandardListings', 'tierStandardPhotos', 'tierStandardBadge', 'tierStandardExtras'],
     whyKey: 'whyStandard',
   },
   {
@@ -26,7 +26,7 @@ export const LANDLORD_TIERS = [
     featured: false,
     maxListings: null,
     maxPhotos: 10,
-    features: ['tierPremiumListings', 'tierPremiumPhotos', 'tierPremiumExtras'],
+    features: ['tierPremiumListings', 'tierPremiumPhotos', 'tierPremiumBadge', 'tierPremiumExtras'],
     whyKey: 'whyPremium',
   },
 ]

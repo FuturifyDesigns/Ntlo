@@ -304,6 +304,12 @@ export default function Pricing() {
                   )}
                 </AnimatePresence>
               </div>
+
+              <Reveal className="mx-auto mt-8 max-w-2xl text-center">
+                <p className="rounded-xl border border-border bg-background px-4 py-3 text-sm text-muted">
+                  {t('pricing.tierIdentityNote')}
+                </p>
+              </Reveal>
             </section>
 
             {/* How billing works — FNB manual flow */}

@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { MapPin, CheckCircle2, ArrowLeft } from 'lucide-react'
+import { MapPin, ArrowLeft } from 'lucide-react'
 import { useParams } from 'react-router-dom'
 import { useListing, useListings } from '../hooks/useListings'
 import { useTranslation } from '../hooks/useTranslation'
@@ -14,6 +14,8 @@ import Button from '../components/ui/Button'
 import { ListingGridSkeleton, Skeleton } from '../components/ui/Skeleton'
 import ListingAdvisorPanel from '../components/advisor/ListingAdvisorPanel'
 import ListingContactPanel from '../components/housing/ListingContactPanel'
+import TrustedBadge from '../components/trust/TrustedBadge'
+import { resolveListingTrustBadge } from '../lib/tierBenefits'
 import { useAuth } from '../hooks/useAuth'
 import { getUniversityDisplayName } from '../lib/universityNames'
 import {
@@ -57,6 +59,7 @@ export default function ListingDetail() {
 
   const uni = getNearestUniversity(listing)
   const relatedListings = related.filter((l) => l.id !== listing.id).slice(0, 3)
+  const trustLevel = resolveListingTrustBadge(listing)
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
@@ -73,12 +76,7 @@ export default function ListingDetail() {
             <div>
               <div className="flex flex-wrap items-start gap-3">
                 <h1 className="font-display text-2xl font-bold text-primary sm:text-3xl">{listing.title}</h1>
-                {listing.is_verified && (
-                  <Badge variant="accent">
-                    <CheckCircle2 size={12} className="mr-1" />
-                    {t('listings.verifiedListing')}
-                  </Badge>
-                )}
+                {trustLevel && <TrustedBadge level={trustLevel} />}
               </div>
 
               <p className="mt-2 font-mono text-2xl font-bold text-primary">

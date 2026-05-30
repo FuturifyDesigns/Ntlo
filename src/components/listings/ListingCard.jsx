@@ -8,7 +8,8 @@ import { useAuth } from '../../hooks/useAuth'
 import { useTranslation } from '../../hooks/useTranslation'
 import { getUniversityDisplayName } from '../../lib/universityNames'
 import Badge from '../ui/Badge'
-import { IconLocation, IconVerified } from '../ui/Icons'
+import TrustedBadge from '../trust/TrustedBadge'
+import { resolveListingTrustBadge } from '../../lib/tierBenefits'
 
 const PLACEHOLDER = 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80'
 
@@ -22,6 +23,7 @@ export default function ListingCard({ listing, compact = false }) {
   const uni = getNearestUniversity(listing)
   const coverUrl = getCoverPhoto(listing) || PLACEHOLDER
   const saved = isSaved(listing.id)
+  const trustLevel = resolveListingTrustBadge(listing)
 
   async function handleSave(e) {
     e.preventDefault()
@@ -79,12 +81,9 @@ export default function ListingCard({ listing, compact = false }) {
             </div>
           )}
 
-          {(listing.is_verified || listing.landlord_verified) && (
+          {trustLevel && (
             <div className="absolute bottom-3 right-3">
-              <span className="inline-flex items-center gap-1 rounded-full bg-accent px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary">
-                <IconVerified className="h-3 w-3" />
-                {listing.is_verified ? t('listings.verifiedListing') : t('listings.verifiedLandlord')}
-              </span>
+              <TrustedBadge level={trustLevel} compact />
             </div>
           )}
         </div>

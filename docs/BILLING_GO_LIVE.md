@@ -1,6 +1,27 @@
 # Billing & subscriptions — go-live checklist
 
-This doc summarizes the subscription/billing work from the early-access chat. Use it when you’re ready to turn on paid landlord plans.
+This doc summarizes subscription/billing work and **future tier features**. Use it when you’re ready to turn on paid landlord plans.
+
+---
+
+## Two separate systems (important)
+
+| System | What it is | When | Where |
+|--------|------------|------|--------|
+| **Identity verification** | One-time ID document check (Omang, selfie, property proof) | Before / while listing seriously | `/#/landlord/verify` |
+| **Subscription tier** | Monthly plan: listing limits, photos, badges, search placement | When billing is enabled | `/#/pricing`, `/#/landlord/billing` |
+
+**Identity verification is NOT tied to Standard or Premium.** Landlords verify once; upgrading a plan does **not** require re-uploading documents.
+
+**Tier badges** are subscription perks (visual + reach), not a second verification step:
+
+| Tier | Badge on listings | Main perks |
+|------|-------------------|------------|
+| **Basic** (free) | Listed on Ntlo (plain home icon) | 2 listings, 3 photos, WhatsApp, all universities |
+| **Standard** (P79/mo) | Standard tier badge (trusted home icon) | 8 listings, 8 photos, priority search |
+| **Premium** (P149/mo) | Featured tier badge | Unlimited listings, 10 photos, featured boost, top browse placement |
+
+Badge logic lives in `src/lib/tierBenefits.js` (`resolveListingTrustBadge`, `LANDLORD_TIER_BENEFITS`).
 
 ---
 
@@ -18,7 +39,9 @@ This doc summarizes the subscription/billing work from the early-access chat. Us
 **Also run these if you haven’t already:**
 
 1. `009_doc_feedback.sql` — per-doc feedback / resubmission  
-2. `010_security_hardening.sql` — RLS/triggers (subscription fields are extended again in 011)
+2. `010_security_hardening.sql` — RLS/triggers (subscription fields extended again in 011)  
+3. `019_fix_profiles_rls_recursion.sql` — signup RLS fix  
+4. `020_abandon_incomplete_signup.sql` — rollback failed signups  
 
 Run each file in the **Supabase SQL Editor** in order.
 
@@ -28,8 +51,10 @@ Run each file in the **Supabase SQL Editor** in order.
 
 - **Students:** always free  
 - **Landlords:** free during early access; UI explains payment will be required later  
+- **Identity:** one-time verify flow at `/landlord/verify` (unchanged)  
 - **Payment model:** manual FNB bank transfer → landlord uploads receipt → admin verifies → tier activated (realtime)  
 - **No payment gateway** — zero gateway fees  
+- **Listing badges today:** admin-approved identity → Standard-style badge; otherwise “Listed on Ntlo” (until billing switches badge source to `subscription_tier`)
 
 **Feature flag (billing OFF by default):**
 
@@ -42,6 +67,7 @@ Until this is `true`:
 - Receipt upload is disabled (“Coming soon” overlay)
 - Landlords are **not** blocked from listing
 - Pricing & billing pages are visible as preview
+- Badges still follow **identity verification**, not subscription tier
 
 ---
 
@@ -49,76 +75,58 @@ Until this is `true`:
 
 ### 1. Database
 
-- [ ] Run `supabase/migrations/009_doc_feedback.sql` (if not done)
-- [ ] Run `supabase/migrations/010_security_hardening.sql` (if not done)
-- [ ] Run `supabase/migrations/011_subscriptions.sql`
-- [ ] Confirm in Supabase: `profiles` has `subscription_status`, `subscription_period_end`
+- [ ] Run migrations through `011_subscriptions.sql` (and 019/020 if not done)
+- [ ] Confirm `profiles` has `subscription_status`, `subscription_tier`, `subscription_period_end`
 - [ ] Confirm table `payment_receipts` exists
 - [ ] Confirm storage bucket `payment-receipts` exists (private)
-- [ ] Confirm realtime is enabled on `payment_receipts` (migration adds it to publication)
+- [ ] Confirm realtime on `payment_receipts`
 
 ### 2. FNB bank details
 
-Edit **`src/lib/subscriptions.js`** → `FNB_PAYMENT`:
-
-```js
-export const FNB_PAYMENT = {
-  bank: 'First National Bank (FNB)',
-  accountName: 'Your legal name / business name',  // ← update
-  accountNumber: 'XXXXXXXXXX',                     // ← update
-  branchCode: '280667',                            // ← update if different
-  accountType: 'Cheque',
-  referenceHint: 'Your full name + phone number',
-}
-```
-
-Redeploy after changing (values are baked into the build).
+Edit **`src/lib/subscriptions.js`** → `FNB_PAYMENT` (account name, number, branch). Redeploy after changing.
 
 ### 3. Enable billing in production
-
-Add to **GitHub Actions secrets** (deploy workflow) or your `.env`:
 
 ```env
 VITE_BILLING_ENABLED=true
 ```
 
-Push / redeploy so the live site picks it up.
+Push / redeploy.
 
-### 4. Smoke test
+### 4. Smoke test — payments
 
-**Landlord flow:**
+**Landlord:** Billing → choose Standard/Premium → pay FNB → upload receipt → `pending_payment`  
+**Admin:** Subscriptions tab → approve receipt → landlord tier + period end update (realtime)
 
-1. Log in as verified landlord → **Billing & plans** (`/#/landlord/billing`)
-2. Choose Standard or Premium (Basic is P0/free tier)
-3. Pay test amount to FNB account (or simulate in staging)
-4. Upload receipt (PDF/JPG/PNG)
-5. Profile should show `pending_payment`; receipt appears in history
+### 5. Future — enforce tier limits (not built yet)
 
-**Admin flow:**
+When ready, implement using `LANDLORD_TIER_BENEFITS` / `LANDLORD_TIERS` in `src/lib/subscriptions.js`:
 
-1. Admin panel → **Subscriptions** tab
-2. Pending receipt appears in queue (realtime)
-3. **View receipt** → **Approve** → landlord tier + `subscription_period_end` update (realtime on landlord side)
-4. Filter table: paid / early access / expiring within 7 days
+- [ ] **Listing count cap** — block create listing when at tier max (`maxListings`)
+- [ ] **Photo count cap** — block upload beyond `maxPhotos` per listing
+- [ ] **Badge from subscription** — `resolveListingTrustBadge()` already reads `subscription_tier` when `BILLING_LIVE`; ensure listings query includes landlord `subscription_tier` (or denormalize on listing)
+- [ ] **Priority search** — sort Standard/Premium higher in `useListings` browse query
+- [ ] **Featured boost (Premium)** — set `listings.featured = true` while subscription active, or sort premium first
+- [ ] **Top placement** — premium listings pinned above fold on browse / university pages
+- [ ] **Block listing if subscription expired** — `isSubscriptionActive()` in create/edit flows
+- [ ] **Grace period** for early-access landlords (e.g. 30 days notice)
 
-### 5. Optional — enforce payment for listings
+### 6. Future — do NOT implement
 
-Today, **`BILLING_LIVE` does not block** creating listings. When you want to enforce:
-
-- Add checks in `CreateListing` / `LandlordDashboard` using `isSubscriptionActive()` from `src/lib/subscriptions.js`
-- Decide grace period for existing early-access landlords (e.g. 30 days notice)
+- ~~Second “apply for verification” on Standard/Premium~~ — removed; identity is once only
+- ~~Tier-gated document upload~~ — all landlords use the same verify page
 
 ---
 
 ## Tier reference
 
-| Tier | Price | Listings | Photos |
-|------|-------|----------|--------|
-| Basic | Free (P0) | 2 | 3 |
-| Standard | P79/mo | 8 | 8 |
-| Premium | P149/mo | Unlimited | 10 |
+| Tier | Price | Listings | Photos | Badge | Extras |
+|------|-------|----------|--------|-------|--------|
+| Basic | Free | 2 | 3 | Listed on Ntlo | WhatsApp, all universities |
+| Standard | P79/mo | 8 | 8 | Standard tier | Priority search |
+| Premium | P149/mo | Unlimited | 10 | Featured tier | Featured boost, top placement, priority search |
 
-Tier limits are defined in `src/lib/subscriptions.js` (`LANDLORD_TIERS`). Enforcing limits on listing count/photos is a separate step when you go live.
+Source of truth: `src/lib/tierBenefits.js` + `src/lib/subscriptions.js`.
 
 ---
 
@@ -126,19 +134,20 @@ Tier limits are defined in `src/lib/subscriptions.js` (`LANDLORD_TIERS`). Enforc
 
 | Area | Path |
 |------|------|
-| Feature flag + tiers + FNB details | `src/lib/subscriptions.js` |
-| Receipt upload / admin RPC calls | `src/lib/paymentReceipts.js` |
-| Public pricing page | `src/pages/Pricing.jsx` |
-| Landlord billing dashboard | `src/pages/LandlordBilling.jsx` |
-| Admin subscriptions tab | `src/components/admin/AdminSubscriptionsPanel.jsx` |
+| Billing feature flag + tier prices | `src/lib/subscriptions.js` |
+| Tier badges + benefits + badge resolver | `src/lib/tierBenefits.js` |
+| Trusted home badge UI | `src/components/trust/TrustedBadge.jsx` |
+| Tier comparison (pricing preview) | `src/components/landlord/LandlordTierBenefits.jsx` |
+| Identity verification (one-time) | `src/pages/LandlordVerify.jsx` |
+| Receipt upload / admin RPC | `src/lib/paymentReceipts.js` |
+| Public pricing | `src/pages/Pricing.jsx` |
+| Landlord billing | `src/pages/LandlordBilling.jsx` |
+| Admin subscriptions | `src/components/admin/AdminSubscriptionsPanel.jsx` |
 | Migration | `supabase/migrations/011_subscriptions.sql` |
-| Profile realtime (subscription fields) | `src/context/AuthContext.jsx` |
 
 ---
 
 ## Admin RPC
-
-Approving a receipt calls:
 
 ```sql
 admin_review_payment_receipt(receipt_id, approved, note, months)
@@ -148,23 +157,15 @@ Default: **1 month** subscription from approval (or extends existing active peri
 
 ---
 
-## Messaging already in the app
-
-- **Pricing page** — early access callout + FNB 4-step flow (preview)
-- **Landlord welcome banner** — free now, payment required later
-- **Early access banner** on dashboard — links to billing
-- **Billing page** — renewal reminders when `subscription_period_end` is set
-
----
-
 ## Quick reference: turn billing ON
 
-1. Run migration `011` (if not already)
+1. Run migration `011` (+ 019/020 if needed)
 2. Update `FNB_PAYMENT` in `subscriptions.js`
 3. Set `VITE_BILLING_ENABLED=true` in deploy secrets
 4. Redeploy
 5. Test one receipt end-to-end in admin Subscriptions tab
+6. Implement tier enforcement items in section 5 when you want limits live
 
 ---
 
-*Last updated: May 2026 — early access / manual FNB billing scaffold.*
+*Last updated: May 2026 — identity verification separate from subscription tiers; tier badges are plan perks only.*
