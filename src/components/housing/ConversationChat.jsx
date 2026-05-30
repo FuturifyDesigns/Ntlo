@@ -42,7 +42,7 @@ export default function ConversationChat({
 
   return (
     <div className="flex flex-col">
-      {otherProfile && (
+      {otherProfile?.id && (
         <p className="mb-3 flex items-center gap-2 text-xs text-muted">
           <span className={`h-2 w-2 rounded-full ${online ? 'bg-success' : 'bg-border'}`} />
           {online ? t('presence.online') : formatLastSeen(lastSeenAt, t)}

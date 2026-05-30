@@ -5,6 +5,7 @@ import { useLandlordInquiries } from '../../hooks/useHousing'
 import { respondToApplication, markApplicationRented, relistListing, updateViewingRequest } from '../../lib/housing'
 import ApplicationDocumentsList from './ApplicationDocumentsList'
 import ConversationChat from './ConversationChat'
+import { chatOtherProfile } from '../../hooks/usePresence'
 import Button from '../ui/Button'
 import Card from '../ui/Card'
 import Badge from '../ui/Badge'
@@ -227,7 +228,7 @@ export default function LandlordInquiriesPanel() {
               className="flex cursor-pointer items-center justify-between p-4 transition hover:border-accent"
               onClick={() => {
                 setActiveChat(c.id)
-                setActiveChatStudent(c.student)
+                setActiveChatStudent(chatOtherProfile(c, 'student'))
               }}
             >
               <div>
@@ -244,7 +245,7 @@ export default function LandlordInquiriesPanel() {
         {activeChat && (
           <ConversationChat
             conversationId={activeChat}
-            otherProfile={activeChatStudent ? { ...activeChatStudent, last_seen_at: activeChatStudent.last_seen_at } : null}
+            otherProfile={activeChatStudent}
           />
         )}
       </Modal>

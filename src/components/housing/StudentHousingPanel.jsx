@@ -9,6 +9,7 @@ import Badge from '../ui/Badge'
 import Button from '../ui/Button'
 import Modal from '../ui/Modal'
 import ConversationChat from './ConversationChat'
+import { chatOtherProfile } from '../../hooks/usePresence'
 
 function statusVariant(status) {
   if (status === 'accepted' || status === 'rented' || status === 'confirmed') return 'success'
@@ -156,7 +157,7 @@ export default function StudentHousingPanel() {
               className="flex cursor-pointer items-center justify-between p-4"
               onClick={() => {
                 setActiveChat(c.id)
-                setActiveChatLandlord(c.landlord)
+                setActiveChatLandlord(chatOtherProfile(c, 'landlord'))
               }}
             >
               <div>
