@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { useAuth } from '../hooks/useAuth'
 import { useTranslation } from '../hooks/useTranslation'
 import { validatePhone, normalizeBotswanaPhone } from '../lib/authValidation'
+import { validateFullUniversityName } from '../lib/universityNames'
 import { supabase } from '../lib/supabase'
 import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
@@ -33,16 +34,24 @@ export default function CompleteProfile() {
     phoneInvalid: t('auth.validation.phoneInvalid'),
     universityRequired: t('auth.validation.universityRequired'),
     universityMin: t('auth.validation.universityMin'),
+    universityFullNameMin: t('auth.validation.universityFullNameMin'),
+    universityFullNameRequired: t('auth.validation.universityFullNameRequired'),
+    universityNoAbbrev: t('auth.validation.universityNoAbbrev'),
     authFailed: t('auth.validation.authFailed'),
+  }
+
+  function universityOtherError() {
+    if (role !== 'student' || universityId !== 'other') return ''
+    const key = validateFullUniversityName(customUniversity)
+    return key ? t(`auth.validation.${key}`) : ''
   }
 
   function validateField(field) {
     const errors = {}
     const phoneError = validatePhone(phone, validationMessages, { required: true })
     if (phoneError) errors.phone = phoneError
-    if (role === 'student' && universityId === 'other' && !customUniversity.trim()) {
-      errors.customUniversity = validationMessages.universityRequired
-    }
+    const uniError = universityOtherError()
+    if (uniError) errors.customUniversity = uniError
     setFieldErrors((prev) => ({ ...prev, [field]: errors[field] || '' }))
   }
 
@@ -53,9 +62,8 @@ export default function CompleteProfile() {
     const errors = {}
     const phoneError = validatePhone(phone, validationMessages, { required: true })
     if (phoneError) errors.phone = phoneError
-    if (role === 'student' && universityId === 'other' && !customUniversity.trim()) {
-      errors.customUniversity = validationMessages.universityRequired
-    }
+    const uniError = universityOtherError()
+    if (uniError) errors.customUniversity = uniError
     setFieldErrors(errors)
     if (Object.keys(errors).length > 0) return
 

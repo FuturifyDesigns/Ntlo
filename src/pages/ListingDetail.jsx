@@ -14,6 +14,7 @@ import Button from '../components/ui/Button'
 import { ListingGridSkeleton, Skeleton } from '../components/ui/Skeleton'
 import ListingAdvisorPanel from '../components/advisor/ListingAdvisorPanel'
 import { useAuth } from '../hooks/useAuth'
+import { getUniversityDisplayName } from '../lib/universityNames'
 import {
   formatPrice,
   formatDistance,
@@ -97,7 +98,7 @@ export default function ListingDetail() {
                 {uni && (
                   <Badge variant="default">
                     <MapPin size={12} className="mr-1" />
-                    {formatDistance(listing.distance_to_campus, uni.short_name)}
+                    {formatDistance(listing.distance_to_campus, getUniversityDisplayName(uni))}
                   </Badge>
                 )}
                 <Badge variant="default">{ROOM_TYPES[listing.room_type]}</Badge>

@@ -3,12 +3,15 @@ import { motion } from 'framer-motion'
 import { useAuth } from '../../hooks/useAuth'
 import { submitUniversityRequest } from '../../hooks/useStats'
 import { useUniversities } from '../../hooks/useUniversities'
+import { useTranslation } from '../../hooks/useTranslation'
+import { getUniversityDisplayName, validateFullUniversityName } from '../../lib/universityNames'
 import Button from '../ui/Button'
 import Input from '../ui/Input'
 import Modal from '../ui/Modal'
 
 export default function OtherUniversityModal({ open, onClose }) {
   const { user } = useAuth()
+  const { t } = useTranslation()
   const [name, setName] = useState('')
   const [city, setCity] = useState('')
   const [email, setEmail] = useState('')
@@ -18,12 +21,17 @@ export default function OtherUniversityModal({ open, onClose }) {
 
   async function handleSubmit(e) {
     e.preventDefault()
-    setLoading(true)
     setError('')
+    const nameErrorKey = validateFullUniversityName(name)
+    if (nameErrorKey) {
+      setError(t(`auth.validation.${nameErrorKey}`))
+      return
+    }
+    setLoading(true)
     try {
       await submitUniversityRequest({
-        name,
-        city,
+        name: name.trim(),
+        city: city.trim(),
         userId: user?.id,
         email: email || user?.email,
       })
@@ -45,7 +53,7 @@ export default function OtherUniversityModal({ open, onClose }) {
   }
 
   return (
-    <Modal open={open} onClose={handleClose} title="Add your university" size="md">
+    <Modal open={open} onClose={handleClose} title={t('universities.otherUniversity')} size="md">
       {done ? (
         <div className="py-4 text-center">
           <motion.div
@@ -55,28 +63,40 @@ export default function OtherUniversityModal({ open, onClose }) {
           >
             <span className="text-2xl">✓</span>
           </motion.div>
-          <p className="font-semibold text-primary">Request received</p>
+          <p className="font-semibold text-primary">{t('universities.requestReceived')}</p>
           <p className="mt-2 text-sm text-muted">
-            We&apos;ll review <strong>{name}</strong> in {city} and add it soon.
+            {t('universities.requestReview', { name, city })}
           </p>
-          <Button className="mt-6 w-full" onClick={handleClose}>Done</Button>
+          <Button className="mt-6 w-full" onClick={handleClose}>{t('common.done')}</Button>
         </div>
       ) : (
         <>
           <p className="mb-5 text-sm leading-relaxed text-muted">
-            Don&apos;t see your university? Tell us the name and city and we&apos;ll add it to Ntlo.
+            {t('universities.otherFullNameHint')}
           </p>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <Input label="University name" value={name} onChange={(e) => setName(e.target.value)} required />
-            <Input label="City / town" value={city} onChange={(e) => setCity(e.target.value)} required />
+            <Input
+              label={t('universities.fullUniversityName')}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder={t('universities.fullUniversityNamePlaceholder')}
+              required
+            />
+            <Input
+              label={t('universities.cityTown')}
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              placeholder={t('universities.cityTownPlaceholder')}
+              required
+            />
             {!user && (
-              <Input label="Your email (optional)" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+              <Input label={t('universities.yourEmailOptional')} type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
             )}
             {error && <p className="text-sm text-error">{error}</p>}
             <div className="flex gap-3 pt-2">
-              <Button type="button" variant="outline" className="flex-1" onClick={handleClose}>Cancel</Button>
+              <Button type="button" variant="outline" className="flex-1" onClick={handleClose}>{t('common.cancel')}</Button>
               <Button type="submit" className="flex-1" disabled={loading}>
-                {loading ? 'Submitting...' : 'Submit request'}
+                {loading ? t('universities.submitting') : t('universities.submitRequest')}
               </Button>
             </div>
           </form>
@@ -96,6 +116,7 @@ export function UniversitySelect({
   onOtherChange,
 }) {
   const { universities } = useUniversities()
+  const { t } = useTranslation()
   const isOther = value === 'other'
 
   return (
@@ -107,20 +128,23 @@ export function UniversitySelect({
         required={required && !isOther}
         className="w-full rounded-lg border border-border bg-surface px-4 py-2.5 text-sm text-primary outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
       >
-        <option value="">Select university</option>
+        <option value="">{t('universities.selectUniversity')}</option>
         {universities.map((u) => (
-          <option key={u.id} value={u.id}>{u.short_name} — {u.name}</option>
+          <option key={u.id} value={u.id}>{getUniversityDisplayName(u)} — {u.city}</option>
         ))}
-        {allowOther && <option value="other">Other — not listed</option>}
+        {allowOther && <option value="other">{t('filter.otherUniversity')}</option>}
       </select>
       {isOther && (
-        <Input
-          label="University name"
-          value={otherValue}
-          onChange={(e) => onOtherChange?.(e.target.value)}
-          placeholder="Enter your university name"
-          required
-        />
+        <>
+          <Input
+            label={t('universities.fullUniversityName')}
+            value={otherValue}
+            onChange={(e) => onOtherChange?.(e.target.value)}
+            placeholder={t('universities.fullUniversityNamePlaceholder')}
+            required
+          />
+          <p className="text-xs text-muted">{t('universities.otherFullNameHint')}</p>
+        </>
       )}
     </div>
   )

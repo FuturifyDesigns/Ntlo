@@ -8,6 +8,7 @@ import Button from '../components/ui/Button'
 import { ListingGridSkeleton } from '../components/ui/Skeleton'
 import CompareAdvisor from '../components/advisor/CompareAdvisor'
 import { getUniversityById } from '../lib/universities'
+import { getUniversityDisplayName } from '../lib/universityNames'
 
 export default function StudentDashboard() {
   const { profile, profileLoading } = useAuth()
@@ -49,7 +50,7 @@ export default function StudentDashboard() {
               </Button>
               {myUni && (
                 <Button as={Link} to={`/universities/${myUni.slug}`} variant="outline">
-                  {t('dashboard.findNear')} {myUni.short_name}
+                  {t('dashboard.findNear')} {getUniversityDisplayName(myUni)}
                 </Button>
               )}
             </div>

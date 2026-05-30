@@ -1,7 +1,7 @@
 import { useParams, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { MapPin, ArrowLeft, Home } from 'lucide-react'
-import { getUniversityImage } from '../lib/universities'
+import { getUniversityImage, getUniversityDisplayName } from '../lib/universities'
 import { useUniversities } from '../hooks/useUniversities'
 import FilterBar from '../components/listings/FilterBar'
 import ListingGrid from '../components/listings/ListingGrid'
@@ -78,10 +78,10 @@ export default function UniversityPage() {
 
             <div className="flex flex-wrap items-end justify-between gap-4">
               <div>
-                <span className="mb-2 inline-block rounded-full bg-accent px-3 py-0.5 text-xs font-bold uppercase tracking-wide text-primary">
-                  {university.short_name}
+                <span className="mb-2 inline-block rounded-full bg-accent px-3 py-0.5 text-xs font-semibold tracking-wide text-primary">
+                  {university.city}
                 </span>
-                <h1 className="font-display text-3xl font-semibold text-white sm:text-4xl">{university.name}</h1>
+                <h1 className="font-display text-3xl font-semibold text-white sm:text-4xl">{getUniversityDisplayName(university)}</h1>
                 <p className="mt-2 flex items-center gap-1.5 text-white/75">
                   <MapPin size={15} />
                   {university.city}
@@ -126,7 +126,7 @@ export default function UniversityPage() {
             filters={filters}
             onChange={setFilters}
             resultCount={count}
-            universityName={university.short_name}
+            universityName={getUniversityDisplayName(university)}
           />
         </div>
 

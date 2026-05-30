@@ -6,7 +6,7 @@ import FilterBar from '../components/listings/FilterBar'
 import ListingGrid from '../components/listings/ListingGrid'
 import ListingMap from '../components/listings/ListingMap'
 import { useListings } from '../hooks/useListings'
-import { getUniversityById, getUniversityMapViewport } from '../lib/universities'
+import { getUniversityById, getUniversityMapViewport, getUniversityDisplayName } from '../lib/universities'
 import { useTranslation } from '../hooks/useTranslation'
 
 export default function Browse() {
@@ -64,7 +64,7 @@ export default function Browse() {
           universityName={
             filters.universityId === 'other'
               ? t('filter.otherUniversity')
-              : uni?.short_name
+              : getUniversityDisplayName(uni)
           }
         />
       </div>

@@ -1,5 +1,6 @@
 import { Search, SlidersHorizontal, X } from 'lucide-react'
 import { useUniversities } from '../../hooks/useUniversities'
+import { getUniversityDisplayName } from '../../lib/universityNames'
 import { AMENITIES, ROOM_TYPES } from '../../lib/utils'
 import Button from '../ui/Button'
 import { Select } from '../ui/Input'
@@ -66,7 +67,7 @@ export default function FilterBar({ filters, onChange, onSearch, resultCount, un
         >
           <option value="">{t('filter.allUniversities')}</option>
           {universities.map((u) => (
-            <option key={u.id} value={u.id}>{u.short_name} — {u.city}</option>
+            <option key={u.id} value={u.id}>{getUniversityDisplayName(u)} — {u.city}</option>
           ))}
           <option value="other">{t('filter.otherUniversity')}</option>
         </Select>

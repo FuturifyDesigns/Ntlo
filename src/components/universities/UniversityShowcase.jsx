@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Search, Plus, ArrowRight, MapPin } from 'lucide-react'
 import { useUniversities } from '../../hooks/useUniversities'
+import { getUniversityDisplayName } from '../../lib/universityNames'
 import OtherUniversityModal from './OtherUniversityModal'
 import { Reveal, AnimatedCounter } from '../ui/Motion'
 import { useTranslation } from '../../hooks/useTranslation'
@@ -23,7 +24,7 @@ export default function UniversityShowcase({ counts = {} }) {
       const matchSearch =
         !q ||
         uni.name.toLowerCase().includes(q) ||
-        uni.short_name.toLowerCase().includes(q) ||
+        getUniversityDisplayName(uni).toLowerCase().includes(q) ||
         uni.city.toLowerCase().includes(q) ||
         (uni.nearby_areas || []).some((a) => a.toLowerCase().includes(q))
       return matchCity && matchSearch
@@ -118,8 +119,8 @@ export default function UniversityShowcase({ counts = {} }) {
                           <div className="absolute inset-0 bg-primary/20 opacity-0 transition-opacity group-hover:opacity-100" />
 
                           <div className="absolute left-3 top-3">
-                            <span className="rounded-full bg-accent px-2.5 py-1 text-xs font-bold uppercase tracking-wide text-primary">
-                              {uni.short_name}
+                            <span className="rounded-full bg-accent px-2.5 py-1 text-xs font-bold uppercase tracking-wide text-primary line-clamp-1 max-w-[90%]">
+                              {getUniversityDisplayName(uni)}
                             </span>
                           </div>
 
@@ -132,8 +133,8 @@ export default function UniversityShowcase({ counts = {} }) {
                           )}
 
                           <div className="absolute bottom-0 left-0 right-0 p-4">
-                            <h3 className="font-display text-lg font-semibold leading-tight text-white sm:text-xl">
-                              {uni.name}
+                            <h3 className="font-display text-lg font-semibold leading-tight text-white sm:text-xl line-clamp-2">
+                              {getUniversityDisplayName(uni)}
                             </h3>
                             <p className="mt-1 flex items-center gap-1 text-sm text-white/75">
                               <MapPin size={13} />

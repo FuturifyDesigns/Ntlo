@@ -1,5 +1,6 @@
 import { calculateDistance, formatPrice } from './utils'
 import { getUniversityById } from './universities'
+import { getUniversityDisplayName } from './universityNames'
 import { getListingPosition } from './googleMaps'
 
 /** Typical monthly student rent in Pula (Botswana market rough guide) */
@@ -112,7 +113,7 @@ export function analyzeListing(listing, context = {}) {
   }
 
   if (studentUniversityId && listing.nearest_university_id && studentUniversityId !== listing.nearest_university_id) {
-    cons.push({ key: 'differentCampus', priority: 2, meta: { campus: uni?.short_name || 'another campus' } })
+    cons.push({ key: 'differentCampus', priority: 2, meta: { campus: getUniversityDisplayName(uni) || 'another campus' } })
   }
 
   const label =
@@ -126,7 +127,7 @@ export function analyzeListing(listing, context = {}) {
     label,
     scores: { distance: distanceScore, price: priceScore, trust: trustScore, amenities: amenityScore, location: locationScore },
     distanceKm,
-    campusName: uni?.short_name,
+    campusName: getUniversityDisplayName(uni),
     pros: pros.sort((a, b) => a.priority - b.priority).slice(0, 4),
     cons: cons.sort((a, b) => a.priority - b.priority).slice(0, 3),
     tips: tips.slice(0, 3),

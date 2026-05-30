@@ -6,6 +6,7 @@ import { ChevronLeft, ChevronRight, Upload, X, Star } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { getUniversityById } from '../lib/universities'
+import { getUniversityDisplayName } from '../lib/universityNames'
 import { useUniversities } from '../hooks/useUniversities'
 import { AMENITIES, ROOM_TYPES, calculateDistance, formatPrice } from '../lib/utils'
 import Button from '../components/ui/Button'
@@ -312,7 +313,7 @@ export default function CreateListing() {
                   <p><strong>Price:</strong> {formatPrice(form.price)}/month</p>
                   <p><strong>Type:</strong> {ROOM_TYPES[form.room_type]}</p>
                   <p><strong>Location:</strong> {form.address}, {form.area}, {form.city}</p>
-                  {uni && <p><strong>University:</strong> {uni.short_name}</p>}
+                  {uni && <p><strong>University:</strong> {getUniversityDisplayName(uni)}</p>}
                   {form.nearest_university_id === 'other' && (
                     <p><strong>University:</strong> {form.custom_university_name} (other)</p>
                   )}

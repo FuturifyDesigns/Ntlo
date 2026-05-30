@@ -1,3 +1,5 @@
+import { validateFullUniversityName } from './universityNames'
+
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i
 const NAME_RE = /^[\p{L}\s'.-]{2,}$/u
 const BW_MOBILE_RE = /^7[1-9]\d{6}$/
@@ -71,8 +73,8 @@ export function validateUniversity(form, messages = {}) {
   if (form.role !== 'student') return ''
   if (form.universityId === 'other') {
     const name = form.customUniversity?.trim() || ''
-    if (!name) return t(messages, 'universityRequired')
-    if (name.length < 2) return t(messages, 'universityMin')
+    const errorKey = validateFullUniversityName(name)
+    if (errorKey) return t(messages, errorKey)
   }
   return ''
 }

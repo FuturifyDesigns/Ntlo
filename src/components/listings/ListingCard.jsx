@@ -5,7 +5,7 @@ import { formatPrice, formatDistance, getCoverPhoto, getNearestUniversity, ROOM_
 import * as LucideIcons from 'lucide-react'
 import { useSavedListings } from '../../hooks/useSavedListings'
 import { useAuth } from '../../hooks/useAuth'
-import { useTranslation } from '../../hooks/useTranslation'
+import { getUniversityDisplayName } from '../../lib/universityNames'
 import Badge from '../ui/Badge'
 import { IconLocation, IconVerified } from '../ui/Icons'
 
@@ -53,7 +53,7 @@ export default function ListingCard({ listing, compact = false }) {
             <div className="absolute left-3 top-3">
               <span className="inline-flex items-center gap-1 rounded-full bg-primary/85 px-2.5 py-1 text-xs font-semibold text-white backdrop-blur-sm">
                 <IconLocation className="h-3 w-3" />
-                {formatDistance(listing.distance_to_campus, uni.short_name)}
+                {formatDistance(listing.distance_to_campus, getUniversityDisplayName(uni))}
               </span>
             </div>
           )}

@@ -64,6 +64,9 @@ export default function Register() {
     phoneInvalid: t('auth.validation.phoneInvalid'),
     universityRequired: t('auth.validation.universityRequired'),
     universityMin: t('auth.validation.universityMin'),
+    universityFullNameMin: t('auth.validation.universityFullNameMin'),
+    universityFullNameRequired: t('auth.validation.universityFullNameRequired'),
+    universityNoAbbrev: t('auth.validation.universityNoAbbrev'),
     emailTaken: t('auth.validation.emailTaken'),
     authFailed: t('auth.validation.authFailed'),
   }

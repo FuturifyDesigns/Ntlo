@@ -1,4 +1,9 @@
 import { GOOGLE_MAPS_API_KEY } from './googleMaps'
+import {
+  GOOGLE_MAPS_CAMPUS_NAMES,
+  getGeocodeCampusName,
+  normalizeUniversityName,
+} from './universityNames'
 
 const CAMPUS_TYPES = new Set([
   'university',
@@ -38,20 +43,28 @@ async function geocodeQuery(query) {
   }
 }
 
-/** Resolve campus coordinates from name + city (Google Geocoding API). */
-export async function geocodeCampus({ name, city, country = 'Botswana' }) {
+/** Resolve campus coordinates using Google Maps–style full names. */
+export async function geocodeCampus({ name, city, slug, country = 'Botswana' }) {
+  const campusName = slug && GOOGLE_MAPS_CAMPUS_NAMES[slug]
+    ? GOOGLE_MAPS_CAMPUS_NAMES[slug]
+    : normalizeUniversityName(name)
+
+  const cityPart = normalizeUniversityName(city)
   const queries = [
-    `${name}, ${city}, ${country}`,
-    `${name} university, ${city}, ${country}`,
-    `${name} campus, ${city}, ${country}`,
+    `${campusName}, ${cityPart}, ${country}`,
+    `${campusName}, ${country}`,
   ]
+
+  if (!/\b(university|college|institute)\b/i.test(campusName)) {
+    queries.push(`${campusName} university, ${cityPart}, ${country}`)
+  }
 
   for (const query of queries) {
     const coords = await geocodeQuery(query)
     if (coords) return coords
   }
 
-  return geocodeQuery(`${city}, ${country}`)
+  return geocodeQuery(`${cityPart}, ${country}`)
 }
 
 export function hasValidCampusCoords(lat, lng) {
@@ -70,16 +83,9 @@ export function slugifyUniversity(name) {
     .slice(0, 80)
 }
 
+/** Store the full official name (same as Google Maps listing). */
 export function makeUniversityShortName(name) {
-  const words = name.trim().split(/\s+/).filter(Boolean)
-  if (!words.length) return 'Uni'
-
-  const acronym = words
-    .filter((w) => /^[A-Z]/.test(w) || w.length <= 3)
-    .map((w) => w[0])
-    .join('')
-    .toUpperCase()
-
-  if (acronym.length >= 2 && acronym.length <= 8) return acronym
-  return words[0].slice(0, 12)
+  return normalizeUniversityName(name)
 }
+
+export { getGeocodeCampusName, normalizeUniversityName }

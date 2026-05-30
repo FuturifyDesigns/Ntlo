@@ -2,23 +2,30 @@ import { supabase } from './supabase'
 import {
   geocodeCampus,
   slugifyUniversity,
-  makeUniversityShortName,
+  normalizeUniversityName,
 } from './geocodeUniversity'
+import { validateFullUniversityName } from './universityNames'
 
 export async function createUniversityFromRequest(request) {
-  const coords = await geocodeCampus({ name: request.name, city: request.city })
-  if (!coords) {
-    throw new Error('Could not find this campus on the map. Check the name and city, then try again.')
+  const fullName = normalizeUniversityName(request.name)
+  const city = normalizeUniversityName(request.city)
+  const validationError = validateFullUniversityName(fullName)
+  if (validationError) {
+    throw new Error('University name must be the full official name as shown on Google Maps (include University or College).')
   }
 
-  const slug = slugifyUniversity(request.name)
-  const shortName = makeUniversityShortName(request.name)
+  const coords = await geocodeCampus({ name: fullName, city })
+  if (!coords) {
+    throw new Error('Could not find this campus on the map. Check the full name and city match Google Maps, then try again.')
+  }
+
+  const slug = slugifyUniversity(fullName)
 
   const { data, error } = await supabase.rpc('admin_create_university', {
-    p_name: request.name.trim(),
-    p_city: request.city.trim(),
+    p_name: fullName,
+    p_city: city,
     p_slug: slug,
-    p_short_name: shortName,
+    p_short_name: fullName,
     p_lat: coords.lat,
     p_lng: coords.lng,
     p_map_zoom: 15,

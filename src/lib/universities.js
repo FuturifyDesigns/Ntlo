@@ -1,3 +1,4 @@
+import { getUniversityDisplayName } from './universityNames'
 import { enrichUniversity, getUniversityImage } from './universityMeta'
 
 /** In-memory cache populated by UniversitiesProvider from Supabase. */
@@ -32,8 +33,8 @@ export function getUniversityMapViewport(university) {
     id: university.id,
     center: { lat: Number(university.lat), lng: Number(university.lng) },
     zoom: university.map_zoom ?? 15,
-    label: university.short_name,
+    label: getUniversityDisplayName(university),
   }
 }
 
-export { getUniversityImage, enrichUniversity }
+export { getUniversityDisplayName, getUniversityImage, enrichUniversity }

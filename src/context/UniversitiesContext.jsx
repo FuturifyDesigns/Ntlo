@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { supabase } from '../lib/supabase'
-import { geocodeCampus, hasValidCampusCoords } from '../lib/geocodeUniversity'
+import { geocodeCampus, getGeocodeCampusName, hasValidCampusCoords } from '../lib/geocodeUniversity'
 import { enrichUniversity } from '../lib/universityMeta'
 import { setUniversitiesCache } from '../lib/universities'
 import { useAuth } from '../hooks/useAuth'
@@ -35,7 +35,11 @@ async function fillMissingCoordinates(list, isAdmin) {
     const uni = next[i]
     if (hasValidCampusCoords(uni.lat, uni.lng)) continue
 
-    const coords = await geocodeCampus({ name: uni.name, city: uni.city })
+    const coords = await geocodeCampus({
+      name: getGeocodeCampusName(uni),
+      city: uni.city,
+      slug: uni.slug,
+    })
     if (!coords) continue
 
     const updated = {

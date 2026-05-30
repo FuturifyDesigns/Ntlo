@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { useUniversities } from '../hooks/useUniversities'
 import { getUniversityById } from '../lib/universities'
+import { getUniversityDisplayName } from '../lib/universityNames'
 import { AMENITIES, ROOM_TYPES, calculateDistance } from '../lib/utils'
 import Button from '../components/ui/Button'
 import Input, { Select, Textarea } from '../components/ui/Input'
@@ -128,7 +129,7 @@ export default function EditListing() {
         </div>
         <Select label="Nearest university" value={form.nearest_university_id || ''} onChange={(e) => update('nearest_university_id', e.target.value)}>
           <option value="">Select</option>
-          {universities.map((u) => <option key={u.id} value={u.id}>{u.short_name}</option>)}
+          {universities.map((u) => <option key={u.id} value={u.id}>{getUniversityDisplayName(u)}</option>)}
         </Select>
         <Input label="WhatsApp" value={form.whatsapp_number} onChange={(e) => update('whatsapp_number', e.target.value)} required />
         <Textarea label="Description" value={form.description || ''} onChange={(e) => update('description', e.target.value)} />

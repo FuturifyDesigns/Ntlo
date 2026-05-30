@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Plus } from 'lucide-react'
 import { useUniversities } from '../../hooks/useUniversities'
+import { getUniversityDisplayName } from '../../lib/universityNames'
 import { IconUniversity, IconLocation } from '../ui/Icons'
 import OtherUniversityModal from '../universities/OtherUniversityModal'
 import { Reveal } from '../ui/Motion'
@@ -52,9 +53,8 @@ export default function UniversityGrid({ counts = {}, showHeader = true }) {
                     <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-primary/5 ring-1 ring-primary/10 transition-colors group-hover:bg-accent/15 group-hover:ring-accent/30">
                       <IconUniversity className="h-5 w-5 text-accent" />
                     </div>
-                    <h3 className="font-display text-lg font-semibold text-primary">{uni.short_name}</h3>
-                    <p className="mt-1 line-clamp-2 text-sm text-muted">{uni.name}</p>
-                    <p className="mt-3 flex items-center gap-1.5 text-xs text-muted">
+                    <h3 className="font-display text-lg font-semibold text-primary line-clamp-2">{getUniversityDisplayName(uni)}</h3>
+                    <p className="mt-1 flex items-center gap-1.5 text-xs text-muted">
                       <IconLocation className="h-3.5 w-3.5 shrink-0" />
                       {uni.city}
                     </p>

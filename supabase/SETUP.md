@@ -85,7 +85,7 @@ Run `supabase/migrations/002_admin_verification.sql` in the **SQL Editor** after
 
 Also run `supabase/migrations/004_university_coordinates.sql` and `supabase/migrations/005_universities_geocoding.sql` so campus pins and distance data stay accurate.
 
-`005` enables automatic geocoding when admins approve new university requests (uses your Google Maps API key).
+Also run `supabase/migrations/006_university_full_names.sql` so campus names match Google Maps (full names, no abbreviations).
 
 This adds:
 
