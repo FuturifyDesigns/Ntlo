@@ -195,16 +195,17 @@ export default function AdminDashboard() {
   }
 
   async function requestDocChanges(docId, note) {
-    await runAction(async () => {
-      const { error } = await supabase.rpc('admin_review_document', {
-        target_doc_id: docId,
-        new_status: 'changes_requested',
-        note,
-      })
-      if (error) throw error
-      await fetchLandlords()
-      await fetchListings()
+    const { error } = await supabase.rpc('admin_review_document', {
+      target_doc_id: docId,
+      new_status: 'changes_requested',
+      note,
     })
+    if (error) {
+      setActionError(error.message)
+      throw error
+    }
+    await fetchLandlords()
+    await fetchListings()
   }
 
   async function reviewListing(listingId, approved) {

@@ -4,7 +4,7 @@ import {
   Check, X, Sparkles, ThumbsUp, AlertTriangle, Lightbulb, Clock,
   CreditCard, Camera, Home, FileSignature, MapPin, Building2,
   Receipt, Zap, ScrollText, FileText, ScanSearch, Loader2,
-  CheckCircle2, XCircle, Info, ChevronDown, MessageSquare, RotateCcw,
+  CheckCircle2, XCircle, Info, ChevronDown, MessageSquare, RotateCcw, Clock3, Eye,
 } from 'lucide-react'
 import { useTranslation } from '../../hooks/useTranslation'
 import { useNow } from '../../hooks/useNow'
@@ -14,6 +14,7 @@ import { relativeTimeParts } from '../../lib/utils'
 import { getSignedDocUrl } from '../../lib/verificationStorage'
 import { recognizeImage } from '../../lib/ocr'
 import { analyzeDocCompliance, compareOcr, VERDICT_STYLE } from '../../lib/docCompliance'
+import RequestChangeModal from './RequestChangeModal'
 import Button from '../ui/Button'
 
 const DOC_ICONS = {
@@ -72,6 +73,7 @@ export default function VerificationCard({ subject, analysis, kind, onOpenDocs, 
   const [progress, setProgress] = useState(0)
   const [scanError, setScanError] = useState('')
   const [showReport, setShowReport] = useState(true)
+  const [changeDoc, setChangeDoc] = useState(null)
 
   const scanned = Object.keys(results).length > 0
   const readiness = combineReadiness(analysis, currentDocs, results)
@@ -108,10 +110,93 @@ export default function VerificationCard({ subject, analysis, kind, onOpenDocs, 
     }
   }
 
-  function handleRequestChanges(doc) {
-    if (!onRequestChanges) return
-    const note = window.prompt(t('admin.compliance.requestPrompt', { doc: t(`admin.docType.${doc.doc_type}`) }))
-    if (note && note.trim()) onRequestChanges(doc.id, note.trim())
+  function buildSuggestion(doc) {
+    const lines = [t('admin.compliance.suggestIntro', { doc: t(`admin.docType.${doc.doc_type}`) })]
+    const r = results[doc.id]
+    const issues = (r?.checks || []).filter((c) => c.status === 'warn' || c.status === 'fail')
+    if (issues.length) {
+      lines.push('')
+      issues.forEach((c) => lines.push(`• ${t(`admin.compliance.check.${c.key}`, c.meta || {})}`))
+    }
+    const tip = t(`admin.compliance.suggest.${doc.doc_type}`)
+    if (tip && !tip.includes('admin.compliance.suggest.')) {
+      lines.push('')
+      lines.push(tip)
+    }
+    return lines.join('\n')
+  }
+
+  /** request | waiting | resubmitted */
+  function changeState(doc) {
+    if (grouped.resubmittedTypes.has(doc.doc_type)) return 'resubmitted'
+    if (doc.status === 'changes_requested') return 'waiting'
+    return 'request'
+  }
+
+  function ChangeAction({ doc, index, compact }) {
+    if (!onRequestChanges) return null
+    const state = changeState(doc)
+    if (state === 'waiting') {
+      return compact ? (
+        <span
+          title={t('admin.compliance.waitingResubmission')}
+          className="flex h-7 items-center gap-1 rounded-lg border border-amber-500/40 bg-amber-500/5 px-2 text-[10px] font-semibold text-amber-600"
+        >
+          <Clock3 size={12} />
+        </span>
+      ) : (
+        <span className="inline-flex shrink-0 items-center gap-1 rounded-md border border-amber-500/40 bg-amber-500/5 px-2 py-1 text-[11px] font-semibold text-amber-600">
+          <Clock3 size={11} />
+          {t('admin.compliance.waitingResubmission')}
+        </span>
+      )
+    }
+    if (state === 'resubmitted') {
+      const viewBtn = (
+        <button
+          type="button"
+          onClick={() => onOpenDocs(currentDocs, index, name)}
+          title={t('admin.compliance.viewResubmission')}
+          className={
+            compact
+              ? 'flex h-7 items-center gap-1 rounded-lg border border-primary/30 bg-primary/5 px-2 text-[10px] font-semibold text-primary'
+              : 'inline-flex shrink-0 items-center gap-1 rounded-md border border-primary/30 bg-primary/5 px-2 py-1 text-[11px] font-semibold text-primary'
+          }
+        >
+          <Eye size={compact ? 12 : 11} />
+          {!compact && t('admin.compliance.viewResubmission')}
+        </button>
+      )
+      if (compact) return viewBtn
+      return (
+        <div className="flex shrink-0 items-center gap-1.5">
+          {viewBtn}
+          <button
+            type="button"
+            onClick={() => setChangeDoc(doc)}
+            className="inline-flex items-center gap-1 rounded-md border border-border px-2 py-1 text-[11px] font-semibold text-muted hover:border-amber-500/40 hover:text-amber-600"
+          >
+            <MessageSquare size={11} />
+            {t('admin.compliance.requestChanges')}
+          </button>
+        </div>
+      )
+    }
+    return (
+      <button
+        type="button"
+        onClick={() => setChangeDoc(doc)}
+        title={t('admin.compliance.requestChanges')}
+        className={
+          compact
+            ? 'flex h-7 w-7 items-center justify-center rounded-lg border border-border text-muted hover:border-amber-500/40 hover:text-amber-600'
+            : 'inline-flex shrink-0 items-center gap-1 rounded-md border border-border px-2 py-1 text-[11px] font-semibold text-muted hover:border-amber-500/40 hover:text-amber-600'
+        }
+      >
+        <MessageSquare size={compact ? 13 : 11} />
+        {!compact && t('admin.compliance.requestChanges')}
+      </button>
+    )
   }
 
   return (
@@ -247,16 +332,7 @@ export default function VerificationCard({ subject, analysis, kind, onOpenDocs, 
                       <span className={`h-2 w-2 shrink-0 rounded-full ${ds.dot}`} title={doc.status} />
                     )}
                   </button>
-                  {onRequestChanges && (
-                    <button
-                      type="button"
-                      onClick={() => handleRequestChanges(doc)}
-                      title={t('admin.compliance.requestChanges')}
-                      className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-border text-muted hover:border-amber-500/40 hover:text-amber-600"
-                    >
-                      <MessageSquare size={13} />
-                    </button>
-                  )}
+                  <ChangeAction doc={doc} index={i} compact />
                 </div>
               )
             })}
@@ -288,7 +364,7 @@ export default function VerificationCard({ subject, analysis, kind, onOpenDocs, 
 
               {showReport && (
                 <div className="space-y-3 border-t border-border px-3 py-3">
-                  {currentDocs.map((doc) => {
+                  {currentDocs.map((doc, docIndex) => {
                     const result = results[doc.id]
                     if (!result) return null
                     const vStyle = VERDICT_STYLE[result.verdict] || VERDICT_STYLE.manual
@@ -340,16 +416,7 @@ export default function VerificationCard({ subject, analysis, kind, onOpenDocs, 
                           <p className="text-[11px] italic text-muted">
                             {t(`admin.compliance.reg.${result.regulationKey || doc.doc_type}`)}
                           </p>
-                          {onRequestChanges && (
-                            <button
-                              type="button"
-                              onClick={() => handleRequestChanges(doc)}
-                              className="inline-flex shrink-0 items-center gap-1 rounded-md border border-border px-2 py-1 text-[11px] font-semibold text-muted hover:border-amber-500/40 hover:text-amber-600"
-                            >
-                              <MessageSquare size={11} />
-                              {t('admin.compliance.requestChanges')}
-                            </button>
-                          )}
+                          <ChangeAction doc={doc} index={docIndex} />
                         </div>
                       </div>
                     )
@@ -373,6 +440,15 @@ export default function VerificationCard({ subject, analysis, kind, onOpenDocs, 
           {t('admin.reject')}
         </Button>
       </div>
+
+      {changeDoc && (
+        <RequestChangeModal
+          docLabel={t(`admin.docType.${changeDoc.doc_type}`)}
+          suggestion={buildSuggestion(changeDoc)}
+          onSend={(note) => onRequestChanges(changeDoc.id, note)}
+          onClose={() => setChangeDoc(null)}
+        />
+      )}
     </motion.div>
   )
 }
