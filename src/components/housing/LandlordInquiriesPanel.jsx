@@ -3,8 +3,9 @@ import { useSearchParams } from 'react-router-dom'
 import { Calendar, CheckCircle2, Home, XCircle, Loader2 } from 'lucide-react'
 import { useTranslation } from '../../hooks/useTranslation'
 import { useLandlordInquiries } from '../../hooks/useHousing'
-import { respondToApplication, markApplicationRented, relistListing, updateViewingRequest, cancelViewingRequest } from '../../lib/housing'
+import { respondToApplication, markApplicationRented, relistListing, updateViewingRequest, cancelViewingRequest, requestApplicationChanges } from '../../lib/housing'
 import WithdrawReasonModal, { VIEWING_CANCEL_REASONS } from './WithdrawReasonModal'
+import RequestChangesModal from './RequestChangesModal'
 import ApplicationAdvisorPanel from '../advisor/ApplicationAdvisorPanel'
 import ApplicationDocumentsList from './ApplicationDocumentsList'
 import ConversationChat from './ConversationChat'
@@ -17,7 +18,12 @@ import Modal from '../ui/Modal'
 function statusVariant(status) {
   if (status === 'accepted' || status === 'rented') return 'success'
   if (status === 'rejected' || status === 'withdrawn') return 'error'
+  if (status === 'changes_requested') return 'warning'
   return 'default'
+}
+
+function statusLabel(status, t) {
+  return t(`housing.status.${status}`, { defaultValue: status.replace(/_/g, ' ') })
 }
 
 export default function LandlordInquiriesPanel() {
@@ -31,6 +37,8 @@ export default function LandlordInquiriesPanel() {
   const [initialLoad, setInitialLoad] = useState(true)
   const [cancelViewingId, setCancelViewingId] = useState(null)
   const [cancelBusy, setCancelBusy] = useState(false)
+  const [changesAppId, setChangesAppId] = useState(null)
+  const [changesBusy, setChangesBusy] = useState(false)
 
   useEffect(() => {
     if (!loading) setInitialLoad(false)
@@ -112,6 +120,18 @@ export default function LandlordInquiriesPanel() {
     }
   }
 
+  async function handleRequestChanges(message) {
+    if (!changesAppId) return
+    setChangesBusy(true)
+    try {
+      await requestApplicationChanges(changesAppId, message)
+      setChangesAppId(null)
+      refetch()
+    } finally {
+      setChangesBusy(false)
+    }
+  }
+
   async function handleRelist(listingId) {
     setBusyId(listingId)
     try {
@@ -187,8 +207,14 @@ export default function LandlordInquiriesPanel() {
                   )}
                   {app.intro_message && <p className="mt-2 text-sm text-muted">{app.intro_message}</p>}
                 </div>
-                <Badge variant={statusVariant(app.status)}>{app.status}</Badge>
+                <Badge variant={statusVariant(app.status)}>{statusLabel(app.status, t)}</Badge>
               </div>
+
+              {app.landlord_notes && ['changes_requested', 'rejected'].includes(app.status) && (
+                <p className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 text-sm text-muted">
+                  {app.landlord_notes}
+                </p>
+              )}
 
               <ApplicationDocumentsList documents={app.documents} />
 
@@ -202,11 +228,18 @@ export default function LandlordInquiriesPanel() {
                     <CheckCircle2 size={14} />
                     {t('housing.accept')}
                   </Button>
+                  <Button size="sm" variant="outline" disabled={busyId === app.id} onClick={() => setChangesAppId(app.id)}>
+                    {t('housing.requestChanges')}
+                  </Button>
                   <Button size="sm" variant="outline" disabled={busyId === app.id} onClick={() => handleApplication(app.id, false)}>
                     <XCircle size={14} />
                     {t('housing.decline')}
                   </Button>
                 </div>
+              )}
+
+              {app.status === 'changes_requested' && (
+                <p className="text-xs text-muted">{t('housing.awaitingStudentResubmit')}</p>
               )}
 
               {app.status === 'accepted' && (
@@ -298,6 +331,13 @@ export default function LandlordInquiriesPanel() {
           ))}
         </div>
       )}
+
+      <RequestChangesModal
+        open={Boolean(changesAppId)}
+        onClose={() => setChangesAppId(null)}
+        onConfirm={handleRequestChanges}
+        busy={changesBusy}
+      />
 
       <WithdrawReasonModal
         open={Boolean(cancelViewingId)}

@@ -62,6 +62,10 @@ export function notificationHref(notification, role) {
     case 'application_rejected':
       return '/student?tab=applications'
 
+    case 'application_changes_requested':
+      if (link?.startsWith('/listings/')) return link
+      return '/student?tab=applications'
+
     case 'admin_application':
       return isAdmin ? '/admin?tab=applications' : '/admin'
 
@@ -86,6 +90,7 @@ export function notificationHref(notification, role) {
     if (type === 'message') return '/landlord?tab=messages'
     return '/landlord?tab=applications'
   }
+  if (link?.startsWith('/listings/')) return link
   if (link?.startsWith('/')) return link
   return link ? `/${link}` : '/'
 }

@@ -12,7 +12,7 @@ export function useListings(filters = {}) {
     roomType,
     genderPreference,
     search,
-    availableOnly = true,
+    availableOnly = false,
     sortBy = 'newest',
     amenities = [],
     landlordId,
@@ -54,7 +54,7 @@ export function useListings(filters = {}) {
         .select(
           `
           id, title, price, room_type, area, city, address, lat, lng,
-          distance_to_campus, available, is_verified, landlord_verified, landlord_display_name, featured,
+          distance_to_campus, available, occupancy_status, is_verified, landlord_verified, landlord_display_name, featured,
           whatsapp_number, amenities, gender_preference, deposit_pula, utilities_included, house_rules,
           created_at, views,
           nearest_university_id, custom_university_name,
@@ -63,7 +63,11 @@ export function useListings(filters = {}) {
         `,
           { count: 'exact' }
         )
-        .eq('available', availableOnly !== false)
+      if (availableOnly === true) {
+        query = query.eq('occupancy_status', 'available')
+      } else {
+        query = query.in('occupancy_status', ['available', 'rented'])
+      }
 
       if (universityId === 'other') {
         query = query.is('nearest_university_id', null)

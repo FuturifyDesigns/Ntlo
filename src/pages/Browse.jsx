@@ -21,7 +21,7 @@ export default function Browse() {
     roomType: '',
     genderPreference: 'any',
     sortBy: 'newest',
-    availableOnly: true,
+    availableOnly: false,
     amenities: [],
   })
 

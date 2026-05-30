@@ -29,7 +29,7 @@ export default function FilterBar({
       roomType: '',
       genderPreference: 'any',
       sortBy: 'newest',
-      availableOnly: true,
+      availableOnly: false,
       amenities: [],
     })
   }
@@ -177,7 +177,7 @@ export default function FilterBar({
           <label className="mt-4 flex items-center gap-2 text-sm">
             <input
               type="checkbox"
-              checked={filters.availableOnly !== false}
+              checked={filters.availableOnly === true}
               onChange={(e) => update('availableOnly', e.target.checked)}
               className="rounded border-border accent-accent"
             />

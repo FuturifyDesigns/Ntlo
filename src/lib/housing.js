@@ -145,6 +145,14 @@ export async function submitApplication({ listingId, landlordId, moveInDate, dur
   return data
 }
 
+export async function requestApplicationChanges(applicationId, message) {
+  const { error } = await supabase.rpc('request_application_changes', {
+    p_application_id: applicationId,
+    p_message: message?.trim() || null,
+  })
+  if (error) throw error
+}
+
 export async function respondToApplication(applicationId, { accept, notes }) {
   const { error } = await supabase.rpc('respond_to_application', {
     p_application_id: applicationId,
@@ -202,10 +210,10 @@ export async function fetchStudentListingStatus(listingId) {
       .maybeSingle(),
     supabase
       .from('listing_applications')
-      .select('id, status')
+      .select('id, status, landlord_notes')
       .eq('listing_id', listingId)
       .eq('student_id', user.id)
-      .in('status', ['submitted', 'under_review', 'accepted', 'rented'])
+      .in('status', ['submitted', 'under_review', 'accepted', 'rented', 'changes_requested'])
       .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle(),

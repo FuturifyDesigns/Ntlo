@@ -17,6 +17,7 @@ import LandlordWelcomeBanner from '../components/landlord/LandlordWelcomeBanner'
 import EarlyAccessBanner from '../components/landlord/EarlyAccessBanner'
 import EarlyAccessLandlordNote from '../components/landlord/EarlyAccessLandlordNote'
 import LandlordInquiriesPanel from '../components/housing/LandlordInquiriesPanel'
+import { getListingOccupancy, isListingRented } from '../lib/listingOccupancy'
 import { relistListing } from '../lib/housing'
 import { MAPS_ENABLED } from '../lib/googleMaps'
 import { CreditCard } from 'lucide-react'
@@ -49,7 +50,7 @@ export default function LandlordDashboard() {
     const { data } = await supabase
       .from('listings')
       .select(`
-        id, title, price, area, city, lat, lng, available, views, is_verified, created_at,
+        id, title, price, area, city, lat, lng, available, occupancy_status, views, is_verified, created_at,
         cover_photo:listing_photos(url, is_cover)
       `)
       .eq('landlord_id', user.id)
@@ -80,7 +81,7 @@ export default function LandlordDashboard() {
   }, [user?.id])
 
   async function markTaken(id) {
-    await supabase.from('listings').update({ available: false }).eq('id', id)
+    await supabase.from('listings').update({ occupancy_status: 'unavailable' }).eq('id', id)
     fetchListings({ silent: true })
   }
 
@@ -100,8 +101,9 @@ export default function LandlordDashboard() {
   }
 
   const filtered = listings.filter((l) => {
-    if (filter === 'active') return l.available
-    if (filter === 'inactive') return !l.available
+    const occupancy = getListingOccupancy(l)
+    if (filter === 'active') return occupancy === 'available' || occupancy === 'rented'
+    if (filter === 'inactive') return occupancy === 'unavailable'
     return true
   })
 
@@ -148,7 +150,7 @@ export default function LandlordDashboard() {
         <Card className="p-5">
           <p className="text-sm text-muted">{t('dashboard.activeListings')}</p>
           <p className="font-display text-3xl font-bold text-success">
-            {listings.filter((l) => l.available).length}
+            {listings.filter((l) => getListingOccupancy(l) === 'available').length}
           </p>
         </Card>
         <Card className="p-5">
@@ -206,7 +208,16 @@ export default function LandlordDashboard() {
           </motion.div>
         ) : (
           <motion.div key="listings-grid" className="space-y-4" {...motionProps}>
-            {filtered.map((listing) => (
+            {filtered.map((listing) => {
+              const occupancy = getListingOccupancy(listing)
+              const badgeVariant = occupancy === 'available' ? 'success' : occupancy === 'rented' ? 'warning' : 'error'
+              const badgeLabel = occupancy === 'available'
+                ? t('listings.available')
+                : occupancy === 'rented'
+                  ? t('listings.rented')
+                  : t('dashboard.taken')
+
+              return (
               <Card key={listing.id} className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center">
                 <img
                   src={getCoverPhoto(listing) || PLACEHOLDER}
@@ -216,8 +227,8 @@ export default function LandlordDashboard() {
                 <div className="flex-1 min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
                     <h3 className="font-semibold text-primary truncate">{listing.title}</h3>
-                    <Badge variant={listing.available ? 'success' : 'error'}>
-                      {listing.available ? t('dashboard.active') : t('dashboard.taken')}
+                    <Badge variant={badgeVariant}>
+                      {badgeLabel}
                     </Badge>
                   </div>
                   <p className="font-mono text-sm font-semibold">{formatPrice(listing.price)}{t('listings.perMo')}</p>
@@ -232,16 +243,17 @@ export default function LandlordDashboard() {
                     <Edit size={14} />
                     {t('dashboard.edit')}
                   </Button>
-                  <Button variant="outline" size="sm" onClick={() => (listing.available ? markTaken(listing.id) : handleRelist(listing.id))}>
-                    {listing.available ? <ToggleRight size={14} /> : <ToggleLeft size={14} />}
-                    {listing.available ? t('dashboard.markTaken') : t('housing.listAgain')}
+                  <Button variant="outline" size="sm" onClick={() => (occupancy === 'available' ? markTaken(listing.id) : handleRelist(listing.id))}>
+                    {occupancy === 'available' ? <ToggleRight size={14} /> : <ToggleLeft size={14} />}
+                    {occupancy === 'available' ? t('dashboard.markTaken') : t('housing.listAgain')}
                   </Button>
                   <Button variant="danger" size="sm" onClick={() => deleteListing(listing.id)}>
                     <Trash2 size={14} />
                   </Button>
                 </div>
               </Card>
-            ))}
+              )
+            })}
           </motion.div>
         )}
       </AnimatePresence>

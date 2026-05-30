@@ -11,6 +11,7 @@ const URGENT_TYPES = new Set([
   'application_accepted',
   'application_rejected',
   'application_withdrawn',
+  'application_changes_requested',
   'viewing_request',
   'viewing_confirmed',
   'viewing_declined',

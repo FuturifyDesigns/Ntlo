@@ -15,6 +15,7 @@ import ApplicationDocFields from './ApplicationDocFields'
 import ApplicationRequirementsList from './ApplicationRequirementsList'
 import { APPLICATION_DOC_TYPES } from '../../lib/applicationDocs'
 import { canStudentApplyToListing } from '../../lib/applicationRules'
+import { isListingOpenForApply } from '../../lib/listingOccupancy'
 import { useStudentHousing, useStudentListingStatus } from '../../hooks/useHousing'
 import { GENDER_PREFERENCES } from '../../lib/utils'
 
@@ -59,7 +60,7 @@ export default function ListingContactPanel({ listing }) {
   const landlordName = listing.landlord_display_name || listing.landlord?.full_name || 'Landlord'
   const isStudent = profile?.role === 'student'
   const isGuest = !user
-  const canContact = listing.available && user && isStudent
+  const canContact = user && isStudent && (isListingOpenForApply(listing) || activeApplication?.status === 'changes_requested')
   const applyCheck = isStudent ? canStudentApplyToListing(profile, listing) : { ok: false }
   const currentlyRented = myApplications?.some((a) => a.status === 'rented')
   const applyBlockedReason = !applyCheck.ok ? applyCheck.reason : null
@@ -167,9 +168,15 @@ export default function ListingContactPanel({ listing }) {
   const viewingPending = activeViewing?.status === 'pending'
   const viewingConfirmed = activeViewing?.status === 'confirmed'
   const applicationPending = activeApplication && ['submitted', 'under_review'].includes(activeApplication.status)
+  const applicationChangesRequested = activeApplication?.status === 'changes_requested'
   const applicationAccepted = activeApplication && ['accepted', 'rented'].includes(activeApplication.status)
 
   function tryOpenApply() {
+    if (applicationChangesRequested) {
+      setApplyError('')
+      setApplyOpen(true)
+      return
+    }
     if (!applyCheck.ok) {
       if (applyCheck.reason === 'genderRequired') {
         navigate('/complete-profile')
@@ -232,15 +239,23 @@ export default function ListingContactPanel({ listing }) {
                 {t('housing.cancelViewing')}
               </button>
             )}
-            <Button variant="outline" onClick={() => requireAuth(tryOpenApply)} className="w-full" disabled={applicationPending || applicationAccepted}>
+            <Button variant="outline" onClick={() => requireAuth(tryOpenApply)} className="w-full" disabled={(applicationPending || applicationAccepted) && !applicationChangesRequested}>
               <FileText size={18} />
               {applicationAccepted
                 ? t('housing.applicationAccepted')
-                : applicationPending
-                  ? t('housing.applicationPending')
-                  : t('housing.applyNow')}
+                : applicationChangesRequested
+                  ? t('housing.updateAndResubmit')
+                  : applicationPending
+                    ? t('housing.applicationPending')
+                    : t('housing.applyNow')}
             </Button>
-            {applicationPending && (
+            {applicationChangesRequested && activeApplication?.landlord_notes && (
+              <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 text-sm text-muted">
+                <p className="font-medium text-primary">{t('housing.changesRequestedTitle')}</p>
+                <p className="mt-1">{activeApplication.landlord_notes}</p>
+              </div>
+            )}
+            {(applicationPending || applicationChangesRequested) && (
               <button type="button" onClick={() => setWithdrawOpen(true)} className="w-full text-center text-xs text-muted underline hover:text-primary">
                 {t('housing.withdrawApplication')}
               </button>
@@ -312,8 +327,8 @@ export default function ListingContactPanel({ listing }) {
         )}
       </Modal>
 
-      <Modal open={applyOpen} onClose={closeApplyModal} title={t('housing.applyNow')} size="lg">
-        {applyDone || applicationPending ? (
+      <Modal open={applyOpen} onClose={closeApplyModal} title={applicationChangesRequested ? t('housing.updateAndResubmit') : t('housing.applyNow')} size="lg">
+        {applyDone || (applicationPending && !applicationChangesRequested) ? (
           <div className="space-y-3">
             <p className="text-sm text-success">{t('housing.applicationSent')}</p>
             {applicationPending && (
@@ -350,7 +365,7 @@ export default function ListingContactPanel({ listing }) {
             {applyError && <p className="text-sm text-error">{applyError}</p>}
             <p className="text-xs text-muted">{t('housing.externalPaymentNote')}</p>
             <Button type="submit" disabled={applyBusy} className="w-full">
-              {applyBusy ? t('housing.sending') : t('housing.submitApplication')}
+              {applyBusy ? t('housing.sending') : applicationChangesRequested ? t('housing.resubmitApplication') : t('housing.submitApplication')}
             </Button>
           </form>
         )}

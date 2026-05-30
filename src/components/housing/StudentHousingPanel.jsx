@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams, Link } from 'react-router-dom'
 import { Loader2 } from 'lucide-react'
 import { useTranslation } from '../../hooks/useTranslation'
 import { useConversations, useStudentHousing } from '../../hooks/useHousing'
@@ -16,7 +16,12 @@ import { chatOtherProfile } from '../../hooks/usePresence'
 function statusVariant(status) {
   if (status === 'accepted' || status === 'rented' || status === 'confirmed') return 'success'
   if (status === 'rejected' || status === 'withdrawn' || status === 'declined' || status === 'cancelled') return 'error'
+  if (status === 'changes_requested') return 'warning'
   return 'default'
+}
+
+function statusLabel(status, t) {
+  return t(`housing.status.${status}`, { defaultValue: status.replace(/_/g, ' ') })
 }
 
 export default function StudentHousingPanel() {
@@ -126,8 +131,18 @@ export default function StudentHousingPanel() {
                     <p className="mt-1 text-xs text-muted">{t('housing.moveInDate')}: {app.move_in_date}</p>
                   )}
                 </div>
-                <Badge variant={statusVariant(app.status)}>{app.status}</Badge>
+                <Badge variant={statusVariant(app.status)}>{statusLabel(app.status, t)}</Badge>
               </div>
+
+              {app.status === 'changes_requested' && (
+                <div className="space-y-2 rounded-lg border border-amber-500/30 bg-amber-500/5 p-3">
+                  <p className="text-sm font-medium text-primary">{t('housing.changesRequestedTitle')}</p>
+                  {app.landlord_notes && <p className="text-sm text-muted">{app.landlord_notes}</p>}
+                  <Button as={Link} to={`/listings/${app.listing_id}`} size="sm">
+                    {t('housing.updateAndResubmit')}
+                  </Button>
+                </div>
+              )}
 
               {app.status === 'accepted' && (
                 <p className="rounded-lg border border-accent/30 bg-accent/5 p-3 text-sm text-muted">
@@ -143,7 +158,7 @@ export default function StudentHousingPanel() {
                 <p className="text-sm text-muted">{t('housing.tenancyEndedStudent')}</p>
               )}
 
-              {['submitted', 'under_review'].includes(app.status) && (
+              {['submitted', 'under_review', 'changes_requested'].includes(app.status) && (
                 <Button size="sm" variant="outline" disabled={busyId === app.id} onClick={() => setWithdrawAppId(app.id)}>
                   {t('housing.withdrawApplication')}
                 </Button>

@@ -1,6 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { Heart } from 'lucide-react'
 import { useState } from 'react'
+import { getListingOccupancy, isListingRented } from '../../lib/listingOccupancy'
 import { formatPrice, formatDistance, getListingPhotos, getNearestUniversity, ROOM_TYPES, AMENITIES, cn } from '../../lib/utils'
 import PhotoCarousel from './PhotoCarousel'
 import * as LucideIcons from 'lucide-react'
@@ -25,6 +26,7 @@ export default function ListingCard({ listing, compact = false, carouselIndex = 
   const hasMultiplePhotos = listingPhotos.length > 1
   const saved = isSaved(listing.id)
   const trustLevel = resolveListingTrustBadge(listing)
+  const occupancy = getListingOccupancy(listing)
 
   async function handleSave(e) {
     e.preventDefault()
@@ -81,9 +83,15 @@ export default function ListingCard({ listing, compact = false, carouselIndex = 
             <Heart size={17} fill={saved ? 'currentColor' : 'none'} strokeWidth={2} />
           </button>
 
-          {!listing.available && (
+          {occupancy === 'unavailable' && (
             <div className="absolute inset-0 z-[3] flex items-center justify-center bg-primary/70 backdrop-blur-[2px]">
               <Badge variant="error">{t('listings.unavailable')}</Badge>
+            </div>
+          )}
+
+          {isListingRented(listing) && (
+            <div className="absolute left-3 bottom-3 z-[2]">
+              <Badge variant="warning">{t('listings.rented')}</Badge>
             </div>
           )}
 

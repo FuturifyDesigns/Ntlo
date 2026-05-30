@@ -1,4 +1,4 @@
-/** Rules for who can apply to a listing and student rental state. */
+import { isListingOpenForApply } from './listingOccupancy'
 
 export function genderMatchesListing(studentGender, listingPreference) {
   const pref = listingPreference || 'any'
@@ -13,7 +13,7 @@ export function canStudentApplyToListing(profile, listing) {
   if (!profile.gender) {
     return { ok: false, reason: 'genderRequired' }
   }
-  if (!listing?.available) {
+  if (!isListingOpenForApply(listing)) {
     return { ok: false, reason: 'unavailable' }
   }
   if (!genderMatchesListing(profile.gender, listing.gender_preference)) {

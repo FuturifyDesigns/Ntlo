@@ -18,6 +18,7 @@ import TrustedBadge from '../components/trust/TrustedBadge'
 import { resolveListingTrustBadge } from '../lib/tierBenefits'
 import { useAuth } from '../hooks/useAuth'
 import { getUniversityDisplayName } from '../lib/universityNames'
+import { getListingOccupancy, isListingRented } from '../lib/listingOccupancy'
 import {
   formatPrice,
   formatDistance,
@@ -84,9 +85,13 @@ export default function ListingDetail() {
               </p>
 
               <div className="mt-3 flex flex-wrap gap-2">
-                <Badge variant={listing.available ? 'success' : 'error'}>
-                  {listing.available ? t('listings.available') : t('listings.unavailable')}
-                </Badge>
+                {isListingRented(listing) ? (
+                  <Badge variant="warning">{t('listings.rented')}</Badge>
+                ) : getListingOccupancy(listing) === 'available' ? (
+                  <Badge variant="success">{t('listings.available')}</Badge>
+                ) : (
+                  <Badge variant="error">{t('listings.unavailable')}</Badge>
+                )}
                 {uni && (
                   <Badge variant="default">
                     <MapPin size={12} className="mr-1" />

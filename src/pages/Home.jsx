@@ -13,7 +13,7 @@ import { PatternBotswana } from '../components/ui/Icons'
 
 export default function Home() {
   const navigate = useNavigate()
-  const [filters, setFilters] = useState({ availableOnly: true, sortBy: 'newest', search: '' })
+  const [filters, setFilters] = useState({ availableOnly: false, sortBy: 'newest', search: '' })
   const { listings } = useListings({ ...filters, sortBy: 'newest' })
   const { t } = useTranslation()
 

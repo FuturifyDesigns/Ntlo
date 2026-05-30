@@ -21,7 +21,7 @@ export default function UniversityPage() {
   const { t } = useTranslation()
   const [filters, setFilters] = useState({
     universityId: '',
-    availableOnly: true,
+    availableOnly: false,
     sortBy: 'distance',
     search: '',
     minPrice: '',
