@@ -1,42 +1,35 @@
 import { supabase } from './supabase'
-import { analyzeListing, compareListings, coachLandlordListing } from './listingAdvisor'
+import { analyzeListing, compareListings, coachLandlordListing, buildListingInsightSummary } from './listingAdvisor'
 
+/** Enable Gemini-enhanced summaries via Supabase edge function (see SETUP.md §9) */
 export const AI_ADVISOR_ENABLED = import.meta.env.VITE_AI_ADVISOR_ENABLED === 'true'
 
-function localSummary(type, payload) {
-  if (type === 'listing') {
-    const analysis = analyzeListing(payload.listing, payload.context)
-    return { analysis, source: 'local' }
-  }
-  if (type === 'compare') {
-    return { comparison: compareListings(payload.listings, payload.context), source: 'local' }
-  }
-  if (type === 'landlord') {
-    return { coach: coachLandlordListing(payload.form, payload.options), source: 'local' }
-  }
-  return null
+export function getListingAdvisorResult(listing, context, t) {
+  const analysis = analyzeListing(listing, context)
+  const insightText = buildListingInsightSummary(listing, analysis, t)
+  return { analysis, insightText, source: 'advisor' }
 }
 
-export async function fetchAiAdvisorSummary(type, payload) {
-  const local = localSummary(type, payload)
-
-  if (!AI_ADVISOR_ENABLED) {
-    return { ...local, aiText: null }
-  }
+export async function fetchOptionalAiEnhancement(type, payload, local) {
+  if (!AI_ADVISOR_ENABLED) return null
 
   try {
     const { data, error } = await supabase.functions.invoke('ai-advisor', {
       body: { type, payload, local },
     })
-
-    if (error || !data?.text) {
-      return { ...local, aiText: null }
-    }
-
-    return { ...local, aiText: data.text, source: 'ai' }
+    if (error || !data?.text) return null
+    return data.text
   } catch {
-    return { ...local, aiText: null }
+    return null
   }
+}
+
+export function getCompareResult(listings, context) {
+  return compareListings(listings, context)
+}
+
+export function getLandlordCoachResult(form, options) {
+  return coachLandlordListing(form, options)
 }
 
 export function getScoreColor(score) {

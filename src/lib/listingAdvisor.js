@@ -225,3 +225,51 @@ export function coachLandlordListing(form, { photoCount = 0, marketListings = []
 
   return { suggestions: suggestions.slice(0, 6), readiness }
 }
+
+/** Plain-language summary from scores — no OpenAI or edge function needed */
+export function buildListingInsightSummary(listing, analysis, t) {
+  if (!listing || !analysis || !t) return ''
+
+  const campus = analysis.campusName || t('advisor.summary.campusFallback')
+  const price = formatPrice(listing.price)
+  const parts = []
+
+  parts.push(
+    t(`advisor.summary.verdict.${analysis.label}`, {
+      title: listing.title,
+      price,
+      campus,
+      score: analysis.overall,
+    })
+  )
+
+  if (analysis.distanceKm != null) {
+    if (analysis.distanceKm <= 2) {
+      parts.push(t('advisor.summary.distanceClose', { km: analysis.distanceKm.toFixed(1), campus }))
+    } else if (analysis.distanceKm > 5) {
+      parts.push(t('advisor.summary.distanceFar', { km: analysis.distanceKm.toFixed(1), campus }))
+    } else {
+      parts.push(t('advisor.summary.distanceMid', { km: analysis.distanceKm.toFixed(1), campus }))
+    }
+  }
+
+  if (analysis.scores.trust >= 80) {
+    parts.push(t('advisor.summary.trustHigh'))
+  } else if (analysis.scores.trust < 60) {
+    parts.push(t('advisor.summary.trustLow'))
+  }
+
+  if (analysis.scores.price >= 82) {
+    parts.push(t('advisor.summary.priceGood'))
+  } else if (analysis.scores.price < 50) {
+    parts.push(t('advisor.summary.priceHigh'))
+  }
+
+  if (analysis.tips.some((tip) => tip.key === 'approxLocation')) {
+    parts.push(t('advisor.summary.confirmLocation'))
+  }
+
+  parts.push(t('advisor.summary.closing'))
+
+  return parts.join(' ')
+}

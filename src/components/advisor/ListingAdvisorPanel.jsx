@@ -1,7 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Sparkles, ThumbsUp, AlertTriangle, Lightbulb, Loader2 } from 'lucide-react'
-import { analyzeListing } from '../../lib/listingAdvisor'
-import { fetchAiAdvisorSummary, getScoreColor, getScoreRingColor } from '../../lib/aiAdvisor'
+import { Sparkles, ThumbsUp, AlertTriangle, Lightbulb } from 'lucide-react'
+import {
+  getListingAdvisorResult,
+  fetchOptionalAiEnhancement,
+  getScoreColor,
+  getScoreRingColor,
+  AI_ADVISOR_ENABLED,
+} from '../../lib/aiAdvisor'
 import { useTranslation } from '../../hooks/useTranslation'
 import Card from '../ui/Card'
 
@@ -58,38 +63,37 @@ function InsightList({ items, icon: Icon, variant }) {
 
 export default function ListingAdvisorPanel({ listing, studentUniversityId }) {
   const { t } = useTranslation()
-  const [aiText, setAiText] = useState(null)
-  const [aiLoading, setAiLoading] = useState(false)
+  const [enhancedText, setEnhancedText] = useState(null)
 
   const context = useMemo(
     () => ({ studentUniversityId }),
     [studentUniversityId]
   )
 
-  const analysis = useMemo(
-    () => (listing ? analyzeListing(listing, context) : null),
-    [listing, context]
+  const { analysis, insightText } = useMemo(
+    () => (listing ? getListingAdvisorResult(listing, context, t) : { analysis: null, insightText: '' }),
+    [listing, context, t]
   )
 
   useEffect(() => {
-    if (!listing) return
-    let cancelled = false
-    setAiLoading(true)
-    setAiText(null)
+    if (!listing || !AI_ADVISOR_ENABLED) {
+      setEnhancedText(null)
+      return
+    }
 
-    fetchAiAdvisorSummary('listing', { listing, context }).then((result) => {
-      if (!cancelled) {
-        setAiText(result.aiText)
-        setAiLoading(false)
-      }
+    let cancelled = false
+    fetchOptionalAiEnhancement('listing', { listing, context }, { analysis }).then((text) => {
+      if (!cancelled) setEnhancedText(text)
     })
 
     return () => {
       cancelled = true
     }
-  }, [listing?.id, studentUniversityId])
+  }, [listing?.id, studentUniversityId, listing, context, analysis])
 
   if (!listing || !analysis) return null
+
+  const summaryText = enhancedText || insightText
 
   return (
     <Card className="space-y-4 p-5">
@@ -104,6 +108,15 @@ export default function ListingAdvisorPanel({ listing, studentUniversityId }) {
       <p className="text-center text-sm font-medium text-primary">
         {t(`advisor.label.${analysis.label}`)}
       </p>
+
+      {summaryText && (
+        <div className="rounded-lg border border-accent/20 bg-accent/5 p-3">
+          <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-accent">
+            {t('advisor.insightSummary')}
+          </p>
+          <p className="text-sm leading-relaxed text-primary">{summaryText}</p>
+        </div>
+      )}
 
       <div className="grid grid-cols-2 gap-2 text-xs">
         {Object.entries(analysis.scores).map(([key, value]) => (
@@ -132,20 +145,6 @@ export default function ListingAdvisorPanel({ listing, studentUniversityId }) {
         <div>
           <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted">{t('advisor.tips')}</p>
           <InsightList items={analysis.tips} icon={Lightbulb} variant="tip" />
-        </div>
-      )}
-
-      {(aiLoading || aiText) && (
-        <div className="rounded-lg border border-accent/20 bg-accent/5 p-3">
-          <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-accent">{t('advisor.aiSummary')}</p>
-          {aiLoading ? (
-            <p className="flex items-center gap-2 text-sm text-muted">
-              <Loader2 size={14} className="animate-spin" />
-              {t('advisor.aiLoading')}
-            </p>
-          ) : (
-            <p className="text-sm leading-relaxed text-primary">{aiText}</p>
-          )}
         </div>
       )}
     </Card>

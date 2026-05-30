@@ -101,22 +101,26 @@ update public.profiles set role = 'admin' where id = 'YOUR-USER-UUID';
 
 Landlords must upload ID + selfie + proof of ownership/authority at `/landlord/verify` before listing rooms. Admins review at `/admin`.
 
-## 9. Ntlo Advisor (optional AI)
+## 9. Ntlo Advisor
 
-**Smart scoring works without AI** — match scores, compare saved rooms, and landlord listing coach run locally using distance, price, trust, and amenities.
+**Works out of the box — no API keys.** Scores, compare, landlord coach, and **Our take** summaries run in the app.
 
-To enable **AI-written summaries** (OpenAI):
+### Optional: Google Gemini (free tier)
 
-1. Deploy the Edge Function:
-   ```bash
-   npx supabase functions deploy ai-advisor --project-ref kbpoljwacmzrakztnlkd
-   ```
-2. In Supabase **Project Settings → Edge Functions → Secrets**, add:
-   - `OPENAI_API_KEY` = your OpenAI key
-   - Optional: `OPENAI_MODEL` = `gpt-4o-mini` (default)
-3. Set in local `.env` and GitHub Actions:
-   ```
-   VITE_AI_ADVISOR_ENABLED=true
-   ```
+Richer natural-language advice via a Supabase edge function + [Google AI Studio](https://aistudio.google.com/apikey) key.
 
-Without this, students and landlords still see scores, pros/cons, and coaching tips — only the “AI insight” paragraph is skipped.
+1. **Get key:** AI Studio → **Create API key** (starts with `AIza...`)
+2. **Login:** `npx supabase login`
+3. **Deploy:** `npx supabase functions deploy ai-advisor --project-ref kbpoljwacmzrakztnlkd`
+4. **Secret:** Supabase → Edge Functions → Secrets → `GEMINI_API_KEY` = your key  
+   Optional: `GEMINI_MODEL` = `gemini-2.0-flash`
+5. **Enable site:** `.env` and GitHub Actions → `VITE_AI_ADVISOR_ENABLED=true`, then redeploy
+
+CLI secret example:
+
+```powershell
+npx supabase secrets set GEMINI_API_KEY=AIza-your-key --project-ref kbpoljwacmzrakztnlkd
+```
+
+If Gemini is off or fails, **Our take** and scores still work.
+
