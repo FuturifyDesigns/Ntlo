@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { supabase } from '../lib/supabase'
+import { useAuth } from './useAuth'
 
 const PAGE_SIZE = 12
 
@@ -163,12 +164,13 @@ export function useListings(filters = {}) {
 }
 
 export function useListing(id) {
+  const { loading: authLoading } = useAuth()
   const [listing, setListing] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
   useEffect(() => {
-    if (!id) return
+    if (!id || authLoading) return undefined
     async function fetchListing() {
       setLoading(true)
       try {
@@ -189,11 +191,7 @@ export function useListing(id) {
         setListing(data)
 
         if (data) {
-          supabase
-            .from('listings')
-            .update({ views: (data.views || 0) + 1 })
-            .eq('id', id)
-            .then(() => {})
+          supabase.rpc('increment_listing_view', { p_listing_id: id }).then(() => {})
         }
       } catch (err) {
         setError(err.message)
@@ -202,7 +200,8 @@ export function useListing(id) {
       }
     }
     fetchListing()
-  }, [id])
+    return undefined
+  }, [id, authLoading])
 
   useEffect(() => {
     if (!id) return undefined
