@@ -286,9 +286,9 @@ export const translations = {
     },
     verification: {
       landlordTitle: 'Verify your landlord account',
-      landlordSubtitle: 'Upload documents so students can trust your listings. Inspired by verified platforms like InRent.',
+      landlordSubtitle: 'Upload documents so students can trust your listings and feel safe booking with you.',
       whyTitle: 'Why we verify landlords',
-      why1: 'Background-checked landlords — like InRent’s verified & safe promise',
+      why1: 'Background-checked landlords — verified and safe for students',
       why2: 'Reduces scams from fake listings on social media',
       why3: 'Your listings get a verified badge once approved',
       statusNone: 'Not submitted',
