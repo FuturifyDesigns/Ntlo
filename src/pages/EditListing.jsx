@@ -180,6 +180,7 @@ export default function EditListing() {
           address={form.address}
           area={form.area}
           city={form.city}
+          universityCity={getUniversityById(form.nearest_university_id)?.city}
           onChange={handleLocationChange}
           hint={t('listingForm.locationHint')}
         />

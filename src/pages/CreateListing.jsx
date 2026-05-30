@@ -268,8 +268,8 @@ export default function CreateListing() {
 
             {step === 1 && (
               <div className="space-y-4">
-                <Input label="Street address" value={form.address} onChange={(e) => update('address', e.target.value)} placeholder="Plot 123, Sbrana" required />
-                <Input label="Area / suburb" value={form.area} onChange={(e) => update('area', e.target.value)} placeholder="Block 8" />
+                <Input label="Street address (optional)" value={form.address} onChange={(e) => update('address', e.target.value)} placeholder="Plot 123, Sbrana" />
+                <Input label="Area / suburb" value={form.area} onChange={(e) => update('area', e.target.value)} placeholder="Block 8" required />
                 <Input label="City" value={form.city} onChange={(e) => update('city', e.target.value)} required />
                 <UniversitySelect
                   value={form.nearest_university_id}
@@ -284,6 +284,7 @@ export default function CreateListing() {
                   address={form.address}
                   area={form.area}
                   city={form.city}
+                  universityCity={uni?.city}
                   onChange={handleLocationChange}
                   hint={t('listingForm.locationHint')}
                 />

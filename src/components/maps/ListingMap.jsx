@@ -6,6 +6,7 @@ import {
   Map,
   useAdvancedMarkerRef,
   useMap,
+  useMapsLibrary,
 } from '@vis.gl/react-google-maps'
 import { MapPin, Navigation, Loader2, AlertCircle } from 'lucide-react'
 import {
@@ -19,7 +20,7 @@ import {
   getMapListingPosition,
   toLatLng,
 } from '../../lib/googleMaps'
-import { geocodeAddress } from '../../lib/geocodeAddress'
+import { geocodeWithGoogle, resolveAddressCoords } from '../../lib/geocodeAddress'
 import { formatPrice } from '../../lib/utils'
 import { useTranslation } from '../../hooks/useTranslation'
 import Button from '../ui/Button'
@@ -313,19 +314,35 @@ export function LocationPicker({
   address = '',
   area = '',
   city = '',
+  universityCity = '',
   height = '320px',
   hint,
 }) {
   const { t } = useTranslation()
+  const geocodingLib = useMapsLibrary('geocoding')
+  const geocoder = useMemo(
+    () => (geocodingLib ? new geocodingLib.Geocoder() : null),
+    [geocodingLib]
+  )
+
   const position = toLatLng(lat, lng)
-  const center = position || DEFAULT_MAP_CENTER
+  const [mapCenter, setMapCenter] = useState(() => position || DEFAULT_MAP_CENTER)
+  const [mapZoom, setMapZoom] = useState(() => (position ? SINGLE_LISTING_ZOOM : DEFAULT_MAP_ZOOM))
   const [geoBusy, setGeoBusy] = useState(false)
+  const [geocodeBusy, setGeocodeBusy] = useState(false)
   const [geoError, setGeoError] = useState('')
   const [geocodeHint, setGeocodeHint] = useState('')
   const skipGeocodeRef = useRef(false)
   const geocodeTimerRef = useRef(null)
   const onChangeRef = useRef(onChange)
   onChangeRef.current = onChange
+
+  useEffect(() => {
+    if (position) {
+      setMapCenter(position)
+      setMapZoom(SINGLE_LISTING_ZOOM)
+    }
+  }, [position?.lat, position?.lng])
 
   const handleMapClick = useCallback((event) => {
     if (!event.detail.latLng) return
@@ -396,24 +413,53 @@ export function LocationPicker({
       skipGeocodeRef.current = false
       return undefined
     }
-    if (!address?.trim() || !city?.trim()) return undefined
+
+    const hasText = Boolean(
+      (address?.trim() || area?.trim()) && city?.trim()
+    )
+    const cityOnly = Boolean(city?.trim() && !address?.trim() && !area?.trim())
+
+    if (!hasText && !cityOnly) return undefined
 
     if (geocodeTimerRef.current) clearTimeout(geocodeTimerRef.current)
     geocodeTimerRef.current = setTimeout(async () => {
-      const result = await geocodeAddress({ address, area, city })
+      setGeocodeBusy(true)
+      setGeocodeHint(t('listingForm.geocodeSearching'))
+
+      const result = await resolveAddressCoords({
+        geocoder,
+        address,
+        area,
+        city,
+        universityCity,
+      })
+
+      setGeocodeBusy(false)
+
       if (result) {
         onChangeRef.current({ lat: result.lat, lng: result.lng })
+        setMapCenter({ lat: result.lat, lng: result.lng })
+        setMapZoom(SINGLE_LISTING_ZOOM)
         setGeocodeHint(t('listingForm.pinFromAddress'))
         setGeoError('')
-      } else if (address.trim().length > 4) {
+      } else if (hasText && (address?.trim().length >= 3 || area?.trim().length >= 2)) {
         setGeocodeHint(t('listingForm.geocodeMiss'))
+      } else if (cityOnly && geocoder) {
+        const cityResult = await geocodeWithGoogle(geocoder, `${city.trim()}, Botswana`)
+        if (cityResult) {
+          setMapCenter({ lat: cityResult.lat, lng: cityResult.lng })
+          setMapZoom(DEFAULT_MAP_ZOOM)
+          setGeocodeHint('')
+        }
+      } else {
+        setGeocodeHint('')
       }
-    }, 900)
+    }, 600)
 
     return () => {
       if (geocodeTimerRef.current) clearTimeout(geocodeTimerRef.current)
     }
-  }, [address, area, city, t])
+  }, [address, area, city, universityCity, geocoder, t])
 
   if (!MAPS_ENABLED) {
     return (
@@ -440,7 +486,13 @@ export function LocationPicker({
           {geoBusy ? <Loader2 size={16} className="animate-spin" /> : <Navigation size={16} />}
           {t('listingForm.useMyLocation')}
         </Button>
-        {position && (
+        {geocodeBusy && (
+          <span className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-background px-3 py-2 text-xs font-medium text-muted">
+            <Loader2 size={14} className="animate-spin" />
+            {t('listingForm.geocodeSearching')}
+          </span>
+        )}
+        {position && !geocodeBusy && (
           <span className="inline-flex items-center gap-1.5 rounded-lg border border-success/30 bg-success/5 px-3 py-2 text-xs font-medium text-success">
             <MapPin size={14} />
             {t('listingForm.pinSet')}
@@ -461,13 +513,13 @@ export function LocationPicker({
       <div className="overflow-hidden rounded-xl border border-border" style={{ height }}>
         <Map
           mapId={GOOGLE_MAPS_MAP_ID}
-          defaultCenter={center}
-          defaultZoom={position ? SINGLE_LISTING_ZOOM : DEFAULT_MAP_ZOOM}
+          center={mapCenter}
+          zoom={mapZoom}
           gestureHandling="greedy"
           onClick={handleMapClick}
           style={{ width: '100%', height: '100%' }}
         >
-          <LocationPickerViewport position={position} />
+          <LocationPickerViewport center={mapCenter} zoom={mapZoom} />
           {position && (
             <AdvancedMarker
               position={position}
@@ -483,14 +535,14 @@ export function LocationPicker({
   )
 }
 
-function LocationPickerViewport({ position }) {
+function LocationPickerViewport({ center, zoom }) {
   const map = useMap()
 
   useEffect(() => {
-    if (!map || !position) return
-    map.panTo(position)
-    map.setZoom(SINGLE_LISTING_ZOOM)
-  }, [map, position?.lat, position?.lng])
+    if (!map || !center) return
+    map.panTo(center)
+    if (zoom) map.setZoom(zoom)
+  }, [map, center?.lat, center?.lng, zoom])
 
   return null
 }
