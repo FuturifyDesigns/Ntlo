@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useAuth } from '../hooks/useAuth'
@@ -13,6 +13,8 @@ import GoogleAuthButton from '../components/auth/GoogleAuthButton'
 import AuthTransitionOverlay from '../components/auth/AuthTransitionOverlay'
 import { UniversitySelect } from '../components/universities/OtherUniversityModal'
 import { getPostAuthPath } from '../lib/verification'
+import { getDraftKey } from '../lib/formDrafts'
+import { useFormDraft } from '../hooks/useFormDraft'
 
 export default function Register() {
   const [searchParams] = useSearchParams()
@@ -32,6 +34,39 @@ export default function Register() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [transitioning, setTransitioning] = useState(false)
+  const draftKey = useMemo(() => getDraftKey('register'), [])
+
+  const handleDraftRestore = useCallback((draft) => {
+    if (draft.form) {
+      setForm((prev) => ({
+        ...prev,
+        fullName: draft.form.fullName ?? prev.fullName,
+        email: draft.form.email ?? prev.email,
+        phone: draft.form.phone ?? prev.phone,
+        role: draft.form.role ?? prev.role,
+        universityId: draft.form.universityId ?? prev.universityId,
+        customUniversity: draft.form.customUniversity ?? prev.customUniversity,
+      }))
+    }
+  }, [])
+
+  const draftPayload = useMemo(() => ({
+    form: {
+      fullName: form.fullName,
+      email: form.email,
+      phone: form.phone,
+      role: form.role,
+      universityId: form.universityId,
+      customUniversity: form.customUniversity,
+    },
+  }), [form.fullName, form.email, form.phone, form.role, form.universityId, form.customUniversity])
+
+  const { restored: draftRestored, savedLabel, clearDraft, dismissRestored } = useFormDraft(
+    draftKey,
+    draftPayload,
+    handleDraftRestore
+  )
+
   const { signUp } = useAuth()
   const navigate = useNavigate()
 
@@ -128,15 +163,18 @@ export default function Register() {
       }
 
       if (data.user && !data.session) {
+        clearDraft()
         navigate('/check-email', { state: { email: form.email.trim() } })
         return
       }
 
       if (data.user && !data.user.email_confirmed_at && !data.user.confirmed_at) {
+        clearDraft()
         navigate('/check-email', { state: { email: form.email.trim() } })
         return
       }
 
+      clearDraft()
       navigate(getPostAuthPath({ role: form.role, verification_status: form.role === 'landlord' ? 'none' : 'approved' }))
     } catch (err) {
       setError(mapAuthError(err.message, validationMessages))
@@ -190,6 +228,25 @@ export default function Register() {
       </div>
 
       <div className="mt-6 space-y-4 rounded-xl border border-border bg-surface p-6 shadow-sm">
+        {(draftRestored || savedLabel) && (
+          <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-accent/30 bg-accent/5 px-3 py-2 text-xs text-primary">
+            <span>
+              {draftRestored
+                ? t('auth.draftRestored')
+                : t('auth.draftSaved', { time: savedLabel })}
+            </span>
+            <div className="flex gap-2">
+              {draftRestored && (
+                <button type="button" onClick={dismissRestored} className="font-semibold text-accent hover:underline">
+                  {t('auth.draftDismiss')}
+                </button>
+              )}
+              <button type="button" onClick={clearDraft} className="font-semibold text-muted hover:text-error">
+                {t('auth.draftClear')}
+              </button>
+            </div>
+          </div>
+        )}
         <GoogleAuthButton
           onClick={startGoogleAuth}
           loading={googleLoading}

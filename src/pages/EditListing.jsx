@@ -1,14 +1,16 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useNavigate, useParams, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
-import { useUniversities } from '../hooks/useUniversities'
 import { useTranslation } from '../hooks/useTranslation'
 import { getUniversityById } from '../lib/universities'
 import { getUniversityDisplayName } from '../lib/universityNames'
 import {
   AMENITIES, ROOM_TYPES, GENDER_PREFERENCES, UTILITIES_OPTIONS, calculateDistance,
 } from '../lib/utils'
+import { validateListingForm, normalizeListingPhone } from '../lib/listingValidation'
+import { getDraftKey, loadDraft } from '../lib/formDrafts'
+import { useFormDraft } from '../hooks/useFormDraft'
 import { UniversitySelect } from '../components/universities/OtherUniversityModal'
 import Button from '../components/ui/Button'
 import Input, { Select, Textarea } from '../components/ui/Input'
@@ -19,12 +21,37 @@ export default function EditListing() {
   const { id } = useParams()
   const { user } = useAuth()
   const { t } = useTranslation()
-  const { universities } = useUniversities()
   const navigate = useNavigate()
   const [form, setForm] = useState(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [fieldErrors, setFieldErrors] = useState({})
+  const [draftRestored, setDraftRestored] = useState(false)
+
+  const draftKey = useMemo(() => getDraftKey(`listing_edit_${id}`, user?.id), [id, user?.id])
+
+  const validationMessages = useMemo(() => ({
+    titleRequired: t('listingForm.validation.titleRequired'),
+    titleMin: t('listingForm.validation.titleMin'),
+    titleMax: t('listingForm.validation.titleMax'),
+    priceRequired: t('listingForm.validation.priceRequired'),
+    priceRange: t('listingForm.validation.priceRange'),
+    depositInvalid: t('listingForm.validation.depositInvalid'),
+    areaRequired: t('listingForm.validation.areaRequired'),
+    cityRequired: t('listingForm.validation.cityRequired'),
+    universityRequired: t('listingForm.validation.universityRequired'),
+    universityFullNameRequired: t('auth.validation.universityFullNameRequired'),
+    universityFullNameMin: t('auth.validation.universityFullNameMin'),
+    universityNoAbbrev: t('auth.validation.universityNoAbbrev'),
+    universityCityRequired: t('listingForm.validation.universityCityRequired'),
+    pinRequired: t('listingForm.pinRequired'),
+    phoneRequired: t('auth.validation.phoneRequired'),
+    phoneInvalid: t('auth.validation.phoneInvalid'),
+    descriptionRequired: t('listingForm.validation.descriptionRequired'),
+    descriptionMin: t('listingForm.validation.descriptionMin'),
+    descriptionMax: t('listingForm.validation.descriptionMax'),
+  }), [t])
 
   useEffect(() => {
     async function load() {
@@ -36,24 +63,44 @@ export default function EditListing() {
       if (fetchError || !data || data.landlord_id !== user?.id) {
         setError('Listing not found')
       } else {
-        setForm({
+        const isOther = !data.nearest_university_id && data.custom_university_name
+        const dbForm = {
           ...data,
+          nearest_university_id: isOther ? 'other' : String(data.nearest_university_id || ''),
           deposit_pula: data.deposit_pula ?? '',
           utilities_included: data.utilities_included ?? '',
           house_rules: data.house_rules ?? '',
-        })
+          custom_university_name: data.custom_university_name ?? '',
+          custom_university_city: data.custom_university_city ?? '',
+        }
+        const draft = loadDraft(draftKey)
+        if (draft?.form) {
+          setForm({ ...dbForm, ...draft.form })
+          setDraftRestored(true)
+        } else {
+          setForm(dbForm)
+        }
       }
       setLoading(false)
     }
     if (user) load()
-  }, [id, user])
+  }, [id, user, draftKey])
+
+  const { savedLabel, clearDraft } = useFormDraft(
+    draftKey,
+    { form },
+    null,
+    { enabled: Boolean(user?.id && form), debounceMs: 450 }
+  )
 
   function update(field, value) {
     setForm((f) => ({ ...f, [field]: value }))
+    if (fieldErrors[field]) setFieldErrors((prev) => ({ ...prev, [field]: '' }))
   }
 
   function handleLocationChange({ lat, lng }) {
     setForm((f) => ({ ...f, lat, lng }))
+    if (fieldErrors.pin) setFieldErrors((prev) => ({ ...prev, pin: '' }))
   }
 
   function toggleAmenity(amenityId) {
@@ -67,14 +114,19 @@ export default function EditListing() {
 
   async function handleSave(e) {
     e.preventDefault()
-    if (!form.lat || !form.lng) {
-      setError(t('listingForm.pinRequired'))
+    const errors = validateListingForm(form, {}, validationMessages)
+    delete errors.photos
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors)
+      setError(t('listingForm.validation.fixErrors'))
       return
     }
+
     setSaving(true)
     setError('')
     try {
-      const uni = getUniversityById(form.nearest_university_id)
+      const isOther = form.nearest_university_id === 'other'
+      const uni = !isOther ? getUniversityById(form.nearest_university_id) : null
       let distance = form.distance_to_campus
       if (uni && form.lat && form.lng) {
         distance = calculateDistance(Number(form.lat), Number(form.lng), uni.lat, uni.lng)
@@ -83,31 +135,31 @@ export default function EditListing() {
       const { error: updateError } = await supabase
         .from('listings')
         .update({
-          title: form.title,
-          description: form.description,
+          title: form.title.trim(),
+          description: form.description?.trim() || '',
           price: Number(form.price),
           room_type: form.room_type,
           gender_preference: form.gender_preference,
           deposit_pula: form.deposit_pula ? Number(form.deposit_pula) : null,
           utilities_included: form.utilities_included || null,
           house_rules: form.house_rules?.trim() || null,
-          custom_university_city: form.nearest_university_id === 'other'
-            ? form.custom_university_city?.trim() || null
-            : null,
-          address: form.address,
-          area: form.area,
-          city: form.city,
+          address: form.address?.trim() || '',
+          area: form.area?.trim() || '',
+          city: form.city.trim(),
           lat: form.lat ? Number(form.lat) : null,
           lng: form.lng ? Number(form.lng) : null,
-          nearest_university_id: form.nearest_university_id ? Number(form.nearest_university_id) : null,
+          nearest_university_id: isOther ? null : form.nearest_university_id ? Number(form.nearest_university_id) : null,
+          custom_university_name: isOther ? form.custom_university_name?.trim() || null : null,
+          custom_university_city: isOther ? form.custom_university_city?.trim() || null : null,
           distance_to_campus: distance,
           amenities: form.amenities || [],
-          whatsapp_number: form.whatsapp_number,
+          whatsapp_number: normalizeListingPhone(form.whatsapp_number),
           updated_at: new Date().toISOString(),
         })
         .eq('id', id)
 
       if (updateError) throw updateError
+      clearDraft()
       navigate('/landlord')
     } catch (err) {
       setError(err.message)
@@ -126,21 +178,43 @@ export default function EditListing() {
     )
   }
 
-  const isOtherUni = String(form.nearest_university_id) === 'other'
+  const isOtherUni = form.nearest_university_id === 'other'
   const uni = isOtherUni ? null : getUniversityById(form.nearest_university_id)
   const campusCoords = uni?.lat != null && uni?.lng != null
     ? { lat: uni.lat, lng: uni.lng }
     : null
+  const campusZoom = uni?.map_zoom ?? undefined
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-5 sm:px-6 sm:py-8">
       <h1 className="font-display text-3xl font-bold text-primary">Edit listing</h1>
+
+      {(draftRestored || savedLabel) && (
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-accent/30 bg-accent/5 px-3 py-2 text-xs text-primary">
+          <span>
+            {draftRestored
+              ? t('listingForm.draftRestored')
+              : t('listingForm.draftSaved', { time: savedLabel })}
+          </span>
+          <div className="flex gap-2">
+            {draftRestored && (
+              <button type="button" onClick={() => setDraftRestored(false)} className="font-semibold text-accent hover:underline">
+                {t('listingForm.draftDismiss')}
+              </button>
+            )}
+            <button type="button" onClick={clearDraft} className="font-semibold text-muted hover:text-error">
+              {t('listingForm.draftClear')}
+            </button>
+          </div>
+        </div>
+      )}
+
       <form onSubmit={handleSave} className="mt-6 space-y-4 rounded-xl border border-border bg-surface p-5 sm:p-6">
-        <Input label="Title" value={form.title} onChange={(e) => update('title', e.target.value)} required />
+        <Input label="Title" value={form.title} onChange={(e) => update('title', e.target.value)} error={fieldErrors.title} required />
         <Select label="Room type" value={form.room_type} onChange={(e) => update('room_type', e.target.value)}>
           {Object.entries(ROOM_TYPES).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
         </Select>
-        <Input label="Price (Pula)" type="number" value={form.price} onChange={(e) => update('price', e.target.value)} required />
+        <Input label="Price (Pula)" type="number" min="300" value={form.price} onChange={(e) => update('price', e.target.value)} error={fieldErrors.price} required />
         <div>
           <p className="mb-2 text-sm font-medium text-primary">{t('listingForm.genderPreference')}</p>
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
@@ -166,6 +240,7 @@ export default function EditListing() {
           min="0"
           value={form.deposit_pula}
           onChange={(e) => update('deposit_pula', e.target.value)}
+          error={fieldErrors.deposit_pula}
         />
         <Select
           label={t('listingForm.utilities')}
@@ -177,9 +252,9 @@ export default function EditListing() {
             <option key={k} value={k}>{v}</option>
           ))}
         </Select>
-        <Input label="Address" value={form.address} onChange={(e) => update('address', e.target.value)} required />
-        <Input label="Area" value={form.area || ''} onChange={(e) => update('area', e.target.value)} />
-        <Input label="City" value={form.city} onChange={(e) => update('city', e.target.value)} required />
+        <Input label="Address" value={form.address || ''} onChange={(e) => update('address', e.target.value)} hint={t('listingForm.validation.addressHint')} />
+        <Input label="Area" value={form.area || ''} onChange={(e) => update('area', e.target.value)} error={fieldErrors.area} required />
+        <Input label="City" value={form.city} onChange={(e) => update('city', e.target.value)} error={fieldErrors.city} required />
         <UniversitySelect
           value={isOtherUni ? 'other' : String(form.nearest_university_id || '')}
           onChange={(v) => update('nearest_university_id', v === 'other' ? 'other' : v)}
@@ -187,7 +262,12 @@ export default function EditListing() {
           onOtherChange={(v) => update('custom_university_name', v)}
           otherCityValue={form.custom_university_city || ''}
           onOtherCityChange={(v) => update('custom_university_city', v)}
+          error={fieldErrors.nearest_university_id}
+          otherNameError={fieldErrors.custom_university_name}
+          otherCityError={fieldErrors.custom_university_city}
+          required
         />
+        {fieldErrors.pin && <p className="text-xs text-error">{fieldErrors.pin}</p>}
         <LocationPicker
           lat={form.lat}
           lng={form.lng}
@@ -197,14 +277,29 @@ export default function EditListing() {
           universityId={isOtherUni ? 'other' : String(form.nearest_university_id || '')}
           campusCoords={campusCoords}
           campusLabel={uni ? getUniversityDisplayName(uni) : ''}
+          campusZoom={campusZoom}
           customUniversityName={form.custom_university_name || ''}
           customUniversityCity={form.custom_university_city || ''}
           onChange={handleLocationChange}
           hint={t('listingForm.locationHint')}
           universityHint={t('listingForm.universityHint')}
         />
-        <Input label="WhatsApp" value={form.whatsapp_number} onChange={(e) => update('whatsapp_number', e.target.value)} required />
-        <Textarea label="Description" value={form.description || ''} onChange={(e) => update('description', e.target.value)} />
+        <Input
+          label="WhatsApp"
+          value={form.whatsapp_number}
+          onChange={(e) => update('whatsapp_number', e.target.value)}
+          hint={t('listingForm.validation.whatsappHint')}
+          error={fieldErrors.whatsapp_number}
+          required
+        />
+        <Textarea
+          label="Description"
+          value={form.description || ''}
+          onChange={(e) => update('description', e.target.value)}
+          hint={t('listingForm.validation.descriptionHint')}
+          error={fieldErrors.description}
+          required
+        />
         <Textarea
           label={t('listingForm.houseRules')}
           value={form.house_rules || ''}

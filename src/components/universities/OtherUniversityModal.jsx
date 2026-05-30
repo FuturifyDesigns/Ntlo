@@ -116,6 +116,9 @@ export function UniversitySelect({
   onOtherChange,
   otherCityValue = '',
   onOtherCityChange,
+  error,
+  otherNameError,
+  otherCityError,
 }) {
   const { universities } = useUniversities()
   const { t } = useTranslation()
@@ -123,12 +126,18 @@ export function UniversitySelect({
 
   return (
     <div className="space-y-3">
-      <label className="block text-sm font-medium text-primary">{label}</label>
+      <label className="block text-sm font-medium text-primary">
+        {label}
+        {required && <span className="ml-0.5 text-error" aria-hidden="true">*</span>}
+      </label>
       <select
         value={value || ''}
         onChange={(e) => onChange(e.target.value)}
         required={required && !isOther}
-        className="w-full rounded-lg border border-border bg-surface px-4 py-2.5 text-sm text-primary outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+        aria-invalid={Boolean(error)}
+        className={`w-full rounded-lg border bg-surface px-4 py-2.5 text-sm text-primary outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 ${
+          error ? 'border-error' : 'border-border'
+        }`}
       >
         <option value="">{t('universities.selectUniversity')}</option>
         {universities.map((u) => (
@@ -136,6 +145,7 @@ export function UniversitySelect({
         ))}
         {allowOther && <option value="other">{t('filter.otherUniversity')}</option>}
       </select>
+      {error && <p className="text-xs text-error">{error}</p>}
       {isOther && (
         <>
           <Input
@@ -144,6 +154,7 @@ export function UniversitySelect({
             onChange={(e) => onOtherChange?.(e.target.value)}
             placeholder={t('universities.fullUniversityNamePlaceholder')}
             required
+            error={otherNameError}
           />
           <Input
             label={t('universities.universityCity')}
@@ -151,6 +162,7 @@ export function UniversitySelect({
             onChange={(e) => onOtherCityChange?.(e.target.value)}
             placeholder={t('universities.universityCityPlaceholder')}
             required
+            error={otherCityError}
           />
           <p className="text-xs text-muted">{t('universities.otherFullNameHint')}</p>
         </>

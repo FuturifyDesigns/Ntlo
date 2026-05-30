@@ -20,7 +20,8 @@ import {
   getMapListingPosition,
   toLatLng,
 } from '../../lib/googleMaps'
-import { geocodeWithGoogle, resolveAddressCoords } from '../../lib/geocodeAddress'
+import { geocodeWithGoogle, resolveAddressCoords, resolveUniversityCampusCoords } from '../../lib/geocodeAddress'
+import { applyMapCameraFocus } from '../../lib/mapCamera'
 import { formatPrice } from '../../lib/utils'
 import { useTranslation } from '../../hooks/useTranslation'
 import Button from '../ui/Button'
@@ -315,20 +316,12 @@ function MapCameraController({ command, disabledRef, programmaticRef }) {
     if (!map || !command || disabledRef?.current) return
 
     programmaticRef.current = true
-    const { campus, pin, zoom } = command
-
-    if (campus && pin) {
-      const bounds = new google.maps.LatLngBounds()
-      bounds.extend(campus)
-      bounds.extend(pin)
-      map.fitBounds(bounds, 56)
-    } else {
-      const target = pin || campus
-      if (target) {
-        map.panTo(target)
-        map.setZoom(zoom ?? (pin ? SINGLE_LISTING_ZOOM : CAMPUS_MAP_ZOOM))
-      }
-    }
+    applyMapCameraFocus(map, {
+      campus: command.campus,
+      pin: command.pin,
+      campusZoom: command.campusZoom,
+      pinZoom: command.pinZoom,
+    })
 
     const idle = map.addListener('idle', () => {
       programmaticRef.current = false
@@ -390,6 +383,7 @@ export function LocationPicker({
   universityId = '',
   campusCoords = null,
   campusLabel = '',
+  campusZoom = CAMPUS_MAP_ZOOM,
   customUniversityName = '',
   customUniversityCity = '',
   height = '320px',
@@ -437,8 +431,13 @@ export function LocationPicker({
   const pushCamera = useCallback((payload) => {
     if (userMapControlRef.current) return
     cameraIdRef.current += 1
-    setCameraCommand({ id: cameraIdRef.current, ...payload })
-  }, [])
+    setCameraCommand({
+      id: cameraIdRef.current,
+      campusZoom: campusZoom ?? CAMPUS_MAP_ZOOM,
+      pinZoom: SINGLE_LISTING_ZOOM,
+      ...payload,
+    })
+  }, [campusZoom])
 
   const markPinManual = useCallback(() => {
     pinLockedRef.current = true
@@ -491,7 +490,7 @@ export function LocationPicker({
         setPinLocked(true)
         const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude }
         onChange(coords)
-        pushCamera({ pin: coords, zoom: SINGLE_LISTING_ZOOM })
+        pushCamera({ pin: coords })
         setGeocodeHint(t('listingForm.pinFromGps'))
         setGeoBusy(false)
       },
@@ -538,7 +537,7 @@ export function LocationPicker({
         if (geocoder) {
           const cityResult = await geocodeWithGoogle(geocoder, `${city.trim()}, Botswana`)
           if (cityResult) {
-            pushCamera({ pin: cityResult, zoom: DEFAULT_MAP_ZOOM })
+            pushCamera({ pin: cityResult, pinZoom: DEFAULT_MAP_ZOOM })
           }
         }
         lastAddressKeyRef.current = addressKey
@@ -559,8 +558,8 @@ export function LocationPicker({
         const campus = campusCoordsRef.current || null
         pushCamera(
           campus
-            ? { campus, pin: coords, zoom: SINGLE_LISTING_ZOOM }
-            : { pin: coords, zoom: SINGLE_LISTING_ZOOM }
+            ? { campus, pin: coords }
+            : { pin: coords }
         )
         setGeocodeHint(t('listingForm.pinFromAddress'))
         setGeoError('')
@@ -585,21 +584,16 @@ export function LocationPicker({
 
     const timer = setTimeout(async () => {
       const uniCity = customUniversityCity?.trim() || city?.trim() || 'Botswana'
-      const result = await resolveAddressCoords({
+      const result = await resolveUniversityCampusCoords({
         geocoder,
-        address: customUniversityName.trim(),
+        name: customUniversityName.trim(),
         city: uniCity,
       })
       if (result) {
         const campus = { lat: result.lat, lng: result.lng }
         setOtherCampus(campus)
         allowCamera()
-        const pin = toLatLng(latRef.current, lngRef.current)
-        pushCamera(
-          pin
-            ? { campus, pin, zoom: SINGLE_LISTING_ZOOM }
-            : { campus, zoom: CAMPUS_MAP_ZOOM }
-        )
+        pushCamera({ campus })
       }
     }, 700)
 
@@ -618,12 +612,7 @@ export function LocationPicker({
 
     prevUniversityIdRef.current = universityId
     allowCamera()
-    const pin = toLatLng(latRef.current, lngRef.current)
-    pushCamera(
-      pin
-        ? { campus, pin, zoom: SINGLE_LISTING_ZOOM }
-        : { campus, zoom: CAMPUS_MAP_ZOOM }
-    )
+    pushCamera({ campus })
   }, [universityId, allowCamera, pushCamera])
 
   const activeCampus = universityId === 'other' ? otherCampus : campusCoords

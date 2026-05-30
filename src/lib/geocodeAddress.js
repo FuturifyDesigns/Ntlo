@@ -1,40 +1,128 @@
-/** Build geocode query strings from listing address fields. */
+import { normalizeUniversityName } from './universityNames'
+
+const CAMPUS_TYPES = new Set([
+  'university',
+  'school',
+  'primary_school',
+  'secondary_school',
+  'establishment',
+])
+
+const LOCATION_PRECISION = {
+  ROOFTOP: 4,
+  RANGE_INTERPOLATED: 3,
+  GEOMETRIC_CENTER: 2,
+  APPROXIMATE: 1,
+}
+
+function pickBestGoogleResult(results) {
+  if (!results?.length) return null
+  let best = results[0]
+  let bestScore = -1
+
+  for (const result of results) {
+    const precision = LOCATION_PRECISION[result.geometry?.location_type] ?? 0
+    const campusBoost = result.types?.some((t) => CAMPUS_TYPES.has(t)) ? 2 : 0
+    const score = precision + campusBoost
+    if (score > bestScore) {
+      best = result
+      bestScore = score
+    }
+  }
+
+  return best
+}
+
+/** Build geocode query strings from listing address fields — many variants for obscure names. */
 export function buildAddressQueries({ address, area, city, universityCity, country = 'Botswana' }) {
   const cityPart = (city || universityCity || '').trim()
-  const parts = [address, area].map((s) => s?.trim()).filter(Boolean)
+  const addr = address?.trim() || ''
+  const areaPart = area?.trim() || ''
+  const parts = [addr, areaPart].filter(Boolean)
   const locationLine = parts.join(', ')
 
   if (!locationLine && !cityPart) return []
 
   const queries = []
+
   if (locationLine && cityPart) {
     queries.push(`${locationLine}, ${cityPart}, ${country}`)
     queries.push(`${locationLine}, ${cityPart}`)
+    if (areaPart && addr) {
+      queries.push(`${areaPart}, ${addr}, ${cityPart}, ${country}`)
+    }
   }
   if (locationLine) queries.push(`${locationLine}, ${country}`)
-  if (area?.trim() && cityPart) queries.push(`${area.trim()}, ${cityPart}, ${country}`)
+  if (areaPart && cityPart) {
+    queries.push(`${areaPart}, ${cityPart}, ${country}`)
+    queries.push(`${areaPart}, ${cityPart}`)
+    // Plot/block style addresses in Botswana
+    if (/^plot\s/i.test(areaPart) || /^block\s/i.test(areaPart)) {
+      queries.push(`${areaPart.replace(/^(plot|block)\s+/i, '')}, ${cityPart}, ${country}`)
+    }
+  }
+  if (addr && cityPart && !areaPart) {
+    queries.push(`${addr}, ${cityPart}, ${country}`)
+  }
   if (cityPart) queries.push(`${cityPart}, ${country}`)
+
+  // Strip parenthetical notes and retry
+  const cleaned = locationLine.replace(/\([^)]*\)/g, '').replace(/\s+/g, ' ').trim()
+  if (cleaned && cleaned !== locationLine && cityPart) {
+    queries.push(`${cleaned}, ${cityPart}, ${country}`)
+  }
+
+  return [...new Set(queries.filter(Boolean))]
+}
+
+/** Build queries for custom / unknown university campus names. */
+export function buildUniversityCampusQueries({ name, city, country = 'Botswana' }) {
+  const campusName = normalizeUniversityName(name?.trim() || '')
+  const cityPart = normalizeUniversityName(city?.trim() || '') || country
+  if (!campusName) return []
+
+  const queries = [
+    `${campusName}, ${cityPart}, ${country}`,
+    `${campusName}, ${country}`,
+    `${campusName}, ${cityPart}`,
+  ]
+
+  if (!/\b(university|college|institute|polytechnic|campus)\b/i.test(campusName)) {
+    queries.push(`${campusName} university, ${cityPart}, ${country}`)
+    queries.push(`${campusName} college, ${cityPart}, ${country}`)
+    queries.push(`${campusName} campus, ${cityPart}, ${country}`)
+  }
 
   return [...new Set(queries)]
 }
 
 /** Google Maps JS Geocoder (works in browser — no CORS). */
-export function geocodeWithGoogle(geocoder, query) {
+export function geocodeWithGoogle(geocoder, query, { preferCampus = false } = {}) {
   if (!geocoder || !query?.trim()) return Promise.resolve(null)
 
   return new Promise((resolve) => {
     geocoder.geocode(
       { address: query.trim(), componentRestrictions: { country: 'BW' } },
       (results, status) => {
-        if (status !== 'OK' || !results?.[0]?.geometry?.location) {
+        if (status !== 'OK' || !results?.length) {
           resolve(null)
           return
         }
-        const loc = results[0].geometry.location
+        const campusResults = results.filter((r) =>
+          r.types?.some((t) => CAMPUS_TYPES.has(t))
+        )
+        const picked = preferCampus
+          ? pickBestGoogleResult(campusResults.length ? campusResults : results)
+          : pickBestGoogleResult(results)
+        if (!picked?.geometry?.location) {
+          resolve(null)
+          return
+        }
+        const loc = picked.geometry.location
         resolve({
           lat: loc.lat(),
           lng: loc.lng(),
-          formatted: results[0].formatted_address,
+          formatted: picked.formatted_address,
           source: 'google',
         })
       }
@@ -50,7 +138,7 @@ export async function geocodeWithNominatim(query) {
     const url = new URL('https://nominatim.openstreetmap.org/search')
     url.searchParams.set('q', query.trim())
     url.searchParams.set('format', 'json')
-    url.searchParams.set('limit', '1')
+    url.searchParams.set('limit', '3')
     url.searchParams.set('countrycodes', 'bw')
 
     const res = await fetch(url.toString(), {
@@ -61,10 +149,11 @@ export async function geocodeWithNominatim(query) {
     const data = await res.json()
     if (!data?.[0]) return null
 
+    const best = data[0]
     return {
-      lat: Number(data[0].lat),
-      lng: Number(data[0].lon),
-      formatted: data[0].display_name,
+      lat: Number(best.lat),
+      lng: Number(best.lon),
+      formatted: best.display_name,
       source: 'nominatim',
     }
   } catch {
@@ -78,6 +167,23 @@ export async function resolveAddressCoords({ geocoder, address, area, city, univ
 
   for (const query of queries) {
     const google = geocoder ? await geocodeWithGoogle(geocoder, query) : null
+    if (google) return google
+  }
+
+  for (const query of queries) {
+    const osm = await geocodeWithNominatim(query)
+    if (osm) return osm
+  }
+
+  return null
+}
+
+/** Geocode a university / campus name (for "Other" university or obscure institutions). */
+export async function resolveUniversityCampusCoords({ geocoder, name, city }) {
+  const queries = buildUniversityCampusQueries({ name, city })
+
+  for (const query of queries) {
+    const google = geocoder ? await geocodeWithGoogle(geocoder, query, { preferCampus: true }) : null
     if (google) return google
   }
 

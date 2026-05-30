@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useAuth } from '../hooks/useAuth'
@@ -12,6 +12,8 @@ import AuthTransitionOverlay from '../components/auth/AuthTransitionOverlay'
 import { UniversitySelect } from '../components/universities/OtherUniversityModal'
 import { getPostAuthPath } from '../lib/verification'
 import { consumeOAuthNewSignup } from '../lib/oauthStorage'
+import { getDraftKey } from '../lib/formDrafts'
+import { useFormDraft } from '../hooks/useFormDraft'
 
 export default function CompleteProfile() {
   const [searchParams] = useSearchParams()
@@ -28,6 +30,22 @@ export default function CompleteProfile() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [transitioning, setTransitioning] = useState(false)
+
+  const draftKey = useMemo(() => getDraftKey('complete_profile', user?.id), [user?.id])
+
+  const handleDraftRestore = useCallback((draft) => {
+    if (draft.role) setRole(draft.role)
+    if (draft.phone) setPhone(draft.phone)
+    if (draft.universityId) setUniversityId(draft.universityId)
+    if (draft.customUniversity) setCustomUniversity(draft.customUniversity)
+  }, [])
+
+  const { restored: draftRestored, savedLabel, clearDraft, dismissRestored } = useFormDraft(
+    draftKey,
+    { role, phone, universityId, customUniversity },
+    handleDraftRestore,
+    { enabled: Boolean(user?.id) }
+  )
 
   const validationMessages = {
     phoneRequired: t('auth.validation.phoneRequired'),
@@ -100,6 +118,7 @@ export default function CompleteProfile() {
       })
 
       await refreshProfile()
+      clearDraft()
       setTransitioning(true)
 
       if (consumeOAuthNewSignup()) {
@@ -170,6 +189,25 @@ export default function CompleteProfile() {
         </div>
 
         <form onSubmit={handleSubmit} className="mt-6 space-y-4 rounded-xl border border-border bg-surface p-6 shadow-sm" noValidate>
+          {(draftRestored || savedLabel) && (
+            <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-accent/30 bg-accent/5 px-3 py-2 text-xs text-primary">
+              <span>
+                {draftRestored
+                  ? t('auth.draftRestored')
+                  : t('auth.draftSaved', { time: savedLabel })}
+              </span>
+              <div className="flex gap-2">
+                {draftRestored && (
+                  <button type="button" onClick={dismissRestored} className="font-semibold text-accent hover:underline">
+                    {t('auth.draftDismiss')}
+                  </button>
+                )}
+                <button type="button" onClick={clearDraft} className="font-semibold text-muted hover:text-error">
+                  {t('auth.draftClear')}
+                </button>
+              </div>
+            </div>
+          )}
           <Input
             label={t('auth.phone')}
             type="tel"
