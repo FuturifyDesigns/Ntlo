@@ -9,6 +9,7 @@ import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
 import PasswordInput from '../components/ui/PasswordInput'
 import GoogleAuthButton from '../components/auth/GoogleAuthButton'
+import AuthTransitionOverlay from '../components/auth/AuthTransitionOverlay'
 import { getPostAuthPath } from '../lib/verification'
 
 export default function Login() {
