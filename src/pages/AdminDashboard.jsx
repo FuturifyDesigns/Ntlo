@@ -17,6 +17,8 @@ import { createUniversityFromRequest } from '../lib/adminUniversities'
 import AdminAdvisorPanel from '../components/admin/AdminAdvisorPanel'
 import VerificationCard from '../components/admin/VerificationCard'
 import DocumentPreviewModal from '../components/admin/DocumentPreviewModal'
+import AdminActionModal from '../components/admin/AdminActionModal'
+import AdminToast from '../components/admin/AdminToast'
 
 const TABS = [
   { id: 'requests', icon: GraduationCap, labelKey: 'admin.tabRequests' },
@@ -47,6 +49,8 @@ export default function AdminDashboard() {
   const [preview, setPreview] = useState(null)
   const [userSearch, setUserSearch] = useState('')
   const [roleFilter, setRoleFilter] = useState('all')
+  const [dialog, setDialog] = useState(null)
+  const [toast, setToast] = useState(null)
 
   const selectTab = useCallback((id) => {
     setTab(id)
@@ -158,39 +162,103 @@ export default function AdminDashboard() {
   }
 
   async function toggleBan(userId, currentlyBanned) {
-    const reason = currentlyBanned ? null : window.prompt(t('admin.banReasonPrompt'))
-    if (!currentlyBanned && reason === null) return
-    await runAction(async () => {
-      const { error } = await supabase.rpc('admin_set_ban', {
-        target_id: userId,
-        banned: !currentlyBanned,
-        reason: reason || null,
-      })
-      if (error) throw error
-      await fetchUsers()
+    if (currentlyBanned) {
+      setActionError('')
+      try {
+        const { error } = await supabase.rpc('admin_set_ban', {
+          target_id: userId,
+          banned: false,
+          reason: null,
+        })
+        if (error) throw error
+        await fetchUsers()
+        setToast({ type: 'success', message: t('admin.dialog.unbanned') })
+      } catch (err) {
+        setActionError(err.message || t('admin.actionFailed'))
+      }
+      return
+    }
+    setDialog({
+      mode: 'prompt',
+      title: t('admin.dialog.banTitle'),
+      placeholder: t('admin.banReasonPrompt'),
+      confirmLabel: t('admin.ban'),
+      confirmVariant: 'danger',
+      onConfirm: async (reason) => {
+        const { error } = await supabase.rpc('admin_set_ban', {
+          target_id: userId,
+          banned: true,
+          reason: reason || null,
+        })
+        if (error) throw error
+        await fetchUsers()
+        setToast({ type: 'success', message: t('admin.dialog.banned') })
+      },
     })
   }
 
-  async function deleteUser(userId, name) {
-    if (!window.confirm(t('admin.deleteConfirm', { name }))) return
-    await runAction(async () => {
-      const { error } = await supabase.rpc('admin_delete_user', { target_id: userId })
-      if (error) throw error
-      await fetchUsers()
+  function openDeleteUser(userId, name) {
+    setDialog({
+      mode: 'confirm',
+      title: t('admin.dialog.deleteTitle'),
+      description: t('admin.deleteConfirm', { name }),
+      confirmLabel: t('admin.dialog.deleteConfirmBtn'),
+      confirmVariant: 'danger',
+      onConfirm: async () => {
+        const { error } = await supabase.rpc('admin_delete_user', { target_id: userId })
+        if (error) throw error
+        await fetchUsers()
+        setToast({ type: 'success', message: t('admin.dialog.deleted') })
+      },
     })
   }
 
-  async function reviewLandlord(userId, approved) {
-    const notes = window.prompt(approved ? t('admin.approveNotes') : t('admin.rejectNotes')) || null
-    await runAction(async () => {
-      const { error } = await supabase.rpc('admin_review_landlord', {
-        target_id: userId,
-        approved,
-        notes,
-      })
-      if (error) throw error
-      await fetchLandlords()
-      await fetchUsers()
+  function openReviewLandlord(item, approved) {
+    setDialog({
+      mode: 'prompt',
+      title: approved ? t('admin.dialog.approveLandlord') : t('admin.dialog.rejectLandlord'),
+      subtitle: item.full_name,
+      placeholder: approved ? t('admin.approveNotes') : t('admin.rejectNotes'),
+      confirmLabel: approved ? t('admin.approve') : t('admin.reject'),
+      confirmVariant: approved ? 'primary' : 'danger',
+      onConfirm: async (notes) => {
+        const { error } = await supabase.rpc('admin_review_landlord', {
+          target_id: item.id,
+          approved,
+          notes,
+        })
+        if (error) throw error
+        await fetchLandlords()
+        await fetchUsers()
+        setToast({
+          type: 'success',
+          message: approved ? t('admin.dialog.landlordApproved') : t('admin.dialog.landlordRejected'),
+        })
+      },
+    })
+  }
+
+  function openReviewListing(item, approved) {
+    setDialog({
+      mode: 'prompt',
+      title: approved ? t('admin.dialog.approveListing') : t('admin.dialog.rejectListing'),
+      subtitle: item.title,
+      placeholder: approved ? t('admin.approveNotes') : t('admin.rejectNotes'),
+      confirmLabel: approved ? t('admin.verifyListing') : t('admin.reject'),
+      confirmVariant: approved ? 'primary' : 'danger',
+      onConfirm: async (notes) => {
+        const { error } = await supabase.rpc('admin_review_listing', {
+          target_listing_id: item.id,
+          approved,
+          notes,
+        })
+        if (error) throw error
+        await fetchListings()
+        setToast({
+          type: 'success',
+          message: approved ? t('admin.dialog.listingApproved') : t('admin.dialog.listingRejected'),
+        })
+      },
     })
   }
 
@@ -220,19 +288,6 @@ export default function AdminDashboard() {
     }
     await fetchLandlords()
     await fetchListings()
-  }
-
-  async function reviewListing(listingId, approved) {
-    const notes = window.prompt(approved ? t('admin.approveNotes') : t('admin.rejectNotes')) || null
-    await runAction(async () => {
-      const { error } = await supabase.rpc('admin_review_listing', {
-        target_listing_id: listingId,
-        approved,
-        notes,
-      })
-      if (error) throw error
-      await fetchListings()
-    })
   }
 
   const pendingRequests = useMemo(() => requests.filter((r) => r.status === 'pending'), [requests])
@@ -468,7 +523,7 @@ export default function AdminDashboard() {
                                 <Button
                                   size="sm"
                                   variant="danger"
-                                  onClick={() => deleteUser(u.id, u.full_name)}
+                                  onClick={() => openDeleteUser(u.id, u.full_name)}
                                 >
                                   <Trash2 size={14} />
                                 </Button>
@@ -501,8 +556,8 @@ export default function AdminDashboard() {
                     analysis={analysis}
                     kind="landlord"
                     onOpenDocs={(docs, index, name) => setPreview({ docs, index, name })}
-                    onApprove={() => reviewLandlord(item.id, true)}
-                    onReject={() => reviewLandlord(item.id, false)}
+                    onApprove={() => openReviewLandlord(item, true)}
+                    onReject={() => openReviewLandlord(item, false)}
                     onRequestChanges={requestDocChanges}
                     onMarkOk={(docId) => setDocStatus(docId, 'approved')}
                     onUnmarkOk={(docId) => setDocStatus(docId, 'pending')}
@@ -529,8 +584,8 @@ export default function AdminDashboard() {
                     analysis={analysis}
                     kind="listing"
                     onOpenDocs={(docs, index, name) => setPreview({ docs, index, name })}
-                    onApprove={() => reviewListing(item.id, true)}
-                    onReject={() => reviewListing(item.id, false)}
+                    onApprove={() => openReviewListing(item, true)}
+                    onReject={() => openReviewListing(item, false)}
                     onRequestChanges={requestDocChanges}
                     onMarkOk={(docId) => setDocStatus(docId, 'approved')}
                     onUnmarkOk={(docId) => setDocStatus(docId, 'pending')}
@@ -549,6 +604,21 @@ export default function AdminDashboard() {
           subjectName={preview.name}
           onIndex={(index) => setPreview((p) => ({ ...p, index }))}
           onClose={() => setPreview(null)}
+        />
+      )}
+
+      {dialog && (
+        <AdminActionModal
+          {...dialog}
+          onClose={() => setDialog(null)}
+        />
+      )}
+
+      {toast && (
+        <AdminToast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
         />
       )}
     </motion.div>
