@@ -8,7 +8,7 @@ export function useSavedListings() {
   const [savedListings, setSavedListings] = useState([])
   const [loading, setLoading] = useState(true)
 
-  const fetchSaved = useCallback(async () => {
+  const fetchSaved = useCallback(async ({ silent = false } = {}) => {
     if (!user) {
       setSavedIds(new Set())
       setSavedListings([])
@@ -16,7 +16,7 @@ export function useSavedListings() {
       return
     }
 
-    setLoading(true)
+    if (!silent) setLoading(true)
     try {
       const { data, error } = await supabase
         .from('saved_listings')
@@ -28,7 +28,7 @@ export function useSavedListings() {
             distance_to_campus, available, is_verified, landlord_verified, landlord_display_name, amenities,
             nearest_university_id, gender_preference,
             nearest_university:universities(id, short_name, name, lat, lng),
-            cover_photo:listing_photos(url, is_cover)
+            listing_photos(url, is_cover, display_order)
           )
         `
         )
@@ -58,7 +58,7 @@ export function useSavedListings() {
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'saved_listings', filter: `student_id=eq.${user.id}` },
-        () => fetchSaved()
+        () => fetchSaved({ silent: true })
       )
       .subscribe()
 
@@ -89,7 +89,7 @@ export function useSavedListings() {
       .insert({ student_id: user.id, listing_id: listingId })
     if (error) throw error
     setSavedIds((prev) => new Set([...prev, listingId]))
-    await fetchSaved()
+    await fetchSaved({ silent: true })
     return { saved: true }
   }
 

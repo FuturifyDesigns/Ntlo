@@ -59,7 +59,7 @@ export function useListings(filters = {}) {
           created_at, views,
           nearest_university_id, custom_university_name,
           nearest_university:universities(id, short_name, name, lat, lng),
-          cover_photo:listing_photos(url, is_cover)
+          listing_photos(url, is_cover, display_order)
         `,
           { count: 'exact' }
         )

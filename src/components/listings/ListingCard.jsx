@@ -1,7 +1,8 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { Heart } from 'lucide-react'
 import { useState } from 'react'
-import { formatPrice, formatDistance, getCoverPhoto, getNearestUniversity, ROOM_TYPES, AMENITIES, cn } from '../../lib/utils'
+import { formatPrice, formatDistance, getListingPhotos, getNearestUniversity, ROOM_TYPES, AMENITIES, cn } from '../../lib/utils'
+import PhotoCarousel from './PhotoCarousel'
 import * as LucideIcons from 'lucide-react'
 import { useSavedListingsContext } from '../../context/SavedListingsContext'
 import { useAuth } from '../../hooks/useAuth'
@@ -12,9 +13,7 @@ import { IconLocation } from '../ui/Icons'
 import TrustedBadge from '../trust/TrustedBadge'
 import { resolveListingTrustBadge } from '../../lib/tierBenefits'
 
-const PLACEHOLDER = 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80'
-
-export default function ListingCard({ listing, compact = false }) {
+export default function ListingCard({ listing, compact = false, carouselIndex = 0 }) {
   const { user } = useAuth()
   const { isSaved, toggleSave } = useSavedListingsContext()
   const navigate = useNavigate()
@@ -22,7 +21,7 @@ export default function ListingCard({ listing, compact = false }) {
   const [saving, setSaving] = useState(false)
 
   const uni = getNearestUniversity(listing)
-  const coverUrl = getCoverPhoto(listing) || PLACEHOLDER
+  const listingPhotos = getListingPhotos(listing)
   const saved = isSaved(listing.id)
   const trustLevel = resolveListingTrustBadge(listing)
 
@@ -45,13 +44,17 @@ export default function ListingCard({ listing, compact = false }) {
     <Link to={`/listings/${listing.id}`} className="group block h-full">
       <article className="card-elevated flex h-full flex-col overflow-hidden">
         <div className="relative aspect-[4/3] overflow-hidden bg-background">
-          <img
-            src={coverUrl}
-            alt={listing.title}
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
-            loading="lazy"
+          <PhotoCarousel
+            photos={listingPhotos}
+            compact
+            showArrows={false}
+            showDots={false}
+            startDelay={carouselIndex * 600}
+            className="h-full rounded-none"
+            aspectClass="h-full w-full"
+            altPrefix={listing.title}
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-primary/50 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-primary/50 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 
           {uni && (
             <div className="absolute left-3 top-3">

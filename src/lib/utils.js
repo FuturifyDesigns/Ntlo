@@ -87,12 +87,16 @@ export function relativeTimeParts(dateInput) {
 }
 
 export function getCoverPhoto(listing) {
-  if (listing?.cover_photo?.length) return listing.cover_photo[0]?.url
-  if (listing?.listing_photos?.length) {
-    const cover = listing.listing_photos.find((p) => p.is_cover)
-    return cover?.url || listing.listing_photos[0]?.url
-  }
-  return null
+  const photos = getListingPhotos(listing)
+  if (!photos.length) return null
+  const cover = photos.find((p) => p.is_cover)
+  return cover?.url || photos[0]?.url
+}
+
+export function getListingPhotos(listing) {
+  if (listing?.listing_photos?.length) return listing.listing_photos
+  if (listing?.cover_photo?.length) return listing.cover_photo
+  return []
 }
 
 export function getNearestUniversity(listing) {

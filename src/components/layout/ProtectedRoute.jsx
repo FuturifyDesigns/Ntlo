@@ -7,11 +7,16 @@ export default function ProtectedRoute({ children, role, requireLandlordVerified
   const { user, profile, loading, profileLoading, isBanned } = useAuth()
   const location = useLocation()
 
-  if (loading || (user && profileLoading)) {
+  if (loading || (user && !profile && profileLoading)) {
     return (
-      <div className="mx-auto max-w-7xl px-4 py-12">
-        <Skeleton className="mb-6 h-8 w-48" />
-        <Skeleton className="h-64 w-full" />
+      <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 sm:py-8 lg:px-8">
+        <Skeleton className="mb-6 h-9 w-56" />
+        <Skeleton className="mb-4 h-5 w-40" />
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {[1, 2, 3].map((i) => (
+            <Skeleton key={i} className="aspect-[4/3] w-full" />
+          ))}
+        </div>
       </div>
     )
   }

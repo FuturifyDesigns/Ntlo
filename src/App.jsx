@@ -44,6 +44,8 @@ import { SavedListingsProvider } from './context/SavedListingsContext'
 import { useLocale } from './context/LocaleContext'
 import { useTranslation } from './hooks/useTranslation'
 
+const TAB_ROUTES = new Set(['/', '/listings', '/universities', '/student', '/landlord'])
+
 function scrollToTop() {
   if (typeof window === 'undefined') return
   window.scrollTo(0, 0)
@@ -54,27 +56,19 @@ function scrollToTop() {
 function AppRoutes() {
   const location = useLocation()
   const { prefs } = useLocale()
+  const isTabRoute = TAB_ROUTES.has(location.pathname)
   const isAuthRoute = ['/login', '/register', '/forgot-password', '/complete-profile', '/check-email'].includes(location.pathname)
   const isDashboardRoute = location.pathname === '/student' || location.pathname === '/landlord' || location.pathname.startsWith('/landlord/') || location.pathname === '/admin'
   const transition = isAuthRoute || isDashboardRoute
-    ? { duration: prefs.reduceMotion ? 0 : 0.15, ease: 'easeOut' }
-    : { duration: prefs.reduceMotion ? 0 : 0.22, ease: 'easeInOut' }
+    ? { duration: prefs.reduceMotion ? 0 : 0.2, ease: [0.22, 1, 0.36, 1] }
+    : { duration: prefs.reduceMotion ? 0 : 0.28, ease: [0.22, 1, 0.36, 1] }
 
-  // With animations off there's no exit phase, so reset scroll on path change.
   useEffect(() => {
-    if (prefs.reduceMotion) scrollToTop()
-  }, [location.pathname, prefs.reduceMotion])
+    if (prefs.reduceMotion || isTabRoute) scrollToTop()
+  }, [location.pathname, prefs.reduceMotion, isTabRoute])
 
-  return (
-    <AnimatePresence mode="wait" onExitComplete={scrollToTop}>
-      <motion.div
-        key={location.pathname}
-        initial={prefs.reduceMotion ? false : { opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={prefs.reduceMotion ? false : { opacity: 0 }}
-        transition={transition}
-      >
-        <Routes location={location}>
+  const routes = (
+    <Routes location={location}>
           <Route path="/" element={<Home />} />
           <Route path="/listings" element={<Browse />} />
           <Route path="/listings/:id" element={<ListingDetail />} />
@@ -96,7 +90,24 @@ function AppRoutes() {
           <Route path="/landlord/listings/new" element={<ProtectedRoute role="landlord" requireLandlordVerified><CreateListing /></ProtectedRoute>} />
           <Route path="/landlord/listings/:id/edit" element={<ProtectedRoute role="landlord" requireLandlordVerified><EditListing /></ProtectedRoute>} />
           <Route path="*" element={<NotFound />} />
-        </Routes>
+    </Routes>
+  )
+
+  // Main nav tabs swap instantly — no blank fade between Home, Browse, Saved, etc.
+  if (isTabRoute || prefs.reduceMotion) {
+    return routes
+  }
+
+  return (
+    <AnimatePresence mode="wait" onExitComplete={scrollToTop}>
+      <motion.div
+        key={location.pathname}
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -4 }}
+        transition={transition}
+      >
+        {routes}
       </motion.div>
     </AnimatePresence>
   )
