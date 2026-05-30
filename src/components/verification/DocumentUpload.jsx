@@ -57,9 +57,17 @@ export default function DocumentUpload({
           </div>
           {description && <p className="mt-1 text-sm text-muted">{description}</p>}
           {uploaded && !flagged && (
-            <p className={`mt-2 truncate text-xs ${approved ? 'text-success' : 'text-muted'}`}>
-              {uploaded.file_name || t('verification.uploaded')}
-            </p>
+            <>
+              <p className="mt-2 truncate text-xs text-muted">
+                {uploaded.file_name || t('verification.uploaded')}
+              </p>
+              {approved && (
+                <p className="mt-1 inline-flex items-center gap-1 text-xs font-semibold text-success">
+                  <CheckCircle size={12} />
+                  {t('verification.docApproved')}
+                </p>
+              )}
+            </>
           )}
           {flagged && (
             <div className="mt-2 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2">

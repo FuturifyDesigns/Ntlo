@@ -4,12 +4,12 @@ import {
   Check, X, Sparkles, ThumbsUp, AlertTriangle, Lightbulb, Clock,
   CreditCard, Camera, Home, FileSignature, MapPin, Building2,
   Receipt, Zap, ScrollText, FileText, ScanSearch, Loader2,
-  CheckCircle2, XCircle, Info, ChevronDown, MessageSquare, RotateCcw, Clock3, Eye,
+  CheckCircle2, XCircle, Info, ChevronDown, MessageSquare, RotateCcw, Clock3, Eye, ShieldAlert,
 } from 'lucide-react'
 import { useTranslation } from '../../hooks/useTranslation'
 import { useNow } from '../../hooks/useNow'
 import { getScoreColor } from '../../lib/aiAdvisor'
-import { isImagePath, isPdfPath, groupDocVersions, combineReadiness } from '../../lib/adminAdvisor'
+import { isImagePath, isPdfPath, groupDocVersions, combineReadiness, ACCEPT_THRESHOLD } from '../../lib/adminAdvisor'
 import { relativeTimeParts } from '../../lib/utils'
 import { getSignedDocUrl } from '../../lib/verificationStorage'
 import { recognizeImage } from '../../lib/ocr'
@@ -57,7 +57,9 @@ function initials(name = '?') {
   return name.trim().split(/\s+/).slice(0, 2).map((w) => w[0]?.toUpperCase()).join('') || '?'
 }
 
-export default function VerificationCard({ subject, analysis, kind, onOpenDocs, onApprove, onReject, onRequestChanges }) {
+export default function VerificationCard({
+  subject, analysis, kind, onOpenDocs, onApprove, onReject, onRequestChanges, onMarkOk, onUnmarkOk,
+}) {
   const { t } = useTranslation()
   useNow()
   const allDocs = useMemo(() => subject.docs || [], [subject.docs])
@@ -74,9 +76,24 @@ export default function VerificationCard({ subject, analysis, kind, onOpenDocs, 
   const [scanError, setScanError] = useState('')
   const [showReport, setShowReport] = useState(true)
   const [changeDoc, setChangeDoc] = useState(null)
+  const [confirmApprove, setConfirmApprove] = useState(false)
 
   const scanned = Object.keys(results).length > 0
   const readiness = combineReadiness(analysis, currentDocs, results)
+
+  const requireAllOk = kind === 'landlord'
+  const okCount = currentDocs.filter((d) => d.status === 'approved').length
+  const allMarkedOk = currentDocs.length > 0 && okCount === currentDocs.length
+  const approveBlocked = requireAllOk && !allMarkedOk
+
+  function handleApproveClick() {
+    if (approveBlocked) return
+    if (kind === 'landlord' && readiness.score < ACCEPT_THRESHOLD) {
+      setConfirmApprove(true)
+    } else {
+      onApprove()
+    }
+  }
 
   const time = relativeTimeParts(subject.created_at)
   const timeLabel = time.unit === 'now' ? t('admin.justNow') : t(`admin.${time.unit}Ago`, { count: time.count })
@@ -133,6 +150,43 @@ export default function VerificationCard({ subject, analysis, kind, onOpenDocs, 
     return 'request'
   }
 
+  function MarkOkButton({ doc, compact }) {
+    if (!onMarkOk || doc.status === 'changes_requested') return null
+    const isOk = doc.status === 'approved'
+    if (isOk) {
+      return (
+        <button
+          type="button"
+          onClick={() => onUnmarkOk?.(doc.id)}
+          title={t('admin.markOkUndo')}
+          className={
+            compact
+              ? 'flex h-7 items-center gap-1 rounded-lg border border-success/40 bg-success/10 px-2 text-[10px] font-semibold text-success'
+              : 'inline-flex shrink-0 items-center gap-1 rounded-md border border-success/40 bg-success/10 px-2 py-1 text-[11px] font-semibold text-success'
+          }
+        >
+          <CheckCircle2 size={compact ? 12 : 11} />
+          {t('admin.markedOk')}
+        </button>
+      )
+    }
+    return (
+      <button
+        type="button"
+        onClick={() => onMarkOk(doc.id)}
+        title={t('admin.markOk')}
+        className={
+          compact
+            ? 'flex h-7 items-center gap-1 rounded-lg border border-border px-2 text-[10px] font-semibold text-muted hover:border-success/40 hover:text-success'
+            : 'inline-flex shrink-0 items-center gap-1 rounded-md border border-border px-2 py-1 text-[11px] font-semibold text-muted hover:border-success/40 hover:text-success'
+        }
+      >
+        <Check size={compact ? 12 : 11} />
+        {t('admin.markOk')}
+      </button>
+    )
+  }
+
   function ChangeAction({ doc, index, compact }) {
     if (!onRequestChanges) return null
     const state = changeState(doc)
@@ -155,7 +209,7 @@ export default function VerificationCard({ subject, analysis, kind, onOpenDocs, 
       const viewBtn = (
         <button
           type="button"
-          onClick={() => onOpenDocs(currentDocs, index, name)}
+          onClick={() => onOpenDocs([doc], 0, name)}
           title={t('admin.compliance.viewResubmission')}
           className={
             compact
@@ -332,7 +386,10 @@ export default function VerificationCard({ subject, analysis, kind, onOpenDocs, 
                       <span className={`h-2 w-2 shrink-0 rounded-full ${ds.dot}`} title={doc.status} />
                     )}
                   </button>
-                  <ChangeAction doc={doc} index={i} compact />
+                  <div className="flex shrink-0 items-center gap-1">
+                    <MarkOkButton doc={doc} compact />
+                    <ChangeAction doc={doc} index={i} compact />
+                  </div>
                 </div>
               )
             })}
@@ -416,7 +473,10 @@ export default function VerificationCard({ subject, analysis, kind, onOpenDocs, 
                           <p className="text-[11px] italic text-muted">
                             {t(`admin.compliance.reg.${result.regulationKey || doc.doc_type}`)}
                           </p>
-                          <ChangeAction doc={doc} index={docIndex} />
+                          <div className="flex shrink-0 items-center gap-1.5">
+                            <MarkOkButton doc={doc} />
+                            <ChangeAction doc={doc} index={docIndex} />
+                          </div>
                         </div>
                       </div>
                     )
@@ -429,16 +489,59 @@ export default function VerificationCard({ subject, analysis, kind, onOpenDocs, 
         </AnimatePresence>
       </div>
 
+      {/* Approve gate + low-score warning */}
+      <AnimatePresence initial={false}>
+        {confirmApprove && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="overflow-hidden border-t border-amber-500/30 bg-amber-500/5"
+          >
+            <div className="flex items-start gap-2 px-4 py-3 sm:px-5">
+              <ShieldAlert size={18} className="mt-0.5 shrink-0 text-amber-600" />
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-amber-700">
+                  {t('admin.adv.lowScoreTitle', { score: readiness.score, threshold: ACCEPT_THRESHOLD })}
+                </p>
+                <p className="mt-0.5 text-xs text-amber-700/90">{t('admin.adv.lowScoreDesc')}</p>
+                <div className="mt-2 flex gap-2">
+                  <Button size="sm" variant="danger" onClick={() => { setConfirmApprove(false); onApprove() }}>
+                    {t('admin.adv.approveAnyway')}
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => setConfirmApprove(false)}>
+                    {t('admin.cancel')}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Actions */}
-      <div className="flex gap-2 border-t border-border bg-background/50 px-4 py-3 sm:px-5">
-        <Button size="sm" className="flex-1 sm:flex-none" onClick={onApprove}>
-          <Check size={14} />
-          {kind === 'listing' ? t('admin.verifyListing') : t('admin.approve')}
-        </Button>
-        <Button size="sm" variant="danger" className="flex-1 sm:flex-none" onClick={onReject}>
-          <X size={14} />
-          {t('admin.reject')}
-        </Button>
+      <div className="border-t border-border bg-background/50 px-4 py-3 sm:px-5">
+        {requireAllOk && currentDocs.length > 0 && (
+          <p className={`mb-2 flex items-center gap-1.5 text-xs ${allMarkedOk ? 'text-success' : 'text-muted'}`}>
+            {allMarkedOk ? <CheckCircle2 size={13} /> : <Info size={13} />}
+            {t('admin.adv.markProgress', { ok: okCount, total: currentDocs.length })}
+          </p>
+        )}
+        <div className="flex gap-2">
+          <Button
+            size="sm"
+            className="flex-1 sm:flex-none"
+            onClick={handleApproveClick}
+            disabled={approveBlocked}
+          >
+            <Check size={14} />
+            {kind === 'listing' ? t('admin.verifyListing') : t('admin.approve')}
+          </Button>
+          <Button size="sm" variant="danger" className="flex-1 sm:flex-none" onClick={onReject}>
+            <X size={14} />
+            {t('admin.reject')}
+          </Button>
+        </div>
       </div>
 
       {changeDoc && (

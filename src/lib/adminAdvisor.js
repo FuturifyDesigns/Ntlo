@@ -137,39 +137,42 @@ export function analyzeListing(listing) {
   }
 }
 
+/** Minimum AI readiness recommended before approving a landlord. */
+export const ACCEPT_THRESHOLD = 70
+
+const VERDICT_SCORE = { pass: 100, manual: 78, pdf: 70, warn: 55, fail: 18 }
+
+/** Pure AI compliance score (0–100) from scan verdicts, or null if not scanned. */
+export function complianceScore(currentDocs = [], complianceResults = {}) {
+  const scored = currentDocs.map((d) => complianceResults[d.id]).filter(Boolean)
+  if (scored.length === 0) return null
+  const vals = scored.map((r) => VERDICT_SCORE[r.verdict] ?? 70)
+  return Math.round(vals.reduce((a, b) => a + b, 0) / vals.length)
+}
+
 /**
  * Combine the presence-based analysis with document statuses and live OCR
  * compliance results so the readiness badge reflects what the admin sees.
  * complianceResults: { [docId]: { verdict } }
  */
 export function combineReadiness(analysis, currentDocs = [], complianceResults = {}) {
-  let { score, status } = analysis
-  const verdicts = currentDocs
-    .map((d) => complianceResults[d.id]?.verdict)
-    .filter(Boolean)
-  const scanned = verdicts.length > 0
-
+  const { status } = analysis
+  const cScore = complianceScore(currentDocs, complianceResults)
+  const scanned = cScore != null
+  const verdicts = currentDocs.map((d) => complianceResults[d.id]?.verdict).filter(Boolean)
   const anyFail = verdicts.includes('fail')
   const anyWarn = verdicts.includes('warn')
   const anyChangesRequested = currentDocs.some((d) => d.status === 'changes_requested')
   const allApproved = currentDocs.length > 0 && currentDocs.every((d) => d.status === 'approved')
 
-  if (anyChangesRequested) {
-    return { status: 'awaitingResubmission', score: Math.min(score, 40), scanned }
-  }
-  if (anyFail) {
-    return { status: 'nonCompliant', score: Math.min(score, 30), scanned }
-  }
-  if (anyWarn) {
-    return { status: 'needsReview', score: Math.min(score, 60), scanned }
-  }
-  if (allApproved) {
-    return { status: status === 'incomplete' ? status : 'readyToApprove', score: Math.max(score, 90), scanned }
-  }
-  if (scanned && (status === 'readyToApprove' || status === 'listingHasProof')) {
-    return { status, score: Math.max(score, 92), scanned }
-  }
-  return { status, score, scanned }
+  const score = scanned ? Math.round((analysis.score + cScore) / 2) : analysis.score
+  const base = { scanned, complianceScore: cScore }
+
+  if (anyChangesRequested) return { status: 'awaitingResubmission', score: Math.min(score, 40), ...base }
+  if (allApproved) return { status: 'readyToApprove', score, ...base }
+  if (scanned && anyFail) return { status: 'nonCompliant', score: Math.min(score, 35), ...base }
+  if (scanned && anyWarn) return { status: 'needsReview', score: Math.min(score, 65), ...base }
+  return { status, score, ...base }
 }
 
 const STATUS_RANK = {

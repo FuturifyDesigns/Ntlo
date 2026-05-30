@@ -59,11 +59,6 @@ export default function LandlordVerify() {
     return () => supabase.removeChannel(channel)
   }, [user, loadDocs, refreshProfile])
 
-  useEffect(() => {
-    if (profile?.verification_status === 'approved') {
-      navigate('/landlord', { replace: true })
-    }
-  }, [profile?.verification_status, navigate])
 
   const docsByType = docs.reduce((acc, doc) => {
     if (!acc[doc.doc_type]) acc[doc.doc_type] = doc
@@ -105,6 +100,27 @@ export default function LandlordVerify() {
   }
   const statusBadge = STATUS_MAP[status] || STATUS_MAP.none
   const StatusIcon = statusBadge.icon
+
+  if (status === 'approved') {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="mx-auto max-w-lg px-4 py-16 text-center sm:px-6"
+      >
+        <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-success/10">
+          <CheckCircle size={34} className="text-success" />
+        </div>
+        <h1 className="font-display text-3xl font-bold text-primary">{t('verification.approvedTitle')}</h1>
+        <p className="mt-3 text-muted">{t('verification.approvedDesc')}</p>
+        <div className="mt-8">
+          <Button size="lg" onClick={() => navigate('/landlord')}>
+            {t('verification.goToDashboard')}
+          </Button>
+        </div>
+      </motion.div>
+    )
+  }
 
   return (
     <motion.div

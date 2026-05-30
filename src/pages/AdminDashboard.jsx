@@ -208,6 +208,20 @@ export default function AdminDashboard() {
     await fetchListings()
   }
 
+  async function setDocStatus(docId, newStatus) {
+    const { error } = await supabase.rpc('admin_review_document', {
+      target_doc_id: docId,
+      new_status: newStatus,
+      note: null,
+    })
+    if (error) {
+      setActionError(error.message)
+      throw error
+    }
+    await fetchLandlords()
+    await fetchListings()
+  }
+
   async function reviewListing(listingId, approved) {
     const notes = window.prompt(approved ? t('admin.approveNotes') : t('admin.rejectNotes')) || null
     await runAction(async () => {
@@ -490,6 +504,8 @@ export default function AdminDashboard() {
                     onApprove={() => reviewLandlord(item.id, true)}
                     onReject={() => reviewLandlord(item.id, false)}
                     onRequestChanges={requestDocChanges}
+                    onMarkOk={(docId) => setDocStatus(docId, 'approved')}
+                    onUnmarkOk={(docId) => setDocStatus(docId, 'pending')}
                   />
                 ))
               )}
@@ -516,6 +532,8 @@ export default function AdminDashboard() {
                     onApprove={() => reviewListing(item.id, true)}
                     onReject={() => reviewListing(item.id, false)}
                     onRequestChanges={requestDocChanges}
+                    onMarkOk={(docId) => setDocStatus(docId, 'approved')}
+                    onUnmarkOk={(docId) => setDocStatus(docId, 'pending')}
                   />
                 ))
               )}
