@@ -6,6 +6,7 @@ import { useTranslation } from '../../hooks/useTranslation'
 import { useNavLinks } from '../../hooks/useNavLinks'
 import Button from '../ui/Button'
 import NotificationBell from './NotificationBell'
+import UserMenu from './UserMenu'
 import { usePresenceHeartbeat } from '../../hooks/usePresence'
 
 export default function Navbar() {
