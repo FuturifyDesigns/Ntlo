@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
-import { UNIVERSITIES } from '../lib/universities'
+import { useUniversities } from './useUniversities'
 
 export function useStats() {
+  const { universities } = useUniversities()
   const [stats, setStats] = useState({
     listings: 0,
-    universities: UNIVERSITIES.length,
+    universities: universities.length,
     universitiesWithListings: 0,
     verified: 0,
     landlords: 0,
@@ -42,7 +43,7 @@ export function useStats() {
 
         setStats({
           listings: listingsRes.count || 0,
-          universities: UNIVERSITIES.length,
+          universities: universities.length,
           universitiesWithListings: uniqueUnis.size,
           verified: verifiedRes.count || 0,
           landlords: landlordsRes.count || 0,
@@ -53,7 +54,7 @@ export function useStats() {
       }
     }
     fetchStats()
-  }, [])
+  }, [universities.length])
 
   return stats
 }

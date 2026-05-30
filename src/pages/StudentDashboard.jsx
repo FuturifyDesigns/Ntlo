@@ -7,13 +7,13 @@ import ListingCard from '../components/listings/ListingCard'
 import Button from '../components/ui/Button'
 import { ListingGridSkeleton } from '../components/ui/Skeleton'
 import CompareAdvisor from '../components/advisor/CompareAdvisor'
-import { UNIVERSITIES } from '../lib/universities'
+import { getUniversityById } from '../lib/universities'
 
 export default function StudentDashboard() {
   const { profile, profileLoading } = useAuth()
   const { savedListings, loading } = useSavedListings()
   const { t } = useTranslation()
-  const myUni = UNIVERSITIES.find((u) => u.id === profile?.university_id)
+  const myUni = getUniversityById(profile?.university_id)
   const pageLoading = loading || profileLoading
 
   return (

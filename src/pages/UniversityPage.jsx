@@ -1,21 +1,26 @@
 import { useParams, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { MapPin, ArrowLeft, Home } from 'lucide-react'
-import { getUniversityBySlug, getUniversityImage } from '../lib/universities'
+import { getUniversityImage } from '../lib/universities'
+import { useUniversities } from '../hooks/useUniversities'
 import FilterBar from '../components/listings/FilterBar'
 import ListingGrid from '../components/listings/ListingGrid'
 import { useListings } from '../hooks/useListings'
-import { useState } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import Button from '../components/ui/Button'
 import { AnimatedCounter } from '../components/ui/Motion'
 import { useTranslation } from '../hooks/useTranslation'
 
 export default function UniversityPage() {
   const { slug } = useParams()
-  const university = getUniversityBySlug(slug)
+  const { universities, loading: universitiesLoading } = useUniversities()
+  const university = useMemo(
+    () => universities.find((u) => u.slug === slug),
+    [universities, slug]
+  )
   const { t } = useTranslation()
   const [filters, setFilters] = useState({
-    universityId: university?.id || '',
+    universityId: '',
     availableOnly: true,
     sortBy: 'distance',
     search: '',
@@ -26,7 +31,21 @@ export default function UniversityPage() {
     amenities: [],
   })
 
+  useEffect(() => {
+    if (university?.id) {
+      setFilters((f) => ({ ...f, universityId: university.id }))
+    }
+  }, [university?.id])
+
   const { listings, loading, error, count, page, setPage, pageSize } = useListings(filters)
+
+  if (universitiesLoading) {
+    return (
+      <div className="mx-auto max-w-7xl px-4 py-16 text-center text-muted">
+        {t('common.loading')}
+      </div>
+    )
+  }
 
   if (!university) {
     return (
@@ -88,7 +107,7 @@ export default function UniversityPage() {
             {t('universities.popularAreas')}
           </p>
           <div className="flex flex-wrap gap-2">
-            {university.nearby_areas.map((area) => (
+            {university.nearby_areas?.map((area) => (
               <button
                 key={area}
                 onClick={() => setFilters((f) => ({ ...f, search: area }))}
@@ -124,7 +143,7 @@ export default function UniversityPage() {
 
         {count === 0 && !loading && (
           <div className="mt-8 text-center">
-            <Button as={Link} to="/listings" variant="outline">
+            <Button as={Link} to={`/listings?uni=${university.id}&view=map`} variant="outline">
               <Home size={16} />
               {t('universities.browseAll')}
             </Button>

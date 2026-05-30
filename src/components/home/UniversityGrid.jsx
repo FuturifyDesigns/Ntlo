@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Plus } from 'lucide-react'
-import { UNIVERSITIES } from '../../lib/universities'
+import { useUniversities } from '../../hooks/useUniversities'
 import { IconUniversity, IconLocation } from '../ui/Icons'
 import OtherUniversityModal from '../universities/OtherUniversityModal'
 import { Reveal } from '../ui/Motion'
@@ -19,6 +19,7 @@ const item = {
 
 export default function UniversityGrid({ counts = {}, showHeader = true }) {
   const [otherOpen, setOtherOpen] = useState(false)
+  const { universities } = useUniversities()
 
   return (
     <>
@@ -43,7 +44,7 @@ export default function UniversityGrid({ counts = {}, showHeader = true }) {
             viewport={{ once: true, margin: '-60px' }}
             className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4"
           >
-            {UNIVERSITIES.map((uni) => (
+            {universities.map((uni) => (
               <motion.div key={uni.id} variants={item}>
                 <Link to={`/universities/${uni.slug}`} className="group block h-full">
                   <div className="card-elevated relative h-full overflow-hidden p-5">

@@ -16,24 +16,25 @@ import { MapUnavailable } from './GoogleMapsProvider'
 
 function MapViewportController({ viewport, plotted }) {
   const map = useMap()
+  const viewportKey = viewport?.id ?? null
 
   useEffect(() => {
     if (!map) return
 
     if (viewport?.center) {
-      map.setCenter(viewport.center)
+      map.panTo(viewport.center)
       map.setZoom(viewport.zoom ?? CAMPUS_MAP_ZOOM)
       return
     }
 
     if (!plotted.length) {
-      map.setCenter(DEFAULT_MAP_CENTER)
+      map.panTo(DEFAULT_MAP_CENTER)
       map.setZoom(DEFAULT_MAP_ZOOM)
       return
     }
 
     if (plotted.length === 1) {
-      map.setCenter(plotted[0].position)
+      map.panTo(plotted[0].position)
       map.setZoom(SINGLE_LISTING_ZOOM)
       return
     }
@@ -41,7 +42,7 @@ function MapViewportController({ viewport, plotted }) {
     const bounds = new google.maps.LatLngBounds()
     plotted.forEach(({ position }) => bounds.extend(position))
     map.fitBounds(bounds, 48)
-  }, [map, viewport, plotted])
+  }, [map, viewportKey, viewport?.center?.lat, viewport?.center?.lng, viewport?.zoom, plotted])
 
   return null
 }
@@ -101,6 +102,21 @@ function MapWithMarkers({
         onClick={() => setSelectedId(null)}
       >
         <MapViewportController viewport={viewport} plotted={plotted} />
+        {viewport?.center && (
+          <Marker
+            position={viewport.center}
+            title={viewport.label || 'Campus'}
+            icon={{
+              path: google.maps.SymbolPath.CIRCLE,
+              scale: 10,
+              fillColor: '#1e3a5f',
+              fillOpacity: 1,
+              strokeColor: '#ffffff',
+              strokeWeight: 2,
+            }}
+            zIndex={1000}
+          />
+        )}
         {plotted.map(({ listing, position }) => (
           <Marker
             key={listing.id}

@@ -5,7 +5,8 @@ import imageCompression from 'browser-image-compression'
 import { ChevronLeft, ChevronRight, Upload, X, Star } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
-import { UNIVERSITIES } from '../lib/universities'
+import { getUniversityById } from '../lib/universities'
+import { useUniversities } from '../hooks/useUniversities'
 import { AMENITIES, ROOM_TYPES, calculateDistance, formatPrice } from '../lib/utils'
 import Button from '../components/ui/Button'
 import Input, { Select, Textarea } from '../components/ui/Input'
@@ -109,7 +110,7 @@ export default function CreateListing() {
     try {
       const isOther = form.nearest_university_id === 'other'
       const uni = !isOther
-        ? UNIVERSITIES.find((u) => u.id === Number(form.nearest_university_id))
+        ? getUniversityById(form.nearest_university_id)
         : null
       let distance = null
       if (uni && form.lat && form.lng) {
@@ -173,7 +174,7 @@ export default function CreateListing() {
 
   const uni = form.nearest_university_id === 'other'
     ? null
-    : UNIVERSITIES.find((u) => u.id === Number(form.nearest_university_id))
+    : getUniversityById(form.nearest_university_id)
 
   return (
     <motion.div

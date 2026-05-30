@@ -1,5 +1,5 @@
 import { Search, SlidersHorizontal, X } from 'lucide-react'
-import { UNIVERSITIES } from '../../lib/universities'
+import { useUniversities } from '../../hooks/useUniversities'
 import { AMENITIES, ROOM_TYPES } from '../../lib/utils'
 import Button from '../ui/Button'
 import { Select } from '../ui/Input'
@@ -7,6 +7,7 @@ import { useTranslation } from '../../hooks/useTranslation'
 
 export default function FilterBar({ filters, onChange, onSearch, resultCount, universityName }) {
   const { t } = useTranslation()
+  const { universities } = useUniversities()
 
   function update(key, value) {
     onChange({ ...filters, [key]: value })
@@ -64,7 +65,7 @@ export default function FilterBar({ filters, onChange, onSearch, resultCount, un
           className="w-auto min-w-[160px] py-2"
         >
           <option value="">{t('filter.allUniversities')}</option>
-          {UNIVERSITIES.map((u) => (
+          {universities.map((u) => (
             <option key={u.id} value={u.id}>{u.short_name} — {u.city}</option>
           ))}
           <option value="other">{t('filter.otherUniversity')}</option>

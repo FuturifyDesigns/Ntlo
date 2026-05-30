@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Search, Plus, ArrowRight, MapPin } from 'lucide-react'
-import { UNIVERSITIES, CITIES } from '../../lib/universities'
+import { useUniversities } from '../../hooks/useUniversities'
 import OtherUniversityModal from './OtherUniversityModal'
 import { Reveal, AnimatedCounter } from '../ui/Motion'
 import { useTranslation } from '../../hooks/useTranslation'
@@ -14,8 +14,10 @@ export default function UniversityShowcase({ counts = {} }) {
   const [otherOpen, setOtherOpen] = useState(false)
   const { t } = useTranslation()
 
+  const { universities, cities } = useUniversities()
+
   const filtered = useMemo(() => {
-    return UNIVERSITIES.filter((uni) => {
+    return universities.filter((uni) => {
       const matchCity = city === 'All' || uni.city === city
       const q = search.toLowerCase()
       const matchSearch =
@@ -23,20 +25,20 @@ export default function UniversityShowcase({ counts = {} }) {
         uni.name.toLowerCase().includes(q) ||
         uni.short_name.toLowerCase().includes(q) ||
         uni.city.toLowerCase().includes(q) ||
-        uni.nearby_areas.some((a) => a.toLowerCase().includes(q))
+        (uni.nearby_areas || []).some((a) => a.toLowerCase().includes(q))
       return matchCity && matchSearch
     })
-  }, [search, city])
+  }, [search, city, universities])
 
   const totalListings = Object.values(counts).reduce((s, n) => s + n, 0)
-  const activeUnis = UNIVERSITIES.filter((u) => counts[u.id] > 0).length
+  const activeUnis = universities.filter((u) => counts[u.id] > 0).length
 
   return (
     <>
       <section className="border-b border-border bg-surface py-5 sm:py-6">
         <div className="mx-auto grid max-w-7xl grid-cols-3 gap-4 px-4 sm:px-6 lg:px-8">
           {[
-            { value: UNIVERSITIES.length, label: t('universities.universities') },
+            { value: universities.length, label: t('universities.universities') },
             { value: totalListings, label: t('universities.totalListings') },
             { value: activeUnis, label: t('universities.withRooms') },
           ].map(({ value, label }) => (
@@ -63,7 +65,7 @@ export default function UniversityShowcase({ counts = {} }) {
             />
           </div>
           <div className="flex flex-wrap gap-2">
-            {['All', ...CITIES].map((c) => (
+            {['All', ...cities].map((c) => (
               <button
                 key={c}
                 onClick={() => setCity(c)}

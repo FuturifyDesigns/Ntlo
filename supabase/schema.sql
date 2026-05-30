@@ -135,13 +135,13 @@ create trigger on_auth_user_created
 
 -- Seed universities
 insert into public.universities (name, slug, short_name, city, lat, lng) values
-('University of Botswana', 'university-of-botswana', 'UB', 'Gaborone', -24.6556, 25.9090),
-('Botswana Intl University of Science & Technology', 'biust', 'BIUST', 'Palapye', -22.5506, 27.1268),
-('Botho University', 'botho-university', 'Botho', 'Gaborone', -24.6282, 25.9116),
-('Limkokwing University', 'limkokwing', 'Limkokwing', 'Gaborone', -24.6553, 25.9143),
-('Ba Isago University', 'ba-isago', 'Ba Isago', 'Gaborone', -24.6420, 25.9080),
-('ABM University College', 'abm-university', 'ABM', 'Gaborone', -24.6500, 25.9100),
-('Gaborone University College', 'guc', 'GUC', 'Gaborone', -24.6510, 25.9060)
+('University of Botswana', 'university-of-botswana', 'UB', 'Gaborone', -24.6576, 25.9398),
+('Botswana Intl University of Science & Technology', 'biust', 'BIUST', 'Palapye', -22.5972, 27.1220),
+('Botho University', 'botho-university', 'Botho', 'Gaborone', -24.6846, 25.8783),
+('Limkokwing University', 'limkokwing', 'Limkokwing', 'Gaborone', -24.6225, 25.8928),
+('Ba Isago University', 'ba-isago', 'Ba Isago', 'Gaborone', -24.6570, 25.9020),
+('ABM University College', 'abm-university', 'ABM', 'Gaborone', -24.6580, 25.9180),
+('Gaborone University College', 'guc', 'GUC', 'Gaborone', -24.6732, 25.9221)
 on conflict (slug) do nothing;
 
 -- Storage bucket (run in Storage section or via SQL)

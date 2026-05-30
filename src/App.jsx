@@ -1,6 +1,7 @@
 import { HashRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { AuthProvider } from './context/AuthContext'
+import { UniversitiesProvider } from './context/UniversitiesContext'
 import { LocaleProvider } from './context/LocaleContext'
 import { WelcomeReturnProvider } from './context/WelcomeReturnContext'
 import { CookieConsentProvider } from './context/CookieConsentContext'
@@ -111,13 +112,15 @@ export default function App() {
     <HashRouter>
       <LocaleProvider>
         <AuthProvider>
-          <GoogleMapsProvider>
-            <CookieConsentProvider>
-              <WelcomeReturnProvider>
-                <AppShell />
-              </WelcomeReturnProvider>
-            </CookieConsentProvider>
-          </GoogleMapsProvider>
+          <UniversitiesProvider>
+            <GoogleMapsProvider>
+              <CookieConsentProvider>
+                <WelcomeReturnProvider>
+                  <AppShell />
+                </WelcomeReturnProvider>
+              </CookieConsentProvider>
+            </GoogleMapsProvider>
+          </UniversitiesProvider>
         </AuthProvider>
       </LocaleProvider>
     </HashRouter>

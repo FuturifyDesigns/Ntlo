@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useParams, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
-import { UNIVERSITIES } from '../lib/universities'
+import { useUniversities } from '../hooks/useUniversities'
+import { getUniversityById } from '../lib/universities'
 import { AMENITIES, ROOM_TYPES, calculateDistance } from '../lib/utils'
 import Button from '../components/ui/Button'
 import Input, { Select, Textarea } from '../components/ui/Input'
@@ -12,6 +13,7 @@ import { Skeleton } from '../components/ui/Skeleton'
 export default function EditListing() {
   const { id } = useParams()
   const { user } = useAuth()
+  const { universities } = useUniversities()
   const navigate = useNavigate()
   const [form, setForm] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -53,7 +55,7 @@ export default function EditListing() {
     setSaving(true)
     setError('')
     try {
-      const uni = UNIVERSITIES.find((u) => u.id === Number(form.nearest_university_id))
+      const uni = getUniversityById(form.nearest_university_id)
       let distance = form.distance_to_campus
       if (uni && form.lat && form.lng) {
         distance = calculateDistance(Number(form.lat), Number(form.lng), uni.lat, uni.lng)
@@ -126,7 +128,7 @@ export default function EditListing() {
         </div>
         <Select label="Nearest university" value={form.nearest_university_id || ''} onChange={(e) => update('nearest_university_id', e.target.value)}>
           <option value="">Select</option>
-          {UNIVERSITIES.map((u) => <option key={u.id} value={u.id}>{u.short_name}</option>)}
+          {universities.map((u) => <option key={u.id} value={u.id}>{u.short_name}</option>)}
         </Select>
         <Input label="WhatsApp" value={form.whatsapp_number} onChange={(e) => update('whatsapp_number', e.target.value)} required />
         <Textarea label="Description" value={form.description || ''} onChange={(e) => update('description', e.target.value)} />

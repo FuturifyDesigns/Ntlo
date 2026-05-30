@@ -11,6 +11,7 @@ import Button from '../components/ui/Button'
 import Badge from '../components/ui/Badge'
 import Card from '../components/ui/Card'
 import { Skeleton } from '../components/ui/Skeleton'
+import { createUniversityFromRequest } from '../lib/adminUniversities'
 
 const TABS = [
   { id: 'requests', icon: GraduationCap, labelKey: 'admin.tabRequests' },
@@ -109,7 +110,19 @@ export default function AdminDashboard() {
     }
   }
 
+  async function approveRequest(req) {
+    await runAction(async () => {
+      await createUniversityFromRequest(req)
+      await fetchRequests()
+    })
+  }
+
   async function reviewRequest(id, status) {
+    if (status === 'approved') {
+      const req = requests.find((r) => r.id === id)
+      if (req) await approveRequest(req)
+      return
+    }
     await runAction(async () => {
       const { error } = await supabase
         .from('university_requests')

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useAuth } from '../../hooks/useAuth'
 import { submitUniversityRequest } from '../../hooks/useStats'
-import { UNIVERSITIES } from '../../lib/universities'
+import { useUniversities } from '../../hooks/useUniversities'
 import Button from '../ui/Button'
 import Input from '../ui/Input'
 import Modal from '../ui/Modal'
@@ -95,6 +95,7 @@ export function UniversitySelect({
   otherValue = '',
   onOtherChange,
 }) {
+  const { universities } = useUniversities()
   const isOther = value === 'other'
 
   return (
@@ -107,7 +108,7 @@ export function UniversitySelect({
         className="w-full rounded-lg border border-border bg-surface px-4 py-2.5 text-sm text-primary outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
       >
         <option value="">Select university</option>
-        {UNIVERSITIES.map((u) => (
+        {universities.map((u) => (
           <option key={u.id} value={u.id}>{u.short_name} — {u.name}</option>
         ))}
         {allowOther && <option value="other">Other — not listed</option>}

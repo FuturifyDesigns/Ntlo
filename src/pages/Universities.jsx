@@ -2,13 +2,15 @@ import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import UniversityShowcase from '../components/universities/UniversityShowcase'
 import { supabase } from '../lib/supabase'
-import { UNIVERSITIES } from '../lib/universities'
+import { useUniversities } from '../hooks/useUniversities'
+import { getUniversityImage } from '../lib/universities'
 import { RevealText } from '../components/ui/Motion'
 import { useTranslation } from '../hooks/useTranslation'
 
 export default function Universities() {
   const [uniCounts, setUniCounts] = useState({})
   const { t } = useTranslation()
+  const { universities } = useUniversities()
 
   useEffect(() => {
     async function fetchCounts() {
@@ -33,7 +35,7 @@ export default function Universities() {
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
       <section className="relative overflow-hidden bg-primary">
         <div className="absolute inset-0 grid grid-cols-3 opacity-30">
-          {UNIVERSITIES.slice(0, 3).map((uni) => (
+          {universities.slice(0, 3).map((uni) => (
             <img key={uni.id} src={uni.image} alt="" className="h-full w-full object-cover" />
           ))}
         </div>
@@ -55,7 +57,7 @@ export default function Universities() {
             transition={{ delay: 0.7 }}
             className="mx-auto mt-5 max-w-xl text-lg text-white/65"
           >
-            {t('universities.subtitle', { count: UNIVERSITIES.length })}
+            {t('universities.subtitle', { count: universities.length })}
           </motion.p>
         </div>
       </section>

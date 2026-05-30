@@ -83,6 +83,10 @@ Push to `main` and the site deploys to https://futurifydesigns.github.io/Ntlo/
 
 Run `supabase/migrations/002_admin_verification.sql` in the **SQL Editor** after the base schema.
 
+Also run `supabase/migrations/004_university_coordinates.sql` and `supabase/migrations/005_universities_geocoding.sql` so campus pins and distance data stay accurate.
+
+`005` enables automatic geocoding when admins approve new university requests (uses your Google Maps API key).
+
 This adds:
 
 - `admin` role on profiles
@@ -110,4 +114,10 @@ Built-in housing advice — **no API keys or extra billing.**
 - **Landlord create listing:** listing coach on the review step
 
 Uses distance to campus, typical Botswana student rents, verification status, and amenities. No Gemini, OpenAI, or edge function required.
+
+## 10. University map locations
+
+Campus coordinates are stored in Supabase and loaded at runtime. When an admin **approves a new university request**, Ntlo geocodes the campus name + city via the **Google Geocoding API** (same key as maps) and saves accurate lat/lng automatically.
+
+Ensure **Geocoding API** is enabled in [Google Cloud Console](https://console.cloud.google.com/) for your maps key.
 

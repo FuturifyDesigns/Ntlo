@@ -6,12 +6,12 @@ import FilterBar from '../components/listings/FilterBar'
 import ListingGrid from '../components/listings/ListingGrid'
 import ListingMap from '../components/listings/ListingMap'
 import { useListings } from '../hooks/useListings'
-import { getUniversityById } from '../lib/universities'
+import { getUniversityById, getUniversityMapViewport } from '../lib/universities'
 import { useTranslation } from '../hooks/useTranslation'
 
 export default function Browse() {
   const [searchParams] = useSearchParams()
-  const [view, setView] = useState('grid')
+  const [view, setView] = useState(searchParams.get('view') === 'map' ? 'map' : 'grid')
   const { t } = useTranslation()
   const [filters, setFilters] = useState({
     search: searchParams.get('search') || '',
@@ -37,14 +37,7 @@ export default function Browse() {
 
   const mapViewport = useMemo(() => {
     if (filters.universityId && filters.universityId !== 'other') {
-      const university = getUniversityById(filters.universityId)
-      if (university) {
-        return {
-          center: { lat: university.lat, lng: university.lng },
-          zoom: undefined,
-          label: university.short_name,
-        }
-      }
+      return getUniversityMapViewport(getUniversityById(filters.universityId))
     }
     return null
   }, [filters.universityId])
