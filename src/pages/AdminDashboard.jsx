@@ -48,28 +48,30 @@ export default function AdminDashboard() {
   }, [])
 
   const fetchLandlords = useCallback(async () => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('profiles')
       .select(`
         id, full_name, phone, verification_status, verification_notes, is_verified, created_at,
-        docs:verification_documents(id, doc_type, file_name, storage_path, status, created_at)
+        docs:verification_documents!verification_documents_user_id_fkey(id, doc_type, file_name, storage_path, status, created_at)
       `)
       .eq('role', 'landlord')
       .eq('verification_status', 'pending')
       .order('created_at', { ascending: false })
+    if (error) setActionError(error.message)
     setLandlords(data || [])
   }, [])
 
   const fetchListings = useCallback(async () => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('listings')
       .select(`
         id, title, city, price, verification_status, verification_notes, is_verified, created_at,
-        landlord:profiles(id, full_name),
-        docs:verification_documents(id, doc_type, file_name, storage_path, status)
+        landlord:profiles!listings_landlord_id_fkey(id, full_name),
+        docs:verification_documents!verification_documents_listing_id_fkey(id, doc_type, file_name, storage_path, status)
       `)
       .eq('verification_status', 'pending')
       .order('created_at', { ascending: false })
+    if (error) setActionError(error.message)
     setListings(data || [])
   }, [])
 

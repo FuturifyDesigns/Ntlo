@@ -27,6 +27,12 @@ function paintBeforeRedirect() {
   })
 }
 
+/** Keep the "Redirecting to Google" overlay visible long enough to read. */
+const MIN_OVERLAY_MS = 650
+function delay(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
 /** True when user left mid-redirect (signed out, back button, etc.). */
 function hasStaleGoogleRedirectFlag() {
   return (
@@ -98,6 +104,7 @@ export function useGoogleAuth({ role, onError } = {}) {
     try {
       await waitForAuthReady(authReadyRef)
       await paintBeforeRedirect()
+      await delay(MIN_OVERLAY_MS)
       await signInWithGoogle({ role })
     } catch (err) {
       resetGoogleState()
