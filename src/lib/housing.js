@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import { uploadApplicationDoc, APPLICATION_DOC_TYPES } from './applicationDocs'
 
 export async function getOrCreateConversation(listingId) {
   const { data, error } = await supabase.rpc('get_or_create_conversation', {
@@ -63,9 +64,14 @@ export async function updateViewingRequest(id, updates) {
   return data
 }
 
-export async function submitApplication({ listingId, landlordId, moveInDate, durationMonths, introMessage }) {
+export async function submitApplication({ listingId, landlordId, moveInDate, durationMonths, introMessage, documents }) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Not authenticated')
+
+  const missing = APPLICATION_DOC_TYPES.filter((t) => !documents?.[t.id])
+  if (missing.length) {
+    throw new Error('Please upload all required documents before submitting.')
+  }
 
   const { data, error } = await supabase
     .from('listing_applications')
@@ -79,47 +85,47 @@ export async function submitApplication({ listingId, landlordId, moveInDate, dur
     })
     .select('*')
     .single()
+
   if (error) throw error
+
+  try {
+    for (const { id: docType } of APPLICATION_DOC_TYPES) {
+      await uploadApplicationDoc({
+        applicationId: data.id,
+        studentId: user.id,
+        docType,
+        file: documents[docType],
+      })
+    }
+  } catch (uploadErr) {
+    await supabase.from('listing_applications').delete().eq('id', data.id)
+    throw uploadErr
+  }
+
   return data
 }
 
-export async function respondToApplication(applicationId, { accept, notes, depositPula, leaseStart, leaseEnd }) {
-  const { data, error } = await supabase.rpc('respond_to_application', {
+export async function respondToApplication(applicationId, { accept, notes }) {
+  const { error } = await supabase.rpc('respond_to_application', {
     p_application_id: applicationId,
     p_accept: accept,
     p_notes: notes || null,
-    p_deposit_pula: depositPula ?? null,
-    p_lease_start: leaseStart || null,
-    p_lease_end: leaseEnd || null,
   })
   if (error) throw error
-  return data
 }
 
-export async function updateLeaseFlow(id, updates) {
-  const { data, error } = await supabase
-    .from('lease_flows')
-    .update({ ...updates, updated_at: new Date().toISOString() })
-    .eq('id', id)
-    .select('*')
-    .single()
+export async function markApplicationRented(applicationId) {
+  const { error } = await supabase.rpc('mark_application_rented', {
+    p_application_id: applicationId,
+  })
   if (error) throw error
-  return data
 }
 
-export async function toggleChecklistItem(itemId, completed, userId) {
-  const { data, error } = await supabase
-    .from('move_in_checklist_items')
-    .update(
-      completed
-        ? { completed_at: new Date().toISOString(), completed_by: userId }
-        : { completed_at: null, completed_by: null }
-    )
-    .eq('id', itemId)
-    .select('*')
-    .single()
+export async function withdrawApplication(applicationId) {
+  const { error } = await supabase.rpc('withdraw_application', {
+    p_application_id: applicationId,
+  })
   if (error) throw error
-  return data
 }
 
 export function isListingVerified(listing) {

@@ -1,9 +1,8 @@
 import { useState } from 'react'
-import { CheckCircle2, Loader2 } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import { useTranslation } from '../../hooks/useTranslation'
-import { useAuth } from '../../hooks/useAuth'
 import { useConversations, useMessages, useStudentHousing } from '../../hooks/useHousing'
-import { toggleChecklistItem, updateLeaseFlow } from '../../lib/housing'
+import { withdrawApplication } from '../../lib/housing'
 import Card from '../ui/Card'
 import Badge from '../ui/Badge'
 import Button from '../ui/Button'
@@ -45,31 +44,33 @@ function ConversationChatModal({ conversationId, open, onClose }) {
   )
 }
 
+function statusVariant(status) {
+  if (status === 'accepted' || status === 'rented') return 'success'
+  if (status === 'rejected' || status === 'withdrawn') return 'error'
+  return 'default'
+}
+
 export default function StudentHousingPanel() {
   const { t } = useTranslation()
-  const { user } = useAuth()
   const { conversations, loading: convLoading } = useConversations()
-  const { viewings, applications, leaseFlows, loading, refetch } = useStudentHousing()
+  const { viewings, applications, loading, refetch } = useStudentHousing()
   const [tab, setTab] = useState('applications')
   const [activeChat, setActiveChat] = useState(null)
+  const [busyId, setBusyId] = useState(null)
 
-  async function completeChecklist(itemId, done) {
-    await toggleChecklistItem(itemId, done, user.id)
-    refetch()
-  }
-
-  async function confirmDeposit(leaseId) {
-    await updateLeaseFlow(leaseId, {
-      deposit_confirmed_at: new Date().toISOString(),
-      status: 'move_in',
-    })
-    refetch()
+  async function handleWithdraw(id) {
+    setBusyId(id)
+    try {
+      await withdrawApplication(id)
+      refetch()
+    } finally {
+      setBusyId(null)
+    }
   }
 
   const tabs = [
     { id: 'applications', label: t('housing.applications'), count: applications.length },
     { id: 'viewings', label: t('housing.viewings'), count: viewings.length },
-    { id: 'movein', label: t('housing.moveIn'), count: leaseFlows.length },
     { id: 'messages', label: t('housing.messages'), count: conversations.length },
   ]
 
@@ -102,14 +103,33 @@ export default function StudentHousingPanel() {
         <div className="space-y-3">
           {applications.length === 0 && <p className="text-sm text-muted">{t('housing.noApplicationsStudent')}</p>}
           {applications.map((app) => (
-            <Card key={app.id} className="p-4">
+            <Card key={app.id} className="space-y-3 p-4">
               <div className="flex justify-between gap-2">
                 <div>
                   <p className="font-semibold">{app.listing?.title}</p>
                   <p className="text-sm text-muted">{app.listing?.area}, {app.listing?.city}</p>
+                  {app.move_in_date && (
+                    <p className="mt-1 text-xs text-muted">{t('housing.moveInDate')}: {app.move_in_date}</p>
+                  )}
                 </div>
-                <Badge>{app.status}</Badge>
+                <Badge variant={statusVariant(app.status)}>{app.status}</Badge>
               </div>
+
+              {app.status === 'accepted' && (
+                <p className="rounded-lg border border-accent/30 bg-accent/5 p-3 text-sm text-muted">
+                  {t('housing.studentAcceptedNote')}
+                </p>
+              )}
+
+              {app.status === 'rented' && (
+                <p className="text-sm font-medium text-success">{t('housing.studentRentedNote')}</p>
+              )}
+
+              {app.status === 'submitted' && (
+                <Button size="sm" variant="outline" disabled={busyId === app.id} onClick={() => handleWithdraw(app.id)}>
+                  {t('housing.withdrawApplication')}
+                </Button>
+              )}
             </Card>
           ))}
         </div>
@@ -125,39 +145,6 @@ export default function StudentHousingPanel() {
                 <p className="text-sm text-muted">{new Date(vr.preferred_at).toLocaleString()}</p>
               )}
               <Badge className="mt-2">{vr.status}</Badge>
-            </Card>
-          ))}
-        </div>
-      )}
-
-      {tab === 'movein' && (
-        <div className="space-y-4">
-          {leaseFlows.length === 0 && <p className="text-sm text-muted">{t('housing.noMoveIn')}</p>}
-          {leaseFlows.map((lease) => (
-            <Card key={lease.id} className="space-y-3 p-4">
-              <div className="flex justify-between gap-2">
-                <p className="font-semibold">{lease.listing?.title}</p>
-                <Badge variant="accent">{lease.status}</Badge>
-              </div>
-              {lease.status === 'deposit_pending' && (
-                <Button size="sm" onClick={() => confirmDeposit(lease.id)}>
-                  {t('housing.confirmDepositPaid')}
-                </Button>
-              )}
-              <ul className="space-y-2">
-                {(lease.checklist || []).sort((a, b) => a.display_order - b.display_order).map((item) => (
-                  <li key={item.id} className="flex items-start gap-2 text-sm">
-                    <button
-                      type="button"
-                      onClick={() => completeChecklist(item.id, !item.completed_at)}
-                      className={item.completed_at ? 'text-success' : 'text-muted'}
-                    >
-                      <CheckCircle2 size={18} fill={item.completed_at ? 'currentColor' : 'none'} />
-                    </button>
-                    <span className={item.completed_at ? 'text-muted line-through' : ''}>{item.label}</span>
-                  </li>
-                ))}
-              </ul>
             </Card>
           ))}
         </div>

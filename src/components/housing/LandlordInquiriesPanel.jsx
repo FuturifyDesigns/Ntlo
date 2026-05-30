@@ -1,13 +1,12 @@
 import { useState } from 'react'
-import { Calendar, CheckCircle2, XCircle, Loader2 } from 'lucide-react'
+import { Calendar, CheckCircle2, Home, XCircle, Loader2 } from 'lucide-react'
 import { useTranslation } from '../../hooks/useTranslation'
-import { useAuth } from '../../hooks/useAuth'
 import { useLandlordInquiries, useMessages } from '../../hooks/useHousing'
-import { respondToApplication, updateViewingRequest } from '../../lib/housing'
+import { respondToApplication, markApplicationRented, updateViewingRequest } from '../../lib/housing'
+import ApplicationDocumentsList from './ApplicationDocumentsList'
 import Button from '../ui/Button'
 import Card from '../ui/Card'
 import Badge from '../ui/Badge'
-import Input from '../ui/Input'
 import Modal from '../ui/Modal'
 
 function ConversationChatModal({ conversationId, open, onClose }) {
@@ -46,13 +45,17 @@ function ConversationChatModal({ conversationId, open, onClose }) {
   )
 }
 
+function statusVariant(status) {
+  if (status === 'accepted' || status === 'rented') return 'success'
+  if (status === 'rejected' || status === 'withdrawn') return 'error'
+  return 'default'
+}
+
 export default function LandlordInquiriesPanel() {
   const { t } = useTranslation()
-  const { user } = useAuth()
   const { viewings, applications, conversations, loading, refetch } = useLandlordInquiries()
   const [tab, setTab] = useState('applications')
   const [busyId, setBusyId] = useState(null)
-  const [deposit, setDeposit] = useState('')
   const [activeChat, setActiveChat] = useState(null)
 
   async function handleViewing(id, status) {
@@ -74,8 +77,17 @@ export default function LandlordInquiriesPanel() {
       await respondToApplication(id, {
         accept,
         notes: accept ? t('housing.applicationAcceptedNote') : t('housing.applicationRejectedNote'),
-        depositPula: accept && deposit ? Number(deposit) : null,
       })
+      refetch()
+    } finally {
+      setBusyId(null)
+    }
+  }
+
+  async function handleMarkRented(id) {
+    setBusyId(id)
+    try {
+      await markApplicationRented(id)
       refetch()
     } finally {
       setBusyId(null)
@@ -98,7 +110,10 @@ export default function LandlordInquiriesPanel() {
 
   return (
     <div className="space-y-4">
-      <h2 className="font-display text-xl font-semibold text-primary">{t('housing.inquiriesTitle')}</h2>
+      <div>
+        <h2 className="font-display text-xl font-semibold text-primary">{t('housing.inquiriesTitle')}</h2>
+        <p className="mt-1 text-sm text-muted">{t('housing.landlordFlowHint')}</p>
+      </div>
       <div className="flex flex-wrap gap-2">
         {tabs.map((item) => (
           <button
@@ -126,21 +141,18 @@ export default function LandlordInquiriesPanel() {
                   {app.move_in_date && (
                     <p className="text-xs text-muted">{t('housing.moveInDate')}: {app.move_in_date}</p>
                   )}
+                  {app.duration_months && (
+                    <p className="text-xs text-muted">{t('housing.durationMonths')}: {app.duration_months}</p>
+                  )}
                   {app.intro_message && <p className="mt-2 text-sm text-muted">{app.intro_message}</p>}
                 </div>
-                <Badge variant={app.status === 'accepted' ? 'success' : app.status === 'rejected' ? 'error' : 'default'}>
-                  {app.status}
-                </Badge>
+                <Badge variant={statusVariant(app.status)}>{app.status}</Badge>
               </div>
+
+              <ApplicationDocumentsList documents={app.documents} />
+
               {app.status === 'submitted' && (
                 <div className="flex flex-wrap gap-2">
-                  <Input
-                    type="number"
-                    placeholder={t('housing.depositAmount')}
-                    value={deposit}
-                    onChange={(e) => setDeposit(e.target.value)}
-                    className="max-w-[140px]"
-                  />
                   <Button size="sm" disabled={busyId === app.id} onClick={() => handleApplication(app.id, true)}>
                     <CheckCircle2 size={14} />
                     {t('housing.accept')}
@@ -150,6 +162,20 @@ export default function LandlordInquiriesPanel() {
                     {t('housing.decline')}
                   </Button>
                 </div>
+              )}
+
+              {app.status === 'accepted' && (
+                <div className="space-y-2 rounded-lg border border-accent/30 bg-accent/5 p-3">
+                  <p className="text-xs text-muted">{t('housing.acceptedExternalNote')}</p>
+                  <Button size="sm" disabled={busyId === app.id} onClick={() => handleMarkRented(app.id)}>
+                    <Home size={14} />
+                    {t('housing.markRentedOut')}
+                  </Button>
+                </div>
+              )}
+
+              {app.status === 'rented' && (
+                <p className="text-xs font-medium text-success">{t('housing.roomRentedConfirmed')}</p>
               )}
             </Card>
           ))}

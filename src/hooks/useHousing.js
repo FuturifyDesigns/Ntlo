@@ -3,6 +3,13 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from './useAuth'
 import { getOrCreateConversation, sendMessage, markMessagesRead } from '../lib/housing'
 
+const APPLICATION_SELECT = `
+  *,
+  listing:listings(id, title, area, city, price, available),
+  documents:application_documents(id, doc_type, file_name, storage_path, created_at),
+  student:profiles!listing_applications_student_id_fkey(id, full_name, phone, university_id)
+`
+
 export function useConversations() {
   const { user, profile } = useAuth()
   const [conversations, setConversations] = useState([])
@@ -118,20 +125,18 @@ export function useStudentHousing() {
   const { user } = useAuth()
   const [viewings, setViewings] = useState([])
   const [applications, setApplications] = useState([])
-  const [leaseFlows, setLeaseFlows] = useState([])
   const [loading, setLoading] = useState(true)
 
   const fetchAll = useCallback(async () => {
     if (!user) {
       setViewings([])
       setApplications([])
-      setLeaseFlows([])
       setLoading(false)
       return
     }
 
     setLoading(true)
-    const [v, a, l] = await Promise.all([
+    const [v, a] = await Promise.all([
       supabase
         .from('viewing_requests')
         .select('*, listing:listings(id, title, area, city)')
@@ -139,23 +144,13 @@ export function useStudentHousing() {
         .order('created_at', { ascending: false }),
       supabase
         .from('listing_applications')
-        .select('*, listing:listings(id, title, area, city, price)')
-        .eq('student_id', user.id)
-        .order('created_at', { ascending: false }),
-      supabase
-        .from('lease_flows')
-        .select(`
-          *,
-          listing:listings(id, title, area, city),
-          checklist:move_in_checklist_items(*)
-        `)
+        .select(APPLICATION_SELECT)
         .eq('student_id', user.id)
         .order('created_at', { ascending: false }),
     ])
 
     setViewings(v.data || [])
     setApplications(a.data || [])
-    setLeaseFlows(l.data || [])
     setLoading(false)
   }, [user])
 
@@ -170,14 +165,13 @@ export function useStudentHousing() {
       .channel(`student-housing-${user.id}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'viewing_requests' }, fetchAll)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'listing_applications' }, fetchAll)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'lease_flows' }, fetchAll)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'move_in_checklist_items' }, fetchAll)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'application_documents' }, fetchAll)
       .subscribe()
 
     return () => supabase.removeChannel(channel)
   }, [user?.id, fetchAll])
 
-  return { viewings, applications, leaseFlows, loading, refetch: fetchAll }
+  return { viewings, applications, loading, refetch: fetchAll }
 }
 
 export function useLandlordInquiries() {
@@ -205,7 +199,7 @@ export function useLandlordInquiries() {
         .order('created_at', { ascending: false }),
       supabase
         .from('listing_applications')
-        .select('*, listing:listings(id, title), student:profiles!listing_applications_student_id_fkey(id, full_name)')
+        .select(APPLICATION_SELECT)
         .eq('landlord_id', user.id)
         .order('created_at', { ascending: false }),
       supabase
@@ -236,6 +230,7 @@ export function useLandlordInquiries() {
       .channel(`landlord-inquiries-${user.id}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'viewing_requests' }, fetchAll)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'listing_applications' }, fetchAll)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'application_documents' }, fetchAll)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'conversations' }, fetchAll)
       .subscribe()
 
@@ -243,4 +238,40 @@ export function useLandlordInquiries() {
   }, [user?.id, fetchAll])
 
   return { viewings, applications, conversations, loading, refetch: fetchAll }
+}
+
+export function useAdminApplications() {
+  const [applications, setApplications] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  const fetchAll = useCallback(async () => {
+    setLoading(true)
+    const { data, error } = await supabase
+      .from('listing_applications')
+      .select(`
+        ${APPLICATION_SELECT},
+        landlord:profiles!listing_applications_landlord_id_fkey(id, full_name, phone)
+      `)
+      .order('created_at', { ascending: false })
+      .limit(200)
+
+    if (!error) setApplications(data || [])
+    setLoading(false)
+  }, [])
+
+  useEffect(() => {
+    fetchAll()
+  }, [fetchAll])
+
+  useEffect(() => {
+    const channel = supabase
+      .channel('admin-applications')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'listing_applications' }, fetchAll)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'application_documents' }, fetchAll)
+      .subscribe()
+
+    return () => supabase.removeChannel(channel)
+  }, [fetchAll])
+
+  return { applications, loading, refetch: fetchAll }
 }

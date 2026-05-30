@@ -9,6 +9,8 @@ import Modal from '../ui/Modal'
 import Input, { Textarea } from '../ui/Input'
 import { getWhatsAppLink } from '../../lib/utils'
 import { createViewingRequest, submitApplication, isLandlordVerified } from '../../lib/housing'
+import ApplicationDocFields from './ApplicationDocFields'
+import { APPLICATION_DOC_TYPES } from '../../lib/applicationDocs'
 
 function WhatsAppIcon({ size = 20 }) {
   return (
@@ -99,6 +101,8 @@ export default function ListingContactPanel({ listing }) {
   const [introMessage, setIntroMessage] = useState('')
   const [applyBusy, setApplyBusy] = useState(false)
   const [applyDone, setApplyDone] = useState(false)
+  const [applyDocs, setApplyDocs] = useState({})
+  const [applyError, setApplyError] = useState('')
 
   const landlordName = listing.landlord_display_name || listing.landlord?.full_name || 'Landlord'
   const landlordVerified = isLandlordVerified(listing)
@@ -145,6 +149,12 @@ export default function ListingContactPanel({ listing }) {
 
   async function submitApply(e) {
     e.preventDefault()
+    setApplyError('')
+    const missing = APPLICATION_DOC_TYPES.filter((d) => !applyDocs[d.id])
+    if (missing.length) {
+      setApplyError(t('housing.documentsRequired'))
+      return
+    }
     setApplyBusy(true)
     try {
       await submitApplication({
@@ -153,11 +163,21 @@ export default function ListingContactPanel({ listing }) {
         moveInDate: moveInDate || null,
         durationMonths,
         introMessage,
+        documents: applyDocs,
       })
       setApplyDone(true)
+    } catch (err) {
+      setApplyError(err.message || t('housing.applicationFailed'))
     } finally {
       setApplyBusy(false)
     }
+  }
+
+  function closeApplyModal() {
+    setApplyOpen(false)
+    setApplyDone(false)
+    setApplyDocs({})
+    setApplyError('')
   }
 
   return (
@@ -238,11 +258,12 @@ export default function ListingContactPanel({ listing }) {
         )}
       </Modal>
 
-      <Modal open={applyOpen} onClose={() => { setApplyOpen(false); setApplyDone(false) }} title={t('housing.applyNow')}>
+      <Modal open={applyOpen} onClose={closeApplyModal} title={t('housing.applyNow')}>
         {applyDone ? (
           <p className="text-sm text-success">{t('housing.applicationSent')}</p>
         ) : (
           <form onSubmit={submitApply} className="space-y-4">
+            <ApplicationDocFields files={applyDocs} onChange={setApplyDocs} disabled={applyBusy} />
             <Input
               label={t('housing.moveInDate')}
               type="date"
@@ -266,6 +287,8 @@ export default function ListingContactPanel({ listing }) {
               placeholder={t('housing.introPlaceholder')}
               required
             />
+            {applyError && <p className="text-sm text-error">{applyError}</p>}
+            <p className="text-xs text-muted">{t('housing.externalPaymentNote')}</p>
             <Button type="submit" disabled={applyBusy} className="w-full">
               {applyBusy ? t('housing.sending') : t('housing.submitApplication')}
             </Button>

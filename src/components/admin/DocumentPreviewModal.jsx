@@ -7,7 +7,7 @@ import { isImagePath, isPdfPath } from '../../lib/adminAdvisor'
 import { useTranslation } from '../../hooks/useTranslation'
 import Badge from '../ui/Badge'
 
-export default function DocumentPreviewModal({ docs, index, subjectName, onClose, onIndex }) {
+export default function DocumentPreviewModal({ docs, index, subjectName, onClose, onIndex, resolveUrl }) {
   const { t } = useTranslation()
   const [url, setUrl] = useState('')
   const [loading, setLoading] = useState(true)
@@ -15,6 +15,7 @@ export default function DocumentPreviewModal({ docs, index, subjectName, onClose
 
   const doc = docs?.[index] || null
   const total = docs?.length || 0
+  const getUrl = resolveUrl || getSignedDocUrl
 
   const go = useCallback(
     (delta) => {
@@ -31,14 +32,14 @@ export default function DocumentPreviewModal({ docs, index, subjectName, onClose
     setLoading(true)
     setError(false)
     setUrl('')
-    getSignedDocUrl(doc.storage_path)
+    getUrl(doc.storage_path)
       .then((signed) => active && setUrl(signed))
       .catch(() => active && setError(true))
       .finally(() => active && setLoading(false))
     return () => {
       active = false
     }
-  }, [doc])
+  }, [doc, getUrl])
 
   useEffect(() => {
     function onKey(e) {
