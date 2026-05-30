@@ -458,6 +458,9 @@ export const translations = {
       ctaList: 'List a place',
       studentsAlwaysFree: 'Students always free',
       cookieSettings: 'Cookie settings',
+      legal: 'Legal',
+      privacy: 'Privacy Policy',
+      terms: 'Terms of Service',
     },
     cookies: {
       bannerTitle: 'We use cookies',
@@ -1022,6 +1025,9 @@ export const translations = {
       ctaList: 'Namela lefelo',
       studentsAlwaysFree: 'Baithuti mahala ka mehla',
       cookieSettings: 'Dipeelo tsa di-cookie',
+      legal: 'Molao',
+      privacy: 'Pholisi ya Sephiri',
+      terms: 'Melao ya Tiriso',
     },
     cookies: {
       bannerTitle: 'Re dirisa di-cookie',

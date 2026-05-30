@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ArrowRight, Mail, Globe, Search, GraduationCap, Tag, Home } from 'lucide-react'
+import { ArrowRight, Mail, Globe, Search, GraduationCap, Tag, Home, ShieldCheck, FileText } from 'lucide-react'
 import { useTranslation } from '../../hooks/useTranslation'
 import { useCookieConsent } from '../../context/CookieConsentContext'
 import { PatternBotswana } from '../ui/Icons'
@@ -75,7 +75,7 @@ export default function Footer() {
       <div className="gold-divider relative opacity-30" />
 
       <div className="relative mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
-        <div className="grid gap-8 md:grid-cols-4 md:gap-10">
+        <div className="grid gap-8 md:grid-cols-5 md:gap-10">
           <motion.div
             className="md:col-span-2"
             initial={{ opacity: 0, y: 20 }}
@@ -133,6 +133,29 @@ export default function Footer() {
                 <ContactLink href="https://futurifydesigns.com" icon={Globe} external>
                   futurifydesigns.com
                 </ContactLink>
+              </li>
+            </ul>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.24 }}
+          >
+            <h3 className="mb-4 text-xs font-semibold uppercase tracking-[0.15em] text-accent">
+              {t('footer.legal')}
+            </h3>
+            <ul className="space-y-1">
+              <li>
+                <FooterLink to="/privacy" icon={ShieldCheck}>
+                  {t('footer.privacy')}
+                </FooterLink>
+              </li>
+              <li>
+                <FooterLink to="/terms" icon={FileText}>
+                  {t('footer.terms')}
+                </FooterLink>
               </li>
             </ul>
           </motion.div>

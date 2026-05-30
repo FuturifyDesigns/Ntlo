@@ -29,6 +29,8 @@ import NotFound from './pages/NotFound'
 import AdminDashboard from './pages/AdminDashboard'
 import LandlordVerify from './pages/LandlordVerify'
 import Pricing from './pages/Pricing'
+import Privacy from './pages/Privacy'
+import Terms from './pages/Terms'
 import GrainOverlay from './components/ui/Motion'
 import CookieConsentBanner from './components/layout/CookieConsentBanner'
 import CookieFeedbackToast from './components/layout/CookieFeedbackToast'
@@ -69,6 +71,8 @@ function AppRoutes() {
           <Route path="/check-email" element={<CheckEmail />} />
           <Route path="/complete-profile" element={<OAuthSetupRoute><CompleteProfile /></OAuthSetupRoute>} />
           <Route path="/pricing" element={<Pricing />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/terms" element={<Terms />} />
           <Route path="/student" element={<ProtectedRoute role="student"><StudentDashboard /></ProtectedRoute>} />
           <Route path="/admin" element={<ProtectedRoute role="admin"><AdminDashboard /></ProtectedRoute>} />
           <Route path="/landlord/verify" element={<ProtectedRoute role="landlord"><LandlordVerify /></ProtectedRoute>} />
