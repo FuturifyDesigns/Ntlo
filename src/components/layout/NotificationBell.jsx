@@ -1,14 +1,15 @@
 import { useState, useRef, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { Bell } from 'lucide-react'
 import { useNotifications } from '../../hooks/useNotifications'
 import { useTranslation } from '../../hooks/useTranslation'
 import { useAuth } from '../../hooks/useAuth'
-import { notificationHref } from '../../lib/notifications'
+import { navigateToNotification } from '../../lib/notifications'
 
 export default function NotificationBell() {
   const { t } = useTranslation()
   const { profile } = useAuth()
+  const navigate = useNavigate()
   const { items, unreadCount, readOne, readAll } = useNotifications()
   const [open, setOpen] = useState(false)
   const ref = useRef(null)
@@ -24,6 +25,7 @@ export default function NotificationBell() {
   async function handleClick(n) {
     if (!n.read_at) await readOne(n.id)
     setOpen(false)
+    navigateToNotification(navigate, n, profile?.role)
   }
 
   return (
@@ -57,18 +59,18 @@ export default function NotificationBell() {
               <p className="px-4 py-6 text-center text-sm text-muted">{t('notifications.empty')}</p>
             ) : (
               items.map((n) => (
-                <Link
+                <button
                   key={n.id}
-                  to={notificationHref(n, profile?.role)}
+                  type="button"
                   onClick={() => handleClick(n)}
-                  className={`block border-b border-border/60 px-4 py-3 text-left transition-colors hover:bg-background ${
+                  className={`block w-full border-b border-border/60 px-4 py-3 text-left transition-colors hover:bg-background ${
                     n.read_at ? 'opacity-75' : 'bg-accent/5'
                   }`}
                 >
                   <p className="text-sm font-medium text-primary">{n.title}</p>
                   {n.body && <p className="mt-0.5 line-clamp-2 text-xs text-muted">{n.body}</p>}
                   <p className="mt-1 text-[10px] text-muted">{new Date(n.created_at).toLocaleString()}</p>
-                </Link>
+                </button>
               ))
             )}
           </div>

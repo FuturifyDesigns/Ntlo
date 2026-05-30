@@ -22,7 +22,7 @@ function statusVariant(status) {
 
 export default function LandlordInquiriesPanel() {
   const { t } = useTranslation()
-  const [searchParams] = useSearchParams()
+  const [searchParams, setSearchParams] = useSearchParams()
   const { viewings, applications, conversations, loading, refetch } = useLandlordInquiries()
   const [tab, setTab] = useState('applications')
   const [busyId, setBusyId] = useState(null)
@@ -38,7 +38,9 @@ export default function LandlordInquiriesPanel() {
 
   useEffect(() => {
     const tabParam = searchParams.get('tab')
-    if (['applications', 'viewings', 'messages'].includes(tabParam)) setTab(tabParam)
+    if (['applications', 'viewings', 'messages'].includes(tabParam)) {
+      setTab(tabParam)
+    }
 
     const chatId = searchParams.get('chat')
     if (!chatId || loading) return
@@ -49,6 +51,14 @@ export default function LandlordInquiriesPanel() {
       setTab('messages')
     }
   }, [searchParams, conversations, loading])
+
+  function selectTab(nextTab) {
+    setTab(nextTab)
+    const next = new URLSearchParams(searchParams)
+    next.set('tab', nextTab)
+    if (nextTab !== 'messages') next.delete('chat')
+    setSearchParams(next, { replace: true })
+  }
 
   const pendingApplications = applications.filter((a) => a.status === 'submitted').length
   const pendingViewings = viewings.filter((v) => v.status === 'pending').length
@@ -142,7 +152,7 @@ export default function LandlordInquiriesPanel() {
           <button
             key={item.id}
             type="button"
-            onClick={() => setTab(item.id)}
+            onClick={() => selectTab(item.id)}
             className={`relative rounded-lg border px-3 py-2 text-sm font-semibold ${
               tab === item.id ? 'border-accent bg-accent/10 text-primary' : 'border-border text-muted'
             }`}

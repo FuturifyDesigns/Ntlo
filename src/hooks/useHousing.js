@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from './useAuth'
 import { getOrCreateConversation, sendMessage, markMessagesRead, fetchStudentListingStatus } from '../lib/housing'
+import { fetchLandlordApplicationsForUser } from '../lib/landlordApplications'
 
 const APPLICATION_SELECT = `
   *,
@@ -9,54 +10,6 @@ const APPLICATION_SELECT = `
   documents:application_documents(id, doc_type, file_name, storage_path, created_at),
   student:profiles!listing_applications_student_id_fkey(id, full_name, phone, university_id, gender)
 `
-
-async function fetchLandlordApplications(landlordUserId) {
-  const listingJoinSelect = `
-    *,
-    listing:listings!inner(id, title, area, city, price, available, gender_preference, room_type, landlord_id),
-    student:profiles!listing_applications_student_id_fkey(id, full_name, phone, university_id, gender)
-  `
-
-  let { data, error } = await supabase
-    .from('listing_applications')
-    .select(listingJoinSelect)
-    .eq('listing.landlord_id', landlordUserId)
-    .order('created_at', { ascending: false })
-
-  if (error || !data?.length) {
-    const fallback = await supabase
-      .from('listing_applications')
-      .select(`
-        *,
-        listing:listings(id, title, area, city, price, available, gender_preference, room_type),
-        student:profiles!listing_applications_student_id_fkey(id, full_name, phone, university_id, gender)
-      `)
-      .eq('landlord_id', landlordUserId)
-      .order('created_at', { ascending: false })
-    data = fallback.data
-    error = fallback.error
-  }
-
-  if (error || !data?.length) {
-    return { data: data || [], error }
-  }
-
-  const { data: docs } = await supabase
-    .from('application_documents')
-    .select('id, application_id, doc_type, file_name, storage_path, created_at')
-    .in('application_id', data.map((row) => row.id))
-
-  const docsByApp = {}
-  for (const doc of docs || []) {
-    if (!docsByApp[doc.application_id]) docsByApp[doc.application_id] = []
-    docsByApp[doc.application_id].push(doc)
-  }
-
-  return {
-    data: data.map((row) => ({ ...row, documents: docsByApp[row.id] || [] })),
-    error: null,
-  }
-}
 
 export function useConversations() {
   const { user, profile } = useAuth()
@@ -289,7 +242,7 @@ export function useLandlordInquiries() {
         .select('*, listing:listings(id, title), student:profiles!viewing_requests_student_id_fkey(id, full_name, last_seen_at)')
         .eq('landlord_id', user.id)
         .order('created_at', { ascending: false }),
-      fetchLandlordApplications(user.id),
+      fetchLandlordApplicationsForUser(user.id),
       supabase
         .from('conversations')
         .select(`

@@ -1,9 +1,9 @@
 import { useEffect, useState, useCallback } from 'react'
-import { Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { X } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../hooks/useAuth'
-import { notificationHref } from '../../lib/notifications'
+import { navigateToNotification } from '../../lib/notifications'
 import { useTranslation } from '../../hooks/useTranslation'
 
 const URGENT_TYPES = new Set([
@@ -59,6 +59,7 @@ export function useUrgentNotificationToasts() {
 
 export default function UrgentNotificationLayer() {
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const { toasts, dismiss, role } = useUrgentNotificationToasts()
 
   useEffect(() => {
@@ -80,13 +81,16 @@ export default function UrgentNotificationLayer() {
               <p className="text-xs font-semibold uppercase tracking-wide text-accent">{t('notifications.urgent')}</p>
               <p className="mt-1 text-sm font-semibold text-primary">{n.title}</p>
               {n.body && <p className="mt-0.5 line-clamp-2 text-xs text-muted">{n.body}</p>}
-              <Link
-                to={notificationHref(n, role)}
-                onClick={() => dismiss(n.id)}
+              <button
+                type="button"
+                onClick={() => {
+                  dismiss(n.id)
+                  navigateToNotification(navigate, n, role)
+                }}
                 className="mt-2 inline-block text-xs font-medium text-accent hover:underline"
               >
                 {t('notifications.viewNow')}
-              </Link>
+              </button>
             </div>
             <button
               type="button"

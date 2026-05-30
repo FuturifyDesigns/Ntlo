@@ -34,7 +34,9 @@ export function notificationHref(notification, role) {
   if (!notification) return '/'
 
   const { type, link, entity_id: entityId } = notification
-  const isLandlord = role === 'landlord'
+  const linkIsLandlord = typeof link === 'string' && link.includes('/landlord')
+  const linkIsStudent = typeof link === 'string' && link.includes('/student')
+  const isLandlord = role === 'landlord' || (linkIsLandlord && !linkIsStudent)
   const isAdmin = role === 'admin'
 
   switch (type) {
@@ -78,6 +80,23 @@ export function notificationHref(notification, role) {
   }
 
   if (link?.startsWith('http')) return link
+  if (link === '/landlord') {
+    if (type?.includes('application')) return '/landlord?tab=applications'
+    if (type?.includes('viewing')) return '/landlord?tab=viewings'
+    if (type === 'message') return '/landlord?tab=messages'
+    return '/landlord?tab=applications'
+  }
   if (link?.startsWith('/')) return link
   return link ? `/${link}` : '/'
+}
+
+/** HashRouter-safe navigation to a notification target. */
+export function navigateToNotification(navigate, notification, role) {
+  const href = notificationHref(notification, role)
+  const qIndex = href.indexOf('?')
+  if (qIndex === -1) {
+    navigate(href)
+    return
+  }
+  navigate({ pathname: href.slice(0, qIndex), search: href.slice(qIndex) })
 }
