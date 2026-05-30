@@ -20,16 +20,19 @@ export function useStats() {
           supabase
             .from('listings')
             .select('id', { count: 'exact', head: true })
-            .eq('available', true),
+            .eq('available', true)
+            .eq('verification_status', 'approved'),
           supabase
             .from('listings')
             .select('id', { count: 'exact', head: true })
             .eq('available', true)
+            .eq('verification_status', 'approved')
             .eq('is_verified', true),
           supabase
             .from('listings')
             .select('nearest_university_id')
             .eq('available', true)
+            .eq('verification_status', 'approved')
             .not('nearest_university_id', 'is', null),
           supabase
             .from('profiles')

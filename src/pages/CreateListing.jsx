@@ -257,7 +257,7 @@ export default function CreateListing() {
       }
 
       clearDraft()
-      navigate('/landlord')
+      navigate('/landlord', { state: { listingSubmitted: true } })
     } catch (err) {
       setError(err.message)
     } finally {
@@ -578,7 +578,7 @@ export default function CreateListing() {
             Back
           </Button>
           <Button onClick={nextStep} disabled={submitting}>
-            {step === STEPS.length - 1 ? (submitting ? 'Publishing...' : 'Publish listing') : 'Continue'}
+            {step === STEPS.length - 1 ? (submitting ? t('listingReview.submitting') : t('listingReview.submit')) : 'Continue'}
             {step < STEPS.length - 1 && <ChevronRight size={16} />}
           </Button>
         </div>

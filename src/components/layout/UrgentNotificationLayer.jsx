@@ -17,6 +17,10 @@ const URGENT_TYPES = new Set([
   'viewing_declined',
   'viewing_cancelled',
   'message',
+  'admin_listing_review',
+  'listing_approved',
+  'listing_rejected',
+  'listing_changes_requested',
 ])
 
 export function useUrgentNotificationToasts() {

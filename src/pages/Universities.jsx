@@ -18,6 +18,7 @@ export default function Universities() {
         .from('listings')
         .select('nearest_university_id')
         .eq('available', true)
+        .eq('verification_status', 'approved')
       if (data) {
         const counts = {}
         data.forEach((l) => {

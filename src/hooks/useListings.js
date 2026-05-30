@@ -69,6 +69,8 @@ export function useListings(filters = {}) {
         query = query.in('occupancy_status', ['available', 'rented'])
       }
 
+      query = query.eq('verification_status', 'approved')
+
       if (universityId === 'other') {
         query = query.is('nearest_university_id', null)
       } else if (universityId) {

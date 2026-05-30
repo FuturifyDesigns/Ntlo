@@ -254,7 +254,9 @@ export function mapHousingError(message) {
 }
 
 export function isListingVerified(listing) {
-  return Boolean(listing?.is_verified && listing?.verification_status !== 'rejected')
+  return listing?.verification_status === 'approved' || (
+    Boolean(listing?.is_verified) && listing?.verification_status !== 'rejected'
+  )
 }
 
 export function isLandlordVerified(listing) {

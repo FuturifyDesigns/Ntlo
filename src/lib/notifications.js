@@ -66,6 +66,16 @@ export function notificationHref(notification, role) {
       if (link?.startsWith('/listings/')) return link
       return '/student?tab=applications'
 
+    case 'listing_submitted':
+    case 'listing_approved':
+    case 'listing_rejected':
+    case 'listing_changes_requested':
+      return isLandlord ? '/landlord' : '/'
+
+    case 'admin_listing_review':
+    case 'admin_listing_removed':
+      return isAdmin ? '/admin?tab=listings' : '/admin'
+
     case 'admin_application':
       return isAdmin ? '/admin?tab=applications' : '/admin'
 
@@ -87,8 +97,9 @@ export function notificationHref(notification, role) {
   if (link === '/landlord') {
     if (type?.includes('application')) return '/landlord?tab=applications'
     if (type?.includes('viewing')) return '/landlord?tab=viewings'
+    if (type?.includes('listing')) return '/landlord'
     if (type === 'message') return '/landlord?tab=messages'
-    return '/landlord?tab=applications'
+    return '/landlord'
   }
   if (link?.startsWith('/listings/')) return link
   if (link?.startsWith('/')) return link

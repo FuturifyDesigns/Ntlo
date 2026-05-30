@@ -19,6 +19,7 @@ import { resolveListingTrustBadge } from '../lib/tierBenefits'
 import { useAuth } from '../hooks/useAuth'
 import { getUniversityDisplayName } from '../lib/universityNames'
 import { getListingOccupancy, isListingRented } from '../lib/listingOccupancy'
+import CompetitiveAdvisorPanel from '../components/advisor/CompetitiveAdvisorPanel'
 import {
   formatPrice,
   formatDistance,
@@ -31,7 +32,7 @@ import {
 export default function ListingDetail() {
   const { id } = useParams()
   const { t } = useTranslation()
-  const { profile } = useAuth()
+  const { profile, isLandlord } = useAuth()
   const { listing, loading, error } = useListing(id)
   const { listings: related } = useListings(
     listing?.landlord_id ? { landlordId: listing.landlord_id, availableOnly: true } : {}
@@ -149,10 +150,14 @@ export default function ListingDetail() {
             <div className="sticky top-24 max-h-[calc(100vh-6rem)] space-y-4 overflow-y-auto rounded-xl border border-border bg-surface p-6 shadow-sm">
               <ListingContactPanel listing={listing} />
 
-              <ListingAdvisorPanel
-                listing={listing}
-                studentUniversityId={profile?.role === 'student' ? profile.university_id : undefined}
-              />
+              {isLandlord ? (
+                <CompetitiveAdvisorPanel listing={listing} />
+              ) : (
+                <ListingAdvisorPanel
+                  listing={listing}
+                  studentUniversityId={profile?.role === 'student' ? profile.university_id : undefined}
+                />
+              )}
             </div>
           </div>
         </div>

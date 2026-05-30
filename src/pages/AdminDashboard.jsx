@@ -108,7 +108,7 @@ export default function AdminDashboard() {
         landlord:profiles!listings_landlord_id_fkey(id, full_name),
         docs:verification_documents!verification_documents_listing_id_fkey(id, doc_type, file_name, storage_path, status, created_at)
       `)
-      .eq('verification_status', 'pending')
+      .in('verification_status', ['pending', 'changes_requested'])
       .order('created_at', { ascending: false })
     if (error) setActionError(error.message)
     setListings(data || [])
