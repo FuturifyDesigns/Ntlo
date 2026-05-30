@@ -22,9 +22,12 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <link rel="manifest" href="/manifest.json" />
 
-    <!-- Icons -->
-    <link rel="icon" type="image/png" href="/favicon.png" sizes="512x512" />
-    <link rel="apple-touch-icon" href="/favicon.png" />
+    <!-- Icons (Google search favicon + browsers) -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="48x48" href="/favicon.png" />
+    <link rel="icon" type="image/png" sizes="any" href="/favicon.png" />
+    <link rel="shortcut icon" href="/favicon.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon.png" />
 
     <!-- Open Graph -->
     <meta property="og:type" content="website" />
@@ -47,24 +50,46 @@
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "WebSite",
-      "name": "Ntlo",
-      "alternateName": "Ntlo Botswana",
-      "url": "https://ntlo.online/",
-      "description": "Student accommodation finder for Botswana universities.",
-      "publisher": {
-        "@type": "Organization",
-        "name": "Futurify Designs",
-        "logo": {
-          "@type": "ImageObject",
-          "url": "https://ntlo.online/favicon.png"
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://ntlo.online/#organization",
+          "name": "Ntlo",
+          "alternateName": ["Ntlo Online", "Ntlo Botswana"],
+          "url": "https://ntlo.online/",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://ntlo.online/favicon.png",
+            "width": 1024,
+            "height": 1024
+          },
+          "image": "https://ntlo.online/logo-brand.png",
+          "description": "Ntlo helps Botswana students find verified rooms and apartments near their universities.",
+          "areaServed": {
+            "@type": "Country",
+            "name": "Botswana"
+          },
+          "founder": {
+            "@type": "Organization",
+            "name": "Futurify Designs"
+          }
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://ntlo.online/#website",
+          "name": "Ntlo",
+          "alternateName": "Ntlo Botswana",
+          "url": "https://ntlo.online/",
+          "description": "Student accommodation finder for Botswana universities.",
+          "publisher": { "@id": "https://ntlo.online/#organization" },
+          "inLanguage": "en",
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://ntlo.online/#/listings?q={search_term_string}",
+            "query-input": "required name=search_term_string"
+          }
         }
-      },
-      "potentialAction": {
-        "@type": "SearchAction",
-        "target": "https://ntlo.online/#/listings?q={search_term_string}",
-        "query-input": "required name=search_term_string"
-      }
+      ]
     }
     </script>
 
