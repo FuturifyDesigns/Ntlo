@@ -54,7 +54,8 @@ Run each file in the **Supabase SQL Editor** in order.
 - **Identity:** one-time verify flow at `/landlord/verify` (unchanged)  
 - **Payment model:** manual FNB bank transfer → landlord uploads receipt → admin verifies → tier activated (realtime)  
 - **No payment gateway** — zero gateway fees  
-- **Listing badges today:** admin-approved identity → Standard-style badge; otherwise “Listed on Ntlo” (until billing switches badge source to `subscription_tier`)
+- **Listing badges today:** every available listing shows a **Free** badge only — no Standard/Premium/verified tier badges until billing is enabled
+- **Listing limits today:** unlimited listings and unlimited photos (`getLandlordLimits()` in `src/lib/subscriptions.js`)
 
 **Feature flag (billing OFF by default):**
 

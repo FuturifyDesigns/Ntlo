@@ -31,6 +31,7 @@ import {
   getTierCardStyle,
 } from '../lib/subscriptions'
 import { fetchUserPaymentReceipts, uploadPaymentReceipt, getReceiptSignedUrl } from '../lib/paymentReceipts'
+import EarlyAccessLandlordNote from '../components/landlord/EarlyAccessLandlordNote'
 
 export default function LandlordBilling() {
   const { user, profile } = useAuth()
@@ -134,9 +135,14 @@ export default function LandlordBilling() {
               )}
             </div>
             <p className="mt-2 text-sm leading-relaxed text-muted">{t('billing.earlyAccessBody')}</p>
+            {!BILLING_LIVE && (
+              <p className="mt-2 text-sm text-muted">{t('billing.earlyAccessLandlordBody')}</p>
+            )}
           </div>
         </div>
       </Card>
+
+      {!BILLING_LIVE && <EarlyAccessLandlordNote className="mb-6" />}
 
       {/* Current status */}
       <div className="mb-6 grid gap-4 sm:grid-cols-2">

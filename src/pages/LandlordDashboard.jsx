@@ -13,6 +13,7 @@ import { formatPrice, getCoverPhoto } from '../lib/utils'
 import ListingMap from '../components/listings/ListingMap'
 import LandlordWelcomeBanner from '../components/landlord/LandlordWelcomeBanner'
 import EarlyAccessBanner from '../components/landlord/EarlyAccessBanner'
+import EarlyAccessLandlordNote from '../components/landlord/EarlyAccessLandlordNote'
 import LandlordInquiriesPanel from '../components/housing/LandlordInquiriesPanel'
 import { relistListing } from '../lib/housing'
 import { MAPS_ENABLED } from '../lib/googleMaps'
@@ -105,6 +106,7 @@ export default function LandlordDashboard() {
         <div>
           <h1 className="font-display text-3xl font-bold text-primary">{t('dashboard.landlordTitle')}</h1>
           <p className="mt-2 text-muted">{t('dashboard.welcomeLandlord')}, {profile?.full_name || 'Landlord'}</p>
+          <EarlyAccessLandlordNote className="mt-4 max-w-2xl" />
         </div>
         <div className="flex flex-wrap gap-2">
           <Button as={Link} to="/landlord/billing" variant="outline">

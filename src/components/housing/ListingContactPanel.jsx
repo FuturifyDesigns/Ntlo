@@ -9,8 +9,6 @@ import Modal from '../ui/Modal'
 import Input, { Textarea } from '../ui/Input'
 import { getWhatsAppLink } from '../../lib/utils'
 import { createViewingRequest, submitApplication, mapHousingError } from '../../lib/housing'
-import TrustedBadge from '../trust/TrustedBadge'
-import { resolveListingTrustBadge } from '../../lib/tierBenefits'
 import ApplicationDocFields from './ApplicationDocFields'
 import ApplicationRequirementsList from './ApplicationRequirementsList'
 import { APPLICATION_DOC_TYPES } from '../../lib/applicationDocs'
@@ -112,7 +110,6 @@ export default function ListingContactPanel({ listing }) {
   const [applyError, setApplyError] = useState('')
 
   const landlordName = listing.landlord_display_name || listing.landlord?.full_name || 'Landlord'
-  const trustLevel = resolveListingTrustBadge(listing)
   const isStudent = profile?.role === 'student'
   const isGuest = !user
   const canContact = listing.available && user && isStudent
@@ -216,11 +213,6 @@ export default function ListingContactPanel({ listing }) {
         <div>
           <p className="text-sm text-muted">{t('listingDetail.listedBy')}</p>
           <p className="font-semibold">{landlordName}</p>
-          {trustLevel && (
-            <div className="mt-2">
-              <TrustedBadge level={trustLevel} compact />
-            </div>
-          )}
         </div>
 
         {listing.available && isGuest && (

@@ -84,6 +84,26 @@ export function tierPrice(id) {
   return LANDLORD_TIERS.find((t) => t.id === id)?.price ?? 0
 }
 
+export function isEarlyAccessMode() {
+  return !BILLING_LIVE
+}
+
+/** Listing/photo caps — null means unlimited. Early access is always unlimited. */
+export function getLandlordLimits(profile) {
+  if (isEarlyAccessMode()) {
+    return { maxListings: null, maxPhotos: null }
+  }
+  const tierId = ['basic', 'standard', 'premium'].includes(profile?.subscription_tier)
+    ? profile.subscription_tier
+    : 'basic'
+  const tier = LANDLORD_TIERS.find((t) => t.id === tierId) || LANDLORD_TIERS[0]
+  return { maxListings: tier.maxListings, maxPhotos: tier.maxPhotos }
+}
+
+export function getMaxPhotosPerListing(profile) {
+  return getLandlordLimits(profile).maxPhotos
+}
+
 export function formatTierLabel(id, t) {
   if (!id || id === 'early_access' || id === 'free') return t('billing.earlyAccessTier')
   return t(tierNameKey(id))

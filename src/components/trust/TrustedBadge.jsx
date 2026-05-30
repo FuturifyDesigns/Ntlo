@@ -4,6 +4,10 @@ import { TRUST_LEVEL, trustBadgeLabelKey } from '../../lib/tierBenefits'
 import { useTranslation } from '../../hooks/useTranslation'
 
 const STYLES = {
+  [TRUST_LEVEL.free]: {
+    wrap: 'bg-success/15 text-success border border-success/35',
+    icon: IconListedHome,
+  },
   [TRUST_LEVEL.listed]: {
     wrap: 'bg-background/95 text-muted border border-border',
     icon: IconListedHome,
@@ -19,13 +23,13 @@ const STYLES = {
 }
 
 export default function TrustedBadge({
-  level = TRUST_LEVEL.standard,
+  level = TRUST_LEVEL.free,
   compact = false,
   showLabel = true,
   className,
 }) {
   const { t } = useTranslation()
-  const style = STYLES[level] || STYLES[TRUST_LEVEL.standard]
+  const style = STYLES[level] || STYLES[TRUST_LEVEL.free]
   const Icon = style.icon
   const labelKey = trustBadgeLabelKey(level)
 
