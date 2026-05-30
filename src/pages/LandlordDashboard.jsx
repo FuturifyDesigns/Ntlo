@@ -13,6 +13,7 @@ import { formatPrice, getCoverPhoto } from '../lib/utils'
 import ListingMap from '../components/listings/ListingMap'
 import LandlordWelcomeBanner from '../components/landlord/LandlordWelcomeBanner'
 import EarlyAccessBanner from '../components/landlord/EarlyAccessBanner'
+import LandlordInquiriesPanel from '../components/housing/LandlordInquiriesPanel'
 import { MAPS_ENABLED } from '../lib/googleMaps'
 import { CreditCard } from 'lucide-react'
 
@@ -125,6 +126,10 @@ export default function LandlordDashboard() {
           <p className="text-sm text-muted">{t('dashboard.totalViews')}</p>
           <p className="font-display text-3xl font-bold text-accent">{totalViews}</p>
         </Card>
+      </div>
+
+      <div className="mb-10">
+        <LandlordInquiriesPanel />
       </div>
 
       {!loading && listings.some((l) => l.lat && l.lng) && (

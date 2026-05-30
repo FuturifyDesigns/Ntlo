@@ -25,10 +25,9 @@ export function useSavedListings() {
           listing_id,
           listing:listings(
             id, title, price, room_type, area, city, lat, lng,
-            distance_to_campus, available, is_verified, amenities,
+            distance_to_campus, available, is_verified, landlord_verified, landlord_display_name, amenities,
             nearest_university_id, gender_preference,
             nearest_university:universities(id, short_name, name, lat, lng),
-            landlord:profiles(is_verified),
             cover_photo:listing_photos(url, is_cover)
           )
         `
@@ -49,9 +48,22 @@ export function useSavedListings() {
   }, [user])
 
   useEffect(() => {
-    if (authLoading) return
+    if (authLoading) return undefined
     fetchSaved()
-  }, [authLoading, fetchSaved])
+
+    if (!user?.id) return undefined
+
+    const channel = supabase
+      .channel(`saved-listings-${user.id}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'saved_listings', filter: `student_id=eq.${user.id}` },
+        () => fetchSaved()
+      )
+      .subscribe()
+
+    return () => supabase.removeChannel(channel)
+  }, [authLoading, fetchSaved, user?.id])
 
   async function toggleSave(listingId) {
     if (!user) return { needsAuth: true }

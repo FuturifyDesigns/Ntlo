@@ -40,6 +40,7 @@ import CookiePreferencesModal from './components/layout/CookiePreferencesModal'
 import ExitIntentModal from './components/layout/ExitIntentModal'
 import AnalyticsTracker from './components/layout/AnalyticsTracker'
 import GoogleMapsProvider from './components/maps/GoogleMapsProvider'
+import { SavedListingsProvider } from './context/SavedListingsContext'
 import { useLocale } from './context/LocaleContext'
 import { useTranslation } from './hooks/useTranslation'
 
@@ -131,6 +132,7 @@ export default function App() {
     <HashRouter>
       <LocaleProvider>
         <AuthProvider>
+          <SavedListingsProvider>
           <UniversitiesProvider>
             <GoogleMapsProvider>
               <CookieConsentProvider>
@@ -140,6 +142,7 @@ export default function App() {
               </CookieConsentProvider>
             </GoogleMapsProvider>
           </UniversitiesProvider>
+          </SavedListingsProvider>
         </AuthProvider>
       </LocaleProvider>
     </HashRouter>

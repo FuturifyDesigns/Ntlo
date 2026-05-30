@@ -3,7 +3,7 @@ import { Heart } from 'lucide-react'
 import { useState } from 'react'
 import { formatPrice, formatDistance, getCoverPhoto, getNearestUniversity, ROOM_TYPES, AMENITIES, cn } from '../../lib/utils'
 import * as LucideIcons from 'lucide-react'
-import { useSavedListings } from '../../hooks/useSavedListings'
+import { useSavedListingsContext } from '../../context/SavedListingsContext'
 import { useAuth } from '../../hooks/useAuth'
 import { useTranslation } from '../../hooks/useTranslation'
 import { getUniversityDisplayName } from '../../lib/universityNames'
@@ -14,7 +14,7 @@ const PLACEHOLDER = 'https://images.unsplash.com/photo-1522708323590-d24dbb6b026
 
 export default function ListingCard({ listing, compact = false }) {
   const { user } = useAuth()
-  const { isSaved, toggleSave } = useSavedListings()
+  const { isSaved, toggleSave } = useSavedListingsContext()
   const navigate = useNavigate()
   const { t } = useTranslation()
   const [saving, setSaving] = useState(false)
@@ -79,11 +79,11 @@ export default function ListingCard({ listing, compact = false }) {
             </div>
           )}
 
-          {listing.is_verified && (
+          {(listing.is_verified || listing.landlord_verified) && (
             <div className="absolute bottom-3 right-3">
               <span className="inline-flex items-center gap-1 rounded-full bg-accent px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary">
                 <IconVerified className="h-3 w-3" />
-                Verified
+                {listing.is_verified ? t('listings.verifiedListing') : t('listings.verifiedLandlord')}
               </span>
             </div>
           )}

@@ -53,7 +53,7 @@ export function useListings(filters = {}) {
         .select(
           `
           id, title, price, room_type, area, city, address, lat, lng,
-          distance_to_campus, available, is_verified, featured,
+          distance_to_campus, available, is_verified, landlord_verified, landlord_display_name, featured,
           whatsapp_number, amenities, gender_preference, deposit_pula, utilities_included, house_rules,
           created_at, views,
           nearest_university_id, custom_university_name,
