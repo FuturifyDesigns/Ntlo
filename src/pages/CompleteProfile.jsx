@@ -40,11 +40,20 @@ export default function CompleteProfile() {
     if (draft.customUniversity) setCustomUniversity(draft.customUniversity)
   }, [])
 
+  const handleDraftClear = useCallback(() => {
+    setRole(profile?.role || defaultRole)
+    setPhone(profile?.phone || '')
+    setUniversityId(profile?.university_id ? String(profile.university_id) : '')
+    setCustomUniversity('')
+    setFieldErrors({})
+    setError('')
+  }, [profile, defaultRole])
+
   const { restored: draftRestored, savedLabel, clearDraft, dismissRestored } = useFormDraft(
     draftKey,
     { role, phone, universityId, customUniversity },
     handleDraftRestore,
-    { enabled: Boolean(user?.id) }
+    { enabled: Boolean(user?.id), onClear: handleDraftClear }
   )
 
   const validationMessages = {

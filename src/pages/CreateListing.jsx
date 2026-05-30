@@ -67,6 +67,19 @@ export default function CreateListing() {
     if (typeof draft.coverIndex === 'number') setCoverIndex(draft.coverIndex)
   }, [])
 
+  const handleDraftClear = useCallback(() => {
+    setPhotos((current) => {
+      current.forEach((p) => URL.revokeObjectURL(p.preview))
+      return []
+    })
+    setForm({ ...initialForm })
+    setStep(0)
+    setCoverIndex(0)
+    setListingDocs({})
+    setFieldErrors({})
+    setError('')
+  }, [])
+
   const {
     restored: draftRestored,
     savedLabel,
@@ -76,7 +89,7 @@ export default function CreateListing() {
     draftKey,
     { form, step, coverIndex },
     handleDraftRestore,
-    { enabled: Boolean(user?.id) }
+    { enabled: Boolean(user?.id), onClear: handleDraftClear }
   )
 
   const validationMessages = useMemo(() => ({

@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import { useNavigate, useParams, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
@@ -28,6 +28,7 @@ export default function EditListing() {
   const [error, setError] = useState('')
   const [fieldErrors, setFieldErrors] = useState({})
   const [draftRestored, setDraftRestored] = useState(false)
+  const dbFormRef = useRef(null)
 
   const draftKey = useMemo(() => getDraftKey(`listing_edit_${id}`, user?.id), [id, user?.id])
 
@@ -73,6 +74,7 @@ export default function EditListing() {
           custom_university_name: data.custom_university_name ?? '',
           custom_university_city: data.custom_university_city ?? '',
         }
+        dbFormRef.current = dbForm
         const draft = loadDraft(draftKey)
         if (draft?.form) {
           setForm({ ...dbForm, ...draft.form })
@@ -86,11 +88,18 @@ export default function EditListing() {
     if (user) load()
   }, [id, user, draftKey])
 
+  const handleDraftClear = useCallback(() => {
+    if (dbFormRef.current) setForm({ ...dbFormRef.current })
+    setFieldErrors({})
+    setError('')
+    setDraftRestored(false)
+  }, [])
+
   const { savedLabel, clearDraft } = useFormDraft(
     draftKey,
     { form },
     null,
-    { enabled: Boolean(user?.id && form), debounceMs: 450 }
+    { enabled: Boolean(user?.id && form), debounceMs: 450, onClear: handleDraftClear }
   )
 
   function update(field, value) {

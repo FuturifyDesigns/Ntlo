@@ -8,12 +8,15 @@ import { loadDraft, saveDraft, clearDraft as removeDraft, formatDraftSavedAt } f
  * @param {(draft: object) => void} onRestore - called once when a draft is found
  * @param {{ debounceMs?: number, enabled?: boolean }} options
  */
-export function useFormDraft(key, state, onRestore, { debounceMs = 450, enabled = true } = {}) {
+export function useFormDraft(key, state, onRestore, { debounceMs = 450, enabled = true, onClear } = {}) {
   const [restored, setRestored] = useState(false)
   const [savedAt, setSavedAt] = useState(null)
   const readyRef = useRef(false)
+  const skipSaveRef = useRef(false)
   const onRestoreRef = useRef(onRestore)
+  const onClearRef = useRef(onClear)
   onRestoreRef.current = onRestore
+  onClearRef.current = onClear
 
   useEffect(() => {
     if (!enabled || !key) {
@@ -31,6 +34,10 @@ export function useFormDraft(key, state, onRestore, { debounceMs = 450, enabled 
 
   useEffect(() => {
     if (!enabled || !key || !readyRef.current) return undefined
+    if (skipSaveRef.current) {
+      skipSaveRef.current = false
+      return undefined
+    }
     const timer = window.setTimeout(() => {
       saveDraft(key, state)
       setSavedAt(Date.now())
@@ -42,6 +49,8 @@ export function useFormDraft(key, state, onRestore, { debounceMs = 450, enabled 
     if (key) removeDraft(key)
     setRestored(false)
     setSavedAt(null)
+    skipSaveRef.current = true
+    onClearRef.current?.()
   }, [key])
 
   const dismissRestored = useCallback(() => setRestored(false), [])

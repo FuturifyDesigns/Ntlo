@@ -50,6 +50,21 @@ export default function Register() {
     }
   }, [])
 
+  const handleDraftClear = useCallback(() => {
+    setForm({
+      fullName: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+      phone: '',
+      role: defaultRole,
+      universityId: '',
+      customUniversity: '',
+    })
+    setFieldErrors({})
+    setError('')
+  }, [defaultRole])
+
   const draftPayload = useMemo(() => ({
     form: {
       fullName: form.fullName,
@@ -64,7 +79,8 @@ export default function Register() {
   const { restored: draftRestored, savedLabel, clearDraft, dismissRestored } = useFormDraft(
     draftKey,
     draftPayload,
-    handleDraftRestore
+    handleDraftRestore,
+    { onClear: handleDraftClear }
   )
 
   const { signUp } = useAuth()
