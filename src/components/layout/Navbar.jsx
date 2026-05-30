@@ -50,31 +50,33 @@ export default function Navbar() {
           ))}
         </nav>
 
-        <div className="hidden items-center gap-2 md:flex">
+        <div className="flex items-center gap-1 sm:gap-2">
           {user && <NotificationBell />}
-          {user ? (
-            <UserMenu />
-          ) : (
-            <Link to="/login" className="text-sm font-medium text-muted transition-colors hover:text-primary">
-              {t('nav.signIn')}
-            </Link>
-          )}
-          <Button as={Link} to={isLandlord ? '/landlord/listings/new' : '/register?role=landlord'} size="sm">
-            {t('nav.listPlace')}
-          </Button>
-        </div>
 
-        <div className="flex items-center gap-1 md:hidden">
-          {user && <NotificationBell />}
-          {user && <UserMenu onNavigate={() => setOpen(false)} />}
-          <button
-            className="rounded-lg p-2 text-primary"
-            onClick={() => setOpen(!open)}
-            aria-label="Toggle menu"
-            aria-expanded={open}
-          >
-            {open ? <X size={24} /> : <Menu size={24} />}
-          </button>
+          <div className="hidden items-center gap-2 md:flex">
+            {user ? (
+              <UserMenu />
+            ) : (
+              <Link to="/login" className="text-sm font-medium text-muted transition-colors hover:text-primary">
+                {t('nav.signIn')}
+              </Link>
+            )}
+            <Button as={Link} to={isLandlord ? '/landlord/listings/new' : '/register?role=landlord'} size="sm">
+              {t('nav.listPlace')}
+            </Button>
+          </div>
+
+          <div className="flex items-center gap-1 md:hidden">
+            {user && <UserMenu onNavigate={() => setOpen(false)} />}
+            <button
+              className="rounded-lg p-2 text-primary"
+              onClick={() => setOpen(!open)}
+              aria-label="Toggle menu"
+              aria-expanded={open}
+            >
+              {open ? <X size={24} /> : <Menu size={24} />}
+            </button>
+          </div>
         </div>
       </div>
 

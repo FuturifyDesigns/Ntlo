@@ -32,8 +32,15 @@ export function useNotifications() {
   useEffect(() => {
     if (!user?.id) return undefined
 
+    const channelName = `notifications-${user.id}`
+
+    // Drop any stale channel (e.g. duplicate mounts) before re-subscribing
+    supabase.getChannels().forEach((ch) => {
+      if (ch.topic === `realtime:${channelName}`) supabase.removeChannel(ch)
+    })
+
     const channel = supabase
-      .channel(`notifications-${user.id}`)
+      .channel(channelName)
       .on(
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.id}` },
