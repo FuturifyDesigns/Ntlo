@@ -45,7 +45,7 @@ export default function Home() {
       <FeaturedListings listings={listings} />
       <TrustFeatures />
 
-      <section className="relative overflow-hidden bg-primary py-10 sm:py-14 lg:py-16">
+      <section className="relative overflow-hidden bg-primary py-8 sm:py-14 lg:py-16">
         <PatternBotswana className="opacity-40" />
         <div className="relative mx-auto max-w-3xl px-4 text-center">
           <span className="section-label mb-3 text-accent sm:mb-4">{t('landlord.forLandlords')}</span>

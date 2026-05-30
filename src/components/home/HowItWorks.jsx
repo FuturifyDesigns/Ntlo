@@ -39,7 +39,7 @@ export default function HowItWorks() {
   ]
 
   return (
-    <section className="bg-surface py-8 sm:py-12 lg:py-16">
+    <section className="bg-surface py-7 sm:py-12 lg:py-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <Reveal className="mb-8 text-center sm:mb-10">
           <span className="section-label mb-4">{t('howItWorks.label')}</span>
@@ -120,7 +120,7 @@ export function TrustFeatures() {
   ]
 
   return (
-    <section className="border-y border-border bg-background py-8 sm:py-10">
+    <section className="border-y border-border bg-background py-6 sm:py-10">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-2 gap-8 md:grid-cols-5 md:gap-6">
           {features.map(({ icon: Icon, label }) => (

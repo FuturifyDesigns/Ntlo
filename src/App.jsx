@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { HashRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { AuthProvider } from './context/AuthContext'
@@ -41,6 +42,13 @@ import GoogleMapsProvider from './components/maps/GoogleMapsProvider'
 import { useLocale } from './context/LocaleContext'
 import { useTranslation } from './hooks/useTranslation'
 
+function scrollToTop() {
+  if (typeof window === 'undefined') return
+  window.scrollTo(0, 0)
+  // Some mobile browsers track scroll on the documentElement/body separately.
+  if (document.scrollingElement) document.scrollingElement.scrollTop = 0
+}
+
 function AppRoutes() {
   const location = useLocation()
   const { prefs } = useLocale()
@@ -48,10 +56,15 @@ function AppRoutes() {
   const isDashboardRoute = location.pathname === '/student' || location.pathname === '/landlord' || location.pathname.startsWith('/landlord/') || location.pathname === '/admin'
   const transition = isAuthRoute || isDashboardRoute
     ? { duration: prefs.reduceMotion ? 0 : 0.15, ease: 'easeOut' }
-    : { duration: prefs.reduceMotion ? 0 : 0.25 }
+    : { duration: prefs.reduceMotion ? 0 : 0.22, ease: 'easeInOut' }
+
+  // With animations off there's no exit phase, so reset scroll on path change.
+  useEffect(() => {
+    if (prefs.reduceMotion) scrollToTop()
+  }, [location.pathname, prefs.reduceMotion])
 
   return (
-    <AnimatePresence mode="wait">
+    <AnimatePresence mode="wait" onExitComplete={scrollToTop}>
       <motion.div
         key={location.pathname}
         initial={prefs.reduceMotion ? false : { opacity: 0 }}

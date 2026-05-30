@@ -27,7 +27,7 @@ export default function Hero() {
   }
 
   return (
-    <section className="relative overflow-hidden bg-primary px-4 py-10 sm:py-14 sm:px-6 lg:px-8 lg:py-16">
+    <section className="relative overflow-hidden bg-primary px-4 py-8 sm:py-14 sm:px-6 lg:px-8 lg:py-16">
       <div className="absolute inset-0">
         <img src={`${base}hero/bg.jpg`} alt="" className="h-full w-full object-cover" />
         <div className="absolute inset-0 bg-primary/75 lg:bg-primary/65" />

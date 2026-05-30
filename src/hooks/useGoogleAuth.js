@@ -51,6 +51,15 @@ export function useGoogleAuth({ role, onError } = {}) {
   const [loading, setLoading] = useState(false)
   const startedRedirectRef = useRef(false)
 
+  // Keep latest callbacks in refs so effects don't re-run on every render
+  // (t and onError get new identities each render).
+  const onErrorRef = useRef(onError)
+  const tRef = useRef(t)
+  useEffect(() => {
+    onErrorRef.current = onError
+    tRef.current = t
+  })
+
   useEffect(() => {
     authReadyRef.current = authReady
   }, [authReady])
@@ -61,15 +70,20 @@ export function useGoogleAuth({ role, onError } = {}) {
     startedRedirectRef.current = false
   }, [])
 
-  // Clear leftover redirect overlay after sign-out or cancelled OAuth return.
+  // Run ONCE on mount: clear a leftover overlay from a previously abandoned
+  // attempt (sign-out, back button, cancelled consent). Never run while a
+  // redirect we started is in flight — otherwise the overlay flashes and dies.
   useEffect(() => {
+    if (startedRedirectRef.current) return
     if (hasStaleGoogleRedirectFlag() || isOAuthPendingStale()) {
+      const wasStale = isOAuthPendingStale()
       resetGoogleState()
-      if (isOAuthPendingStale()) {
-        onError?.(t('auth.googleTimeout'))
+      if (wasStale) {
+        onErrorRef.current?.(tRef.current('auth.googleTimeout'))
       }
     }
-  }, [resetGoogleState, onError, t])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   useEffect(() => {
     function handlePageShow(event) {
@@ -85,11 +99,11 @@ export function useGoogleAuth({ role, onError } = {}) {
 
     const timeout = window.setTimeout(() => {
       resetGoogleState()
-      onError?.(t('auth.googleTimeout'))
+      onErrorRef.current?.(tRef.current('auth.googleTimeout'))
     }, 12_000)
 
     return () => clearTimeout(timeout)
-  }, [loading, resetGoogleState, onError, t])
+  }, [loading, resetGoogleState])
 
   const startGoogleAuth = useCallback(async () => {
     if (loading) return
