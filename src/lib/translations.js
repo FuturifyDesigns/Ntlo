@@ -157,6 +157,7 @@ export const translations = {
       geocodeMiss: 'Could not find that address on the map — click the map or use GPS to place the pin.',
       geoUnsupported: 'Your browser does not support location services.',
       geoDenied: 'Location permission denied. Click the map to place your pin instead.',
+      geoPolicyBlocked: 'Location is blocked by browser security settings. Update Cloudflare Permissions-Policy to geolocation=(self), or click the map to place your pin.',
       geoFailed: 'Could not get your location. Click the map to place your pin.',
     },
     auth: {

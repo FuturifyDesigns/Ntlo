@@ -348,13 +348,25 @@ export function LocationPicker({
     setGeocodeHint('')
   }, [onChange])
 
-  const useCurrentLocation = useCallback(() => {
+  const useCurrentLocation = useCallback(async () => {
     if (!navigator.geolocation) {
       setGeoError(t('listingForm.geoUnsupported'))
       return
     }
     setGeoBusy(true)
     setGeoError('')
+    try {
+      if (navigator.permissions) {
+        const perm = await navigator.permissions.query({ name: 'geolocation' })
+        if (perm.state === 'denied') {
+          setGeoError(t('listingForm.geoPolicyBlocked'))
+          setGeoBusy(false)
+          return
+        }
+      }
+    } catch {
+      /* Permissions API unavailable — try geolocation anyway */
+    }
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         skipGeocodeRef.current = true
@@ -369,7 +381,9 @@ export function LocationPicker({
         setGeoError(
           err.code === 1
             ? t('listingForm.geoDenied')
-            : t('listingForm.geoFailed')
+            : err.message?.includes('permissions policy')
+              ? t('listingForm.geoPolicyBlocked')
+              : t('listingForm.geoFailed')
         )
         setGeoBusy(false)
       },
