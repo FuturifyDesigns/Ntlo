@@ -35,6 +35,7 @@ const initialForm = {
   city: 'Gaborone',
   nearest_university_id: '',
   custom_university_name: '',
+  custom_university_city: '',
   lat: '',
   lng: '',
   amenities: [],
@@ -145,6 +146,7 @@ export default function CreateListing() {
           lng: form.lng ? Number(form.lng) : null,
           nearest_university_id: isOther ? null : form.nearest_university_id ? Number(form.nearest_university_id) : null,
           custom_university_name: isOther ? form.custom_university_name.trim() : null,
+          custom_university_city: isOther ? form.custom_university_city.trim() || null : null,
           distance_to_campus: distance,
           amenities: form.amenities,
           whatsapp_number: form.whatsapp_number,
@@ -192,6 +194,9 @@ export default function CreateListing() {
   const uni = form.nearest_university_id === 'other'
     ? null
     : getUniversityById(form.nearest_university_id)
+  const campusCoords = uni?.lat != null && uni?.lng != null
+    ? { lat: uni.lat, lng: uni.lng }
+    : null
 
   return (
     <motion.div
@@ -276,6 +281,8 @@ export default function CreateListing() {
                   onChange={(v) => update('nearest_university_id', v)}
                   otherValue={form.custom_university_name}
                   onOtherChange={(v) => update('custom_university_name', v)}
+                  otherCityValue={form.custom_university_city}
+                  onOtherCityChange={(v) => update('custom_university_city', v)}
                   required
                 />
                 <LocationPicker
@@ -284,9 +291,14 @@ export default function CreateListing() {
                   address={form.address}
                   area={form.area}
                   city={form.city}
-                  universityCity={uni?.city}
+                  universityId={form.nearest_university_id}
+                  campusCoords={campusCoords}
+                  campusLabel={uni ? getUniversityDisplayName(uni) : ''}
+                  customUniversityName={form.custom_university_name}
+                  customUniversityCity={form.custom_university_city}
                   onChange={handleLocationChange}
                   hint={t('listingForm.locationHint')}
+                  universityHint={t('listingForm.universityHint')}
                 />
               </div>
             )}

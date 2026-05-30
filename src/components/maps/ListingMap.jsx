@@ -307,6 +307,48 @@ export function SingleListingMap({ lat, lng, listing, height = '280px', title })
   )
 }
 
+/** One-shot camera move — does not fight user pan/zoom after. */
+function MapCameraController({ command }) {
+  const map = useMap()
+
+  useEffect(() => {
+    if (!map || !command) return
+
+    const { campus, pin, zoom } = command
+
+    if (campus && pin) {
+      const bounds = new google.maps.LatLngBounds()
+      bounds.extend(campus)
+      bounds.extend(pin)
+      map.fitBounds(bounds, 56)
+      return
+    }
+
+    const target = pin || campus
+    if (!target) return
+    map.panTo(target)
+    map.setZoom(zoom ?? (pin ? SINGLE_LISTING_ZOOM : CAMPUS_MAP_ZOOM))
+  }, [map, command?.id])
+
+  return null
+}
+
+function CampusReferenceMarker({ position, label }) {
+  return (
+    <AdvancedMarker position={position} title={label} zIndex={100}>
+      <div className="flex flex-col items-center gap-0.5">
+        <div
+          className="h-5 w-5 rounded-full border-2 border-white shadow-md"
+          style={{ backgroundColor: '#c45c26' }}
+        />
+        <span className="max-w-[120px] truncate rounded bg-primary/90 px-1.5 py-0.5 text-[9px] font-semibold text-white">
+          {label}
+        </span>
+      </div>
+    </AdvancedMarker>
+  )
+}
+
 export function LocationPicker({
   lat,
   lng,
@@ -314,9 +356,14 @@ export function LocationPicker({
   address = '',
   area = '',
   city = '',
-  universityCity = '',
+  universityId = '',
+  campusCoords = null,
+  campusLabel = '',
+  customUniversityName = '',
+  customUniversityCity = '',
   height = '320px',
   hint,
+  universityHint,
 }) {
   const { t } = useTranslation()
   const geocodingLib = useMapsLibrary('geocoding')
@@ -326,44 +373,56 @@ export function LocationPicker({
   )
 
   const position = toLatLng(lat, lng)
-  const [mapCenter, setMapCenter] = useState(() => position || DEFAULT_MAP_CENTER)
-  const [mapZoom, setMapZoom] = useState(() => (position ? SINGLE_LISTING_ZOOM : DEFAULT_MAP_ZOOM))
   const [geoBusy, setGeoBusy] = useState(false)
   const [geocodeBusy, setGeocodeBusy] = useState(false)
   const [geoError, setGeoError] = useState('')
   const [geocodeHint, setGeocodeHint] = useState('')
-  const skipGeocodeRef = useRef(false)
+  const [pinLocked, setPinLocked] = useState(false)
+  const [cameraCommand, setCameraCommand] = useState(null)
+  const [otherCampus, setOtherCampus] = useState(null)
+
   const geocodeTimerRef = useRef(null)
   const onChangeRef = useRef(onChange)
+  const lastAddressKeyRef = useRef('')
+  const pinLockedRef = useRef(false)
+  const prevUniversityIdRef = useRef('')
+  const cameraIdRef = useRef(0)
   onChangeRef.current = onChange
 
-  useEffect(() => {
-    if (position) {
-      setMapCenter(position)
-      setMapZoom(SINGLE_LISTING_ZOOM)
-    }
-  }, [position?.lat, position?.lng])
+  const addressKey = `${address?.trim()}|${area?.trim()}|${city?.trim()}`
+
+  const pushCamera = useCallback((payload) => {
+    cameraIdRef.current += 1
+    setCameraCommand({ id: cameraIdRef.current, ...payload })
+  }, [])
+
+  const markPinManual = useCallback(() => {
+    pinLockedRef.current = true
+    setPinLocked(true)
+    setGeocodeHint(t('listingForm.pinManual'))
+  }, [t])
 
   const handleMapClick = useCallback((event) => {
     if (!event.detail.latLng) return
-    skipGeocodeRef.current = true
-    onChange({
+    markPinManual()
+    const coords = {
       lat: event.detail.latLng.lat,
       lng: event.detail.latLng.lng,
-    })
-    setGeocodeHint('')
-  }, [onChange])
+    }
+    onChange(coords)
+    pushCamera({ pin: coords, zoom: SINGLE_LISTING_ZOOM })
+  }, [markPinManual, onChange, pushCamera])
 
   const handleDragEnd = useCallback((event) => {
     const ll = event.detail?.latLng || event.latLng
     if (!ll) return
-    skipGeocodeRef.current = true
+    markPinManual()
     const coords = typeof ll.lat === 'function'
       ? { lat: ll.lat(), lng: ll.lng() }
       : { lat: ll.lat, lng: ll.lng }
     onChange(coords)
-    setGeocodeHint('')
-  }, [onChange])
+    pushCamera({ pin: coords, zoom: SINGLE_LISTING_ZOOM })
+  }, [markPinManual, onChange, pushCamera])
 
   const useCurrentLocation = useCallback(async () => {
     if (!navigator.geolocation) {
@@ -382,15 +441,15 @@ export function LocationPicker({
         }
       }
     } catch {
-      /* Permissions API unavailable — try geolocation anyway */
+      /* ignore */
     }
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        skipGeocodeRef.current = true
-        onChange({
-          lat: pos.coords.latitude,
-          lng: pos.coords.longitude,
-        })
+        pinLockedRef.current = true
+        setPinLocked(true)
+        const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude }
+        onChange(coords)
+        pushCamera({ pin: coords, zoom: SINGLE_LISTING_ZOOM })
         setGeocodeHint(t('listingForm.pinFromGps'))
         setGeoBusy(false)
       },
@@ -406,60 +465,122 @@ export function LocationPicker({
       },
       { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 }
     )
-  }, [onChange, t])
+  }, [onChange, pushCamera, t])
 
+  // Geocode listing address → pin (only when address text changes)
   useEffect(() => {
-    if (skipGeocodeRef.current) {
-      skipGeocodeRef.current = false
-      return undefined
-    }
-
-    const hasText = Boolean(
-      (address?.trim() || area?.trim()) && city?.trim()
-    )
+    const hasText = Boolean((address?.trim() || area?.trim()) && city?.trim())
     const cityOnly = Boolean(city?.trim() && !address?.trim() && !area?.trim())
 
     if (!hasText && !cityOnly) return undefined
 
+    if (addressKey !== lastAddressKeyRef.current) {
+      pinLockedRef.current = false
+      setPinLocked(false)
+    }
+
+    if (pinLockedRef.current && addressKey === lastAddressKeyRef.current) return undefined
+
     if (geocodeTimerRef.current) clearTimeout(geocodeTimerRef.current)
     geocodeTimerRef.current = setTimeout(async () => {
+      if (pinLockedRef.current && addressKey === lastAddressKeyRef.current) return
+
+      if (cityOnly && !hasText) {
+        if (geocoder) {
+          const cityResult = await geocodeWithGoogle(geocoder, `${city.trim()}, Botswana`)
+          if (cityResult) {
+            pushCamera({ pin: cityResult, zoom: DEFAULT_MAP_ZOOM })
+          }
+        }
+        return
+      }
+
       setGeocodeBusy(true)
       setGeocodeHint(t('listingForm.geocodeSearching'))
 
-      const result = await resolveAddressCoords({
-        geocoder,
-        address,
-        area,
-        city,
-        universityCity,
-      })
+      const result = await resolveAddressCoords({ geocoder, address, area, city })
 
       setGeocodeBusy(false)
+      lastAddressKeyRef.current = addressKey
 
-      if (result) {
+      if (result && !pinLockedRef.current) {
         onChangeRef.current({ lat: result.lat, lng: result.lng })
-        setMapCenter({ lat: result.lat, lng: result.lng })
-        setMapZoom(SINGLE_LISTING_ZOOM)
+        const coords = { lat: result.lat, lng: result.lng }
+        const campus = campusCoords || otherCampus
+        pushCamera(
+          campus
+            ? { campus, pin: coords, zoom: SINGLE_LISTING_ZOOM }
+            : { pin: coords, zoom: SINGLE_LISTING_ZOOM }
+        )
         setGeocodeHint(t('listingForm.pinFromAddress'))
         setGeoError('')
       } else if (hasText && (address?.trim().length >= 3 || area?.trim().length >= 2)) {
-        setGeocodeHint(t('listingForm.geocodeMiss'))
-      } else if (cityOnly && geocoder) {
-        const cityResult = await geocodeWithGoogle(geocoder, `${city.trim()}, Botswana`)
-        if (cityResult) {
-          setMapCenter({ lat: cityResult.lat, lng: cityResult.lng })
-          setMapZoom(DEFAULT_MAP_ZOOM)
-          setGeocodeHint('')
-        }
+        setGeocodeHint(
+          pinLockedRef.current ? t('listingForm.pinManual') : t('listingForm.geocodeMiss')
+        )
       } else {
-        setGeocodeHint('')
+        setGeocodeHint(pinLockedRef.current ? t('listingForm.pinManual') : '')
       }
-    }, 600)
+    }, 900)
 
     return () => {
       if (geocodeTimerRef.current) clearTimeout(geocodeTimerRef.current)
     }
-  }, [address, area, city, universityCity, geocoder, t])
+  }, [addressKey, geocoder, campusCoords, otherCampus, pushCamera, t, city, address, area])
+
+  // Geocode "other" university for campus reference marker
+  useEffect(() => {
+    if (universityId !== 'other' || !customUniversityName?.trim()) {
+      setOtherCampus(null)
+      return undefined
+    }
+
+    const timer = setTimeout(async () => {
+      const uniCity = customUniversityCity?.trim() || city?.trim() || 'Botswana'
+      const result = await resolveAddressCoords({
+        geocoder,
+        address: customUniversityName.trim(),
+        city: uniCity,
+      })
+      if (result) {
+        const campus = { lat: result.lat, lng: result.lng }
+        setOtherCampus(campus)
+        pushCamera(
+          position
+            ? { campus, pin: position, zoom: SINGLE_LISTING_ZOOM }
+            : { campus, zoom: CAMPUS_MAP_ZOOM }
+        )
+      }
+    }, 700)
+
+    return () => clearTimeout(timer)
+  }, [
+    universityId,
+    customUniversityName,
+    customUniversityCity,
+    city,
+    geocoder,
+    position?.lat,
+    position?.lng,
+    pushCamera,
+  ])
+
+  // When a known university is selected, pan to show campus (+ pin) — does NOT move the listing pin
+  useEffect(() => {
+    if (!campusCoords || universityId === 'other' || !universityId) return
+    if (prevUniversityIdRef.current === universityId) return
+    prevUniversityIdRef.current = universityId
+    pushCamera(
+      position
+        ? { campus: campusCoords, pin: position, zoom: SINGLE_LISTING_ZOOM }
+        : { campus: campusCoords, zoom: CAMPUS_MAP_ZOOM }
+    )
+  }, [universityId, campusCoords?.lat, campusCoords?.lng, position?.lat, position?.lng, pushCamera])
+
+  const activeCampus = universityId === 'other' ? otherCampus : campusCoords
+  const activeCampusLabel = universityId === 'other'
+    ? customUniversityName
+    : campusLabel
 
   if (!MAPS_ENABLED) {
     return (
@@ -473,6 +594,11 @@ export function LocationPicker({
   return (
     <div className="space-y-3">
       {hint && <p className="text-sm text-muted">{hint}</p>}
+      {universityHint && (
+        <p className="rounded-lg border border-border bg-background px-3 py-2 text-xs text-muted">
+          {universityHint}
+        </p>
+      )}
 
       <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
         <Button
@@ -495,7 +621,7 @@ export function LocationPicker({
         {position && !geocodeBusy && (
           <span className="inline-flex items-center gap-1.5 rounded-lg border border-success/30 bg-success/5 px-3 py-2 text-xs font-medium text-success">
             <MapPin size={14} />
-            {t('listingForm.pinSet')}
+            {pinLocked ? t('listingForm.pinManualShort') : t('listingForm.pinSet')}
           </span>
         )}
       </div>
@@ -513,13 +639,17 @@ export function LocationPicker({
       <div className="overflow-hidden rounded-xl border border-border" style={{ height }}>
         <Map
           mapId={GOOGLE_MAPS_MAP_ID}
-          center={mapCenter}
-          zoom={mapZoom}
+          defaultCenter={position || DEFAULT_MAP_CENTER}
+          defaultZoom={position ? SINGLE_LISTING_ZOOM : DEFAULT_MAP_ZOOM}
           gestureHandling="greedy"
+          disableDefaultUI={false}
           onClick={handleMapClick}
           style={{ width: '100%', height: '100%' }}
         >
-          <LocationPickerViewport center={mapCenter} zoom={mapZoom} />
+          <MapCameraController command={cameraCommand} />
+          {activeCampus && activeCampusLabel && (
+            <CampusReferenceMarker position={activeCampus} label={activeCampusLabel} />
+          )}
           {position && (
             <AdvancedMarker
               position={position}
@@ -533,16 +663,4 @@ export function LocationPicker({
       <p className="text-xs leading-relaxed text-muted">{t('listingForm.mapHelp')}</p>
     </div>
   )
-}
-
-function LocationPickerViewport({ center, zoom }) {
-  const map = useMap()
-
-  useEffect(() => {
-    if (!map || !center) return
-    map.panTo(center)
-    if (zoom) map.setZoom(zoom)
-  }, [map, center?.lat, center?.lng, zoom])
-
-  return null
 }

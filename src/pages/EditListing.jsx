@@ -9,6 +9,7 @@ import { getUniversityDisplayName } from '../lib/universityNames'
 import {
   AMENITIES, ROOM_TYPES, GENDER_PREFERENCES, UTILITIES_OPTIONS, calculateDistance,
 } from '../lib/utils'
+import { UniversitySelect } from '../components/universities/OtherUniversityModal'
 import Button from '../components/ui/Button'
 import Input, { Select, Textarea } from '../components/ui/Input'
 import { LocationPicker } from '../components/maps/ListingMap'
@@ -90,6 +91,9 @@ export default function EditListing() {
           deposit_pula: form.deposit_pula ? Number(form.deposit_pula) : null,
           utilities_included: form.utilities_included || null,
           house_rules: form.house_rules?.trim() || null,
+          custom_university_city: form.nearest_university_id === 'other'
+            ? form.custom_university_city?.trim() || null
+            : null,
           address: form.address,
           area: form.area,
           city: form.city,
@@ -121,6 +125,12 @@ export default function EditListing() {
       </div>
     )
   }
+
+  const isOtherUni = String(form.nearest_university_id) === 'other'
+  const uni = isOtherUni ? null : getUniversityById(form.nearest_university_id)
+  const campusCoords = uni?.lat != null && uni?.lng != null
+    ? { lat: uni.lat, lng: uni.lng }
+    : null
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-5 sm:px-6 sm:py-8">
@@ -170,19 +180,28 @@ export default function EditListing() {
         <Input label="Address" value={form.address} onChange={(e) => update('address', e.target.value)} required />
         <Input label="Area" value={form.area || ''} onChange={(e) => update('area', e.target.value)} />
         <Input label="City" value={form.city} onChange={(e) => update('city', e.target.value)} required />
-        <Select label="Nearest university" value={form.nearest_university_id || ''} onChange={(e) => update('nearest_university_id', e.target.value)}>
-          <option value="">Select</option>
-          {universities.map((u) => <option key={u.id} value={u.id}>{getUniversityDisplayName(u)}</option>)}
-        </Select>
+        <UniversitySelect
+          value={isOtherUni ? 'other' : String(form.nearest_university_id || '')}
+          onChange={(v) => update('nearest_university_id', v === 'other' ? 'other' : v)}
+          otherValue={form.custom_university_name || ''}
+          onOtherChange={(v) => update('custom_university_name', v)}
+          otherCityValue={form.custom_university_city || ''}
+          onOtherCityChange={(v) => update('custom_university_city', v)}
+        />
         <LocationPicker
           lat={form.lat}
           lng={form.lng}
           address={form.address}
           area={form.area}
           city={form.city}
-          universityCity={getUniversityById(form.nearest_university_id)?.city}
+          universityId={isOtherUni ? 'other' : String(form.nearest_university_id || '')}
+          campusCoords={campusCoords}
+          campusLabel={uni ? getUniversityDisplayName(uni) : ''}
+          customUniversityName={form.custom_university_name || ''}
+          customUniversityCity={form.custom_university_city || ''}
           onChange={handleLocationChange}
           hint={t('listingForm.locationHint')}
+          universityHint={t('listingForm.universityHint')}
         />
         <Input label="WhatsApp" value={form.whatsapp_number} onChange={(e) => update('whatsapp_number', e.target.value)} required />
         <Textarea label="Description" value={form.description || ''} onChange={(e) => update('description', e.target.value)} />

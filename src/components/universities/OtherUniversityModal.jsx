@@ -114,6 +114,8 @@ export function UniversitySelect({
   allowOther = true,
   otherValue = '',
   onOtherChange,
+  otherCityValue = '',
+  onOtherCityChange,
 }) {
   const { universities } = useUniversities()
   const { t } = useTranslation()
@@ -141,6 +143,13 @@ export function UniversitySelect({
             value={otherValue}
             onChange={(e) => onOtherChange?.(e.target.value)}
             placeholder={t('universities.fullUniversityNamePlaceholder')}
+            required
+          />
+          <Input
+            label={t('universities.universityCity')}
+            value={otherCityValue}
+            onChange={(e) => onOtherCityChange?.(e.target.value)}
+            placeholder={t('universities.universityCityPlaceholder')}
             required
           />
           <p className="text-xs text-muted">{t('universities.otherFullNameHint')}</p>
