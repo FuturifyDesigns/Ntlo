@@ -8,11 +8,12 @@ import { useAuth } from '../hooks/useAuth'
 import { getUniversityById } from '../lib/universities'
 import { getUniversityDisplayName } from '../lib/universityNames'
 import { useUniversities } from '../hooks/useUniversities'
-import { AMENITIES, ROOM_TYPES, calculateDistance, formatPrice } from '../lib/utils'
+import { AMENITIES, ROOM_TYPES, GENDER_PREFERENCES, UTILITIES_OPTIONS, calculateDistance, formatPrice } from '../lib/utils'
 import Button from '../components/ui/Button'
 import Input, { Select, Textarea } from '../components/ui/Input'
 import { UniversitySelect } from '../components/universities/OtherUniversityModal'
 import { LocationPicker } from '../components/maps/ListingMap'
+import DocumentUpload from '../components/verification/DocumentUpload'
 
 import { LISTING_DOC_TYPES } from '../lib/verification'
 import { uploadVerificationDoc } from '../lib/verificationStorage'
@@ -26,6 +27,9 @@ const initialForm = {
   room_type: 'single',
   price: '',
   gender_preference: 'any',
+  deposit_pula: '',
+  utilities_included: '',
+  house_rules: '',
   address: '',
   area: '',
   city: 'Gaborone',
@@ -105,6 +109,10 @@ export default function CreateListing() {
     }
   }
 
+  function handleLocationChange({ lat, lng }) {
+    setForm((f) => ({ ...f, lat: String(lat), lng: String(lng) }))
+  }
+
   async function handleSubmit() {
     setError('')
     setSubmitting(true)
@@ -127,6 +135,9 @@ export default function CreateListing() {
           price: Number(form.price),
           room_type: form.room_type,
           gender_preference: form.gender_preference,
+          deposit_pula: form.deposit_pula ? Number(form.deposit_pula) : null,
+          utilities_included: form.utilities_included || null,
+          house_rules: form.house_rules.trim() || null,
           address: form.address,
           area: form.area,
           city: form.city,
@@ -161,6 +172,11 @@ export default function CreateListing() {
   }
 
   function nextStep() {
+    if (step === 1 && (!form.lat || !form.lng)) {
+      setError(t('listingForm.pinRequired'))
+      return
+    }
+    setError('')
     if (step < STEPS.length - 1) setStep(step + 1)
     else handleSubmit()
   }
@@ -210,10 +226,42 @@ export default function CreateListing() {
                   {Object.entries(ROOM_TYPES).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
                 </Select>
                 <Input label="Price per month (Pula)" type="number" min="300" value={form.price} onChange={(e) => update('price', e.target.value)} required />
-                <Select label="Gender preference" value={form.gender_preference} onChange={(e) => update('gender_preference', e.target.value)}>
-                  <option value="any">Any</option>
-                  <option value="female">Female only</option>
-                  <option value="male">Male only</option>
+                <div>
+                  <p className="mb-2 text-sm font-medium text-primary">{t('listingForm.genderPreference')}</p>
+                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                    {Object.entries(GENDER_PREFERENCES).map(([value, label]) => (
+                      <button
+                        key={value}
+                        type="button"
+                        onClick={() => update('gender_preference', value)}
+                        className={`rounded-lg border px-3 py-2.5 text-sm font-medium transition-colors ${
+                          form.gender_preference === value
+                            ? 'border-accent bg-accent/10 text-primary'
+                            : 'border-border bg-background text-muted hover:border-accent/40'
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <Input
+                  label={t('listingForm.deposit')}
+                  type="number"
+                  min="0"
+                  value={form.deposit_pula}
+                  onChange={(e) => update('deposit_pula', e.target.value)}
+                  placeholder={t('listingForm.depositPlaceholder')}
+                />
+                <Select
+                  label={t('listingForm.utilities')}
+                  value={form.utilities_included}
+                  onChange={(e) => update('utilities_included', e.target.value)}
+                >
+                  <option value="">{t('listingForm.utilitiesSelect')}</option>
+                  {Object.entries(UTILITIES_OPTIONS).map(([k, v]) => (
+                    <option key={k} value={k}>{v}</option>
+                  ))}
                 </Select>
               </div>
             )}
@@ -233,15 +281,12 @@ export default function CreateListing() {
                 <LocationPicker
                   lat={form.lat}
                   lng={form.lng}
-                  onChange={({ lat, lng }) => {
-                    setForm((f) => ({ ...f, lat: String(lat), lng: String(lng) }))
-                  }}
-                  hint="Pin your listing on the map so students can see where it is."
+                  address={form.address}
+                  area={form.area}
+                  city={form.city}
+                  onChange={handleLocationChange}
+                  hint={t('listingForm.locationHint')}
                 />
-                <div className="grid grid-cols-2 gap-4">
-                  <Input label="Latitude" type="number" step="any" value={form.lat} onChange={(e) => update('lat', e.target.value)} placeholder="-24.6556" />
-                  <Input label="Longitude" type="number" step="any" value={form.lng} onChange={(e) => update('lng', e.target.value)} placeholder="25.9090" />
-                </div>
               </div>
             )}
 
@@ -285,7 +330,13 @@ export default function CreateListing() {
             {step === 4 && (
               <div className="space-y-4">
                 <Input label="WhatsApp number" type="tel" value={form.whatsapp_number} onChange={(e) => update('whatsapp_number', e.target.value)} placeholder="7X XXX XXX" required />
-                <Textarea label="Description" value={form.description} onChange={(e) => update('description', e.target.value)} placeholder="Describe the room, house rules, what's included..." />
+                <Textarea label="Description" value={form.description} onChange={(e) => update('description', e.target.value)} placeholder="Describe the room, what's included, nearby landmarks..." />
+                <Textarea
+                  label={t('listingForm.houseRules')}
+                  value={form.house_rules}
+                  onChange={(e) => update('house_rules', e.target.value)}
+                  placeholder={t('listingForm.houseRulesPlaceholder')}
+                />
               </div>
             )}
 
@@ -312,7 +363,13 @@ export default function CreateListing() {
                   <p><strong>Title:</strong> {form.title}</p>
                   <p><strong>Price:</strong> {formatPrice(form.price)}/month</p>
                   <p><strong>Type:</strong> {ROOM_TYPES[form.room_type]}</p>
+                  <p><strong>{t('listingForm.genderPreference')}:</strong> {GENDER_PREFERENCES[form.gender_preference]}</p>
+                  {form.deposit_pula && <p><strong>{t('listingForm.deposit')}:</strong> P{form.deposit_pula}</p>}
+                  {form.utilities_included && (
+                    <p><strong>{t('listingForm.utilities')}:</strong> {UTILITIES_OPTIONS[form.utilities_included]}</p>
+                  )}
                   <p><strong>Location:</strong> {form.address}, {form.area}, {form.city}</p>
+                  {form.lat && form.lng && <p><strong>{t('listingForm.mapPin')}:</strong> {t('listingForm.pinSet')}</p>}
                   {uni && <p><strong>University:</strong> {getUniversityDisplayName(uni)}</p>}
                   {form.nearest_university_id === 'other' && (
                     <p><strong>University:</strong> {form.custom_university_name} (other)</p>

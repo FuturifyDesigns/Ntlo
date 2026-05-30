@@ -25,9 +25,9 @@ export default function LandlordDashboard() {
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('all')
 
-  async function fetchListings() {
+  async function fetchListings({ silent = false } = {}) {
     if (!user) return
-    setLoading(true)
+    if (!silent) setLoading(true)
     const { data } = await supabase
       .from('listings')
       .select(`
@@ -37,12 +37,27 @@ export default function LandlordDashboard() {
       .eq('landlord_id', user.id)
       .order('created_at', { ascending: false })
     setListings(data || [])
-    setLoading(false)
+    if (!silent) setLoading(false)
   }
 
   useEffect(() => {
     fetchListings()
   }, [user])
+
+  useEffect(() => {
+    if (!user?.id) return undefined
+
+    const channel = supabase
+      .channel(`landlord-listings-${user.id}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'listings', filter: `landlord_id=eq.${user.id}` },
+        () => fetchListings({ silent: true })
+      )
+      .subscribe()
+
+    return () => supabase.removeChannel(channel)
+  }, [user?.id])
 
   async function toggleAvailable(id, current) {
     await supabase.from('listings').update({ available: !current }).eq('id', id)

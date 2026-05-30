@@ -54,7 +54,8 @@ export function useListings(filters = {}) {
           `
           id, title, price, room_type, area, city, address, lat, lng,
           distance_to_campus, available, is_verified, featured,
-          whatsapp_number, amenities, gender_preference, created_at, views,
+          whatsapp_number, amenities, gender_preference, deposit_pula, utilities_included, house_rules,
+          created_at, views,
           nearest_university_id, custom_university_name,
           nearest_university:universities(id, short_name, name, lat, lng),
           cover_photo:listing_photos(url, is_cover)
@@ -135,6 +136,19 @@ export function useListings(filters = {}) {
     return () => clearTimeout(timer)
   }, [fetchListings])
 
+  useEffect(() => {
+    const channel = supabase
+      .channel('listings-live')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'listings' }, () => {
+        fetchListings()
+      })
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [fetchListings])
+
   return {
     listings,
     loading,
@@ -188,6 +202,23 @@ export function useListing(id) {
       }
     }
     fetchListing()
+  }, [id])
+
+  useEffect(() => {
+    if (!id) return undefined
+
+    const channel = supabase
+      .channel(`listing-${id}`)
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'listings', filter: `id=eq.${id}` },
+        (payload) => {
+          if (payload.new) setListing((prev) => (prev ? { ...prev, ...payload.new } : payload.new))
+        }
+      )
+      .subscribe()
+
+    return () => supabase.removeChannel(channel)
   }, [id])
 
   return { listing, loading, error }

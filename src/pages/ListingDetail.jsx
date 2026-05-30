@@ -21,6 +21,8 @@ import {
   getWhatsAppLink,
   getNearestUniversity,
   ROOM_TYPES,
+  GENDER_PREFERENCES,
+  UTILITIES_OPTIONS,
 } from '../lib/utils'
 
 function WhatsAppIcon({ size = 20 }) {
@@ -102,6 +104,15 @@ export default function ListingDetail() {
                   </Badge>
                 )}
                 <Badge variant="default">{ROOM_TYPES[listing.room_type]}</Badge>
+                {listing.gender_preference && listing.gender_preference !== 'any' && (
+                  <Badge variant="default">{GENDER_PREFERENCES[listing.gender_preference]}</Badge>
+                )}
+                {listing.deposit_pula != null && listing.deposit_pula > 0 && (
+                  <Badge variant="default">{t('listingForm.deposit')}: P{listing.deposit_pula}</Badge>
+                )}
+                {listing.utilities_included && (
+                  <Badge variant="default">{UTILITIES_OPTIONS[listing.utilities_included]}</Badge>
+                )}
               </div>
 
               <p className="mt-4 flex items-center gap-1 text-muted">
@@ -121,6 +132,13 @@ export default function ListingDetail() {
               <div>
                 <h2 className="mb-3 font-display text-lg font-semibold">{t('listingDetail.description')}</h2>
                 <p className="whitespace-pre-wrap text-muted leading-relaxed">{listing.description}</p>
+              </div>
+            )}
+
+            {listing.house_rules && (
+              <div>
+                <h2 className="mb-3 font-display text-lg font-semibold">{t('listingForm.houseRules')}</h2>
+                <p className="whitespace-pre-wrap text-muted leading-relaxed">{listing.house_rules}</p>
               </div>
             )}
 

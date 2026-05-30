@@ -3,9 +3,12 @@ import { useNavigate, useParams, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { useUniversities } from '../hooks/useUniversities'
+import { useTranslation } from '../hooks/useTranslation'
 import { getUniversityById } from '../lib/universities'
 import { getUniversityDisplayName } from '../lib/universityNames'
-import { AMENITIES, ROOM_TYPES, calculateDistance } from '../lib/utils'
+import {
+  AMENITIES, ROOM_TYPES, GENDER_PREFERENCES, UTILITIES_OPTIONS, calculateDistance,
+} from '../lib/utils'
 import Button from '../components/ui/Button'
 import Input, { Select, Textarea } from '../components/ui/Input'
 import { LocationPicker } from '../components/maps/ListingMap'
@@ -14,6 +17,7 @@ import { Skeleton } from '../components/ui/Skeleton'
 export default function EditListing() {
   const { id } = useParams()
   const { user } = useAuth()
+  const { t } = useTranslation()
   const { universities } = useUniversities()
   const navigate = useNavigate()
   const [form, setForm] = useState(null)
@@ -31,7 +35,12 @@ export default function EditListing() {
       if (fetchError || !data || data.landlord_id !== user?.id) {
         setError('Listing not found')
       } else {
-        setForm(data)
+        setForm({
+          ...data,
+          deposit_pula: data.deposit_pula ?? '',
+          utilities_included: data.utilities_included ?? '',
+          house_rules: data.house_rules ?? '',
+        })
       }
       setLoading(false)
     }
@@ -40,6 +49,10 @@ export default function EditListing() {
 
   function update(field, value) {
     setForm((f) => ({ ...f, [field]: value }))
+  }
+
+  function handleLocationChange({ lat, lng }) {
+    setForm((f) => ({ ...f, lat, lng }))
   }
 
   function toggleAmenity(amenityId) {
@@ -53,6 +66,10 @@ export default function EditListing() {
 
   async function handleSave(e) {
     e.preventDefault()
+    if (!form.lat || !form.lng) {
+      setError(t('listingForm.pinRequired'))
+      return
+    }
     setSaving(true)
     setError('')
     try {
@@ -70,6 +87,9 @@ export default function EditListing() {
           price: Number(form.price),
           room_type: form.room_type,
           gender_preference: form.gender_preference,
+          deposit_pula: form.deposit_pula ? Number(form.deposit_pula) : null,
+          utilities_included: form.utilities_included || null,
+          house_rules: form.house_rules?.trim() || null,
           address: form.address,
           area: form.area,
           city: form.city,
@@ -93,7 +113,7 @@ export default function EditListing() {
   }
 
   if (loading) return <div className="mx-auto max-w-2xl px-4 py-8"><Skeleton className="h-96 w-full" /></div>
-  if (error || !form) {
+  if (error && !form) {
     return (
       <div className="mx-auto max-w-2xl px-4 py-16 text-center">
         <p className="text-error">{error || 'Not found'}</p>
@@ -103,36 +123,73 @@ export default function EditListing() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-8">
+    <div className="mx-auto max-w-2xl px-4 py-5 sm:px-6 sm:py-8">
       <h1 className="font-display text-3xl font-bold text-primary">Edit listing</h1>
-      <form onSubmit={handleSave} className="mt-6 space-y-4 rounded-xl border border-border bg-surface p-6">
+      <form onSubmit={handleSave} className="mt-6 space-y-4 rounded-xl border border-border bg-surface p-5 sm:p-6">
         <Input label="Title" value={form.title} onChange={(e) => update('title', e.target.value)} required />
         <Select label="Room type" value={form.room_type} onChange={(e) => update('room_type', e.target.value)}>
           {Object.entries(ROOM_TYPES).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
         </Select>
         <Input label="Price (Pula)" type="number" value={form.price} onChange={(e) => update('price', e.target.value)} required />
+        <div>
+          <p className="mb-2 text-sm font-medium text-primary">{t('listingForm.genderPreference')}</p>
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+            {Object.entries(GENDER_PREFERENCES).map(([value, label]) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => update('gender_preference', value)}
+                className={`rounded-lg border px-3 py-2.5 text-sm font-medium ${
+                  form.gender_preference === value
+                    ? 'border-accent bg-accent/10 text-primary'
+                    : 'border-border bg-background text-muted'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+        <Input
+          label={t('listingForm.deposit')}
+          type="number"
+          min="0"
+          value={form.deposit_pula}
+          onChange={(e) => update('deposit_pula', e.target.value)}
+        />
+        <Select
+          label={t('listingForm.utilities')}
+          value={form.utilities_included}
+          onChange={(e) => update('utilities_included', e.target.value)}
+        >
+          <option value="">{t('listingForm.utilitiesSelect')}</option>
+          {Object.entries(UTILITIES_OPTIONS).map(([k, v]) => (
+            <option key={k} value={k}>{v}</option>
+          ))}
+        </Select>
         <Input label="Address" value={form.address} onChange={(e) => update('address', e.target.value)} required />
         <Input label="Area" value={form.area || ''} onChange={(e) => update('area', e.target.value)} />
         <Input label="City" value={form.city} onChange={(e) => update('city', e.target.value)} required />
-        <LocationPicker
-          lat={form.lat}
-          lng={form.lng}
-          onChange={({ lat, lng }) => {
-            update('lat', lat)
-            update('lng', lng)
-          }}
-          hint="Update the map pin for this listing."
-        />
-        <div className="grid grid-cols-2 gap-4">
-          <Input label="Latitude" type="number" step="any" value={form.lat ?? ''} onChange={(e) => update('lat', e.target.value)} />
-          <Input label="Longitude" type="number" step="any" value={form.lng ?? ''} onChange={(e) => update('lng', e.target.value)} />
-        </div>
         <Select label="Nearest university" value={form.nearest_university_id || ''} onChange={(e) => update('nearest_university_id', e.target.value)}>
           <option value="">Select</option>
           {universities.map((u) => <option key={u.id} value={u.id}>{getUniversityDisplayName(u)}</option>)}
         </Select>
+        <LocationPicker
+          lat={form.lat}
+          lng={form.lng}
+          address={form.address}
+          area={form.area}
+          city={form.city}
+          onChange={handleLocationChange}
+          hint={t('listingForm.locationHint')}
+        />
         <Input label="WhatsApp" value={form.whatsapp_number} onChange={(e) => update('whatsapp_number', e.target.value)} required />
         <Textarea label="Description" value={form.description || ''} onChange={(e) => update('description', e.target.value)} />
+        <Textarea
+          label={t('listingForm.houseRules')}
+          value={form.house_rules || ''}
+          onChange={(e) => update('house_rules', e.target.value)}
+        />
         <div>
           <p className="mb-2 text-sm font-medium">Amenities</p>
           <div className="grid grid-cols-2 gap-2">
@@ -145,9 +202,9 @@ export default function EditListing() {
           </div>
         </div>
         {error && <p className="text-sm text-error">{error}</p>}
-        <div className="flex gap-3">
-          <Button type="submit" disabled={saving}>{saving ? 'Saving...' : 'Save changes'}</Button>
-          <Button type="button" variant="outline" onClick={() => navigate('/landlord')}>Cancel</Button>
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <Button type="submit" disabled={saving} className="w-full sm:w-auto">{saving ? 'Saving...' : 'Save changes'}</Button>
+          <Button type="button" variant="outline" onClick={() => navigate('/landlord')} className="w-full sm:w-auto">Cancel</Button>
         </div>
       </form>
     </div>

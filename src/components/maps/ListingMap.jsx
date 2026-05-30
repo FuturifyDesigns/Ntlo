@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, useCallback, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import {
   AdvancedMarker,
@@ -7,6 +7,7 @@ import {
   useAdvancedMarkerRef,
   useMap,
 } from '@vis.gl/react-google-maps'
+import { MapPin, Navigation, Loader2, AlertCircle } from 'lucide-react'
 import {
   CAMPUS_MAP_ZOOM,
   DEFAULT_MAP_CENTER,
@@ -18,8 +19,10 @@ import {
   getMapListingPosition,
   toLatLng,
 } from '../../lib/googleMaps'
+import { geocodeAddress } from '../../lib/geocodeAddress'
 import { formatPrice } from '../../lib/utils'
 import { useTranslation } from '../../hooks/useTranslation'
+import Button from '../ui/Button'
 import { MapUnavailable } from './GoogleMapsProvider'
 
 /** Keep campus centered when filter changes; do not re-center when listings load or user pans. */
@@ -303,17 +306,100 @@ export function SingleListingMap({ lat, lng, listing, height = '280px', title })
   )
 }
 
-export function LocationPicker({ lat, lng, onChange, height = '320px', hint }) {
+export function LocationPicker({
+  lat,
+  lng,
+  onChange,
+  address = '',
+  area = '',
+  city = '',
+  height = '320px',
+  hint,
+}) {
+  const { t } = useTranslation()
   const position = toLatLng(lat, lng)
   const center = position || DEFAULT_MAP_CENTER
+  const [geoBusy, setGeoBusy] = useState(false)
+  const [geoError, setGeoError] = useState('')
+  const [geocodeHint, setGeocodeHint] = useState('')
+  const skipGeocodeRef = useRef(false)
+  const geocodeTimerRef = useRef(null)
+  const onChangeRef = useRef(onChange)
+  onChangeRef.current = onChange
 
-  function handleClick(event) {
+  const handleMapClick = useCallback((event) => {
     if (!event.detail.latLng) return
+    skipGeocodeRef.current = true
     onChange({
       lat: event.detail.latLng.lat,
       lng: event.detail.latLng.lng,
     })
-  }
+    setGeocodeHint('')
+  }, [onChange])
+
+  const handleDragEnd = useCallback((event) => {
+    const ll = event.detail?.latLng || event.latLng
+    if (!ll) return
+    skipGeocodeRef.current = true
+    const coords = typeof ll.lat === 'function'
+      ? { lat: ll.lat(), lng: ll.lng() }
+      : { lat: ll.lat, lng: ll.lng }
+    onChange(coords)
+    setGeocodeHint('')
+  }, [onChange])
+
+  const useCurrentLocation = useCallback(() => {
+    if (!navigator.geolocation) {
+      setGeoError(t('listingForm.geoUnsupported'))
+      return
+    }
+    setGeoBusy(true)
+    setGeoError('')
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        skipGeocodeRef.current = true
+        onChange({
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
+        })
+        setGeocodeHint(t('listingForm.pinFromGps'))
+        setGeoBusy(false)
+      },
+      (err) => {
+        setGeoError(
+          err.code === 1
+            ? t('listingForm.geoDenied')
+            : t('listingForm.geoFailed')
+        )
+        setGeoBusy(false)
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 }
+    )
+  }, [onChange, t])
+
+  useEffect(() => {
+    if (skipGeocodeRef.current) {
+      skipGeocodeRef.current = false
+      return undefined
+    }
+    if (!address?.trim() || !city?.trim()) return undefined
+
+    if (geocodeTimerRef.current) clearTimeout(geocodeTimerRef.current)
+    geocodeTimerRef.current = setTimeout(async () => {
+      const result = await geocodeAddress({ address, area, city })
+      if (result) {
+        onChangeRef.current({ lat: result.lat, lng: result.lng })
+        setGeocodeHint(t('listingForm.pinFromAddress'))
+        setGeoError('')
+      } else if (address.trim().length > 4) {
+        setGeocodeHint(t('listingForm.geocodeMiss'))
+      }
+    }, 900)
+
+    return () => {
+      if (geocodeTimerRef.current) clearTimeout(geocodeTimerRef.current)
+    }
+  }, [address, area, city, t])
 
   if (!MAPS_ENABLED) {
     return (
@@ -325,21 +411,72 @@ export function LocationPicker({ lat, lng, onChange, height = '320px', hint }) {
   }
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       {hint && <p className="text-sm text-muted">{hint}</p>}
+
+      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={useCurrentLocation}
+          disabled={geoBusy}
+          className="w-full sm:w-auto"
+        >
+          {geoBusy ? <Loader2 size={16} className="animate-spin" /> : <Navigation size={16} />}
+          {t('listingForm.useMyLocation')}
+        </Button>
+        {position && (
+          <span className="inline-flex items-center gap-1.5 rounded-lg border border-success/30 bg-success/5 px-3 py-2 text-xs font-medium text-success">
+            <MapPin size={14} />
+            {t('listingForm.pinSet')}
+          </span>
+        )}
+      </div>
+
+      {geoError && (
+        <p className="flex items-start gap-2 text-sm text-error">
+          <AlertCircle size={16} className="mt-0.5 shrink-0" />
+          {geoError}
+        </p>
+      )}
+      {geocodeHint && !geoError && (
+        <p className="text-xs text-muted">{geocodeHint}</p>
+      )}
+
       <div className="overflow-hidden rounded-xl border border-border" style={{ height }}>
         <Map
           mapId={GOOGLE_MAPS_MAP_ID}
           defaultCenter={center}
           defaultZoom={position ? SINGLE_LISTING_ZOOM : DEFAULT_MAP_ZOOM}
           gestureHandling="greedy"
-          onClick={handleClick}
+          onClick={handleMapClick}
           style={{ width: '100%', height: '100%' }}
         >
-          {position && <AdvancedMarker position={position} />}
+          <LocationPickerViewport position={position} />
+          {position && (
+            <AdvancedMarker
+              position={position}
+              draggable
+              onDragEnd={handleDragEnd}
+            />
+          )}
         </Map>
       </div>
-      <p className="text-xs text-muted">Click the map to drop a pin for your listing location.</p>
+
+      <p className="text-xs leading-relaxed text-muted">{t('listingForm.mapHelp')}</p>
     </div>
   )
+}
+
+function LocationPickerViewport({ position }) {
+  const map = useMap()
+
+  useEffect(() => {
+    if (!map || !position) return
+    map.panTo(position)
+    map.setZoom(SINGLE_LISTING_ZOOM)
+  }, [map, position?.lat, position?.lng])
+
+  return null
 }

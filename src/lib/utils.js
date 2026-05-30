@@ -45,6 +45,18 @@ export const ROOM_TYPES = {
   house: 'House',
 }
 
+export const GENDER_PREFERENCES = {
+  any: 'Open to all',
+  female: 'Females only',
+  male: 'Males only',
+}
+
+export const UTILITIES_OPTIONS = {
+  included: 'Bills included in rent',
+  partial: 'Some bills included',
+  not_included: 'Tenant pays own bills',
+}
+
 export const AMENITIES = [
   { id: 'wifi', label: 'WiFi', icon: 'Wifi' },
   { id: 'water', label: 'Water included', icon: 'Droplets' },
