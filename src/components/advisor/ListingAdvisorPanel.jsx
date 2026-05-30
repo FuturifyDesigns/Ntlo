@@ -1,12 +1,6 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { Sparkles, ThumbsUp, AlertTriangle, Lightbulb } from 'lucide-react'
-import {
-  getListingAdvisorResult,
-  fetchOptionalAiEnhancement,
-  getScoreColor,
-  getScoreRingColor,
-  AI_ADVISOR_ENABLED,
-} from '../../lib/aiAdvisor'
+import { getListingAdvisorResult, getScoreColor, getScoreRingColor } from '../../lib/aiAdvisor'
 import { useTranslation } from '../../hooks/useTranslation'
 import Card from '../ui/Card'
 
@@ -63,7 +57,6 @@ function InsightList({ items, icon: Icon, variant }) {
 
 export default function ListingAdvisorPanel({ listing, studentUniversityId }) {
   const { t } = useTranslation()
-  const [enhancedText, setEnhancedText] = useState(null)
 
   const context = useMemo(
     () => ({ studentUniversityId }),
@@ -75,25 +68,7 @@ export default function ListingAdvisorPanel({ listing, studentUniversityId }) {
     [listing, context, t]
   )
 
-  useEffect(() => {
-    if (!listing || !AI_ADVISOR_ENABLED) {
-      setEnhancedText(null)
-      return
-    }
-
-    let cancelled = false
-    fetchOptionalAiEnhancement('listing', { listing, context }, { analysis }).then((text) => {
-      if (!cancelled) setEnhancedText(text)
-    })
-
-    return () => {
-      cancelled = true
-    }
-  }, [listing?.id, studentUniversityId, listing, context, analysis])
-
   if (!listing || !analysis) return null
-
-  const summaryText = enhancedText || insightText
 
   return (
     <Card className="space-y-4 p-5">
@@ -109,12 +84,12 @@ export default function ListingAdvisorPanel({ listing, studentUniversityId }) {
         {t(`advisor.label.${analysis.label}`)}
       </p>
 
-      {summaryText && (
+      {insightText && (
         <div className="rounded-lg border border-accent/20 bg-accent/5 p-3">
           <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-accent">
             {t('advisor.insightSummary')}
           </p>
-          <p className="text-sm leading-relaxed text-primary">{summaryText}</p>
+          <p className="text-sm leading-relaxed text-primary">{insightText}</p>
         </div>
       )}
 

@@ -310,7 +310,7 @@ export const translations = {
     },
     advisor: {
       title: 'Ntlo Advisor',
-      subtitle: 'Smart match score based on distance, price, trust, and amenities — tailored for student housing in Botswana.',
+      subtitle: 'Smart match score based on distance, price, trust, and amenities — tailored for student housing in Botswana. No extra API needed.',
       pros: 'Strengths',
       cons: 'Watch outs',
       tips: 'Before you contact',

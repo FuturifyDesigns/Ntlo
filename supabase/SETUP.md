@@ -103,24 +103,11 @@ Landlords must upload ID + selfie + proof of ownership/authority at `/landlord/v
 
 ## 9. Ntlo Advisor
 
-**Works out of the box — no API keys.** Scores, compare, landlord coach, and **Our take** summaries run in the app.
+Built-in housing advice — **no API keys or extra billing.**
 
-### Optional: Google Gemini (free tier)
+- **Listing pages:** match score (/100), strengths, watch outs, and **Our take**
+- **Saved rooms:** compare ranked list when you save 2+ listings
+- **Landlord create listing:** listing coach on the review step
 
-Richer natural-language advice via a Supabase edge function + [Google AI Studio](https://aistudio.google.com/apikey) key.
-
-1. **Get key:** AI Studio → **Create API key** (starts with `AIza...`)
-2. **Login:** `npx supabase login`
-3. **Deploy:** `npx supabase functions deploy ai-advisor --project-ref kbpoljwacmzrakztnlkd`
-4. **Secret:** Supabase → Edge Functions → Secrets → `GEMINI_API_KEY` = your key  
-   Optional: `GEMINI_MODEL` = `gemini-2.0-flash`
-5. **Enable site:** `.env` and GitHub Actions → `VITE_AI_ADVISOR_ENABLED=true`, then redeploy
-
-CLI secret example:
-
-```powershell
-npx supabase secrets set GEMINI_API_KEY=AIza-your-key --project-ref kbpoljwacmzrakztnlkd
-```
-
-If Gemini is off or fails, **Our take** and scores still work.
+Uses distance to campus, typical Botswana student rents, verification status, and amenities. No Gemini, OpenAI, or edge function required.
 
