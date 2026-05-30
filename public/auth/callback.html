@@ -90,6 +90,15 @@
       return Boolean(user?.email_confirmed_at || user?.confirmed_at)
     }
 
+    async function abandonIncompleteSignup(client) {
+      try {
+        await client.rpc('abandon_incomplete_signup')
+      } catch (_) {}
+      try {
+        await client.auth.signOut()
+      } catch (_) {}
+    }
+
     async function run() {
       if (!cfg?.url || !cfg?.key) {
         showError('App configuration is missing. Contact support.')
@@ -109,6 +118,9 @@
       const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''))
       const accessToken = hashParams.get('access_token')
       const refreshToken = hashParams.get('refresh_token')
+
+      let signupFrom = sessionStorage.getItem('ntlo_oauth_from')
+      let signupIsNew = false
 
       try {
         if (code) {
@@ -130,7 +142,9 @@
         if (!user) throw new Error('Could not load your account.')
 
         const { from, role: pendingRole } = consumeOAuthIntent()
+        signupFrom = from || signupFrom
         const isNewUser = isNewOAuthUser(user)
+        signupIsNew = isNewUser
 
         if (from === 'register' && !isNewUser) {
           await supabase.auth.signOut()
@@ -206,6 +220,11 @@
             'Go to sign in'
           )
           return
+        }
+        if (signupIsNew && signupFrom === 'register') {
+          await abandonIncompleteSignup(supabase)
+        } else {
+          await supabase.auth.signOut().catch(() => {})
         }
         showError(err.message || 'Sign-in failed.')
       }

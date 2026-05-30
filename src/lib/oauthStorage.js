@@ -61,6 +61,10 @@ export function markOAuthNewSignup() {
   sessionStorage.setItem(OAUTH_NEW_SIGNUP_KEY, '1')
 }
 
+export function hasOAuthNewSignupPending() {
+  return sessionStorage.getItem(OAUTH_NEW_SIGNUP_KEY) === '1'
+}
+
 export function consumeOAuthNewSignup() {
   const value = sessionStorage.getItem(OAUTH_NEW_SIGNUP_KEY)
   sessionStorage.removeItem(OAUTH_NEW_SIGNUP_KEY)

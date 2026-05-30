@@ -44,8 +44,8 @@ export default function CheckEmail() {
         </p>
         <Button
           as={Link}
-          to={isOAuth ? '/login?verified=1' : '/login'}
-          state={isOAuth ? { verified: true } : undefined}
+          to={isOAuth ? '/login?verified=1&oauth=1' : '/login'}
+          state={isOAuth ? { verified: true, oauth: true } : undefined}
           className="mt-6 w-full"
         >
           {isOAuth ? t('auth.continueToSignIn') : t('auth.backToSignIn')}

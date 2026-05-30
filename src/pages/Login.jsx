@@ -26,6 +26,7 @@ export default function Login() {
   const [searchParams] = useSearchParams()
   const from = location.state?.from?.pathname || '/'
   const verified = searchParams.get('verified') === '1' || location.state?.verified
+  const oauthSignup = searchParams.get('oauth') === '1' || location.state?.oauth
   const passwordReset = searchParams.get('reset') === '1'
   const banned = searchParams.get('banned') === '1'
 
@@ -104,7 +105,14 @@ export default function Login() {
           </p>
         )}
 
-        {verified && (
+        {verified && oauthSignup && (
+          <div className="mt-6 space-y-2 rounded-xl border border-success/30 bg-success/10 px-4 py-3 text-center text-sm text-success">
+            <p>{t('auth.oauthVerifiedSignIn')}</p>
+            <p className="text-xs text-muted">{t('auth.oauthVerifiedSignInHint')}</p>
+          </div>
+        )}
+
+        {verified && !oauthSignup && (
           <p className="mt-6 rounded-xl border border-success/30 bg-success/10 px-4 py-3 text-center text-sm text-success">
             {t('auth.emailVerifiedSignIn')}
           </p>

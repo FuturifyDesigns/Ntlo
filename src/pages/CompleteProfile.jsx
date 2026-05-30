@@ -12,7 +12,7 @@ import AuthTransitionOverlay from '../components/auth/AuthTransitionOverlay'
 import { UniversitySelect } from '../components/universities/OtherUniversityModal'
 import GenderSelect from '../components/auth/GenderSelect'
 import { getPostAuthPath } from '../lib/verification'
-import { consumeOAuthNewSignup } from '../lib/oauthStorage'
+import { consumeOAuthNewSignup, hasOAuthNewSignupPending } from '../lib/oauthStorage'
 import { getDraftKey } from '../lib/formDrafts'
 import { useFormDraft } from '../hooks/useFormDraft'
 
@@ -133,17 +133,18 @@ export default function CompleteProfile() {
         },
       })
 
-      await refreshProfile()
+      const finishingOAuthSignup = hasOAuthNewSignupPending()
       clearDraft()
       setTransitioning(true)
 
-      if (consumeOAuthNewSignup()) {
+      if (finishingOAuthSignup) {
+        consumeOAuthNewSignup()
         await supabase.auth.signOut()
-        window.setTimeout(() => {
-          navigate(`/check-email?oauth=1&email=${encodeURIComponent(user.email || '')}`, { replace: true })
-        }, 350)
+        navigate(`/check-email?oauth=1&email=${encodeURIComponent(user.email || '')}`, { replace: true })
         return
       }
+
+      await refreshProfile()
 
       const destination = getPostAuthPath({
         role,

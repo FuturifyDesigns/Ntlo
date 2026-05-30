@@ -14,6 +14,7 @@ import AuthTransitionOverlay from '../components/auth/AuthTransitionOverlay'
 import { UniversitySelect } from '../components/universities/OtherUniversityModal'
 import GenderSelect from '../components/auth/GenderSelect'
 import { supabase } from '../lib/supabase'
+import { abandonIncompleteSignup } from '../lib/abandonSignup'
 import { getPostAuthPath } from '../lib/verification'
 import { getDraftKey } from '../lib/formDrafts'
 import { useFormDraft } from '../hooks/useFormDraft'
@@ -164,6 +165,7 @@ export default function Register() {
     const normalizedPhone = normalizeBotswanaPhone(form.phone.trim())
 
     setLoading(true)
+    let createdUserId = null
     try {
       const data = await signUp({
         email: form.email.trim(),
@@ -172,13 +174,18 @@ export default function Register() {
         role: form.role,
         phone: normalizedPhone,
       })
+      createdUserId = data.user?.id ?? null
 
-      if (data.user?.id && form.role === 'student' && form.gender) {
+      if (createdUserId && form.role === 'student' && form.gender) {
         const profileUpdates = { gender: form.gender }
         if (form.universityId && form.universityId !== 'other') {
           profileUpdates.university_id = Number(form.universityId)
         }
-        await supabase.from('profiles').update(profileUpdates).eq('id', data.user.id)
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .update(profileUpdates)
+          .eq('id', createdUserId)
+        if (profileError) throw profileError
       }
 
       if (form.role === 'student' && form.universityId === 'other' && form.customUniversity.trim()) {
@@ -208,6 +215,9 @@ export default function Register() {
       clearDraft()
       navigate(getPostAuthPath({ role: form.role, verification_status: form.role === 'landlord' ? 'none' : 'approved' }))
     } catch (err) {
+      if (createdUserId) {
+        await abandonIncompleteSignup()
+      }
       setError(mapAuthError(err.message, validationMessages))
     } finally {
       setLoading(false)
