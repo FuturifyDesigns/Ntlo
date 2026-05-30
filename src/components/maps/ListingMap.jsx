@@ -20,7 +20,7 @@ import {
   getMapListingPosition,
   toLatLng,
 } from '../../lib/googleMaps'
-import { geocodeWithGoogle, resolveAddressCoords, resolveUniversityCampusCoords } from '../../lib/geocodeAddress'
+import { geocodeWithGoogle, resolveAddressCoords, resolveUniversityCampusCoords, reverseGeocodeWithGoogle } from '../../lib/geocodeAddress'
 import { applyMapCameraFocus } from '../../lib/mapCamera'
 import { formatPrice } from '../../lib/utils'
 import { useTranslation } from '../../hooks/useTranslation'
@@ -407,9 +407,10 @@ export function LocationPicker({
   const [otherCampus, setOtherCampus] = useState(null)
 
   const geocodeTimerRef = useRef(null)
+  const reverseTimerRef = useRef(null)
   const onChangeRef = useRef(onChange)
   const lastAddressKeyRef = useRef('')
-  const pinLockedRef = useRef(false)
+  const skipForwardGeocodeRef = useRef(false)
   const prevUniversityIdRef = useRef('')
   const cameraIdRef = useRef(0)
   const userMapControlRef = useRef(false)
@@ -439,30 +440,62 @@ export function LocationPicker({
     })
   }, [campusZoom])
 
-  const markPinManual = useCallback(() => {
-    pinLockedRef.current = true
+  const applyCoordsFromReverse = useCallback(async (coords, hintKey) => {
+    allowCamera()
     setPinLocked(true)
-    setGeocodeHint(t('listingForm.pinManual'))
-  }, [t])
+    setGeocodeHint(t(hintKey))
+    onChangeRef.current({ lat: coords.lat, lng: coords.lng, source: 'map' })
+    pushCamera({ pin: coords })
+
+    if (!geocoder) return
+
+    setGeocodeBusy(true)
+    const parsed = await reverseGeocodeWithGoogle(geocoder, coords.lat, coords.lng)
+    setGeocodeBusy(false)
+
+    if (parsed) {
+      const key = `${parsed.address?.trim()}|${parsed.area?.trim()}|${parsed.city?.trim()}`
+      skipForwardGeocodeRef.current = true
+      lastAddressKeyRef.current = key
+      onChangeRef.current({
+        lat: coords.lat,
+        lng: coords.lng,
+        address: parsed.address || '',
+        area: parsed.area || '',
+        city: parsed.city || city?.trim() || 'Gaborone',
+        source: 'reverse',
+      })
+      if (parsed.formatted) {
+        setGeocodeHint(t('listingForm.pinFromReverse', { address: parsed.formatted }))
+      }
+    }
+  }, [allowCamera, pushCamera, geocoder, city, t])
 
   const handleMapClick = useCallback((event) => {
     if (!event.detail.latLng) return
-    markPinManual()
-    onChange({
+    const coords = {
       lat: event.detail.latLng.lat,
       lng: event.detail.latLng.lng,
-    })
-  }, [markPinManual, onChange])
+    }
+    lastAddressKeyRef.current = ''
+    if (reverseTimerRef.current) clearTimeout(reverseTimerRef.current)
+    reverseTimerRef.current = setTimeout(() => {
+      applyCoordsFromReverse(coords, 'listingForm.pinManual')
+    }, 200)
+  }, [applyCoordsFromReverse])
 
   const handleDragEnd = useCallback((event) => {
     const ll = event.detail?.latLng || event.latLng
     if (!ll) return
-    markPinManual()
     const coords = typeof ll.lat === 'function'
       ? { lat: ll.lat(), lng: ll.lng() }
       : { lat: ll.lat, lng: ll.lng }
-    onChange(coords)
-  }, [markPinManual, onChange])
+    lastAddressKeyRef.current = ''
+    if (reverseTimerRef.current) clearTimeout(reverseTimerRef.current)
+    reverseTimerRef.current = setTimeout(() => {
+      applyCoordsFromReverse(coords, 'listingForm.pinManual')
+    }, 200)
+  }, [applyCoordsFromReverse])
 
   const useCurrentLocation = useCallback(async () => {
     if (!navigator.geolocation) {
@@ -484,15 +517,12 @@ export function LocationPicker({
       /* ignore */
     }
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
+      async (pos) => {
         allowCamera()
-        pinLockedRef.current = true
-        setPinLocked(true)
-        const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude }
-        onChange(coords)
-        pushCamera({ pin: coords })
-        setGeocodeHint(t('listingForm.pinFromGps'))
         setGeoBusy(false)
+        const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude }
+        lastAddressKeyRef.current = ''
+        await applyCoordsFromReverse(coords, 'listingForm.pinFromGps')
       },
       (err) => {
         setGeoError(
@@ -506,38 +536,38 @@ export function LocationPicker({
       },
       { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 }
     )
-  }, [onChange, pushCamera, allowCamera, t])
+  }, [applyCoordsFromReverse, allowCamera, t])
 
-  // Geocode listing address → pin (only when address text changes)
+  // Forward geocode: address fields → pin (always when address text changes)
   useEffect(() => {
+    if (skipForwardGeocodeRef.current) {
+      skipForwardGeocodeRef.current = false
+      return undefined
+    }
+
     const hasText = Boolean((address?.trim() || area?.trim()) && city?.trim())
     const cityOnly = Boolean(city?.trim() && !address?.trim() && !area?.trim())
 
     if (!hasText && !cityOnly) return undefined
 
-    // Already geocoded this exact address and pin isn't locked for manual edit
     if (addressKey === lastAddressKeyRef.current && lastAddressKeyRef.current !== '') {
       return undefined
     }
 
-    if (addressKey !== lastAddressKeyRef.current) {
-      pinLockedRef.current = false
-      setPinLocked(false)
-      allowCamera()
-    }
-
-    if (pinLockedRef.current) return undefined
+    allowCamera()
 
     if (geocodeTimerRef.current) clearTimeout(geocodeTimerRef.current)
     geocodeTimerRef.current = setTimeout(async () => {
-      if (pinLockedRef.current) return
       if (addressKey === lastAddressKeyRef.current && lastAddressKeyRef.current !== '') return
 
       if (cityOnly && !hasText) {
         if (geocoder) {
           const cityResult = await geocodeWithGoogle(geocoder, `${city.trim()}, Botswana`)
           if (cityResult) {
+            setPinLocked(false)
+            onChangeRef.current({ lat: cityResult.lat, lng: cityResult.lng, source: 'geocode' })
             pushCamera({ pin: cityResult, pinZoom: DEFAULT_MAP_ZOOM })
+            setGeocodeHint(t('listingForm.pinFromAddress'))
           }
         }
         lastAddressKeyRef.current = addressKey
@@ -552,15 +582,12 @@ export function LocationPicker({
       setGeocodeBusy(false)
       lastAddressKeyRef.current = addressKey
 
-      if (result && !pinLockedRef.current) {
-        onChangeRef.current({ lat: result.lat, lng: result.lng })
+      if (result) {
+        setPinLocked(false)
+        onChangeRef.current({ lat: result.lat, lng: result.lng, source: 'geocode' })
         const coords = { lat: result.lat, lng: result.lng }
         const campus = campusCoordsRef.current || null
-        pushCamera(
-          campus
-            ? { campus, pin: coords }
-            : { pin: coords }
-        )
+        pushCamera(campus ? { campus, pin: coords } : { pin: coords })
         setGeocodeHint(t('listingForm.pinFromAddress'))
         setGeoError('')
       } else if (hasText && (address?.trim().length >= 3 || area?.trim().length >= 2)) {
@@ -568,7 +595,7 @@ export function LocationPicker({
       } else {
         setGeocodeHint('')
       }
-    }, 900)
+    }, 700)
 
     return () => {
       if (geocodeTimerRef.current) clearTimeout(geocodeTimerRef.current)

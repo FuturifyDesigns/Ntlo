@@ -200,6 +200,38 @@ export async function geocodeAddress(fields) {
   return resolveAddressCoords({ geocoder: null, ...fields })
 }
 
+/** Extract street, area, and city from a Google Geocoder result. */
+export function parseGoogleAddressResult(result) {
+  if (!result?.address_components) {
+    return { address: '', area: '', city: '', formatted: result?.formatted_address || '' }
+  }
+
+  const components = result.address_components
+  const get = (type) => components.find((c) => c.types.includes(type))?.long_name || ''
+
+  const streetNumber = get('street_number')
+  const route = get('route')
+  const address = [streetNumber, route].filter(Boolean).join(' ').trim()
+
+  const area = get('sublocality')
+    || get('sublocality_level_1')
+    || get('neighborhood')
+    || get('administrative_area_level_2')
+    || get('administrative_area_level_3')
+    || ''
+
+  const city = get('locality')
+    || get('administrative_area_level_1')
+    || ''
+
+  return {
+    address,
+    area,
+    city,
+    formatted: result.formatted_address || '',
+  }
+}
+
 export async function reverseGeocodeWithGoogle(geocoder, lat, lng) {
   if (!geocoder) return null
   const latitude = Number(lat)
@@ -212,7 +244,12 @@ export async function reverseGeocodeWithGoogle(geocoder, lat, lng) {
         resolve(null)
         return
       }
-      resolve({ formatted: results[0].formatted_address })
+      const parsed = parseGoogleAddressResult(results[0])
+      resolve({
+        lat: latitude,
+        lng: longitude,
+        ...parsed,
+      })
     })
   })
 }

@@ -98,8 +98,15 @@ export default function EditListing() {
     if (fieldErrors[field]) setFieldErrors((prev) => ({ ...prev, [field]: '' }))
   }
 
-  function handleLocationChange({ lat, lng }) {
-    setForm((f) => ({ ...f, lat, lng }))
+  function handleLocationChange({ lat, lng, address, area, city }) {
+    setForm((f) => ({
+      ...f,
+      lat,
+      lng,
+      ...(address !== undefined ? { address } : {}),
+      ...(area !== undefined ? { area } : {}),
+      ...(city !== undefined ? { city } : {}),
+    }))
     if (fieldErrors.pin) setFieldErrors((prev) => ({ ...prev, pin: '' }))
   }
 
@@ -252,6 +259,12 @@ export default function EditListing() {
             <option key={k} value={k}>{v}</option>
           ))}
         </Select>
+        <p className="text-xs text-muted">{t('listingForm.utilitiesHint')}</p>
+        {form.utilities_included && (
+          <p className="rounded-lg border border-border bg-background px-3 py-2 text-xs text-muted">
+            {t(`listingForm.utilitiesDesc.${form.utilities_included}`)}
+          </p>
+        )}
         <Input label="Address" value={form.address || ''} onChange={(e) => update('address', e.target.value)} hint={t('listingForm.validation.addressHint')} />
         <Input label="Area" value={form.area || ''} onChange={(e) => update('area', e.target.value)} error={fieldErrors.area} required />
         <Input label="City" value={form.city} onChange={(e) => update('city', e.target.value)} error={fieldErrors.city} required />

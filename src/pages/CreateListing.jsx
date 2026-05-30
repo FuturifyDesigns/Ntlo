@@ -161,8 +161,16 @@ export default function CreateListing() {
     }
   }
 
-  function handleLocationChange({ lat, lng }) {
-    setForm((f) => ({ ...f, lat: String(lat), lng: String(lng) }))
+  function handleLocationChange({ lat, lng, address, area, city }) {
+    setForm((f) => ({
+      ...f,
+      lat: String(lat),
+      lng: String(lng),
+      ...(address !== undefined ? { address } : {}),
+      ...(area !== undefined ? { area } : {}),
+      ...(city !== undefined ? { city } : {}),
+    }))
+    if (fieldErrors.pin) setFieldErrors((prev) => ({ ...prev, pin: '' }))
   }
 
   async function handleSubmit() {
@@ -377,6 +385,12 @@ export default function CreateListing() {
                     <option key={k} value={k}>{v}</option>
                   ))}
                 </Select>
+                <p className="text-xs text-muted">{t('listingForm.utilitiesHint')}</p>
+                {form.utilities_included && (
+                  <p className="rounded-lg border border-border bg-background px-3 py-2 text-xs text-muted">
+                    {t(`listingForm.utilitiesDesc.${form.utilities_included}`)}
+                  </p>
+                )}
               </div>
             )}
 
