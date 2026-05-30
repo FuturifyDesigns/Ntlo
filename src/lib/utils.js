@@ -62,6 +62,18 @@ export function cn(...classes) {
   return classes.filter(Boolean).join(' ')
 }
 
+/** Returns { unit: 'now'|'minutes'|'hours'|'days', count } for relative time. */
+export function relativeTimeParts(dateInput) {
+  if (!dateInput) return { unit: 'now', count: 0 }
+  const ms = Date.now() - new Date(dateInput).getTime()
+  const mins = Math.floor(ms / 60000)
+  if (mins < 1) return { unit: 'now', count: 0 }
+  if (mins < 60) return { unit: 'minutes', count: mins }
+  const hours = Math.floor(mins / 60)
+  if (hours < 24) return { unit: 'hours', count: hours }
+  return { unit: 'days', count: Math.floor(hours / 24) }
+}
+
 export function getCoverPhoto(listing) {
   if (listing?.cover_photo?.length) return listing.cover_photo[0]?.url
   if (listing?.listing_photos?.length) {

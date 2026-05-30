@@ -26,9 +26,38 @@ function presentTypes(docs = []) {
   return new Set(docs.map((d) => d.doc_type))
 }
 
+const FLAGGED = ['rejected', 'changes_requested']
+
+/**
+ * Collapse multiple uploads of the same doc_type into the latest version,
+ * and flag types that were re-uploaded after being sent back.
+ */
+export function groupDocVersions(docs = []) {
+  const byType = {}
+  for (const d of docs) {
+    (byType[d.doc_type] ||= []).push(d)
+  }
+  const current = []
+  const resubmittedTypes = new Set()
+  const previousByType = {}
+  for (const type of Object.keys(byType)) {
+    const versions = byType[type]
+      .slice()
+      .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+    current.push(versions[versions.length - 1])
+    if (versions.length > 1 && versions.slice(0, -1).some((v) => FLAGGED.includes(v.status))) {
+      resubmittedTypes.add(type)
+      previousByType[type] = versions[versions.length - 2]
+    }
+  }
+  current.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+  return { current, byType, resubmittedTypes, previousByType }
+}
+
 /** Analyze a pending landlord submission. */
 export function analyzeLandlord(landlord) {
-  const docs = landlord.docs || []
+  const grouped = groupDocVersions(landlord.docs || [])
+  const docs = grouped.current
   const present = presentTypes(docs)
   const hasPropertyProof = PROPERTY_PROOF.some((t) => present.has(t))
 
@@ -63,14 +92,27 @@ export function analyzeLandlord(landlord) {
   if (missingRequired.length === 0 && hasPropertyProof) flags.push({ key: 'docsComplete', severity: 'pro' })
   if (LANDLORD_EXTRA.some((t) => present.has(t))) flags.push({ key: 'hasExtraProof', severity: 'pro' })
   if (docs.length === 1) flags.push({ key: 'singleDoc', severity: 'tip' })
+  if (grouped.resubmittedTypes.size > 0) {
+    flags.push({ key: 'resubmitted', severity: 'tip', meta: { count: grouped.resubmittedTypes.size } })
+  }
   if (waitingDays >= 2) flags.push({ key: 'waitingLong', severity: 'tip', meta: { days: waitingDays } })
 
-  return { kind: 'landlord', score, status, recommendKey, flags, waitingDays, docCount: docs.length }
+  return {
+    kind: 'landlord',
+    score,
+    status,
+    recommendKey,
+    flags,
+    waitingDays,
+    docCount: docs.length,
+    resubmittedTypes: grouped.resubmittedTypes,
+  }
 }
 
 /** Analyze a pending listing submission. */
 export function analyzeListing(listing) {
-  const docs = listing.docs || []
+  const grouped = groupDocVersions(listing.docs || [])
+  const docs = grouped.current
   const present = presentTypes(docs)
   const hasProof = LISTING_PROOF.some((t) => present.has(t))
   const waitingDays = daysSince(listing.created_at)
@@ -78,6 +120,9 @@ export function analyzeListing(listing) {
   const flags = []
   if (hasProof) flags.push({ key: 'docsComplete', severity: 'pro' })
   else flags.push({ key: 'missingPropertyProof', severity: 'con' })
+  if (grouped.resubmittedTypes.size > 0) {
+    flags.push({ key: 'resubmitted', severity: 'tip', meta: { count: grouped.resubmittedTypes.size } })
+  }
   if (waitingDays >= 2) flags.push({ key: 'waitingLong', severity: 'tip', meta: { days: waitingDays } })
 
   return {
@@ -88,7 +133,43 @@ export function analyzeListing(listing) {
     flags,
     waitingDays,
     docCount: docs.length,
+    resubmittedTypes: grouped.resubmittedTypes,
   }
+}
+
+/**
+ * Combine the presence-based analysis with document statuses and live OCR
+ * compliance results so the readiness badge reflects what the admin sees.
+ * complianceResults: { [docId]: { verdict } }
+ */
+export function combineReadiness(analysis, currentDocs = [], complianceResults = {}) {
+  let { score, status } = analysis
+  const verdicts = currentDocs
+    .map((d) => complianceResults[d.id]?.verdict)
+    .filter(Boolean)
+  const scanned = verdicts.length > 0
+
+  const anyFail = verdicts.includes('fail')
+  const anyWarn = verdicts.includes('warn')
+  const anyChangesRequested = currentDocs.some((d) => d.status === 'changes_requested')
+  const allApproved = currentDocs.length > 0 && currentDocs.every((d) => d.status === 'approved')
+
+  if (anyChangesRequested) {
+    return { status: 'awaitingResubmission', score: Math.min(score, 40), scanned }
+  }
+  if (anyFail) {
+    return { status: 'nonCompliant', score: Math.min(score, 30), scanned }
+  }
+  if (anyWarn) {
+    return { status: 'needsReview', score: Math.min(score, 60), scanned }
+  }
+  if (allApproved) {
+    return { status: status === 'incomplete' ? status : 'readyToApprove', score: Math.max(score, 90), scanned }
+  }
+  if (scanned && (status === 'readyToApprove' || status === 'listingHasProof')) {
+    return { status, score: Math.max(score, 92), scanned }
+  }
+  return { status, score, scanned }
 }
 
 const STATUS_RANK = {

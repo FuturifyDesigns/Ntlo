@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { Upload, FileText, CheckCircle, Loader2 } from 'lucide-react'
+import { Upload, FileText, CheckCircle, Loader2, AlertCircle } from 'lucide-react'
 import { useTranslation } from '../../hooks/useTranslation'
 import Button from '../ui/Button'
 
@@ -17,6 +17,9 @@ export default function DocumentUpload({
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState('')
 
+  const flagged = uploaded && ['changes_requested', 'rejected'].includes(uploaded.status)
+  const approved = uploaded && uploaded.status === 'approved'
+
   async function handleFile(e) {
     const file = e.target.files?.[0]
     if (!file) return
@@ -32,12 +35,20 @@ export default function DocumentUpload({
     }
   }
 
+  const borderClass = flagged
+    ? 'border-amber-500/50 bg-amber-500/5'
+    : uploaded
+      ? 'border-success/40 bg-success/5'
+      : 'border-border bg-surface'
+
   return (
-    <div className={`rounded-xl border p-4 ${uploaded ? 'border-success/40 bg-success/5' : 'border-border bg-surface'}`}>
+    <div className={`rounded-xl border p-4 ${borderClass}`}>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            {uploaded ? (
+            {flagged ? (
+              <AlertCircle size={18} className="shrink-0 text-amber-600" />
+            ) : uploaded ? (
               <CheckCircle size={18} className="shrink-0 text-success" />
             ) : (
               <FileText size={18} className="shrink-0 text-muted" />
@@ -45,16 +56,26 @@ export default function DocumentUpload({
             <p className="font-medium text-primary">{label}</p>
           </div>
           {description && <p className="mt-1 text-sm text-muted">{description}</p>}
-          {uploaded && (
-            <p className="mt-2 truncate text-xs text-success">
+          {uploaded && !flagged && (
+            <p className={`mt-2 truncate text-xs ${approved ? 'text-success' : 'text-muted'}`}>
               {uploaded.file_name || t('verification.uploaded')}
             </p>
+          )}
+          {flagged && (
+            <div className="mt-2 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2">
+              <p className="text-xs font-semibold text-amber-700">{t('verification.needsUpdate')}</p>
+              {uploaded.admin_notes && (
+                <p className="mt-1 text-xs text-amber-700/90">
+                  <span className="font-medium">{t('verification.adminFeedback')}:</span> {uploaded.admin_notes}
+                </p>
+              )}
+            </div>
           )}
           {error && <p className="mt-2 text-sm text-error">{error}</p>}
         </div>
         <Button
           type="button"
-          variant="outline"
+          variant={flagged ? 'accent' : 'outline'}
           size="sm"
           disabled={disabled || uploading}
           onClick={() => inputRef.current?.click()}

@@ -77,7 +77,7 @@ export default function AdminDashboard() {
         docs:verification_documents!verification_documents_user_id_fkey(id, doc_type, file_name, storage_path, status, created_at)
       `)
       .eq('role', 'landlord')
-      .eq('verification_status', 'pending')
+      .in('verification_status', ['pending', 'changes_requested'])
       .order('created_at', { ascending: false })
     if (error) setActionError(error.message)
     setLandlords(data || [])
@@ -191,6 +191,19 @@ export default function AdminDashboard() {
       if (error) throw error
       await fetchLandlords()
       await fetchUsers()
+    })
+  }
+
+  async function requestDocChanges(docId, note) {
+    await runAction(async () => {
+      const { error } = await supabase.rpc('admin_review_document', {
+        target_doc_id: docId,
+        new_status: 'changes_requested',
+        note,
+      })
+      if (error) throw error
+      await fetchLandlords()
+      await fetchListings()
     })
   }
 
@@ -475,6 +488,7 @@ export default function AdminDashboard() {
                     onOpenDocs={(docs, index, name) => setPreview({ docs, index, name })}
                     onApprove={() => reviewLandlord(item.id, true)}
                     onReject={() => reviewLandlord(item.id, false)}
+                    onRequestChanges={requestDocChanges}
                   />
                 ))
               )}
@@ -500,6 +514,7 @@ export default function AdminDashboard() {
                     onOpenDocs={(docs, index, name) => setPreview({ docs, index, name })}
                     onApprove={() => reviewListing(item.id, true)}
                     onReject={() => reviewListing(item.id, false)}
+                    onRequestChanges={requestDocChanges}
                   />
                 ))
               )}

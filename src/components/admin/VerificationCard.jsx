@@ -1,17 +1,19 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Check, X, Sparkles, ThumbsUp, AlertTriangle, Lightbulb, Clock,
   CreditCard, Camera, Home, FileSignature, MapPin, Building2,
   Receipt, Zap, ScrollText, FileText, ScanSearch, Loader2,
-  CheckCircle2, XCircle, Info, ChevronDown,
+  CheckCircle2, XCircle, Info, ChevronDown, MessageSquare, RotateCcw,
 } from 'lucide-react'
 import { useTranslation } from '../../hooks/useTranslation'
+import { useNow } from '../../hooks/useNow'
 import { getScoreColor } from '../../lib/aiAdvisor'
-import { isImagePath, isPdfPath } from '../../lib/adminAdvisor'
+import { isImagePath, isPdfPath, groupDocVersions, combineReadiness } from '../../lib/adminAdvisor'
+import { relativeTimeParts } from '../../lib/utils'
 import { getSignedDocUrl } from '../../lib/verificationStorage'
 import { recognizeImage } from '../../lib/ocr'
-import { analyzeDocCompliance, VERDICT_STYLE } from '../../lib/docCompliance'
+import { analyzeDocCompliance, compareOcr, VERDICT_STYLE } from '../../lib/docCompliance'
 import Button from '../ui/Button'
 
 const DOC_ICONS = {
@@ -34,10 +36,18 @@ const STATUS_STYLE = {
   listingHasProof: 'bg-success/10 text-success ring-success/20',
   needsProof: 'bg-amber-500/10 text-amber-700 ring-amber-500/20',
   listingNoProof: 'bg-amber-500/10 text-amber-700 ring-amber-500/20',
+  needsReview: 'bg-amber-500/10 text-amber-700 ring-amber-500/20',
   incomplete: 'bg-error/10 text-error ring-error/20',
+  nonCompliant: 'bg-error/10 text-error ring-error/20',
+  awaitingResubmission: 'bg-primary/10 text-primary ring-primary/20',
 }
 
-const DOC_STATUS_DOT = { approved: 'bg-success', rejected: 'bg-error', pending: 'bg-amber-500' }
+const DOC_STATUS = {
+  approved: { color: 'text-success', dot: 'bg-success' },
+  rejected: { color: 'text-error', dot: 'bg-error' },
+  changes_requested: { color: 'text-amber-600', dot: 'bg-amber-500' },
+  pending: { color: 'text-muted', dot: 'bg-amber-500' },
+}
 
 const CHECK_ICON = { pass: CheckCircle2, warn: AlertTriangle, fail: XCircle, manual: Info }
 const CHECK_COLOR = { pass: 'text-success', warn: 'text-amber-600', fail: 'text-error', manual: 'text-muted' }
@@ -46,9 +56,12 @@ function initials(name = '?') {
   return name.trim().split(/\s+/).slice(0, 2).map((w) => w[0]?.toUpperCase()).join('') || '?'
 }
 
-export default function VerificationCard({ subject, analysis, kind, onOpenDocs, onApprove, onReject }) {
+export default function VerificationCard({ subject, analysis, kind, onOpenDocs, onApprove, onReject, onRequestChanges }) {
   const { t } = useTranslation()
-  const docs = subject.docs || []
+  useNow()
+  const allDocs = useMemo(() => subject.docs || [], [subject.docs])
+  const grouped = useMemo(() => groupDocVersions(allDocs), [allDocs])
+  const currentDocs = grouped.current
   const name = kind === 'landlord' ? subject.full_name : subject.title
   const sub = kind === 'landlord'
     ? (subject.phone || '—')
@@ -60,16 +73,20 @@ export default function VerificationCard({ subject, analysis, kind, onOpenDocs, 
   const [scanError, setScanError] = useState('')
   const [showReport, setShowReport] = useState(true)
 
-  const imageDocs = docs.filter((d) => isImagePath(d.storage_path, d.file_name))
   const scanned = Object.keys(results).length > 0
+  const readiness = combineReadiness(analysis, currentDocs, results)
+
+  const time = relativeTimeParts(subject.created_at)
+  const timeLabel = time.unit === 'now' ? t('admin.justNow') : t(`admin.${time.unit}Ago`, { count: time.count })
 
   async function runScan() {
-    if (scanning || docs.length === 0) return
+    if (scanning || allDocs.length === 0) return
     setScanning(true)
     setScanError('')
     setProgress(0)
+    const imageDocs = allDocs.filter((d) => isImagePath(d.storage_path, d.file_name))
     const next = {}
-    docs.forEach((d) => {
+    allDocs.forEach((d) => {
       if (isPdfPath(d.storage_path, d.file_name)) next[d.id] = { verdict: 'pdf', checks: [], score: null }
     })
     setResults({ ...next })
@@ -77,11 +94,10 @@ export default function VerificationCard({ subject, analysis, kind, onOpenDocs, 
       for (let i = 0; i < imageDocs.length; i++) {
         const d = imageDocs[i]
         const url = await getSignedDocUrl(d.storage_path)
-        // eslint-disable-next-line no-await-in-loop
         const { text, confidence } = await recognizeImage(url, (p) =>
           setProgress((i + p) / imageDocs.length)
         )
-        next[d.id] = analyzeDocCompliance(d.doc_type, text, confidence)
+        next[d.id] = { ...analyzeDocCompliance(d.doc_type, text, confidence), _text: text }
         setResults({ ...next })
       }
       setProgress(1)
@@ -90,6 +106,12 @@ export default function VerificationCard({ subject, analysis, kind, onOpenDocs, 
     } finally {
       setScanning(false)
     }
+  }
+
+  function handleRequestChanges(doc) {
+    if (!onRequestChanges) return
+    const note = window.prompt(t('admin.compliance.requestPrompt', { doc: t(`admin.docType.${doc.doc_type}`) }))
+    if (note && note.trim()) onRequestChanges(doc.id, note.trim())
   }
 
   return (
@@ -111,18 +133,17 @@ export default function VerificationCard({ subject, analysis, kind, onOpenDocs, 
         </div>
 
         <div className="flex flex-col items-end gap-1.5">
-          <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ring-1 ${STATUS_STYLE[analysis.status]}`}>
+          <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ring-1 ${STATUS_STYLE[readiness.status] || STATUS_STYLE.incomplete}`}>
             <Sparkles size={12} />
-            {t(`admin.adv.status.${analysis.status}`)}
+            {t(`admin.adv.status.${readiness.status}`)}
+            {readiness.scanned && <span className="opacity-70">· {t('admin.compliance.scannedTag')}</span>}
           </span>
           <span className="flex items-center gap-1 text-[11px] text-muted">
             <Clock size={11} />
-            {analysis.waitingDays === 0
-              ? t('admin.justNow')
-              : t('admin.daysAgo', { count: analysis.waitingDays })}
+            {timeLabel}
             <span className="text-border">·</span>
-            <span className={`font-semibold ${getScoreColor(analysis.score)}`}>
-              {analysis.score} {t('admin.adv.readinessLabel')}
+            <span className={`font-semibold ${getScoreColor(readiness.score)}`}>
+              {readiness.score} {t('admin.adv.readinessLabel')}
             </span>
           </span>
         </div>
@@ -154,9 +175,9 @@ export default function VerificationCard({ subject, analysis, kind, onOpenDocs, 
       <div className="px-4 pb-4 sm:px-5">
         <div className="mb-2 flex items-center justify-between gap-2">
           <p className="text-xs font-semibold uppercase tracking-wide text-muted">
-            {t('admin.documents')} {docs.length > 0 && `(${docs.length})`}
+            {t('admin.documents')} {currentDocs.length > 0 && `(${currentDocs.length})`}
           </p>
-          {docs.length > 0 && (
+          {allDocs.length > 0 && (
             <button
               type="button"
               onClick={runScan}
@@ -171,51 +192,78 @@ export default function VerificationCard({ subject, analysis, kind, onOpenDocs, 
           )}
         </div>
 
-        {docs.length === 0 ? (
+        {currentDocs.length === 0 ? (
           <p className="rounded-lg border border-dashed border-border px-3 py-4 text-center text-sm text-muted">
             {t('admin.noDocuments')}
           </p>
         ) : (
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-            {docs.map((doc, i) => {
+            {currentDocs.map((doc, i) => {
               const Icon = DOC_ICONS[doc.doc_type] || FileText
               const result = results[doc.id]
               const vStyle = result && VERDICT_STYLE[result.verdict]
+              const isResubmitted = grouped.resubmittedTypes.has(doc.doc_type)
+              const ds = DOC_STATUS[doc.status] || DOC_STATUS.pending
               return (
-                <button
+                <div
                   key={doc.id}
-                  type="button"
-                  onClick={() => onOpenDocs(docs, i, name)}
-                  className="group flex items-center gap-3 rounded-xl border border-border bg-background px-3 py-2.5 text-left transition-colors hover:border-accent/40 hover:bg-accent/5"
+                  className="flex items-center gap-3 rounded-xl border border-border bg-background px-3 py-2.5"
                 >
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-surface ring-1 ring-border group-hover:ring-accent/30">
-                    <Icon size={16} className="text-accent" />
-                  </span>
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate text-sm font-medium text-primary">
-                      {t(`admin.docType.${doc.doc_type}`)}
+                  <button
+                    type="button"
+                    onClick={() => onOpenDocs(currentDocs, i, name)}
+                    className="group flex min-w-0 flex-1 items-center gap-3 text-left"
+                  >
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-surface ring-1 ring-border group-hover:ring-accent/30">
+                      <Icon size={16} className="text-accent" />
                     </span>
-                    <span className="block truncate text-xs text-muted">{doc.file_name}</span>
-                  </span>
-                  {result ? (
-                    <span className={`inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${vStyle?.color}`}>
-                      <span className={`h-1.5 w-1.5 rounded-full ${vStyle?.dot}`} />
-                      {result.verdict === 'pdf'
-                        ? t('admin.compliance.verdict.pdf')
-                        : t(`admin.compliance.verdict.${result.verdict}`)}
+                    <span className="min-w-0 flex-1">
+                      <span className="flex items-center gap-1.5">
+                        <span className="truncate text-sm font-medium text-primary">
+                          {t(`admin.docType.${doc.doc_type}`)}
+                        </span>
+                        {isResubmitted && (
+                          <span className="inline-flex shrink-0 items-center gap-0.5 rounded-full bg-primary/10 px-1.5 py-0.5 text-[9px] font-bold uppercase text-primary">
+                            <RotateCcw size={9} />
+                            {t('admin.compliance.resubmittedTag')}
+                          </span>
+                        )}
+                      </span>
+                      <span className="block truncate text-xs text-muted">{doc.file_name}</span>
                     </span>
-                  ) : (
-                    <span className={`h-2 w-2 shrink-0 rounded-full ${DOC_STATUS_DOT[doc.status] || 'bg-amber-500'}`} title={doc.status} />
+                    {result ? (
+                      <span className={`inline-flex shrink-0 items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${vStyle?.color}`}>
+                        <span className={`h-1.5 w-1.5 rounded-full ${vStyle?.dot}`} />
+                        {result.verdict === 'pdf'
+                          ? t('admin.compliance.verdict.pdf')
+                          : t(`admin.compliance.verdict.${result.verdict}`)}
+                      </span>
+                    ) : doc.status !== 'pending' ? (
+                      <span className={`inline-flex shrink-0 items-center gap-1 text-[10px] font-semibold ${ds.color}`}>
+                        <span className={`h-1.5 w-1.5 rounded-full ${ds.dot}`} />
+                        {t(`admin.docState.${doc.status}`)}
+                      </span>
+                    ) : (
+                      <span className={`h-2 w-2 shrink-0 rounded-full ${ds.dot}`} title={doc.status} />
+                    )}
+                  </button>
+                  {onRequestChanges && (
+                    <button
+                      type="button"
+                      onClick={() => handleRequestChanges(doc)}
+                      title={t('admin.compliance.requestChanges')}
+                      className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-border text-muted hover:border-amber-500/40 hover:text-amber-600"
+                    >
+                      <MessageSquare size={13} />
+                    </button>
                   )}
-                </button>
+                </div>
               )
             })}
           </div>
         )}
 
-        {scanError && (
-          <p className="mt-2 text-xs text-error">{t('admin.compliance.scanError')}</p>
-        )}
+        {scanError && <p className="mt-2 text-xs text-error">{t('admin.compliance.scanError')}</p>}
 
         {/* Compliance report */}
         <AnimatePresence initial={false}>
@@ -240,10 +288,17 @@ export default function VerificationCard({ subject, analysis, kind, onOpenDocs, 
 
               {showReport && (
                 <div className="space-y-3 border-t border-border px-3 py-3">
-                  {docs.map((doc) => {
+                  {currentDocs.map((doc) => {
                     const result = results[doc.id]
                     if (!result) return null
                     const vStyle = VERDICT_STYLE[result.verdict] || VERDICT_STYLE.manual
+                    // Resubmission comparison
+                    const prev = grouped.previousByType[doc.doc_type]
+                    const prevResult = prev && results[prev.id]
+                    let compare = null
+                    if (prevResult?._text && result._text) {
+                      compare = compareOcr(prevResult._text, result._text)
+                    }
                     return (
                       <div key={doc.id} className="rounded-lg border border-border bg-surface p-3">
                         <div className="mb-1.5 flex items-center justify-between gap-2">
@@ -256,6 +311,16 @@ export default function VerificationCard({ subject, analysis, kind, onOpenDocs, 
                             {typeof result.score === 'number' && ` · ${result.score}`}
                           </span>
                         </div>
+
+                        {compare && (
+                          <p className={`mb-1.5 flex items-center gap-1.5 text-xs font-medium ${compare.changed ? 'text-success' : 'text-amber-600'}`}>
+                            <RotateCcw size={12} />
+                            {compare.changed
+                              ? t('admin.compliance.changedVsPrev', { pct: Math.round((1 - compare.similarity) * 100) })
+                              : t('admin.compliance.similarToPrev')}
+                          </p>
+                        )}
+
                         {result.verdict === 'pdf' ? (
                           <p className="text-xs text-muted">{t('admin.compliance.pdfNote')}</p>
                         ) : (
@@ -271,9 +336,21 @@ export default function VerificationCard({ subject, analysis, kind, onOpenDocs, 
                             })}
                           </ul>
                         )}
-                        <p className="mt-2 border-t border-border pt-1.5 text-[11px] italic text-muted">
-                          {t(`admin.compliance.reg.${result.regulationKey || doc.doc_type}`)}
-                        </p>
+                        <div className="mt-2 flex items-center justify-between gap-2 border-t border-border pt-1.5">
+                          <p className="text-[11px] italic text-muted">
+                            {t(`admin.compliance.reg.${result.regulationKey || doc.doc_type}`)}
+                          </p>
+                          {onRequestChanges && (
+                            <button
+                              type="button"
+                              onClick={() => handleRequestChanges(doc)}
+                              className="inline-flex shrink-0 items-center gap-1 rounded-md border border-border px-2 py-1 text-[11px] font-semibold text-muted hover:border-amber-500/40 hover:text-amber-600"
+                            >
+                              <MessageSquare size={11} />
+                              {t('admin.compliance.requestChanges')}
+                            </button>
+                          )}
+                        </div>
                       </div>
                     )
                   })}

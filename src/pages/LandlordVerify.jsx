@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Shield, Clock, XCircle, CheckCircle } from 'lucide-react'
+import { Shield, Clock, XCircle, CheckCircle, AlertCircle } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { useTranslation } from '../hooks/useTranslation'
+import { supabase } from '../lib/supabase'
 import { LANDLORD_DOC_TYPES, landlordDocsComplete } from '../lib/verification'
 import {
   fetchUserVerificationDocs,
@@ -39,6 +40,25 @@ export default function LandlordVerify() {
     loadDocs()
   }, [loadDocs])
 
+  // Realtime: admin feedback / status changes arrive live
+  useEffect(() => {
+    if (!user) return undefined
+    const channel = supabase
+      .channel(`landlord-verify-${user.id}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'verification_documents', filter: `user_id=eq.${user.id}` },
+        () => loadDocs({ silent: true })
+      )
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'profiles', filter: `id=eq.${user.id}` },
+        () => refreshProfile()
+      )
+      .subscribe()
+    return () => supabase.removeChannel(channel)
+  }, [user, loadDocs, refreshProfile])
+
   useEffect(() => {
     if (profile?.verification_status === 'approved') {
       navigate('/landlord', { replace: true })
@@ -53,6 +73,9 @@ export default function LandlordVerify() {
   const uploadedTypes = Object.keys(docsByType)
   const canSubmit = landlordDocsComplete(uploadedTypes)
   const status = profile?.verification_status || 'none'
+  const flaggedDocs = Object.values(docsByType).filter(
+    (d) => ['changes_requested', 'rejected'].includes(d.status) && d.admin_notes
+  )
 
   async function handleUpload(docType, file) {
     await uploadVerificationDoc({ userId: user.id, docType, file })
@@ -77,6 +100,7 @@ export default function LandlordVerify() {
     none: { variant: 'default', icon: Shield, label: t('verification.statusNone') },
     pending: { variant: 'warning', icon: Clock, label: t('verification.statusPending') },
     rejected: { variant: 'error', icon: XCircle, label: t('verification.statusRejected') },
+    changes_requested: { variant: 'warning', icon: AlertCircle, label: t('verification.statusChangesRequested') },
     approved: { variant: 'success', icon: CheckCircle, label: t('verification.statusApproved') },
   }
   const statusBadge = STATUS_MAP[status] || STATUS_MAP.none
@@ -106,6 +130,28 @@ export default function LandlordVerify() {
           </p>
         )}
       </div>
+
+      {status === 'changes_requested' && (
+        <div className="mb-6 rounded-xl border border-amber-500/40 bg-amber-500/5 p-4">
+          <p className="flex items-center gap-2 font-semibold text-amber-700">
+            <AlertCircle size={18} />
+            {t('verification.changesRequestedTitle')}
+          </p>
+          <p className="mt-1 text-sm text-amber-700/90">{t('verification.changesRequestedDesc')}</p>
+          {flaggedDocs.length > 0 && (
+            <ul className="mt-3 space-y-2">
+              {flaggedDocs.map((d) => (
+                <li key={d.id} className="rounded-lg bg-amber-500/10 px-3 py-2 text-sm">
+                  <span className="font-medium text-amber-800">
+                    {t(`admin.docType.${d.doc_type}`)}:
+                  </span>{' '}
+                  <span className="text-amber-700/90">{d.admin_notes}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
 
       <div className="mb-6 rounded-xl border border-border bg-surface p-4 text-sm text-muted">
         <p className="font-medium text-primary">{t('verification.whyTitle')}</p>
@@ -151,13 +197,12 @@ export default function LandlordVerify() {
                 onClick={handleSubmit}
                 disabled={!canSubmit || submitting}
               >
-                {submitting ? t('verification.submitting') : t('verification.submitForReview')}
+                {submitting
+                  ? t('verification.submitting')
+                  : status === 'changes_requested' || status === 'rejected'
+                    ? t('verification.resubmit')
+                    : t('verification.submitForReview')}
               </Button>
-              {status === 'rejected' && (
-                <Button variant="outline" onClick={handleSubmit} disabled={!canSubmit || submitting}>
-                  {t('verification.resubmit')}
-                </Button>
-              )}
             </div>
           )}
         </div>

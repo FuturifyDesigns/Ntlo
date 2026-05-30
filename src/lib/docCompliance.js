@@ -25,7 +25,7 @@ function findOmang(text) {
 function parseDates(text) {
   const dates = []
   // dd/mm/yyyy, dd-mm-yyyy, dd.mm.yyyy
-  const numeric = text.matchAll(/\b(\d{1,2})[/.\-](\d{1,2})[/.\-](\d{2,4})\b/g)
+  const numeric = text.matchAll(/\b(\d{1,2})[/.-](\d{1,2})[/.-](\d{2,4})\b/g)
   for (const m of numeric) {
     let [, d, mo, y] = m
     y = y.length === 2 ? `20${y}` : y
@@ -206,6 +206,25 @@ export function analyzeDocCompliance(docType, text, confidence) {
     default:
       return finalize(docType, [legibilityCheck(confidence)], {})
   }
+}
+
+/** Rough word-overlap similarity between two OCR texts (0–1). */
+export function compareOcr(prevText = '', newText = '') {
+  const tokenize = (s) =>
+    new Set(
+      norm(s)
+        .replace(/[^A-Z0-9 ]/g, ' ')
+        .split(' ')
+        .filter((w) => w.length >= 3)
+    )
+  const a = tokenize(prevText)
+  const b = tokenize(newText)
+  if (a.size === 0 && b.size === 0) return { similarity: 1, changed: false }
+  let inter = 0
+  for (const w of a) if (b.has(w)) inter += 1
+  const union = a.size + b.size - inter
+  const similarity = union === 0 ? 1 : inter / union
+  return { similarity, changed: similarity < 0.75 }
 }
 
 export const VERDICT_STYLE = {
