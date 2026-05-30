@@ -3,9 +3,11 @@ import { flushSync } from 'react-dom'
 import { useAuth } from './useAuth'
 import { useAuthPageSession } from './useAuthPage'
 import { useTranslation } from './useTranslation'
-import { clearOAuthStorage, isOAuthPendingStale } from '../lib/oauthStorage'
-
-export const GOOGLE_REDIRECT_KEY = 'ntlo_google_redirecting'
+import {
+  clearOAuthStorage,
+  GOOGLE_REDIRECT_KEY,
+  isOAuthPendingStale,
+} from '../lib/oauthStorage'
 
 async function waitForAuthReady(authReadyRef, maxMs = 8000) {
   const started = Date.now()
@@ -25,14 +27,22 @@ function paintBeforeRedirect() {
   })
 }
 
+/** True when user left mid-redirect (signed out, back button, etc.). */
+function hasStaleGoogleRedirectFlag() {
+  return (
+    sessionStorage.getItem(GOOGLE_REDIRECT_KEY) === '1'
+    && !sessionStorage.getItem('ntlo_oauth_pending')
+  )
+}
+
+export { GOOGLE_REDIRECT_KEY }
+
 export function useGoogleAuth({ role, onError } = {}) {
   const authReady = useAuthPageSession()
   const authReadyRef = useRef(authReady)
   const { signInWithGoogle } = useAuth()
   const { t } = useTranslation()
-  const [loading, setLoading] = useState(
-    () => sessionStorage.getItem(GOOGLE_REDIRECT_KEY) === '1'
-  )
+  const [loading, setLoading] = useState(false)
   const startedRedirectRef = useRef(false)
 
   useEffect(() => {
@@ -40,18 +50,18 @@ export function useGoogleAuth({ role, onError } = {}) {
   }, [authReady])
 
   const resetGoogleState = useCallback(() => {
-    sessionStorage.removeItem(GOOGLE_REDIRECT_KEY)
     clearOAuthStorage()
     setLoading(false)
     startedRedirectRef.current = false
   }, [])
 
+  // Clear leftover redirect overlay after sign-out or cancelled OAuth return.
   useEffect(() => {
-    if (startedRedirectRef.current) return
-
-    if (isOAuthPendingStale()) {
+    if (hasStaleGoogleRedirectFlag() || isOAuthPendingStale()) {
       resetGoogleState()
-      onError?.(t('auth.googleTimeout'))
+      if (isOAuthPendingStale()) {
+        onError?.(t('auth.googleTimeout'))
+      }
     }
   }, [resetGoogleState, onError, t])
 
@@ -68,10 +78,8 @@ export function useGoogleAuth({ role, onError } = {}) {
     if (!loading) return undefined
 
     const timeout = window.setTimeout(() => {
-      if (sessionStorage.getItem('ntlo_oauth_pending')) {
-        resetGoogleState()
-        onError?.(t('auth.googleTimeout'))
-      }
+      resetGoogleState()
+      onError?.(t('auth.googleTimeout'))
     }, 12_000)
 
     return () => clearTimeout(timeout)

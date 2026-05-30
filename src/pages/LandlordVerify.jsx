@@ -24,14 +24,14 @@ export default function LandlordVerify() {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
 
-  const loadDocs = useCallback(async () => {
+  const loadDocs = useCallback(async ({ silent = false } = {}) => {
     if (!user) return
-    setLoading(true)
+    if (!silent) setLoading(true)
     try {
       const data = await fetchUserVerificationDocs(user.id)
       setDocs(data)
     } finally {
-      setLoading(false)
+      if (!silent) setLoading(false)
     }
   }, [user])
 
@@ -56,7 +56,7 @@ export default function LandlordVerify() {
 
   async function handleUpload(docType, file) {
     await uploadVerificationDoc({ userId: user.id, docType, file })
-    await loadDocs()
+    await loadDocs({ silent: true })
   }
 
   async function handleSubmit() {

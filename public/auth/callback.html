@@ -50,6 +50,7 @@
       'ntlo_oauth_role',
       'ntlo_oauth_from',
       'ntlo_oauth_new_signup',
+      'ntlo_google_redirecting',
     ]
 
     function clearOAuthStorage() {
@@ -167,6 +168,7 @@
 
         sessionStorage.removeItem('ntlo_oauth_pending')
         sessionStorage.removeItem('ntlo_oauth_started_at')
+        sessionStorage.removeItem('ntlo_google_redirecting')
 
         const { data: profile } = await supabase
           .from('profiles')

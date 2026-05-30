@@ -3,7 +3,11 @@ const KEYS = [
   'ntlo_oauth_started_at',
   'ntlo_oauth_role',
   'ntlo_oauth_from',
+  'ntlo_oauth_new_signup',
+  'ntlo_google_redirecting',
 ]
+
+export const GOOGLE_REDIRECT_KEY = 'ntlo_google_redirecting'
 
 export function clearOAuthStorage() {
   KEYS.forEach((key) => sessionStorage.removeItem(key))
