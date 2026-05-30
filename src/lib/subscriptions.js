@@ -31,6 +31,41 @@ export const LANDLORD_TIERS = [
   },
 ]
 
+/** Per-tier card styling for pricing / billing UI */
+export const TIER_CARD_STYLES = {
+  basic: {
+    card: 'border-2 border-dashed border-success/35 bg-surface',
+    selected: 'border-success ring-2 ring-success/30 shadow-lg shadow-success/10',
+    hover: 'hover:border-success/55 hover:shadow-md',
+    check: 'text-success',
+    freePrice: 'text-success',
+    ctaSelected: 'bg-success text-white',
+    topBar: 'h-0.5 bg-success/40',
+  },
+  standard: {
+    card: 'border-2 border-accent bg-gradient-to-b from-accent/12 to-surface shadow-lg shadow-accent/10',
+    selected: 'border-accent ring-2 ring-accent/45 shadow-xl shadow-accent/20',
+    hover: 'hover:border-accent hover:shadow-xl',
+    check: 'text-accent',
+    freePrice: 'text-accent',
+    ctaSelected: 'bg-accent text-primary',
+    topBar: 'h-1 bg-gradient-to-r from-transparent via-accent to-transparent',
+  },
+  premium: {
+    card: 'border-2 border-primary/45 bg-gradient-to-b from-primary/[0.06] to-surface',
+    selected: 'border-primary ring-2 ring-primary/25 shadow-lg shadow-primary/10',
+    hover: 'hover:border-primary/65 hover:shadow-md',
+    check: 'text-primary',
+    freePrice: 'text-primary',
+    ctaSelected: 'bg-primary text-white',
+    topBar: 'h-0.5 bg-gradient-to-r from-primary/20 via-primary to-primary/20',
+  },
+}
+
+export function getTierCardStyle(id) {
+  return TIER_CARD_STYLES[id] || TIER_CARD_STYLES.basic
+}
+
 /** FNB bank details — update before enabling billing. */
 export const FNB_PAYMENT = {
   bank: 'First National Bank (FNB)',

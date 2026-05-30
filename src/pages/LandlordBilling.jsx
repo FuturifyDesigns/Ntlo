@@ -28,6 +28,7 @@ import {
   subscriptionStatusLabel,
   daysUntilRenewal,
   needsRenewalSoon,
+  getTierCardStyle,
 } from '../lib/subscriptions'
 import { fetchUserPaymentReceipts, uploadPaymentReceipt, getReceiptSignedUrl } from '../lib/paymentReceipts'
 
@@ -188,33 +189,48 @@ export default function LandlordBilling() {
       {/* Tier selection */}
       <section className="mb-8">
         <h2 className="mb-4 font-display text-xl font-semibold text-primary">{t('billing.choosePlan')}</h2>
-        <div className="grid gap-3 sm:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 sm:gap-3 lg:grid-cols-3">
           {LANDLORD_TIERS.map((tier) => {
             const isSelected = selectedTier === tier.id
+            const style = getTierCardStyle(tier.id)
             return (
-              <button
+              <div
                 key={tier.id}
-                type="button"
-                disabled={!BILLING_LIVE}
-                onClick={() => setSelectedTier(tier.id)}
-                className={`rounded-xl border p-4 text-left transition-all ${
-                  isSelected
-                    ? 'border-accent bg-accent/5 ring-2 ring-accent/30'
-                    : 'border-border bg-surface hover:border-accent/30'
-                } ${!BILLING_LIVE ? 'cursor-default opacity-90' : ''}`}
+                className={tier.featured ? 'relative pt-4 sm:pt-5' : 'relative pt-1'}
               >
-                <p className="font-display font-semibold text-primary">{t(tierNameKey(tier.id))}</p>
-                <p className="mt-1 font-display text-2xl font-bold text-primary">
-                  {tier.price ? `P${tier.price}` : t('pricing.free')}
-                  {tier.price > 0 && <span className="text-sm font-normal text-muted">{t('pricing.perMonth')}</span>}
-                </p>
-                {isSelected && (
-                  <span className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-accent">
-                    <Check size={12} />
-                    {t('billing.selected')}
+                {tier.featured && (
+                  <span className="absolute left-1/2 top-0 z-10 -translate-x-1/2 whitespace-nowrap rounded-full bg-accent px-3 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary shadow-md ring-2 ring-surface sm:text-xs">
+                    {t('pricing.popular')}
                   </span>
                 )}
-              </button>
+                <button
+                  type="button"
+                  disabled={!BILLING_LIVE}
+                  onClick={() => setSelectedTier(tier.id)}
+                  className={`relative w-full rounded-xl p-4 text-left transition-all sm:p-5 ${
+                    style.card
+                  } ${isSelected ? style.selected : style.hover} ${
+                    !BILLING_LIVE ? 'cursor-default opacity-90' : ''
+                  }`}
+                >
+                  <span className={`absolute inset-x-0 top-0 rounded-t-xl ${style.topBar}`} aria-hidden />
+                  <p className={`font-display font-semibold text-primary ${tier.featured ? 'mt-1' : ''}`}>
+                    {t(tierNameKey(tier.id))}
+                  </p>
+                  <p className={`mt-1 font-display text-2xl font-bold ${tier.price ? 'text-primary' : style.freePrice}`}>
+                    {tier.price ? `P${tier.price}` : t('pricing.free')}
+                    {tier.price > 0 && (
+                      <span className="text-sm font-normal text-muted">{t('pricing.perMonth')}</span>
+                    )}
+                  </p>
+                  {isSelected && (
+                    <span className={`mt-2 inline-flex items-center gap-1 text-xs font-semibold ${style.check}`}>
+                      <Check size={12} />
+                      {t('billing.selected')}
+                    </span>
+                  )}
+                </button>
+              </div>
             )
           })}
         </div>

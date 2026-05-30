@@ -20,7 +20,7 @@ import {
 import Button from '../components/ui/Button'
 import { Reveal } from '../components/ui/Motion'
 import { useTranslation } from '../hooks/useTranslation'
-import { LANDLORD_TIERS, FNB_PAYMENT, tierNameKey, BILLING_LIVE } from '../lib/subscriptions'
+import { LANDLORD_TIERS, FNB_PAYMENT, tierNameKey, BILLING_LIVE, getTierCardStyle } from '../lib/subscriptions'
 
 const STUDENT_PERKS = ['studentPerk1', 'studentPerk2', 'studentPerk3']
 
@@ -183,85 +183,91 @@ export default function Pricing() {
                   </p>
                 </Reveal>
 
-                <div className="grid gap-6 lg:grid-cols-3">
+                <div className="mx-auto grid max-w-lg gap-8 sm:max-w-none sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-6">
                   {LANDLORD_TIERS.map((tier, i) => {
                     const isSelected = selectedTier === tier.id
                     const isHovered = hoveredTier === tier.id
                     const isFree = !tier.price
+                    const style = getTierCardStyle(tier.id)
 
                     return (
-                      <motion.button
+                      <div
                         key={tier.id}
-                        type="button"
-                        initial={{ opacity: 0, y: 24 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: i * 0.08 }}
-                        whileHover={{ y: -6 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => setSelectedTier(tier.id)}
-                        onMouseEnter={() => setHoveredTier(tier.id)}
-                        onMouseLeave={() => setHoveredTier(null)}
-                        className={`relative flex h-full w-full flex-col overflow-hidden rounded-2xl border p-6 text-left transition-shadow sm:p-8 ${
-                          tier.featured
-                            ? 'border-accent/60 bg-gradient-to-b from-accent/10 to-surface shadow-xl shadow-accent/10'
-                            : isSelected
-                              ? 'border-accent bg-surface shadow-xl shadow-accent/15 ring-2 ring-accent/40'
-                              : 'border-border bg-surface hover:border-accent/30 hover:shadow-lg'
-                        }`}
+                        className={`relative ${tier.featured ? 'pt-4 sm:pt-5 lg:scale-[1.02] lg:transform' : 'pt-1'}`}
                       >
                         {tier.featured && (
-                          <span className="absolute -top-px left-0 right-0 h-1 bg-gradient-to-r from-transparent via-accent to-transparent" />
-                        )}
-                        {tier.featured && (
-                          <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-accent px-4 py-1 text-xs font-bold uppercase tracking-wide text-primary shadow-md">
+                          <span className="absolute left-1/2 top-0 z-20 -translate-x-1/2 whitespace-nowrap rounded-full bg-accent px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-primary shadow-md ring-2 ring-surface sm:px-4 sm:text-xs">
                             {t('pricing.popular')}
                           </span>
                         )}
 
-                        <div className="mb-6">
-                          <h3 className="font-display text-xl font-semibold text-primary">
-                            {t(tierNameKey(tier.id))}
-                          </h3>
-                          <div className="mt-3 flex items-baseline gap-1">
-                            {isFree ? (
-                              <span className="font-display text-4xl font-bold text-accent">{t('pricing.free')}</span>
-                            ) : (
-                              <>
-                                <motion.span
-                                  key={`${tier.id}-${isHovered}`}
-                                  className="font-display text-4xl font-bold text-primary"
-                                  initial={{ scale: 0.9, opacity: 0.5 }}
-                                  animate={{ scale: 1, opacity: 1 }}
-                                >
-                                  P{tier.price}
-                                </motion.span>
-                                <span className="text-muted">{t('pricing.perMonth')}</span>
-                              </>
+                        <motion.button
+                          type="button"
+                          initial={{ opacity: 0, y: 24 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: i * 0.08 }}
+                          whileHover={{ y: tier.featured ? -4 : -6 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={() => setSelectedTier(tier.id)}
+                          onMouseEnter={() => setHoveredTier(tier.id)}
+                          onMouseLeave={() => setHoveredTier(null)}
+                          className={`relative flex h-full w-full flex-col rounded-2xl p-5 text-left transition-shadow sm:p-6 lg:p-8 ${
+                            style.card
+                          } ${isSelected ? style.selected : style.hover}`}
+                        >
+                          <span className={`absolute inset-x-0 top-0 rounded-t-2xl ${style.topBar}`} aria-hidden />
+
+                          <div className={`mb-5 sm:mb-6 ${tier.featured ? 'mt-2' : 'mt-1'}`}>
+                            <h3 className="font-display text-lg font-semibold text-primary sm:text-xl">
+                              {t(tierNameKey(tier.id))}
+                            </h3>
+                            <div className="mt-2 flex flex-wrap items-baseline gap-x-1 gap-y-0 sm:mt-3">
+                              {isFree ? (
+                                <span className={`font-display text-3xl font-bold sm:text-4xl ${style.freePrice}`}>
+                                  {t('pricing.free')}
+                                </span>
+                              ) : (
+                                <>
+                                  <motion.span
+                                    key={`${tier.id}-${isHovered}`}
+                                    className="font-display text-3xl font-bold text-primary sm:text-4xl"
+                                    initial={{ scale: 0.9, opacity: 0.5 }}
+                                    animate={{ scale: 1, opacity: 1 }}
+                                  >
+                                    P{tier.price}
+                                  </motion.span>
+                                  <span className="text-sm text-muted sm:text-base">{t('pricing.perMonth')}</span>
+                                </>
+                              )}
+                            </div>
+                            {!BILLING_LIVE && (
+                              <p className="mt-2 text-xs font-medium text-muted sm:text-accent/90">
+                                {t('pricing.earlyAccessFreeNow')}
+                              </p>
                             )}
                           </div>
-                          {!BILLING_LIVE && (
-                            <p className="mt-2 text-xs font-medium text-accent">{t('pricing.earlyAccessFreeNow')}</p>
-                          )}
-                        </div>
 
-                        <ul className="mb-8 flex-1 space-y-3">
-                          {tier.features.map((key) => (
-                            <li key={key} className="flex items-start gap-2.5 text-sm text-primary">
-                              <Check size={18} className="mt-0.5 shrink-0 text-accent" />
-                              {t(`pricing.${key}`)}
-                            </li>
-                          ))}
-                        </ul>
+                          <ul className="mb-6 flex-1 space-y-2.5 sm:mb-8 sm:space-y-3">
+                            {tier.features.map((key) => (
+                              <li key={key} className="flex items-start gap-2 text-sm text-primary">
+                                <Check size={16} className={`mt-0.5 shrink-0 sm:h-[18px] sm:w-[18px] ${style.check}`} />
+                                {t(`pricing.${key}`)}
+                              </li>
+                            ))}
+                          </ul>
 
-                        <span
-                          className={`inline-flex w-full items-center justify-center gap-2 rounded-lg py-2.5 text-sm font-semibold ${
-                            isSelected ? 'bg-accent text-primary' : 'border border-border bg-background text-muted'
-                          }`}
-                        >
-                          {BILLING_LIVE ? t('pricing.selectThisPlan') : t('pricing.comingSoon')}
-                          {isSelected && <ChevronRight size={16} />}
-                        </span>
-                      </motion.button>
+                          <span
+                            className={`inline-flex w-full items-center justify-center gap-2 rounded-lg py-2.5 text-sm font-semibold ${
+                              isSelected
+                                ? style.ctaSelected
+                                : 'border border-border bg-background text-muted'
+                            }`}
+                          >
+                            {BILLING_LIVE ? t('pricing.selectThisPlan') : t('pricing.comingSoon')}
+                            {isSelected && <ChevronRight size={16} />}
+                          </span>
+                        </motion.button>
+                      </div>
                     )
                   })}
                 </div>
@@ -346,23 +352,20 @@ export default function Pricing() {
                         {t('pricing.bankDetailsPreview')}
                       </p>
                       <p className="mt-1 text-sm text-muted">{t('pricing.bankDetailsNote')}</p>
-                      <dl className="mt-4 space-y-2 text-sm">
-                        <div className="flex gap-2">
-                          <dt className="w-28 shrink-0 text-muted">{t('billing.bank')}</dt>
-                          <dd className="font-medium text-primary">{FNB_PAYMENT.bank}</dd>
-                        </div>
-                        <div className="flex gap-2">
-                          <dt className="w-28 shrink-0 text-muted">{t('billing.accountName')}</dt>
-                          <dd className="font-medium text-primary">{FNB_PAYMENT.accountName}</dd>
-                        </div>
-                        <div className="flex gap-2">
-                          <dt className="w-28 shrink-0 text-muted">{t('billing.accountNumber')}</dt>
-                          <dd className="font-mono font-medium text-primary">{FNB_PAYMENT.accountNumber}</dd>
-                        </div>
-                        <div className="flex gap-2">
-                          <dt className="w-28 shrink-0 text-muted">{t('billing.reference')}</dt>
-                          <dd className="text-primary">{FNB_PAYMENT.referenceHint}</dd>
-                        </div>
+                      <dl className="mt-4 space-y-3 text-sm sm:space-y-2">
+                        {[
+                          [t('billing.bank'), FNB_PAYMENT.bank],
+                          [t('billing.accountName'), FNB_PAYMENT.accountName],
+                          [t('billing.accountNumber'), FNB_PAYMENT.accountNumber],
+                          [t('billing.reference'), FNB_PAYMENT.referenceHint],
+                        ].map(([label, value]) => (
+                          <div key={label} className="flex flex-col gap-0.5 sm:flex-row sm:gap-2">
+                            <dt className="shrink-0 text-xs font-medium uppercase tracking-wide text-muted sm:w-28 sm:text-sm sm:normal-case sm:tracking-normal">
+                              {label}
+                            </dt>
+                            <dd className="break-words font-medium text-primary sm:font-normal">{value}</dd>
+                          </div>
+                        ))}
                       </dl>
                     </div>
                     <span className="inline-flex shrink-0 items-center gap-2 self-start rounded-full border border-accent/30 bg-surface px-3 py-1.5 text-xs font-semibold text-accent">
@@ -373,14 +376,16 @@ export default function Pricing() {
                 </div>
 
                 <p className="mt-8 text-center text-sm text-muted">
-                  {t('pricing.freeForNow')}{' '}
+                  <span className="block sm:inline">{t('pricing.freeForNow')}{' '}</span>
                   <Link to="/register?role=landlord" className="font-semibold text-accent hover:underline">
                     {t('pricing.listFreeNow')}
                   </Link>
-                  {' · '}
-                  <Link to="/landlord/billing" className="font-semibold text-accent hover:underline">
-                    {t('pricing.viewBilling')}
-                  </Link>
+                  <span className="mx-1 hidden sm:inline">·</span>
+                  <span className="block sm:inline">
+                    <Link to="/landlord/billing" className="font-semibold text-accent hover:underline">
+                      {t('pricing.viewBilling')}
+                    </Link>
+                  </span>
                 </p>
               </div>
             </section>
