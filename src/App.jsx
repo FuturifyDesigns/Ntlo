@@ -24,7 +24,8 @@ import StudentDashboard from './pages/StudentDashboard'
 import LandlordDashboard from './pages/LandlordDashboard'
 import CreateListing from './pages/CreateListing'
 import EditListing from './pages/EditListing'
-import NotFound from './pages/NotFound'
+import AdminDashboard from './pages/AdminDashboard'
+import LandlordVerify from './pages/LandlordVerify'
 import Pricing from './pages/Pricing'
 import GrainOverlay from './components/ui/Motion'
 import CookieConsentBanner from './components/layout/CookieConsentBanner'
@@ -40,7 +41,7 @@ function AppRoutes() {
   const location = useLocation()
   const { prefs } = useLocale()
   const isAuthRoute = ['/login', '/register', '/forgot-password', '/complete-profile', '/check-email'].includes(location.pathname)
-  const isDashboardRoute = location.pathname === '/student' || location.pathname === '/landlord' || location.pathname.startsWith('/landlord/')
+  const isDashboardRoute = location.pathname === '/student' || location.pathname === '/landlord' || location.pathname.startsWith('/landlord/') || location.pathname === '/admin'
   const transition = isAuthRoute || isDashboardRoute
     ? { duration: prefs.reduceMotion ? 0 : 0.15, ease: 'easeOut' }
     : { duration: prefs.reduceMotion ? 0 : 0.25 }
@@ -67,9 +68,11 @@ function AppRoutes() {
           <Route path="/complete-profile" element={<OAuthSetupRoute><CompleteProfile /></OAuthSetupRoute>} />
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/student" element={<ProtectedRoute role="student"><StudentDashboard /></ProtectedRoute>} />
-          <Route path="/landlord" element={<ProtectedRoute role="landlord"><LandlordDashboard /></ProtectedRoute>} />
-          <Route path="/landlord/listings/new" element={<ProtectedRoute role="landlord"><CreateListing /></ProtectedRoute>} />
-          <Route path="/landlord/listings/:id/edit" element={<ProtectedRoute role="landlord"><EditListing /></ProtectedRoute>} />
+          <Route path="/admin" element={<ProtectedRoute role="admin"><AdminDashboard /></ProtectedRoute>} />
+          <Route path="/landlord/verify" element={<ProtectedRoute role="landlord"><LandlordVerify /></ProtectedRoute>} />
+          <Route path="/landlord" element={<ProtectedRoute role="landlord" requireLandlordVerified><LandlordDashboard /></ProtectedRoute>} />
+          <Route path="/landlord/listings/new" element={<ProtectedRoute role="landlord" requireLandlordVerified><CreateListing /></ProtectedRoute>} />
+          <Route path="/landlord/listings/:id/edit" element={<ProtectedRoute role="landlord" requireLandlordVerified><EditListing /></ProtectedRoute>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </motion.div>

@@ -78,3 +78,25 @@ Maps appear on browse (map view), listing detail, landlord dashboard, and the cr
 In repo **Settings** → **Pages** → Source: **GitHub Actions**
 
 Push to `main` and the site deploys to https://futurifydesigns.github.io/Ntlo/
+
+## 8. Admin panel & landlord verification
+
+Run `supabase/migrations/002_admin_verification.sql` in the **SQL Editor** after the base schema.
+
+This adds:
+
+- `admin` role on profiles
+- Ban / delete user RPCs
+- Landlord document verification (`verification_documents` table)
+- Private `verification-docs` storage bucket
+- Realtime on requests, profiles, listings, and documents
+
+**Create your first admin** (replace with your user UUID from Authentication → Users):
+
+```sql
+update public.profiles set role = 'admin' where id = 'YOUR-USER-UUID';
+```
+
+**Enable Realtime** in Supabase Dashboard → Database → Replication if tables are not already in the publication.
+
+Landlords must upload ID + selfie + proof of ownership/authority at `/landlord/verify` before listing rooms. Admins review at `/admin`.

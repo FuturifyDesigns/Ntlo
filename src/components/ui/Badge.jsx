@@ -5,6 +5,7 @@ const variants = {
   accent: 'bg-accent/15 text-accent border border-accent/30',
   success: 'bg-success/10 text-success border border-success/20',
   error: 'bg-error/10 text-error border border-error/20',
+  warning: 'bg-amber-500/10 text-amber-700 border border-amber-500/20 dark:text-amber-400',
   dark: 'bg-primary/80 text-white',
 }
 

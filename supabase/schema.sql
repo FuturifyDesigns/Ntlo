@@ -168,3 +168,7 @@ create policy "Anyone can submit university requests" on public.university_reque
 
 create policy "Users can view own requests" on public.university_requests
   for select using (auth.uid() = requested_by or requested_by is null);
+
+-- After initial setup, run supabase/migrations/002_admin_verification.sql
+-- for admin panel, landlord verification, and private document storage.
+

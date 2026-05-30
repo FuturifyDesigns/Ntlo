@@ -11,7 +11,7 @@ import Input from '../components/ui/Input'
 import PasswordInput from '../components/ui/PasswordInput'
 import GoogleAuthButton from '../components/auth/GoogleAuthButton'
 import AuthTransitionOverlay from '../components/auth/AuthTransitionOverlay'
-import { UniversitySelect } from '../components/universities/OtherUniversityModal'
+import { getPostAuthPath } from '../lib/verification'
 
 export default function Register() {
   const [searchParams] = useSearchParams()
@@ -133,7 +133,7 @@ export default function Register() {
         return
       }
 
-      navigate(form.role === 'landlord' ? '/landlord' : '/student')
+      navigate(getPostAuthPath({ role: form.role, verification_status: form.role === 'landlord' ? 'none' : 'approved' }))
     } catch (err) {
       setError(mapAuthError(err.message, validationMessages))
     } finally {

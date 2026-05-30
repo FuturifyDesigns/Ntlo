@@ -1,6 +1,7 @@
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
 import { profileNeedsSetup } from '../../lib/oauthStorage'
+import { getPostAuthPath } from '../../lib/verification'
 import { Skeleton } from '../ui/Skeleton'
 
 export default function OAuthSetupRoute({ children }) {
@@ -20,8 +21,7 @@ export default function OAuthSetupRoute({ children }) {
   }
 
   if (!profileNeedsSetup(profile)) {
-    const destination = profile?.role === 'landlord' ? '/landlord' : '/student'
-    return <Navigate to={destination} replace />
+    return <Navigate to={getPostAuthPath(profile)} replace />
   }
 
   return children

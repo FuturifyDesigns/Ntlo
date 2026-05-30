@@ -9,7 +9,7 @@ import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
 import AuthTransitionOverlay from '../components/auth/AuthTransitionOverlay'
 import { UniversitySelect } from '../components/universities/OtherUniversityModal'
-import { consumeOAuthNewSignup } from '../lib/oauthStorage'
+import { getPostAuthPath } from '../lib/verification'
 
 export default function CompleteProfile() {
   const [searchParams] = useSearchParams()
@@ -97,7 +97,10 @@ export default function CompleteProfile() {
         return
       }
 
-      const destination = role === 'landlord' ? '/landlord' : '/student'
+      const destination = getPostAuthPath({
+        role,
+        verification_status: role === 'landlord' ? 'none' : 'approved',
+      })
       window.setTimeout(() => {
         navigate(destination, { replace: true })
       }, 350)

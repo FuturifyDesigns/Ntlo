@@ -16,7 +16,7 @@ export function AuthProvider({ children }) {
     try {
       const { data } = await supabase
         .from('profiles')
-        .select('id, full_name, phone, role, university_id, avatar_url, is_verified')
+        .select('id, full_name, phone, role, university_id, avatar_url, is_verified, verification_status, verification_notes, is_banned, banned_reason')
         .eq('id', userId)
         .maybeSingle()
       setProfile(data)
@@ -79,7 +79,16 @@ export function AuthProvider({ children }) {
 
     if (data?.user) {
       setUser(data.user)
-      await fetchProfile(data.user.id)
+      const prof = await fetchProfile(data.user.id)
+      if (prof?.is_banned) {
+        await supabase.auth.signOut()
+        setUser(null)
+        setProfile(null)
+        const err = new Error('Account suspended')
+        err.code = 'account_banned'
+        throw err
+      }
+      return { ...data, profile: prof }
     }
 
     return data
@@ -162,6 +171,8 @@ export function AuthProvider({ children }) {
       refreshProfile: () => user && fetchProfile(user.id),
       isStudent: profile?.role === 'student',
       isLandlord: profile?.role === 'landlord',
+      isAdmin: profile?.role === 'admin',
+      isBanned: profile?.is_banned === true,
     }),
     [user, profile, loading, profileLoading, signOut]
   )

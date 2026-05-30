@@ -1,0 +1,171 @@
+import { useState, useEffect, useCallback } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { motion } from 'framer-motion'
+import { Shield, Clock, XCircle, CheckCircle } from 'lucide-react'
+import { useAuth } from '../hooks/useAuth'
+import { useTranslation } from '../hooks/useTranslation'
+import { LANDLORD_DOC_TYPES, landlordDocsComplete } from '../lib/verification'
+import {
+  fetchUserVerificationDocs,
+  submitLandlordVerification,
+  uploadVerificationDoc,
+} from '../lib/verificationStorage'
+import DocumentUpload from '../components/verification/DocumentUpload'
+import Button from '../components/ui/Button'
+import Badge from '../components/ui/Badge'
+import { Skeleton } from '../components/ui/Skeleton'
+
+export default function LandlordVerify() {
+  const { user, profile, refreshProfile } = useAuth()
+  const { t } = useTranslation()
+  const navigate = useNavigate()
+  const [docs, setDocs] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState('')
+
+  const loadDocs = useCallback(async () => {
+    if (!user) return
+    setLoading(true)
+    try {
+      const data = await fetchUserVerificationDocs(user.id)
+      setDocs(data)
+    } finally {
+      setLoading(false)
+    }
+  }, [user])
+
+  useEffect(() => {
+    loadDocs()
+  }, [loadDocs])
+
+  useEffect(() => {
+    if (profile?.verification_status === 'approved') {
+      navigate('/landlord', { replace: true })
+    }
+  }, [profile?.verification_status, navigate])
+
+  const docsByType = docs.reduce((acc, doc) => {
+    if (!acc[doc.doc_type]) acc[doc.doc_type] = doc
+    return acc
+  }, {})
+
+  const uploadedTypes = Object.keys(docsByType)
+  const canSubmit = landlordDocsComplete(uploadedTypes)
+  const status = profile?.verification_status || 'none'
+
+  async function handleUpload(docType, file) {
+    await uploadVerificationDoc({ userId: user.id, docType, file })
+    await loadDocs()
+  }
+
+  async function handleSubmit() {
+    if (!canSubmit) return
+    setError('')
+    setSubmitting(true)
+    try {
+      await submitLandlordVerification(user.id)
+      await refreshProfile()
+    } catch (err) {
+      setError(err.message || t('verification.submitFailed'))
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  const STATUS_MAP = {
+    none: { variant: 'default', icon: Shield, label: t('verification.statusNone') },
+    pending: { variant: 'warning', icon: Clock, label: t('verification.statusPending') },
+    rejected: { variant: 'error', icon: XCircle, label: t('verification.statusRejected') },
+    approved: { variant: 'success', icon: CheckCircle, label: t('verification.statusApproved') },
+  }
+  const statusBadge = STATUS_MAP[status] || STATUS_MAP.none
+  const StatusIcon = statusBadge.icon
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="mx-auto max-w-2xl px-4 py-8 sm:px-6 lg:px-8"
+    >
+      <div className="mb-8 text-center">
+        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-accent/10">
+          <Shield size={28} className="text-accent" />
+        </div>
+        <h1 className="font-display text-3xl font-bold text-primary">{t('verification.landlordTitle')}</h1>
+        <p className="mt-2 text-muted">{t('verification.landlordSubtitle')}</p>
+        <div className="mt-4 flex justify-center">
+          <Badge variant={statusBadge.variant}>
+            <StatusIcon size={14} />
+            {statusBadge.label}
+          </Badge>
+        </div>
+        {profile?.verification_notes && status === 'rejected' && (
+          <p className="mt-3 rounded-lg border border-error/30 bg-error/5 px-4 py-2 text-sm text-error">
+            {profile.verification_notes}
+          </p>
+        )}
+      </div>
+
+      <div className="mb-6 rounded-xl border border-border bg-surface p-4 text-sm text-muted">
+        <p className="font-medium text-primary">{t('verification.whyTitle')}</p>
+        <ul className="mt-2 list-inside list-disc space-y-1">
+          <li>{t('verification.why1')}</li>
+          <li>{t('verification.why2')}</li>
+          <li>{t('verification.why3')}</li>
+        </ul>
+      </div>
+
+      {loading ? (
+        <div className="space-y-4">
+          {[1, 2, 3].map((i) => <Skeleton key={i} className="h-24 w-full" />)}
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {LANDLORD_DOC_TYPES.map((doc) => (
+            <DocumentUpload
+              key={doc.id}
+              docType={doc.id}
+              label={`${t(doc.labelKey)}${doc.required ? ' *' : ''}`}
+              description={t(doc.descKey)}
+              accept={doc.accept}
+              uploaded={docsByType[doc.id]}
+              onUpload={handleUpload}
+              disabled={status === 'pending'}
+            />
+          ))}
+
+          <p className="text-xs text-muted">{t('verification.propertyProofNote')}</p>
+
+          {error && <p className="text-sm text-error">{error}</p>}
+
+          {status === 'pending' ? (
+            <div className="rounded-xl border border-warning/30 bg-warning/5 p-4 text-center">
+              <Clock size={24} className="mx-auto text-warning" />
+              <p className="mt-2 font-medium text-primary">{t('verification.reviewPending')}</p>
+              <p className="mt-1 text-sm text-muted">{t('verification.reviewPendingDesc')}</p>
+            </div>
+          ) : (
+            <div className="flex flex-wrap gap-3 pt-2">
+              <Button
+                onClick={handleSubmit}
+                disabled={!canSubmit || submitting}
+              >
+                {submitting ? t('verification.submitting') : t('verification.submitForReview')}
+              </Button>
+              {status === 'rejected' && (
+                <Button variant="outline" onClick={handleSubmit} disabled={!canSubmit || submitting}>
+                  {t('verification.resubmit')}
+                </Button>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
+      <p className="mt-8 text-center text-sm text-muted">
+        <Link to="/" className="text-accent hover:underline">{t('verification.backToHome')}</Link>
+      </p>
+    </motion.div>
+  )
+}

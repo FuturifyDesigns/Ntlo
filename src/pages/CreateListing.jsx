@@ -12,7 +12,12 @@ import Input, { Select, Textarea } from '../components/ui/Input'
 import { UniversitySelect } from '../components/universities/OtherUniversityModal'
 import { LocationPicker } from '../components/maps/ListingMap'
 
-const STEPS = ['Basics', 'Location', 'Photos', 'Amenities', 'Contact', 'Review']
+import { LISTING_DOC_TYPES } from '../lib/verification'
+import { uploadVerificationDoc } from '../lib/verificationStorage'
+import DocumentUpload from '../components/verification/DocumentUpload'
+import { useTranslation } from '../hooks/useTranslation'
+
+const STEPS = ['Basics', 'Location', 'Photos', 'Amenities', 'Contact', 'Documents', 'Review']
 
 const initialForm = {
   title: '',
@@ -33,10 +38,12 @@ const initialForm = {
 
 export default function CreateListing() {
   const { user } = useAuth()
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [step, setStep] = useState(0)
   const [form, setForm] = useState(initialForm)
   const [photos, setPhotos] = useState([])
+  const [listingDocs, setListingDocs] = useState({})
   const [coverIndex, setCoverIndex] = useState(0)
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -137,6 +144,12 @@ export default function CreateListing() {
 
       if (photos.length) await uploadPhotos(data.id)
 
+      for (const [docType, file] of Object.entries(listingDocs)) {
+        if (file) {
+          await uploadVerificationDoc({ userId: user.id, listingId: data.id, docType, file })
+        }
+      }
+
       navigate('/landlord')
     } catch (err) {
       setError(err.message)
@@ -152,6 +165,10 @@ export default function CreateListing() {
 
   function prevStep() {
     if (step > 0) setStep(step - 1)
+  }
+
+  function handleListingDoc(docType, file) {
+    setListingDocs((prev) => ({ ...prev, [docType]: file }))
   }
 
   const uni = form.nearest_university_id === 'other'
@@ -271,6 +288,23 @@ export default function CreateListing() {
             )}
 
             {step === 5 && (
+              <div className="space-y-4">
+                <p className="text-sm text-muted">{t('verification.listingDocsIntro')}</p>
+                {LISTING_DOC_TYPES.map((doc) => (
+                  <DocumentUpload
+                    key={doc.id}
+                    docType={doc.id}
+                    label={t(doc.labelKey)}
+                    description={t(doc.descKey)}
+                    accept={doc.accept}
+                    uploaded={listingDocs[doc.id] ? { file_name: listingDocs[doc.id].name } : null}
+                    onUpload={async (type, file) => handleListingDoc(type, file)}
+                  />
+                ))}
+              </div>
+            )}
+
+            {step === 6 && (
               <div className="space-y-3 text-sm">
                 <p><strong>Title:</strong> {form.title}</p>
                 <p><strong>Price:</strong> {formatPrice(form.price)}/month</p>

@@ -3,7 +3,7 @@ import { useAuth } from './useAuth'
 import { useTranslation } from './useTranslation'
 
 export function useNavLinks() {
-  const { user, isLandlord } = useAuth()
+  const { user, isLandlord, isAdmin } = useAuth()
   const { t } = useTranslation()
 
   return useMemo(() => {
@@ -14,18 +14,22 @@ export function useNavLinks() {
       { to: '/pricing', label: t('nav.pricing') },
     ]
 
-    if (user && isLandlord) {
+    if (user && isAdmin) {
+      links.push({ to: '/admin', label: t('nav.admin') })
+    } else if (user && isLandlord) {
       links.push({ to: '/landlord', label: t('nav.myListings') })
     } else {
       links.push({ to: '/student', label: t('nav.saved') })
     }
 
     return links
-  }, [user, isLandlord, t])
+  }, [user, isLandlord, isAdmin, t])
 }
 
 export function useDashboardPath() {
-  const { user, isLandlord } = useAuth()
+  const { user, isLandlord, isAdmin, profile } = useAuth()
   if (!user) return '/login'
+  if (isAdmin) return '/admin'
+  if (isLandlord && profile?.verification_status !== 'approved') return '/landlord/verify'
   return isLandlord ? '/landlord' : '/student'
 }

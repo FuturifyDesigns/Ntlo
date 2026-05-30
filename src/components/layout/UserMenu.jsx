@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { ChevronDown, LogOut, Heart, Home } from 'lucide-react'
+import { ChevronDown, LogOut, Heart, Home, Shield } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 import { useTranslation } from '../../hooks/useTranslation'
+import { useDashboardPath } from '../../hooks/useNavLinks'
 import { cn } from '../../lib/utils'
 
 function getInitials(name, email) {
@@ -19,13 +20,13 @@ function getInitials(name, email) {
 }
 
 export default function UserMenu({ onNavigate, className }) {
-  const { user, profile, signOut, isLandlord } = useAuth()
+  const { user, profile, signOut, isLandlord, isAdmin } = useAuth()
   const { t } = useTranslation()
   const navigate = useNavigate()
   const [open, setOpen] = useState(false)
   const rootRef = useRef(null)
 
-  const dashboardPath = isLandlord ? '/landlord' : '/student'
+  const dashboardPath = useDashboardPath()
   const firstName = profile?.full_name?.split(' ')[0] || t('nav.account')
   const initials = getInitials(profile?.full_name, user?.email)
 
@@ -89,7 +90,7 @@ export default function UserMenu({ onNavigate, className }) {
             <p className="truncate text-sm font-semibold text-primary">{profile?.full_name || firstName}</p>
             <p className="truncate text-xs text-muted">{user.email}</p>
             <p className="mt-1 text-[10px] font-semibold uppercase tracking-wider text-accent">
-              {isLandlord ? t('nav.roleLandlord') : t('nav.roleStudent')}
+              {isAdmin ? t('nav.roleAdmin') : isLandlord ? t('nav.roleLandlord') : t('nav.roleStudent')}
             </p>
           </div>
 
@@ -99,8 +100,8 @@ export default function UserMenu({ onNavigate, className }) {
             onClick={closeAndNavigate}
             className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-primary hover:bg-background"
           >
-            {isLandlord ? <Home size={16} /> : <Heart size={16} />}
-            {isLandlord ? t('nav.myListings') : t('nav.saved')}
+            {isAdmin ? <Shield size={16} /> : isLandlord ? <Home size={16} /> : <Heart size={16} />}
+            {isAdmin ? t('nav.admin') : isLandlord ? t('nav.myListings') : t('nav.saved')}
           </Link>
 
           <button

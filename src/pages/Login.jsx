@@ -9,7 +9,7 @@ import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
 import PasswordInput from '../components/ui/PasswordInput'
 import GoogleAuthButton from '../components/auth/GoogleAuthButton'
-import AuthTransitionOverlay from '../components/auth/AuthTransitionOverlay'
+import { getPostAuthPath } from '../lib/verification'
 
 export default function Login() {
   const [email, setEmail] = useState('')
@@ -26,6 +26,7 @@ export default function Login() {
   const from = location.state?.from?.pathname || '/'
   const verified = searchParams.get('verified') === '1' || location.state?.verified
   const passwordReset = searchParams.get('reset') === '1'
+  const banned = searchParams.get('banned') === '1'
 
   const handleGoogleError = useCallback((message) => {
     setError(message)
@@ -61,20 +62,18 @@ export default function Login() {
     setLoading(true)
     try {
       const data = await signIn(email, password)
-      const role = data?.user?.user_metadata?.role
-      const destination =
-        from !== '/login' && from !== '/'
-          ? from
-          : role === 'landlord'
-            ? '/landlord'
-            : '/student'
+      const destination = getPostAuthPath(data?.profile, from)
 
       setTransitioning(true)
       window.setTimeout(() => {
         navigate(destination, { replace: true })
       }, 350)
     } catch (err) {
-      setError(mapAuthError(err.message, validationMessages))
+      if (err.code === 'account_banned') {
+        setError(t('auth.accountBanned'))
+      } else {
+        setError(mapAuthError(err.message, validationMessages))
+      }
       setLoading(false)
     }
   }
@@ -97,6 +96,12 @@ export default function Login() {
           <h1 className="font-display text-3xl font-semibold tracking-tight text-primary">{t('auth.welcomeBack')}</h1>
           <p className="mt-2 text-muted">{t('auth.signInSubtitle')}</p>
         </div>
+
+        {banned && (
+          <p className="mt-6 rounded-xl border border-error/30 bg-error/10 px-4 py-3 text-center text-sm text-error">
+            {t('auth.accountBanned')}
+          </p>
+        )}
 
         {verified && (
           <p className="mt-6 rounded-xl border border-success/30 bg-success/10 px-4 py-3 text-center text-sm text-success">
