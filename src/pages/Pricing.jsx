@@ -11,40 +11,25 @@ import {
   Shield,
   Zap,
   Heart,
+  Banknote,
+  Upload,
+  BadgeCheck,
+  Gift,
+  ArrowRight,
 } from 'lucide-react'
 import Button from '../components/ui/Button'
 import { Reveal } from '../components/ui/Motion'
 import { useTranslation } from '../hooks/useTranslation'
-
-const LANDLORD_TIERS = [
-  {
-    id: 'basic',
-    price: null,
-    featured: false,
-    features: ['tierBasicListings', 'tierBasicPhotos', 'tierBasicExtras'],
-    whyKey: 'whyBasic',
-  },
-  {
-    id: 'standard',
-    price: 79,
-    featured: true,
-    features: ['tierStandardListings', 'tierStandardPhotos', 'tierStandardExtras'],
-    whyKey: 'whyStandard',
-  },
-  {
-    id: 'premium',
-    price: 149,
-    featured: false,
-    features: ['tierPremiumListings', 'tierPremiumPhotos', 'tierPremiumExtras'],
-    whyKey: 'whyPremium',
-  },
-]
+import { LANDLORD_TIERS, FNB_PAYMENT, tierNameKey, BILLING_LIVE } from '../lib/subscriptions'
 
 const STUDENT_PERKS = ['studentPerk1', 'studentPerk2', 'studentPerk3']
 
-function tierNameKey(id) {
-  return `pricing.tier${id.charAt(0).toUpperCase() + id.slice(1)}Name`
-}
+const PAYMENT_STEPS = [
+  { icon: Building2, key: 'stepChoose' },
+  { icon: Banknote, key: 'stepPay' },
+  { icon: Upload, key: 'stepUpload' },
+  { icon: BadgeCheck, key: 'stepVerify' },
+]
 
 export default function Pricing() {
   const { t } = useTranslation()
@@ -67,7 +52,6 @@ export default function Pricing() {
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-lg text-white/65">{t('pricing.subtitle')}</p>
 
-          {/* Audience toggle */}
           <div className="mx-auto mt-6 flex w-full max-w-sm flex-col rounded-xl border border-white/15 bg-white/5 p-1 backdrop-blur-sm sm:mt-8 sm:inline-flex sm:w-auto sm:max-w-none sm:flex-row">
             {[
               { id: 'students', icon: GraduationCap, label: t('pricing.tabStudents') },
@@ -166,21 +150,34 @@ export default function Pricing() {
             exit={{ opacity: 0, y: -16 }}
             transition={{ duration: 0.35 }}
           >
+            {/* Early access callout */}
+            <section className="border-b border-accent/20 bg-gradient-to-r from-accent/15 via-accent/5 to-transparent py-6 sm:py-8">
+              <div className="mx-auto flex max-w-4xl flex-col items-center gap-4 px-4 text-center sm:flex-row sm:px-6 sm:text-left lg:px-8">
+                <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-accent/20 text-accent ring-1 ring-accent/30">
+                  <Gift size={28} />
+                </span>
+                <div className="flex-1">
+                  <p className="font-display text-xl font-bold text-primary">{t('pricing.earlyAccessTitle')}</p>
+                  <p className="mt-1 text-sm leading-relaxed text-muted">{t('pricing.earlyAccessBody')}</p>
+                </div>
+                <motion.div
+                  className="inline-flex items-center gap-2 rounded-full border border-accent/40 bg-surface px-4 py-2 text-sm font-semibold text-accent shadow-sm"
+                  animate={{ opacity: [1, 0.7, 1] }}
+                  transition={{ duration: 2.5, repeat: Infinity }}
+                >
+                  <Clock size={16} />
+                  {t('pricing.comingSoon')}
+                </motion.div>
+              </div>
+            </section>
+
             <section className="py-8 sm:py-12 lg:py-16">
               <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <Reveal className="mb-6 text-center sm:mb-8">
+                <Reveal className="mb-8 text-center sm:mb-10">
                   <h2 className="font-display text-3xl font-semibold text-primary sm:text-4xl">
                     {t('pricing.landlordsTitle')}
                   </h2>
-                  <motion.div
-                    className="mx-auto mt-4 inline-flex items-center gap-2 rounded-full border border-accent/40 bg-accent/10 px-4 py-2 text-sm font-medium text-primary"
-                    animate={{ opacity: [1, 0.75, 1] }}
-                    transition={{ duration: 2.5, repeat: Infinity }}
-                  >
-                    <Clock size={16} className="text-accent" />
-                    {t('pricing.comingSoon')}
-                  </motion.div>
-                  <p className="mx-auto mt-3 max-w-xl text-sm text-muted">{t('pricing.comingSoonNote')}</p>
+                  <p className="mx-auto mt-3 max-w-2xl text-muted">{t('pricing.comingSoonNote')}</p>
                   <p className="mt-4 text-xs font-medium uppercase tracking-wider text-accent">
                     {t('pricing.selectPlan')}
                   </p>
@@ -190,6 +187,7 @@ export default function Pricing() {
                   {LANDLORD_TIERS.map((tier, i) => {
                     const isSelected = selectedTier === tier.id
                     const isHovered = hoveredTier === tier.id
+                    const isFree = !tier.price
 
                     return (
                       <motion.button
@@ -203,26 +201,21 @@ export default function Pricing() {
                         onClick={() => setSelectedTier(tier.id)}
                         onMouseEnter={() => setHoveredTier(tier.id)}
                         onMouseLeave={() => setHoveredTier(null)}
-                        className={`relative flex h-full w-full flex-col rounded-2xl border p-6 text-left transition-shadow sm:p-8 ${
-                          isSelected
-                            ? 'border-accent bg-surface shadow-xl shadow-accent/15 ring-2 ring-accent/40'
-                            : tier.featured
-                              ? 'border-accent/50 bg-surface shadow-lg shadow-accent/5'
+                        className={`relative flex h-full w-full flex-col overflow-hidden rounded-2xl border p-6 text-left transition-shadow sm:p-8 ${
+                          tier.featured
+                            ? 'border-accent/60 bg-gradient-to-b from-accent/10 to-surface shadow-xl shadow-accent/10'
+                            : isSelected
+                              ? 'border-accent bg-surface shadow-xl shadow-accent/15 ring-2 ring-accent/40'
                               : 'border-border bg-surface hover:border-accent/30 hover:shadow-lg'
                         }`}
                       >
                         {tier.featured && (
-                          <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-accent px-4 py-1 text-xs font-bold uppercase tracking-wide text-primary">
+                          <span className="absolute -top-px left-0 right-0 h-1 bg-gradient-to-r from-transparent via-accent to-transparent" />
+                        )}
+                        {tier.featured && (
+                          <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-accent px-4 py-1 text-xs font-bold uppercase tracking-wide text-primary shadow-md">
                             {t('pricing.popular')}
                           </span>
-                        )}
-
-                        {isSelected && (
-                          <motion.span
-                            layoutId="tier-selected-ring"
-                            className="pointer-events-none absolute inset-0 rounded-2xl ring-2 ring-accent/60"
-                            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                          />
                         )}
 
                         <div className="mb-6">
@@ -230,7 +223,7 @@ export default function Pricing() {
                             {t(tierNameKey(tier.id))}
                           </h3>
                           <div className="mt-3 flex items-baseline gap-1">
-                            {tier.price === null ? (
+                            {isFree ? (
                               <span className="font-display text-4xl font-bold text-accent">{t('pricing.free')}</span>
                             ) : (
                               <>
@@ -246,20 +239,17 @@ export default function Pricing() {
                               </>
                             )}
                           </div>
+                          {!BILLING_LIVE && (
+                            <p className="mt-2 text-xs font-medium text-accent">{t('pricing.earlyAccessFreeNow')}</p>
+                          )}
                         </div>
 
                         <ul className="mb-8 flex-1 space-y-3">
-                          {tier.features.map((key, fi) => (
-                            <motion.li
-                              key={key}
-                              initial={false}
-                              animate={{ x: isSelected ? 4 : 0 }}
-                              transition={{ delay: fi * 0.04 }}
-                              className="flex items-start gap-2.5 text-sm text-primary"
-                            >
+                          {tier.features.map((key) => (
+                            <li key={key} className="flex items-start gap-2.5 text-sm text-primary">
                               <Check size={18} className="mt-0.5 shrink-0 text-accent" />
                               {t(`pricing.${key}`)}
-                            </motion.li>
+                            </li>
                           ))}
                         </ul>
 
@@ -268,7 +258,7 @@ export default function Pricing() {
                             isSelected ? 'bg-accent text-primary' : 'border border-border bg-background text-muted'
                           }`}
                         >
-                          {t('pricing.comingSoon')}
+                          {BILLING_LIVE ? t('pricing.selectThisPlan') : t('pricing.comingSoon')}
                           {isSelected && <ChevronRight size={16} />}
                         </span>
                       </motion.button>
@@ -276,7 +266,6 @@ export default function Pricing() {
                   })}
                 </div>
 
-                {/* Selected plan detail panel */}
                 <AnimatePresence mode="wait">
                   {activeTier && (
                     <motion.div
@@ -308,18 +297,95 @@ export default function Pricing() {
                     </motion.div>
                   )}
                 </AnimatePresence>
+              </div>
+            </section>
+
+            {/* How billing works — FNB manual flow */}
+            <section className="border-y border-border bg-background py-10 sm:py-14">
+              <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+                <Reveal className="text-center">
+                  <span className="section-label mb-4">{t('pricing.billingFlowLabel')}</span>
+                  <h2 className="font-display text-3xl font-semibold text-primary">{t('pricing.billingFlowTitle')}</h2>
+                  <p className="mx-auto mt-3 max-w-2xl text-sm text-muted">{t('pricing.billingFlowSubtitle')}</p>
+                </Reveal>
+
+                <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                  {PAYMENT_STEPS.map(({ icon: Icon, key }, i) => (
+                    <motion.div
+                      key={key}
+                      initial={{ opacity: 0, y: 16 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: i * 0.08 }}
+                      className="relative rounded-2xl border border-border bg-surface p-5"
+                    >
+                      <span className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-accent/15 text-accent">
+                        <Icon size={20} />
+                      </span>
+                      <p className="text-xs font-bold uppercase tracking-wider text-accent">
+                        {t('pricing.step')} {i + 1}
+                      </p>
+                      <p className="mt-1 font-display text-base font-semibold text-primary">
+                        {t(`pricing.${key}Title`)}
+                      </p>
+                      <p className="mt-2 text-sm text-muted">{t(`pricing.${key}Body`)}</p>
+                      {i < PAYMENT_STEPS.length - 1 && (
+                        <ArrowRight
+                          size={18}
+                          className="absolute -right-3 top-1/2 hidden -translate-y-1/2 text-accent/40 lg:block"
+                        />
+                      )}
+                    </motion.div>
+                  ))}
+                </div>
+
+                <div className="mt-8 rounded-2xl border border-dashed border-accent/40 bg-accent/5 p-6 sm:p-8">
+                  <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-wider text-accent">
+                        {t('pricing.bankDetailsPreview')}
+                      </p>
+                      <p className="mt-1 text-sm text-muted">{t('pricing.bankDetailsNote')}</p>
+                      <dl className="mt-4 space-y-2 text-sm">
+                        <div className="flex gap-2">
+                          <dt className="w-28 shrink-0 text-muted">{t('billing.bank')}</dt>
+                          <dd className="font-medium text-primary">{FNB_PAYMENT.bank}</dd>
+                        </div>
+                        <div className="flex gap-2">
+                          <dt className="w-28 shrink-0 text-muted">{t('billing.accountName')}</dt>
+                          <dd className="font-medium text-primary">{FNB_PAYMENT.accountName}</dd>
+                        </div>
+                        <div className="flex gap-2">
+                          <dt className="w-28 shrink-0 text-muted">{t('billing.accountNumber')}</dt>
+                          <dd className="font-mono font-medium text-primary">{FNB_PAYMENT.accountNumber}</dd>
+                        </div>
+                        <div className="flex gap-2">
+                          <dt className="w-28 shrink-0 text-muted">{t('billing.reference')}</dt>
+                          <dd className="text-primary">{FNB_PAYMENT.referenceHint}</dd>
+                        </div>
+                      </dl>
+                    </div>
+                    <span className="inline-flex shrink-0 items-center gap-2 self-start rounded-full border border-accent/30 bg-surface px-3 py-1.5 text-xs font-semibold text-accent">
+                      <Clock size={14} />
+                      {t('pricing.comingSoon')}
+                    </span>
+                  </div>
+                </div>
 
                 <p className="mt-8 text-center text-sm text-muted">
                   {t('pricing.freeForNow')}{' '}
                   <Link to="/register?role=landlord" className="font-semibold text-accent hover:underline">
                     {t('pricing.listFreeNow')}
                   </Link>
+                  {' · '}
+                  <Link to="/landlord/billing" className="font-semibold text-accent hover:underline">
+                    {t('pricing.viewBilling')}
+                  </Link>
                 </p>
               </div>
             </section>
 
-            {/* Why these numbers — accordion style cards */}
-            <section className="border-t border-border bg-background py-8 sm:py-12 lg:py-16">
+            <section className="py-8 sm:py-12 lg:py-16">
               <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
                 <Reveal className="text-center">
                   <span className="section-label mb-4">{t('pricing.whyLabel')}</span>
@@ -343,17 +409,14 @@ export default function Pricing() {
                           className={`w-full rounded-xl border p-5 text-left transition-all ${
                             isOpen
                               ? 'border-accent bg-surface shadow-md'
-                              : 'border-border bg-surface hover:border-accent/40 hover:bg-surface/80'
+                              : 'border-border bg-surface hover:border-accent/40'
                           }`}
                         >
                           <div className="flex items-center justify-between gap-4">
                             <h3 className="font-display text-lg font-semibold text-primary">
                               {t(tierNameKey(tier.id))}
                             </h3>
-                            <motion.span
-                              animate={{ rotate: isOpen ? 90 : 0 }}
-                              transition={{ duration: 0.2 }}
-                            >
+                            <motion.span animate={{ rotate: isOpen ? 90 : 0 }} transition={{ duration: 0.2 }}>
                               <ChevronRight size={20} className="text-accent" />
                             </motion.span>
                           </div>
@@ -380,7 +443,6 @@ export default function Pricing() {
         )}
       </AnimatePresence>
 
-      {/* Always-visible student free strip */}
       <section className="border-t border-border bg-primary py-6 sm:py-8">
         <div className="mx-auto flex max-w-4xl flex-col items-center gap-3 px-4 text-center sm:flex-row sm:justify-between sm:gap-4 sm:text-left">
           <div className="flex items-center gap-3">

@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import {
   Users, GraduationCap, Shield, Home, Ban, Trash2, Check, X,
-  RefreshCw, Radio, Search, MapPin,
+  RefreshCw, Radio, Search, MapPin, CreditCard,
 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useTranslation } from '../hooks/useTranslation'
@@ -19,12 +19,14 @@ import VerificationCard from '../components/admin/VerificationCard'
 import DocumentPreviewModal from '../components/admin/DocumentPreviewModal'
 import AdminActionModal from '../components/admin/AdminActionModal'
 import AdminToast from '../components/admin/AdminToast'
+import AdminSubscriptionsPanel from '../components/admin/AdminSubscriptionsPanel'
 
 const TABS = [
   { id: 'requests', icon: GraduationCap, labelKey: 'admin.tabRequests' },
   { id: 'users', icon: Users, labelKey: 'admin.tabUsers' },
   { id: 'landlords', icon: Shield, labelKey: 'admin.tabLandlords' },
   { id: 'listings', icon: Home, labelKey: 'admin.tabListings' },
+  { id: 'subscriptions', icon: CreditCard, labelKey: 'admin.tabSubscriptions' },
 ]
 
 const TAB_STORAGE_KEY = 'ntlo_admin_tab'
@@ -606,6 +608,8 @@ export default function AdminDashboard() {
               )}
             </div>
           )}
+
+          {tab === 'subscriptions' && <AdminSubscriptionsPanel />}
         </>
       )}
 

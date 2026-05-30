@@ -12,7 +12,9 @@ import { Skeleton } from '../components/ui/Skeleton'
 import { formatPrice, getCoverPhoto } from '../lib/utils'
 import ListingMap from '../components/listings/ListingMap'
 import LandlordWelcomeBanner from '../components/landlord/LandlordWelcomeBanner'
+import EarlyAccessBanner from '../components/landlord/EarlyAccessBanner'
 import { MAPS_ENABLED } from '../lib/googleMaps'
+import { CreditCard } from 'lucide-react'
 
 const PLACEHOLDER = 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400&q=80'
 
@@ -78,13 +80,20 @@ export default function LandlordDashboard() {
           <h1 className="font-display text-3xl font-bold text-primary">{t('dashboard.landlordTitle')}</h1>
           <p className="mt-2 text-muted">{t('dashboard.welcomeLandlord')}, {profile?.full_name || 'Landlord'}</p>
         </div>
-        <Button as={Link} to="/landlord/listings/new">
-          <Plus size={18} />
-          {t('dashboard.addListing')}
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button as={Link} to="/landlord/billing" variant="outline">
+            <CreditCard size={18} />
+            {t('billing.title')}
+          </Button>
+          <Button as={Link} to="/landlord/listings/new">
+            <Plus size={18} />
+            {t('dashboard.addListing')}
+          </Button>
+        </div>
       </div>
 
       <LandlordWelcomeBanner userId={user?.id} profile={profile} />
+      <EarlyAccessBanner />
 
       <div className="mb-8 grid gap-4 sm:grid-cols-3">
         <Card className="p-5">
