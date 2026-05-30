@@ -10,6 +10,7 @@ import Input from '../components/ui/Input'
 import AuthTransitionOverlay from '../components/auth/AuthTransitionOverlay'
 import { UniversitySelect } from '../components/universities/OtherUniversityModal'
 import { getPostAuthPath } from '../lib/verification'
+import { consumeOAuthNewSignup } from '../lib/oauthStorage'
 
 export default function CompleteProfile() {
   const [searchParams] = useSearchParams()
