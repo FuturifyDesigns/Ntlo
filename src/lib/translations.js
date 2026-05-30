@@ -283,6 +283,78 @@ export const translations = {
       rejectNotes: 'Reason for rejection (shown to landlord):',
       noEmail: 'No email provided',
       actionFailed: 'Action failed. Try again.',
+      overview: 'Overview',
+      statRequests: 'Uni requests',
+      statLandlords: 'Landlords',
+      statListings: 'Listings',
+      statUsers: 'Total users',
+      pending: 'pending',
+      documents: 'Documents',
+      noDocuments: 'No documents uploaded yet.',
+      preview: 'Preview',
+      openInTab: 'Open in new tab',
+      viewAll: 'Review documents',
+      waitingTime: 'Waiting {time}',
+      justNow: 'just now',
+      hoursAgo: '{count}h',
+      daysAgo: '{count}d',
+      searchUsers: 'Search by name or phone…',
+      filterRole: 'All roles',
+      roleStudent: 'Students',
+      roleLandlord: 'Landlords',
+      roleAdmin: 'Admins',
+      noUsersMatch: 'No users match your search.',
+      docOf: 'Document {current} of {total}',
+      prev: 'Previous',
+      next: 'Next',
+      close: 'Close',
+      loadingDoc: 'Loading document…',
+      docLoadError: 'Could not load this document.',
+      cannotPreview: 'This file type can’t be previewed inline.',
+      docType: {
+        national_id: 'National ID / Passport',
+        selfie_with_id: 'Selfie with ID',
+        proof_of_ownership: 'Proof of ownership',
+        proof_of_authority: 'Authority to let',
+        proof_of_address: 'Proof of address',
+        reib_registration: 'REIB registration',
+        property_rates_receipt: 'Property rates receipt',
+        utility_bill_property: 'Utility bill',
+        title_deed_excerpt: 'Title deed excerpt',
+      },
+      adv: {
+        title: 'AI review assistant',
+        subtitle: 'Automated document checks, sorting and guidance to help you decide faster.',
+        queueClear: 'Queue is clear — nothing waiting for review right now.',
+        queueSummary: '{total} awaiting review · {ready} ready to approve · {attention} need attention',
+        smartSort: 'Smart sort',
+        newestSort: 'Newest first',
+        readinessLabel: 'Readiness',
+        recommendedAction: 'Recommended action',
+        status: {
+          readyToApprove: 'Ready to approve',
+          needsProof: 'Missing property proof',
+          incomplete: 'Incomplete submission',
+          listingHasProof: 'Proof attached',
+          listingNoProof: 'No proof attached',
+        },
+        recommend: {
+          approve: 'All required identity and property documents are present. Open each file to confirm it’s legible and unaltered, then approve.',
+          proof: 'Identity documents are in, but there’s no proof of ownership or authority to let. Request property proof before approving.',
+          incomplete: 'Key identity documents are missing. Reject with a note asking the landlord to re-upload the required files.',
+          listingHasProof: 'Property documents are attached. Confirm the address on each file matches the listing before verifying.',
+          listingNoProof: 'No property documents are attached. Verify ownership manually or ask the landlord to upload proof.',
+        },
+        flag: {
+          missingNationalId: 'No National ID / passport',
+          missingSelfie: 'No selfie with ID — identity unconfirmed',
+          missingPropertyProof: 'No proof of ownership or authority to let',
+          hasExtraProof: 'Extra proof provided — stronger trust',
+          docsComplete: 'All required documents provided',
+          singleDoc: 'Only one document uploaded',
+          waitingLong: 'Waiting {days} days — prioritise',
+        },
+      },
     },
     verification: {
       landlordTitle: 'Verify your landlord account',
@@ -1140,6 +1212,13 @@ export function getTranslation(lang, key, vars = {}) {
   let value = translations[lang]
   for (const k of keys) {
     value = value?.[k]
+  }
+  // Fall back to English when a key is missing in the active language.
+  if (typeof value !== 'string' && lang !== 'en') {
+    value = translations.en
+    for (const k of keys) {
+      value = value?.[k]
+    }
   }
   if (typeof value !== 'string') return key
   return value.replace(/\{(\w+)\}/g, (_, v) => vars[v] ?? '')

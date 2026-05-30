@@ -1,17 +1,22 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import {
   Users, GraduationCap, Shield, Home, Ban, Trash2, Check, X,
-  RefreshCw, Eye, Radio,
+  RefreshCw, Radio, Search, MapPin,
 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useTranslation } from '../hooks/useTranslation'
-import { getSignedDocUrl } from '../lib/verificationStorage'
+import {
+  analyzeLandlord, analyzeListing, sortSubmissions, summarizeQueue,
+} from '../lib/adminAdvisor'
 import Button from '../components/ui/Button'
 import Badge from '../components/ui/Badge'
 import Card from '../components/ui/Card'
 import { Skeleton } from '../components/ui/Skeleton'
 import { createUniversityFromRequest } from '../lib/adminUniversities'
+import AdminAdvisorPanel from '../components/admin/AdminAdvisorPanel'
+import VerificationCard from '../components/admin/VerificationCard'
+import DocumentPreviewModal from '../components/admin/DocumentPreviewModal'
 
 const TABS = [
   { id: 'requests', icon: GraduationCap, labelKey: 'admin.tabRequests' },
@@ -20,9 +25,17 @@ const TABS = [
   { id: 'listings', icon: Home, labelKey: 'admin.tabListings' },
 ]
 
+const TAB_STORAGE_KEY = 'ntlo_admin_tab'
+
 export default function AdminDashboard() {
   const { t } = useTranslation()
-  const [tab, setTab] = useState('requests')
+  const [tab, setTab] = useState(() => {
+    if (typeof sessionStorage !== 'undefined') {
+      const saved = sessionStorage.getItem(TAB_STORAGE_KEY)
+      if (saved && TABS.some((x) => x.id === saved)) return saved
+    }
+    return 'requests'
+  })
   const [loading, setLoading] = useState(true)
   const [live, setLive] = useState(true)
   const [requests, setRequests] = useState([])
@@ -30,6 +43,15 @@ export default function AdminDashboard() {
   const [landlords, setLandlords] = useState([])
   const [listings, setListings] = useState([])
   const [actionError, setActionError] = useState('')
+  const [sortMode, setSortMode] = useState('smart')
+  const [preview, setPreview] = useState(null)
+  const [userSearch, setUserSearch] = useState('')
+  const [roleFilter, setRoleFilter] = useState('all')
+
+  const selectTab = useCallback((id) => {
+    setTab(id)
+    try { sessionStorage.setItem(TAB_STORAGE_KEY, id) } catch { /* ignore */ }
+  }, [])
 
   const fetchRequests = useCallback(async () => {
     const { data } = await supabase
@@ -67,7 +89,7 @@ export default function AdminDashboard() {
       .select(`
         id, title, city, price, verification_status, verification_notes, is_verified, created_at,
         landlord:profiles!listings_landlord_id_fkey(id, full_name),
-        docs:verification_documents!verification_documents_listing_id_fkey(id, doc_type, file_name, storage_path, status)
+        docs:verification_documents!verification_documents_listing_id_fkey(id, doc_type, file_name, storage_path, status, created_at)
       `)
       .eq('verification_status', 'pending')
       .order('created_at', { ascending: false })
@@ -185,16 +207,38 @@ export default function AdminDashboard() {
     })
   }
 
-  async function viewDoc(storagePath) {
-    try {
-      const url = await getSignedDocUrl(storagePath)
-      window.open(url, '_blank', 'noopener,noreferrer')
-    } catch (err) {
-      setActionError(err.message)
-    }
-  }
+  const pendingRequests = useMemo(() => requests.filter((r) => r.status === 'pending'), [requests])
 
-  const pendingRequests = requests.filter((r) => r.status === 'pending')
+  const landlordQueue = useMemo(
+    () => sortSubmissions(landlords, analyzeLandlord, sortMode),
+    [landlords, sortMode]
+  )
+  const listingQueue = useMemo(
+    () => sortSubmissions(listings, analyzeListing, sortMode),
+    [listings, sortMode]
+  )
+
+  const filteredUsers = useMemo(() => {
+    const q = userSearch.trim().toLowerCase()
+    return users.filter((u) => {
+      if (roleFilter !== 'all' && u.role !== roleFilter) return false
+      if (!q) return true
+      return (u.full_name || '').toLowerCase().includes(q) || (u.phone || '').toLowerCase().includes(q)
+    })
+  }, [users, userSearch, roleFilter])
+
+  const stats = [
+    { id: 'requests', icon: GraduationCap, label: t('admin.statRequests'), value: pendingRequests.length },
+    { id: 'users', icon: Users, label: t('admin.statUsers'), value: users.length },
+    { id: 'landlords', icon: Shield, label: t('admin.statLandlords'), value: landlords.length },
+    { id: 'listings', icon: Home, label: t('admin.statListings'), value: listings.length },
+  ]
+
+  const tabCounts = {
+    requests: pendingRequests.length,
+    landlords: landlords.length,
+    listings: listings.length,
+  }
 
   return (
     <motion.div
@@ -202,10 +246,13 @@ export default function AdminDashboard() {
       animate={{ opacity: 1 }}
       className="mx-auto max-w-7xl px-4 py-5 sm:px-6 sm:py-8 lg:px-8"
     >
-      <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
+      <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="font-display text-3xl font-bold text-primary">{t('admin.title')}</h1>
-          <p className="mt-2 flex items-center gap-2 text-muted">
+          <p className="mt-2 inline-flex items-center gap-2 text-sm text-muted">
+            <span className={`flex h-2 w-2 rounded-full ${live ? 'bg-success' : 'bg-muted'}`}>
+              <span className={`h-2 w-2 rounded-full ${live ? 'animate-ping bg-success/60' : ''}`} />
+            </span>
             <Radio size={14} className={live ? 'text-success' : 'text-muted'} />
             {live ? t('admin.liveConnected') : t('admin.liveDisconnected')}
           </p>
@@ -216,27 +263,54 @@ export default function AdminDashboard() {
         </Button>
       </div>
 
+      {/* Overview stat cards */}
+      <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {stats.map(({ id, icon: Icon, label, value }) => (
+          <button
+            key={id}
+            type="button"
+            onClick={() => selectTab(id)}
+            className={`flex items-center gap-3 rounded-2xl border p-4 text-left transition-all ${
+              tab === id
+                ? 'border-accent/40 bg-accent/5 shadow-sm'
+                : 'border-border bg-surface hover:border-accent/30 hover:bg-background'
+            }`}
+          >
+            <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${
+              tab === id ? 'bg-accent/15 text-accent ring-1 ring-accent/30' : 'bg-background text-muted'
+            }`}>
+              <Icon size={20} />
+            </span>
+            <span>
+              <span className="block font-display text-2xl font-bold leading-none text-primary">{value}</span>
+              <span className="mt-1 block text-xs text-muted">{label}</span>
+            </span>
+          </button>
+        ))}
+      </div>
+
       {actionError && (
         <div className="mb-4 rounded-lg border border-error/30 bg-error/5 px-4 py-2 text-sm text-error">
           {actionError}
         </div>
       )}
 
+      {/* Tab bar */}
       <div className="mb-6 flex flex-wrap gap-2">
         {TABS.map(({ id, icon: Icon, labelKey }) => (
           <button
             key={id}
             type="button"
-            onClick={() => setTab(id)}
-            className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium ${
-              tab === id ? 'bg-primary text-white' : 'border border-border bg-surface text-muted'
+            onClick={() => selectTab(id)}
+            className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+              tab === id ? 'bg-primary text-white shadow-sm' : 'border border-border bg-surface text-muted hover:text-primary'
             }`}
           >
             <Icon size={16} />
             {t(labelKey)}
-            {id === 'requests' && pendingRequests.length > 0 && (
-              <span className="rounded-full bg-accent px-2 py-0.5 text-xs text-white">
-                {pendingRequests.length}
+            {tabCounts[id] > 0 && (
+              <span className={`rounded-full px-2 py-0.5 text-xs ${tab === id ? 'bg-accent text-primary' : 'bg-accent/15 text-accent'}`}>
+                {tabCounts[id]}
               </span>
             )}
           </button>
@@ -245,7 +319,7 @@ export default function AdminDashboard() {
 
       {loading ? (
         <div className="space-y-4">
-          {[1, 2, 3].map((i) => <Skeleton key={i} className="h-20 w-full" />)}
+          {[1, 2, 3].map((i) => <Skeleton key={i} className="h-28 w-full" />)}
         </div>
       ) : (
         <>
@@ -256,10 +330,17 @@ export default function AdminDashboard() {
               ) : (
                 pendingRequests.map((req) => (
                   <Card key={req.id} className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                      <p className="font-semibold text-primary">{req.name}</p>
-                      <p className="text-sm text-muted">{req.city} · {req.contact_email || t('admin.noEmail')}</p>
-                      <p className="text-xs text-muted">{new Date(req.created_at).toLocaleString()}</p>
+                    <div className="flex items-center gap-3">
+                      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-accent/10 text-accent ring-1 ring-accent/20">
+                        <GraduationCap size={20} />
+                      </span>
+                      <div>
+                        <p className="font-semibold text-primary">{req.name}</p>
+                        <p className="flex items-center gap-1 text-sm text-muted">
+                          <MapPin size={12} /> {req.city} · {req.contact_email || t('admin.noEmail')}
+                        </p>
+                        <p className="text-xs text-muted">{new Date(req.created_at).toLocaleString()}</p>
+                      </div>
                     </div>
                     <div className="flex gap-2">
                       <Button size="sm" onClick={() => reviewRequest(req.id, 'approved')}>
@@ -278,107 +359,123 @@ export default function AdminDashboard() {
           )}
 
           {tab === 'users' && (
-            <div className="overflow-x-auto rounded-xl border border-border">
-              <table className="w-full min-w-[640px] text-left text-sm">
-                <thead className="border-b border-border bg-surface">
-                  <tr>
-                    <th className="px-4 py-3 font-medium text-muted">{t('admin.name')}</th>
-                    <th className="px-4 py-3 font-medium text-muted">{t('admin.role')}</th>
-                    <th className="px-4 py-3 font-medium text-muted">{t('admin.status')}</th>
-                    <th className="px-4 py-3 font-medium text-muted">{t('admin.joined')}</th>
-                    <th className="px-4 py-3 font-medium text-muted">{t('admin.actions')}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {users.map((u) => (
-                    <tr key={u.id} className="border-b border-border last:border-0">
-                      <td className="px-4 py-3">
-                        <p className="font-medium text-primary">{u.full_name}</p>
-                        <p className="text-xs text-muted">{u.phone || '—'}</p>
-                      </td>
-                      <td className="px-4 py-3 capitalize">{u.role}</td>
-                      <td className="px-4 py-3">
-                        {u.is_banned ? (
-                          <Badge variant="error">{t('admin.banned')}</Badge>
-                        ) : u.role === 'landlord' ? (
-                          <Badge variant={u.verification_status === 'approved' ? 'success' : 'warning'}>
-                            {u.verification_status}
-                          </Badge>
-                        ) : (
-                          <Badge variant="default">{t('admin.active')}</Badge>
-                        )}
-                      </td>
-                      <td className="px-4 py-3 text-muted">
-                        {new Date(u.created_at).toLocaleDateString()}
-                      </td>
-                      <td className="px-4 py-3">
-                        {u.role !== 'admin' && (
-                          <div className="flex gap-1">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => toggleBan(u.id, u.is_banned)}
-                              title={u.is_banned ? t('admin.unban') : t('admin.ban')}
-                            >
-                              <Ban size={14} />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="danger"
-                              onClick={() => deleteUser(u.id, u.full_name)}
-                            >
-                              <Trash2 size={14} />
-                            </Button>
-                          </div>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="space-y-4">
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <div className="relative flex-1">
+                  <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
+                  <input
+                    type="search"
+                    value={userSearch}
+                    onChange={(e) => setUserSearch(e.target.value)}
+                    placeholder={t('admin.searchUsers')}
+                    className="w-full rounded-lg border border-border bg-surface py-2 pl-9 pr-3 text-sm text-primary outline-none focus:ring-2 focus:ring-accent/40"
+                  />
+                </div>
+                <select
+                  value={roleFilter}
+                  onChange={(e) => setRoleFilter(e.target.value)}
+                  className="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-primary outline-none focus:ring-2 focus:ring-accent/40"
+                >
+                  <option value="all">{t('admin.filterRole')}</option>
+                  <option value="student">{t('admin.roleStudent')}</option>
+                  <option value="landlord">{t('admin.roleLandlord')}</option>
+                  <option value="admin">{t('admin.roleAdmin')}</option>
+                </select>
+              </div>
+
+              {filteredUsers.length === 0 ? (
+                <Card className="p-8 text-center text-muted">{t('admin.noUsersMatch')}</Card>
+              ) : (
+                <div className="overflow-x-auto rounded-xl border border-border">
+                  <table className="w-full min-w-[640px] text-left text-sm">
+                    <thead className="border-b border-border bg-surface">
+                      <tr>
+                        <th className="px-4 py-3 font-medium text-muted">{t('admin.name')}</th>
+                        <th className="px-4 py-3 font-medium text-muted">{t('admin.role')}</th>
+                        <th className="px-4 py-3 font-medium text-muted">{t('admin.status')}</th>
+                        <th className="px-4 py-3 font-medium text-muted">{t('admin.joined')}</th>
+                        <th className="px-4 py-3 font-medium text-muted">{t('admin.actions')}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredUsers.map((u) => (
+                        <tr key={u.id} className="border-b border-border last:border-0 hover:bg-background/50">
+                          <td className="px-4 py-3">
+                            <div className="flex items-center gap-2.5">
+                              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
+                                {(u.full_name || '?').trim().charAt(0).toUpperCase()}
+                              </span>
+                              <div>
+                                <p className="font-medium text-primary">{u.full_name}</p>
+                                <p className="text-xs text-muted">{u.phone || '—'}</p>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-4 py-3 capitalize">{u.role}</td>
+                          <td className="px-4 py-3">
+                            {u.is_banned ? (
+                              <Badge variant="error">{t('admin.banned')}</Badge>
+                            ) : u.role === 'landlord' ? (
+                              <Badge variant={u.verification_status === 'approved' ? 'success' : 'warning'}>
+                                {u.verification_status}
+                              </Badge>
+                            ) : (
+                              <Badge variant="default">{t('admin.active')}</Badge>
+                            )}
+                          </td>
+                          <td className="px-4 py-3 text-muted">
+                            {new Date(u.created_at).toLocaleDateString()}
+                          </td>
+                          <td className="px-4 py-3">
+                            {u.role !== 'admin' && (
+                              <div className="flex gap-1">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => toggleBan(u.id, u.is_banned)}
+                                  title={u.is_banned ? t('admin.unban') : t('admin.ban')}
+                                >
+                                  <Ban size={14} />
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="danger"
+                                  onClick={() => deleteUser(u.id, u.full_name)}
+                                >
+                                  <Trash2 size={14} />
+                                </Button>
+                              </div>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           )}
 
           {tab === 'landlords' && (
             <div className="space-y-4">
-              {landlords.length === 0 ? (
+              <AdminAdvisorPanel
+                summary={summarizeQueue(landlordQueue)}
+                sortMode={sortMode}
+                onSortChange={setSortMode}
+              />
+              {landlordQueue.length === 0 ? (
                 <Card className="p-8 text-center text-muted">{t('admin.noPendingLandlords')}</Card>
               ) : (
-                landlords.map((ll) => (
-                  <Card key={ll.id} className="p-4">
-                    <div className="flex flex-wrap items-start justify-between gap-4">
-                      <div>
-                        <p className="font-semibold text-primary">{ll.full_name}</p>
-                        <p className="text-sm text-muted">{ll.phone}</p>
-                        <Badge variant="warning" className="mt-2">{ll.verification_status}</Badge>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button size="sm" onClick={() => reviewLandlord(ll.id, true)}>
-                          <Check size={14} />
-                          {t('admin.approve')}
-                        </Button>
-                        <Button size="sm" variant="danger" onClick={() => reviewLandlord(ll.id, false)}>
-                          <X size={14} />
-                          {t('admin.reject')}
-                        </Button>
-                      </div>
-                    </div>
-                    {ll.docs?.length > 0 && (
-                      <div className="mt-4 flex flex-wrap gap-2">
-                        {ll.docs.map((doc) => (
-                          <Button
-                            key={doc.id}
-                            size="sm"
-                            variant="outline"
-                            onClick={() => viewDoc(doc.storage_path)}
-                          >
-                            <Eye size={14} />
-                            {doc.doc_type.replace(/_/g, ' ')}
-                          </Button>
-                        ))}
-                      </div>
-                    )}
-                  </Card>
+                landlordQueue.map(({ item, analysis }) => (
+                  <VerificationCard
+                    key={item.id}
+                    subject={item}
+                    analysis={analysis}
+                    kind="landlord"
+                    onOpenDocs={(docs, index, name) => setPreview({ docs, index, name })}
+                    onApprove={() => reviewLandlord(item.id, true)}
+                    onReject={() => reviewLandlord(item.id, false)}
+                  />
                 ))
               )}
             </div>
@@ -386,50 +483,39 @@ export default function AdminDashboard() {
 
           {tab === 'listings' && (
             <div className="space-y-4">
-              {listings.length === 0 ? (
+              <AdminAdvisorPanel
+                summary={summarizeQueue(listingQueue)}
+                sortMode={sortMode}
+                onSortChange={setSortMode}
+              />
+              {listingQueue.length === 0 ? (
                 <Card className="p-8 text-center text-muted">{t('admin.noPendingListings')}</Card>
               ) : (
-                listings.map((listing) => (
-                  <Card key={listing.id} className="p-4">
-                    <div className="flex flex-wrap items-start justify-between gap-4">
-                      <div>
-                        <p className="font-semibold text-primary">{listing.title}</p>
-                        <p className="text-sm text-muted">
-                          {listing.city} · {listing.landlord?.full_name}
-                        </p>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button size="sm" onClick={() => reviewListing(listing.id, true)}>
-                          <Check size={14} />
-                          {t('admin.verifyListing')}
-                        </Button>
-                        <Button size="sm" variant="danger" onClick={() => reviewListing(listing.id, false)}>
-                          <X size={14} />
-                          {t('admin.reject')}
-                        </Button>
-                      </div>
-                    </div>
-                    {listing.docs?.length > 0 && (
-                      <div className="mt-4 flex flex-wrap gap-2">
-                        {listing.docs.map((doc) => (
-                          <Button
-                            key={doc.id}
-                            size="sm"
-                            variant="outline"
-                            onClick={() => viewDoc(doc.storage_path)}
-                          >
-                            <Eye size={14} />
-                            {doc.doc_type.replace(/_/g, ' ')}
-                          </Button>
-                        ))}
-                      </div>
-                    )}
-                  </Card>
+                listingQueue.map(({ item, analysis }) => (
+                  <VerificationCard
+                    key={item.id}
+                    subject={item}
+                    analysis={analysis}
+                    kind="listing"
+                    onOpenDocs={(docs, index, name) => setPreview({ docs, index, name })}
+                    onApprove={() => reviewListing(item.id, true)}
+                    onReject={() => reviewListing(item.id, false)}
+                  />
                 ))
               )}
             </div>
           )}
         </>
+      )}
+
+      {preview && (
+        <DocumentPreviewModal
+          docs={preview.docs}
+          index={preview.index}
+          subjectName={preview.name}
+          onIndex={(index) => setPreview((p) => ({ ...p, index }))}
+          onClose={() => setPreview(null)}
+        />
       )}
     </motion.div>
   )
