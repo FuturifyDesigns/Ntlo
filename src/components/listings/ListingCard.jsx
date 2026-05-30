@@ -8,6 +8,7 @@ import { useAuth } from '../../hooks/useAuth'
 import { useTranslation } from '../../hooks/useTranslation'
 import { getUniversityDisplayName } from '../../lib/universityNames'
 import Badge from '../ui/Badge'
+import { IconLocation } from '../ui/Icons'
 import TrustedBadge from '../trust/TrustedBadge'
 import { resolveListingTrustBadge } from '../../lib/tierBenefits'
 
