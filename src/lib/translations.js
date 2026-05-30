@@ -38,6 +38,8 @@ export const translations = {
     },
     filter: {
       searchPlaceholder: 'Search by area or university...',
+      searchLiveHint: 'Results update as you type. Press Enter to open full browse.',
+      searchEnterHint: 'Press Enter to search.',
       allUniversities: 'All Universities',
       propertyType: 'Property Type',
       priceRange: 'Price Range',
@@ -75,6 +77,7 @@ export const translations = {
       mapNoLocations: 'Listings without a map pin are shown near their campus. Drop a pin when listing for an exact location.',
       mapCampusFocus: 'Showing rooms near {campus}',
       mapCampusDefault: 'selected campus',
+      mapHiddenPins: '{count} listing(s) hidden — no accurate map pin near this campus.',
       mapApproxPin: 'Approximate pin — exact address on contact.',
       viewListing: 'View listing',
       noResults: 'No rooms found. Try different filters or check back soon.',
@@ -595,6 +598,8 @@ export const translations = {
     },
     filter: {
       searchPlaceholder: 'Batla ka kgaolo kgotsa yunivesiti...',
+      searchLiveHint: 'Dipoelo di a ntšhafala fa o kwala. Tlanya Enter go bula go batla tsotlhe.',
+      searchEnterHint: 'Tlanya Enter go batla.',
       allUniversities: 'Diunivesiti tsotlhe',
       propertyType: 'Mofuta wa lefelo',
       priceRange: 'Tekanyetso ya madi',
@@ -632,6 +637,7 @@ export const translations = {
       mapNoLocations: 'Dilong tse di se nang pin di bonwa kgaufi le khamposi. Namela ka pin bakeng sa lefelo le le siameng.',
       mapCampusFocus: 'Go bontsha dilong kgaufi le {campus}',
       mapCampusDefault: 'khamposi e e kgethilweng',
+      mapHiddenPins: 'Dilong di le {count} di fitlhiwe — ga go na pin e e siameng kgaufi le khamposi eno.',
       mapApproxPin: 'Pin e akanyetsa — aterese e siameng fa o ikgolaganya.',
       viewListing: 'Bona lefelo',
       noResults: 'Ga go na dilong. Leka disefo tse dingwe kgotsa boela gape.',

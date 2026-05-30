@@ -37,6 +37,10 @@ export default function UniversityPage() {
     }
   }, [university?.id])
 
+  function scrollToListings() {
+    document.getElementById('uni-listings')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
   const { listings, loading, error, count, page, setPage, pageSize } = useListings(filters)
 
   if (universitiesLoading) {
@@ -125,11 +129,13 @@ export default function UniversityPage() {
           <FilterBar
             filters={filters}
             onChange={setFilters}
+            onSearchSubmit={scrollToListings}
             resultCount={count}
             universityName={getUniversityDisplayName(university)}
           />
         </div>
 
+        <div id="uni-listings">
         <ListingGrid
           listings={listings}
           loading={loading}
@@ -140,6 +146,7 @@ export default function UniversityPage() {
           pageSize={pageSize}
           emptyMessage={t('listings.noResults')}
         />
+        </div>
 
         {count === 0 && !loading && (
           <div className="mt-8 text-center">

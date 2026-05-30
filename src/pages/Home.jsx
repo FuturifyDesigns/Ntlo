@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import Hero from '../components/home/Hero'
 import FeaturedListings from '../components/home/FeaturedListings'
@@ -12,9 +12,19 @@ import Button from '../components/ui/Button'
 import { PatternBotswana } from '../components/ui/Icons'
 
 export default function Home() {
-  const [filters, setFilters] = useState({ availableOnly: true, sortBy: 'newest' })
+  const navigate = useNavigate()
+  const [filters, setFilters] = useState({ availableOnly: true, sortBy: 'newest', search: '' })
   const { listings } = useListings({ ...filters, sortBy: 'newest' })
   const { t } = useTranslation()
+
+  function goToBrowseWithSearch() {
+    const params = new URLSearchParams()
+    if (filters.search?.trim()) params.set('search', filters.search.trim())
+    if (filters.universityId) params.set('uni', String(filters.universityId))
+    if (filters.roomType) params.set('roomType', filters.roomType)
+    if (filters.maxPrice) params.set('maxPrice', String(filters.maxPrice))
+    navigate(`/listings${params.toString() ? `?${params.toString()}` : ''}`)
+  }
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
@@ -23,7 +33,12 @@ export default function Home() {
 
       <section className="relative border-y border-border bg-surface py-6 sm:py-8">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <FilterBar filters={filters} onChange={setFilters} resultCount={listings.length} />
+          <FilterBar
+            filters={filters}
+            onChange={setFilters}
+            onSearchSubmit={goToBrowseWithSearch}
+            resultCount={listings.length}
+          />
         </div>
       </section>
 

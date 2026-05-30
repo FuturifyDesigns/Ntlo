@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Map, LayoutGrid } from 'lucide-react'
 import { motion } from 'framer-motion'
@@ -10,7 +10,7 @@ import { getUniversityById, getUniversityMapViewport, getUniversityDisplayName }
 import { useTranslation } from '../hooks/useTranslation'
 
 export default function Browse() {
-  const [searchParams] = useSearchParams()
+  const [searchParams, setSearchParams] = useSearchParams()
   const [view, setView] = useState(searchParams.get('view') === 'map' ? 'map' : 'grid')
   const { t } = useTranslation()
   const [filters, setFilters] = useState({
@@ -42,6 +42,15 @@ export default function Browse() {
     return null
   }, [filters.universityId])
 
+  const syncSearchToUrl = useCallback(() => {
+    const params = new URLSearchParams()
+    if (filters.search?.trim()) params.set('search', filters.search.trim())
+    if (filters.universityId) params.set('uni', String(filters.universityId))
+    if (view === 'map') params.set('view', 'map')
+    setSearchParams(params, { replace: true })
+    document.getElementById('browse-results')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }, [filters.search, filters.universityId, view, setSearchParams])
+
   const { listings, loading, isFetching, error, count, page, setPage, pageSize } = useListings(queryFilters)
   const uni = filters.universityId ? getUniversityById(filters.universityId) : null
 
@@ -60,6 +69,7 @@ export default function Browse() {
         <FilterBar
           filters={filters}
           onChange={setFilters}
+          onSearchSubmit={syncSearchToUrl}
           resultCount={count}
           universityName={
             filters.universityId === 'other'
@@ -92,7 +102,7 @@ export default function Browse() {
         </button>
       </div>
 
-      <div className="relative min-h-[420px]">
+      <div id="browse-results" className="relative min-h-[420px]">
         {isFetching && listings.length > 0 && (
           <div
             className="pointer-events-none absolute inset-x-0 top-0 z-10 h-0.5 overflow-hidden rounded-full bg-border"

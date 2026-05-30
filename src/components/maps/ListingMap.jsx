@@ -8,24 +8,33 @@ import {
   MAPS_ENABLED,
   SINGLE_LISTING_ZOOM,
   getListingPosition,
+  getMapListingPosition,
   toLatLng,
 } from '../../lib/googleMaps'
 import { formatPrice } from '../../lib/utils'
 import { useTranslation } from '../../hooks/useTranslation'
 import { MapUnavailable } from './GoogleMapsProvider'
 
-function MapViewportController({ viewport, plotted }) {
+/** Keep campus centered when filter changes; do not re-center when listings load or user pans. */
+function CampusViewportLock({ viewport }) {
   const map = useMap()
   const viewportKey = viewport?.id ?? null
 
   useEffect(() => {
-    if (!map) return
+    if (!map || !viewport?.center) return
+    map.panTo(viewport.center)
+    map.setZoom(viewport.zoom ?? CAMPUS_MAP_ZOOM)
+  }, [map, viewportKey, viewport?.center?.lat, viewport?.center?.lng, viewport?.zoom])
 
-    if (viewport?.center) {
-      map.panTo(viewport.center)
-      map.setZoom(viewport.zoom ?? CAMPUS_MAP_ZOOM)
-      return
-    }
+  return null
+}
+
+/** Fit map to listing pins when no campus filter is active. */
+function ListingsBoundsFit({ plotted, disabled }) {
+  const map = useMap()
+
+  useEffect(() => {
+    if (!map || disabled) return
 
     if (!plotted.length) {
       map.panTo(DEFAULT_MAP_CENTER)
@@ -42,7 +51,7 @@ function MapViewportController({ viewport, plotted }) {
     const bounds = new google.maps.LatLngBounds()
     plotted.forEach(({ position }) => bounds.extend(position))
     map.fitBounds(bounds, 48)
-  }, [map, viewportKey, viewport?.center?.lat, viewport?.center?.lng, viewport?.zoom, plotted])
+  }, [map, disabled, plotted])
 
   return null
 }
@@ -58,21 +67,34 @@ function MapWithMarkers({
   const { t } = useTranslation()
   const [selectedId, setSelectedId] = useState(null)
 
+  const campusCenter = viewport?.center ?? null
+  const campusLocked = Boolean(campusCenter)
+
   const plotted = useMemo(
     () =>
       listings
         .map((listing) => {
-          const position = getListingPosition(listing)
+          const position = campusLocked
+            ? getMapListingPosition(listing, {
+                campusId: viewport?.id,
+                campusCenter,
+              })
+            : getListingPosition(listing)
           if (!position) return null
           return { listing, position }
         })
         .filter(Boolean),
-    [listings]
+    [listings, campusLocked, campusCenter, viewport?.id]
+  )
+
+  const campusMarkerPosition = useMemo(
+    () => (campusCenter ? { lat: campusCenter.lat, lng: campusCenter.lng } : null),
+    [campusCenter?.lat, campusCenter?.lng]
   )
 
   const selected = plotted.find(({ listing }) => listing.id === selectedId)
 
-  const initialCenter = viewport?.center
+  const initialCenter = campusCenter
     || (plotted[0] ? { lat: plotted[0].position.lat, lng: plotted[0].position.lng } : DEFAULT_MAP_CENTER)
 
   const initialZoom = viewport?.zoom
@@ -80,18 +102,25 @@ function MapWithMarkers({
 
   useEffect(() => {
     setSelectedId(null)
-  }, [listings, viewport])
+  }, [listings, viewport?.id])
+
+  const hiddenPinCount = campusLocked ? listings.length - plotted.length : 0
 
   return (
     <div className={`relative overflow-hidden rounded-xl border border-border ${className}`} style={{ height }}>
-      {emptyHint && plotted.length === 0 && (
+      {emptyHint && plotted.length === 0 && !campusLocked && (
         <div className="absolute inset-x-0 top-0 z-10 border-b border-border bg-surface/95 px-4 py-2 text-center text-sm text-muted">
           {emptyHint}
         </div>
       )}
-      {viewport?.center && (
-        <div className="absolute inset-x-0 top-0 z-10 border-b border-border bg-primary/90 px-4 py-2 text-center text-sm font-medium text-white">
-          {t('listings.mapCampusFocus', { campus: viewport.label || t('listings.mapCampusDefault') })}
+      {campusLocked && (
+        <div className="absolute inset-x-0 top-0 z-10 space-y-0.5 border-b border-border bg-primary/90 px-4 py-2 text-center text-sm font-medium text-white">
+          <p>{t('listings.mapCampusFocus', { campus: viewport.label || t('listings.mapCampusDefault') })}</p>
+          {hiddenPinCount > 0 && (
+            <p className="text-xs font-normal text-white/80">
+              {t('listings.mapHiddenPins', { count: hiddenPinCount })}
+            </p>
+          )}
         </div>
       )}
       <Map
@@ -101,20 +130,24 @@ function MapWithMarkers({
         style={{ width: '100%', height: '100%' }}
         onClick={() => setSelectedId(null)}
       >
-        <MapViewportController viewport={viewport} plotted={plotted} />
-        {viewport?.center && (
+        {campusLocked ? (
+          <CampusViewportLock viewport={viewport} />
+        ) : (
+          <ListingsBoundsFit plotted={plotted} disabled={false} />
+        )}
+        {campusMarkerPosition && (
           <Marker
-            position={viewport.center}
+            position={campusMarkerPosition}
             title={viewport.label || 'Campus'}
             icon={{
               path: google.maps.SymbolPath.CIRCLE,
-              scale: 10,
-              fillColor: '#1e3a5f',
+              scale: 11,
+              fillColor: '#c45c26',
               fillOpacity: 1,
               strokeColor: '#ffffff',
-              strokeWeight: 2,
+              strokeWeight: 3,
             }}
-            zIndex={1000}
+            zIndex={2000}
           />
         )}
         {plotted.map(({ listing, position }) => (
@@ -122,6 +155,7 @@ function MapWithMarkers({
             key={listing.id}
             position={{ lat: position.lat, lng: position.lng }}
             title={listing.title}
+            zIndex={100}
             onClick={(event) => {
               if (typeof event.stop === 'function') event.stop()
               if (interactive) setSelectedId(listing.id)
@@ -176,7 +210,12 @@ export default function ListingMap({
     )
   }
 
-  const hasAnyPosition = listings.some((listing) => getListingPosition(listing))
+  const campusCenter = viewport?.center ?? null
+  const hasAnyPosition = listings.some((listing) =>
+    campusCenter
+      ? getMapListingPosition(listing, { campusId: viewport?.id, campusCenter })
+      : getListingPosition(listing)
+  )
 
   return (
     <MapWithMarkers

@@ -2,11 +2,17 @@ import { Search, SlidersHorizontal, X } from 'lucide-react'
 import { useUniversities } from '../../hooks/useUniversities'
 import { getUniversityDisplayName } from '../../lib/universityNames'
 import { AMENITIES, ROOM_TYPES } from '../../lib/utils'
-import Button from '../ui/Button'
 import { Select } from '../ui/Input'
 import { useTranslation } from '../../hooks/useTranslation'
 
-export default function FilterBar({ filters, onChange, onSearch, resultCount, universityName }) {
+export default function FilterBar({
+  filters,
+  onChange,
+  onSearchSubmit,
+  resultCount,
+  universityName,
+  liveSearch = true,
+}) {
   const { t } = useTranslation()
   const { universities } = useUniversities()
 
@@ -28,6 +34,11 @@ export default function FilterBar({ filters, onChange, onSearch, resultCount, un
     })
   }
 
+  function handleSearchSubmit(e) {
+    e.preventDefault()
+    onSearchSubmit?.()
+  }
+
   const hasActiveFilters =
     filters.search ||
     filters.universityId ||
@@ -39,22 +50,21 @@ export default function FilterBar({ filters, onChange, onSearch, resultCount, un
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-3 sm:flex-row">
-        <div className="relative flex-1">
+      <form onSubmit={handleSearchSubmit} className="space-y-1">
+        <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" size={18} />
           <input
             type="search"
             placeholder={t('filter.searchPlaceholder')}
             value={filters.search || ''}
             onChange={(e) => update('search', e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && onSearch?.()}
             className="w-full rounded-lg border border-border bg-surface py-2.5 pl-10 pr-4 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
           />
         </div>
-        <Button onClick={onSearch} className="shrink-0">
-          {t('hero.search')}
-        </Button>
-      </div>
+        <p className="text-xs text-muted">
+          {liveSearch ? t('filter.searchLiveHint') : t('filter.searchEnterHint')}
+        </p>
+      </form>
 
       <div className="flex flex-wrap gap-2">
         <Select
@@ -189,6 +199,7 @@ export default function FilterBar({ filters, onChange, onSearch, resultCount, un
         </p>
         {hasActiveFilters && (
           <button
+            type="button"
             onClick={clearFilters}
             className="flex items-center gap-1 text-sm text-accent hover:underline"
           >
