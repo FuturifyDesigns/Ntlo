@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Map, LayoutGrid } from 'lucide-react'
 import { motion } from 'framer-motion'
@@ -30,10 +30,12 @@ export default function Browse() {
     if (search) setFilters((f) => ({ ...f, search }))
   }, [searchParams])
 
-  const { listings, loading, error, count, page, setPage, pageSize } = useListings({
-    ...filters,
-    mapMode: view === 'map',
-  })
+  const queryFilters = useMemo(
+    () => ({ ...filters, mapMode: view === 'map' }),
+    [filters, view]
+  )
+
+  const { listings, loading, isFetching, error, count, page, setPage, pageSize } = useListings(queryFilters)
   const uni = filters.universityId ? getUniversityById(filters.universityId) : null
 
   return (
@@ -62,6 +64,7 @@ export default function Browse() {
 
       <div className="mb-6 flex gap-2">
         <button
+          type="button"
           onClick={() => setView('grid')}
           className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium ${
             view === 'grid' ? 'bg-primary text-white' : 'bg-surface border border-border text-muted'
@@ -71,6 +74,7 @@ export default function Browse() {
           {t('listings.grid')}
         </button>
         <button
+          type="button"
           onClick={() => setView('map')}
           className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium ${
             view === 'map' ? 'bg-primary text-white' : 'bg-surface border border-border text-muted'
@@ -81,29 +85,35 @@ export default function Browse() {
         </button>
       </div>
 
-      {view === 'map' ? (
-        <>
-          {loading && (
-            <p className="mb-3 text-sm text-muted">{t('listings.loadingMap')}</p>
-          )}
+      <div className="relative min-h-[420px]">
+        {isFetching && listings.length > 0 && (
+          <div
+            className="pointer-events-none absolute inset-x-0 top-0 z-10 h-0.5 overflow-hidden rounded-full bg-border"
+            aria-hidden
+          >
+            <div className="h-full w-1/3 animate-pulse bg-accent" />
+          </div>
+        )}
+
+        {view === 'map' ? (
           <ListingMap
             listings={listings}
             height="500px"
             emptyHint={t('listings.mapNoLocations')}
           />
-        </>
-      ) : (
-        <ListingGrid
-          listings={listings}
-          loading={loading}
-          error={error}
-          count={count}
-          page={page}
-          setPage={setPage}
-          pageSize={pageSize}
-          emptyMessage={t('listings.noResults')}
-        />
-      )}
+        ) : (
+          <ListingGrid
+            listings={listings}
+            loading={loading}
+            error={error}
+            count={count}
+            page={page}
+            setPage={setPage}
+            pageSize={pageSize}
+            emptyMessage={t('listings.noResults')}
+          />
+        )}
+      </div>
     </motion.div>
   )
 }

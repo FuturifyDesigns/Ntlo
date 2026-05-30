@@ -15,7 +15,7 @@ export default function ListingGrid({
 }) {
   const totalPages = Math.ceil(count / pageSize)
 
-  if (loading) return <ListingGridSkeleton />
+  if (loading && listings.length === 0) return <ListingGridSkeleton />
 
   if (error) {
     return (

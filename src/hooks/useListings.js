@@ -1,32 +1,52 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 
 const PAGE_SIZE = 12
 
 export function useListings(filters = {}) {
+  const {
+    universityId,
+    minPrice,
+    maxPrice,
+    roomType,
+    genderPreference,
+    search,
+    availableOnly = true,
+    sortBy = 'newest',
+    amenities = [],
+    landlordId,
+    mapMode = false,
+  } = filters
+
+  const amenitiesKey = JSON.stringify(amenities)
+
   const [listings, setListings] = useState([])
   const [loading, setLoading] = useState(true)
+  const [isFetching, setIsFetching] = useState(false)
   const [error, setError] = useState(null)
   const [count, setCount] = useState(0)
   const [page, setPage] = useState(0)
+  const hasLoadedRef = useRef(false)
 
   useEffect(() => {
     setPage(0)
   }, [
-    filters.universityId,
-    filters.minPrice,
-    filters.maxPrice,
-    filters.roomType,
-    filters.genderPreference,
-    filters.search,
-    filters.availableOnly,
-    filters.sortBy,
-    filters.amenities,
+    universityId,
+    minPrice,
+    maxPrice,
+    roomType,
+    genderPreference,
+    search,
+    availableOnly,
+    sortBy,
+    amenitiesKey,
   ])
 
   const fetchListings = useCallback(async () => {
-    setLoading(true)
+    if (!hasLoadedRef.current) setLoading(true)
+    setIsFetching(true)
     setError(null)
+
     try {
       let query = supabase
         .from('listings')
@@ -41,40 +61,40 @@ export function useListings(filters = {}) {
         `,
           { count: 'exact' }
         )
-        .eq('available', filters.availableOnly !== false)
+        .eq('available', availableOnly !== false)
 
-      if (filters.universityId === 'other') {
+      if (universityId === 'other') {
         query = query.is('nearest_university_id', null)
-      } else if (filters.universityId) {
-        query = query.eq('nearest_university_id', filters.universityId)
+      } else if (universityId) {
+        query = query.eq('nearest_university_id', universityId)
       }
-      if (filters.minPrice) query = query.gte('price', filters.minPrice)
-      if (filters.maxPrice) query = query.lte('price', filters.maxPrice)
-      if (filters.roomType) query = query.eq('room_type', filters.roomType)
-      if (filters.genderPreference && filters.genderPreference !== 'any') {
-        query = query.eq('gender_preference', filters.genderPreference)
+      if (minPrice) query = query.gte('price', minPrice)
+      if (maxPrice) query = query.lte('price', maxPrice)
+      if (roomType) query = query.eq('room_type', roomType)
+      if (genderPreference && genderPreference !== 'any') {
+        query = query.eq('gender_preference', genderPreference)
       }
-      if (filters.landlordId) query = query.eq('landlord_id', filters.landlordId)
-      if (filters.search) {
+      if (landlordId) query = query.eq('landlord_id', landlordId)
+      if (search) {
         query = query.or(
-          `title.ilike.%${filters.search}%,area.ilike.%${filters.search}%,city.ilike.%${filters.search}%,address.ilike.%${filters.search}%`
+          `title.ilike.%${search}%,area.ilike.%${search}%,city.ilike.%${search}%,address.ilike.%${search}%`
         )
       }
-      if (filters.amenities?.length) {
-        query = query.contains('amenities', filters.amenities)
+      if (amenities.length) {
+        query = query.contains('amenities', amenities)
       }
 
-      if (filters.sortBy === 'price_asc') {
+      if (sortBy === 'price_asc') {
         query = query.order('price', { ascending: true })
-      } else if (filters.sortBy === 'price_desc') {
+      } else if (sortBy === 'price_desc') {
         query = query.order('price', { ascending: false })
-      } else if (filters.sortBy === 'distance') {
+      } else if (sortBy === 'distance') {
         query = query.order('distance_to_campus', { ascending: true })
       } else {
         query = query.order('featured', { ascending: false }).order('created_at', { ascending: false })
       }
 
-      if (filters.mapMode) {
+      if (mapMode) {
         query = query.limit(200)
       } else {
         query = query.range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1)
@@ -84,21 +104,48 @@ export function useListings(filters = {}) {
       if (queryError) throw queryError
       setListings(data || [])
       setCount(total || 0)
+      hasLoadedRef.current = true
     } catch (err) {
       setError(err.message)
-      setListings([])
-      setCount(0)
+      if (!hasLoadedRef.current) {
+        setListings([])
+        setCount(0)
+      }
     } finally {
       setLoading(false)
+      setIsFetching(false)
     }
-  }, [filters, page])
+  }, [
+    universityId,
+    minPrice,
+    maxPrice,
+    roomType,
+    genderPreference,
+    search,
+    availableOnly,
+    sortBy,
+    amenitiesKey,
+    landlordId,
+    mapMode,
+    page,
+  ])
 
   useEffect(() => {
     const timer = setTimeout(fetchListings, 300)
     return () => clearTimeout(timer)
   }, [fetchListings])
 
-  return { listings, loading, error, count, page, setPage, pageSize: PAGE_SIZE, refetch: fetchListings }
+  return {
+    listings,
+    loading,
+    isFetching,
+    error,
+    count,
+    page,
+    setPage,
+    pageSize: PAGE_SIZE,
+    refetch: fetchListings,
+  }
 }
 
 export function useListing(id) {
