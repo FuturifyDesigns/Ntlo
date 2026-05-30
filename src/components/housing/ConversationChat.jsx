@@ -50,7 +50,7 @@ export default function ConversationChat({
       )}
       <div className={`${heightClass} flex flex-col overflow-hidden rounded-lg border border-border bg-background`}>
         <div className="flex-1 space-y-2 overflow-y-auto p-3">
-          {loading && <p className="text-xs text-muted">{t('housing.chatLoading')}</p>}
+          {loading && messages.length === 0 && <p className="text-xs text-muted">{t('housing.chatLoading')}</p>}
           {!loading && messages.length === 0 && (
             <p className="text-xs text-muted">{t('housing.chatEmpty')}</p>
           )}

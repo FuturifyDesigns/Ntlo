@@ -15,14 +15,14 @@ export function useConversations() {
   const [conversations, setConversations] = useState([])
   const [loading, setLoading] = useState(true)
 
-  const fetchConversations = useCallback(async () => {
+  const fetchConversations = useCallback(async ({ silent = false } = {}) => {
     if (!user) {
       setConversations([])
       setLoading(false)
       return
     }
 
-    setLoading(true)
+    if (!silent) setLoading(true)
     const isLandlord = profile?.role === 'landlord'
     const filterCol = isLandlord ? 'landlord_id' : 'student_id'
 
@@ -38,7 +38,7 @@ export function useConversations() {
       .order('last_message_at', { ascending: false, nullsFirst: false })
 
     if (!error) setConversations(data || [])
-    setLoading(false)
+    if (!silent) setLoading(false)
   }, [user, profile?.role])
 
   useEffect(() => {
@@ -51,7 +51,7 @@ export function useConversations() {
     const channel = supabase
       .channel(`conversations-${user.id}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'conversations' }, () => {
-        fetchConversations()
+        fetchConversations({ silent: true })
       })
       .subscribe()
 
@@ -66,16 +66,16 @@ export function useStudentListingStatus(listingId) {
   const [status, setStatus] = useState({ viewing: null, application: null })
   const [loading, setLoading] = useState(true)
 
-  const refetch = useCallback(async () => {
+  const refetch = useCallback(async ({ silent = false } = {}) => {
     if (!user || !listingId) {
       setStatus({ viewing: null, application: null })
       setLoading(false)
       return
     }
-    setLoading(true)
+    if (!silent) setLoading(true)
     const data = await fetchStudentListingStatus(listingId)
     setStatus(data)
-    setLoading(false)
+    if (!silent) setLoading(false)
   }, [user, listingId])
 
   useEffect(() => {
@@ -87,8 +87,8 @@ export function useStudentListingStatus(listingId) {
 
     const channel = supabase
       .channel(`listing-status-${listingId}-${user.id}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'viewing_requests' }, refetch)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'listing_applications' }, refetch)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'viewing_requests' }, () => refetch({ silent: true }))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'listing_applications' }, () => refetch({ silent: true }))
       .subscribe()
 
     return () => supabase.removeChannel(channel)
@@ -102,14 +102,14 @@ export function useMessages(conversationId) {
   const [messages, setMessages] = useState([])
   const [loading, setLoading] = useState(true)
 
-  const fetchMessages = useCallback(async () => {
+  const fetchMessages = useCallback(async ({ silent = false } = {}) => {
     if (!conversationId) {
       setMessages([])
       setLoading(false)
       return
     }
 
-    setLoading(true)
+    if (!silent) setLoading(true)
     const { data, error } = await supabase
       .from('messages')
       .select('*')
@@ -117,13 +117,18 @@ export function useMessages(conversationId) {
       .order('created_at', { ascending: true })
 
     if (!error) setMessages(data || [])
-    setLoading(false)
-    if (conversationId) markMessagesRead(conversationId)
+    if (!silent) setLoading(false)
+    markMessagesRead(conversationId)
   }, [conversationId])
 
   useEffect(() => {
-    fetchMessages()
-  }, [fetchMessages])
+    setMessages([])
+    if (conversationId) {
+      fetchMessages()
+    } else {
+      setLoading(false)
+    }
+  }, [conversationId, fetchMessages])
 
   useEffect(() => {
     if (!conversationId) return undefined
@@ -166,7 +171,7 @@ export function useStudentHousing() {
   const [applications, setApplications] = useState([])
   const [loading, setLoading] = useState(true)
 
-  const fetchAll = useCallback(async () => {
+  const fetchAll = useCallback(async ({ silent = false } = {}) => {
     if (!user) {
       setViewings([])
       setApplications([])
@@ -174,7 +179,7 @@ export function useStudentHousing() {
       return
     }
 
-    setLoading(true)
+    if (!silent) setLoading(true)
     const [v, a] = await Promise.all([
       supabase
         .from('viewing_requests')
@@ -190,7 +195,7 @@ export function useStudentHousing() {
 
     setViewings(v.data || [])
     setApplications(a.data || [])
-    setLoading(false)
+    if (!silent) setLoading(false)
   }, [user])
 
   useEffect(() => {
@@ -202,9 +207,9 @@ export function useStudentHousing() {
 
     const channel = supabase
       .channel(`student-housing-${user.id}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'viewing_requests' }, fetchAll)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'listing_applications' }, fetchAll)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'application_documents' }, fetchAll)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'viewing_requests' }, () => fetchAll({ silent: true }))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'listing_applications' }, () => fetchAll({ silent: true }))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'application_documents' }, () => fetchAll({ silent: true }))
       .subscribe()
 
     return () => supabase.removeChannel(channel)
@@ -220,7 +225,7 @@ export function useLandlordInquiries() {
   const [conversations, setConversations] = useState([])
   const [loading, setLoading] = useState(true)
 
-  const fetchAll = useCallback(async () => {
+  const fetchAll = useCallback(async ({ silent = false } = {}) => {
     if (!user) {
       setViewings([])
       setApplications([])
@@ -229,7 +234,7 @@ export function useLandlordInquiries() {
       return
     }
 
-    setLoading(true)
+    if (!silent) setLoading(true)
     const [v, a, c] = await Promise.all([
       supabase
         .from('viewing_requests')
@@ -255,7 +260,7 @@ export function useLandlordInquiries() {
     setViewings(v.data || [])
     setApplications(a.data || [])
     setConversations(c.data || [])
-    setLoading(false)
+    if (!silent) setLoading(false)
   }, [user])
 
   useEffect(() => {
@@ -267,10 +272,10 @@ export function useLandlordInquiries() {
 
     const channel = supabase
       .channel(`landlord-inquiries-${user.id}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'viewing_requests' }, fetchAll)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'listing_applications' }, fetchAll)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'application_documents' }, fetchAll)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'conversations' }, fetchAll)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'viewing_requests' }, () => fetchAll({ silent: true }))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'listing_applications' }, () => fetchAll({ silent: true }))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'application_documents' }, () => fetchAll({ silent: true }))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'conversations' }, () => fetchAll({ silent: true }))
       .subscribe()
 
     return () => supabase.removeChannel(channel)
@@ -283,8 +288,8 @@ export function useAdminApplications() {
   const [applications, setApplications] = useState([])
   const [loading, setLoading] = useState(true)
 
-  const fetchAll = useCallback(async () => {
-    setLoading(true)
+  const fetchAll = useCallback(async ({ silent = false } = {}) => {
+    if (!silent) setLoading(true)
     const { data, error } = await supabase
       .from('listing_applications')
       .select(`
@@ -295,7 +300,7 @@ export function useAdminApplications() {
       .limit(200)
 
     if (!error) setApplications(data || [])
-    setLoading(false)
+    if (!silent) setLoading(false)
   }, [])
 
   useEffect(() => {
@@ -305,8 +310,8 @@ export function useAdminApplications() {
   useEffect(() => {
     const channel = supabase
       .channel('admin-applications')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'listing_applications' }, fetchAll)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'application_documents' }, fetchAll)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'listing_applications' }, () => fetchAll({ silent: true }))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'application_documents' }, () => fetchAll({ silent: true }))
       .subscribe()
 
     return () => supabase.removeChannel(channel)

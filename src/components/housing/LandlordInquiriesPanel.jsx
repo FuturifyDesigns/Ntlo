@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { Calendar, CheckCircle2, Home, XCircle, Loader2 } from 'lucide-react'
 import { useTranslation } from '../../hooks/useTranslation'
 import { useLandlordInquiries } from '../../hooks/useHousing'
@@ -19,11 +20,31 @@ function statusVariant(status) {
 
 export default function LandlordInquiriesPanel() {
   const { t } = useTranslation()
+  const [searchParams] = useSearchParams()
   const { viewings, applications, conversations, loading, refetch } = useLandlordInquiries()
   const [tab, setTab] = useState('applications')
   const [busyId, setBusyId] = useState(null)
   const [activeChat, setActiveChat] = useState(null)
   const [activeChatStudent, setActiveChatStudent] = useState(null)
+  const [initialLoad, setInitialLoad] = useState(true)
+
+  useEffect(() => {
+    if (!loading) setInitialLoad(false)
+  }, [loading])
+
+  useEffect(() => {
+    const tabParam = searchParams.get('tab')
+    if (['applications', 'viewings', 'messages'].includes(tabParam)) setTab(tabParam)
+
+    const chatId = searchParams.get('chat')
+    if (!chatId || loading) return
+    const match = conversations.find((c) => c.id === chatId)
+    if (match) {
+      setActiveChat(chatId)
+      setActiveChatStudent(chatOtherProfile(match, 'student'))
+      setTab('messages')
+    }
+  }, [searchParams, conversations, loading])
 
   const pendingApplications = applications.filter((a) => a.status === 'submitted').length
   const pendingViewings = viewings.filter((v) => v.status === 'pending').length
@@ -75,7 +96,7 @@ export default function LandlordInquiriesPanel() {
     }
   }
 
-  if (loading) {
+  if (initialLoad && loading) {
     return (
       <div className="flex justify-center py-8">
         <Loader2 className="animate-spin text-muted" />

@@ -73,20 +73,53 @@ export async function submitApplication({ listingId, landlordId, moveInDate, dur
     throw new Error('Please upload Omang/passport and registration proof before submitting.')
   }
 
-  const { data, error } = await supabase
+  const { data: existing } = await supabase
     .from('listing_applications')
-    .insert({
-      listing_id: listingId,
-      student_id: user.id,
-      landlord_id: landlordId,
-      move_in_date: moveInDate || null,
-      duration_months: durationMonths ? Number(durationMonths) : null,
-      intro_message: introMessage?.trim() || null,
-    })
-    .select('*')
-    .single()
+    .select('id, status')
+    .eq('listing_id', listingId)
+    .eq('student_id', user.id)
+    .maybeSingle()
 
-  if (error) throw error
+  const activeStatuses = ['submitted', 'under_review', 'accepted', 'rented']
+  if (existing && activeStatuses.includes(existing.status)) {
+    throw new Error('You already have an active application for this room')
+  }
+
+  const payload = {
+    landlord_id: landlordId,
+    move_in_date: moveInDate || null,
+    duration_months: durationMonths ? Number(durationMonths) : null,
+    intro_message: introMessage?.trim() || null,
+  }
+
+  let data
+  if (existing) {
+    const { data: updated, error } = await supabase
+      .from('listing_applications')
+      .update({
+        ...payload,
+        status: 'submitted',
+        landlord_notes: null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', existing.id)
+      .select('*')
+      .single()
+    if (error) throw error
+    data = updated
+  } else {
+    const { data: inserted, error } = await supabase
+      .from('listing_applications')
+      .insert({
+        listing_id: listingId,
+        student_id: user.id,
+        ...payload,
+      })
+      .select('*')
+      .single()
+    if (error) throw error
+    data = inserted
+  }
 
   try {
     for (const { id: docType } of APPLICATION_DOC_TYPES) {
@@ -98,7 +131,9 @@ export async function submitApplication({ listingId, landlordId, moveInDate, dur
       })
     }
   } catch (uploadErr) {
-    await supabase.from('listing_applications').delete().eq('id', data.id)
+    if (!existing) {
+      await supabase.from('listing_applications').delete().eq('id', data.id)
+    }
     throw uploadErr
   }
 
@@ -193,6 +228,9 @@ export function mapHousingError(message) {
   if (message.includes('Add your gender')) return 'genderRequired'
   if (message.includes('no longer available')) return 'unavailable'
   if (message.includes('active application')) return 'duplicateApplication'
+  if (message.includes('listing_applications_listing_id_student_id_key') || message.includes('duplicate key value')) {
+    return 'duplicateApplication'
+  }
   if (message.includes('doc_type') || message.includes('application_documents')) return 'documentsFailed'
   if (message.includes('Bucket not found') || message.includes('application-docs')) return 'documentsStorage'
   return message

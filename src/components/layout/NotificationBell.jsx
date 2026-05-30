@@ -3,10 +3,12 @@ import { Link } from 'react-router-dom'
 import { Bell } from 'lucide-react'
 import { useNotifications } from '../../hooks/useNotifications'
 import { useTranslation } from '../../hooks/useTranslation'
+import { useAuth } from '../../hooks/useAuth'
 import { notificationHref } from '../../lib/notifications'
 
 export default function NotificationBell() {
   const { t } = useTranslation()
+  const { profile } = useAuth()
   const { items, unreadCount, readOne, readAll } = useNotifications()
   const [open, setOpen] = useState(false)
   const ref = useRef(null)
@@ -57,7 +59,7 @@ export default function NotificationBell() {
               items.map((n) => (
                 <Link
                   key={n.id}
-                  to={notificationHref(n.link)}
+                  to={notificationHref(n, profile?.role)}
                   onClick={() => handleClick(n)}
                   className={`block border-b border-border/60 px-4 py-3 text-left transition-colors hover:bg-background ${
                     n.read_at ? 'opacity-75' : 'bg-accent/5'

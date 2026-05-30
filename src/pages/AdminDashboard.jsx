@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import {
   Users, GraduationCap, Shield, Home, Ban, Trash2, Check, X,
@@ -62,6 +63,12 @@ export default function AdminDashboard() {
     setTab(id)
     try { sessionStorage.setItem(TAB_STORAGE_KEY, id) } catch { /* ignore */ }
   }, [])
+
+  const [searchParams] = useSearchParams()
+  useEffect(() => {
+    const tabParam = searchParams.get('tab')
+    if (tabParam && TABS.some((x) => x.id === tabParam)) selectTab(tabParam)
+  }, [searchParams, selectTab])
 
   const fetchRequests = useCallback(async () => {
     const { data } = await supabase

@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { Link } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Heart, Search } from 'lucide-react'
@@ -28,6 +29,14 @@ export default function StudentDashboard() {
   const { t } = useTranslation()
   const { prefs } = useLocale()
   const [section, setSection] = useState('saved')
+  const [searchParams] = useSearchParams()
+
+  useEffect(() => {
+    const tab = searchParams.get('tab')
+    if (tab && ['applications', 'viewings', 'messages'].includes(tab)) {
+      setSection('housing')
+    }
+  }, [searchParams])
   const myUni = getUniversityById(profile?.university_id)
   const pageLoading = loading || profileLoading
   const motionProps = prefs.reduceMotion ? {} : fade

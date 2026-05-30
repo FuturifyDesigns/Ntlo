@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { Loader2 } from 'lucide-react'
 import { useTranslation } from '../../hooks/useTranslation'
 import { useConversations, useStudentHousing } from '../../hooks/useHousing'
@@ -19,12 +20,32 @@ function statusVariant(status) {
 
 export default function StudentHousingPanel() {
   const { t } = useTranslation()
+  const [searchParams] = useSearchParams()
   const { conversations, loading: convLoading } = useConversations()
   const { viewings, applications, loading, refetch } = useStudentHousing()
   const [tab, setTab] = useState('applications')
   const [activeChat, setActiveChat] = useState(null)
   const [activeChatLandlord, setActiveChatLandlord] = useState(null)
   const [busyId, setBusyId] = useState(null)
+  const [initialLoad, setInitialLoad] = useState(true)
+
+  useEffect(() => {
+    if (!loading && !convLoading) setInitialLoad(false)
+  }, [loading, convLoading])
+
+  useEffect(() => {
+    const tabParam = searchParams.get('tab')
+    if (['applications', 'viewings', 'messages'].includes(tabParam)) setTab(tabParam)
+
+    const chatId = searchParams.get('chat')
+    if (!chatId || convLoading) return
+    const match = conversations.find((c) => c.id === chatId)
+    if (match) {
+      setActiveChat(chatId)
+      setActiveChatLandlord(chatOtherProfile(match, 'landlord'))
+      setTab('messages')
+    }
+  }, [searchParams, conversations, convLoading])
 
   async function handleWithdraw(id) {
     setBusyId(id)
@@ -54,7 +75,7 @@ export default function StudentHousingPanel() {
     { id: 'messages', label: t('housing.messages'), count: conversations.length },
   ]
 
-  if (loading || convLoading) {
+  if (initialLoad && (loading || convLoading)) {
     return (
       <div className="flex justify-center py-12">
         <Loader2 className="animate-spin text-muted" />
@@ -63,6 +84,7 @@ export default function StudentHousingPanel() {
   }
 
   return (
+    <>
     <div className="space-y-4">
       <div className="flex flex-wrap gap-2">
         {tabs.map((item) => (
@@ -176,5 +198,6 @@ export default function StudentHousingPanel() {
         )}
       </Modal>
     </div>
+    </>
   )
 }
