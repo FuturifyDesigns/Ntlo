@@ -27,6 +27,6 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
   return {
     plugins: [react(), tailwindcss(), authConfigPlugin(env)],
-    base: '/Ntlo/',
+    base: '/',
   }
 })

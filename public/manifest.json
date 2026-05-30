@@ -2,8 +2,8 @@
   "name": "Ntlo — Student Accommodation",
   "short_name": "Ntlo",
   "description": "Find verified student rooms near Botswana universities. Your campus home, sorted.",
-  "start_url": "/Ntlo/",
-  "scope": "/Ntlo/",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
   "background_color": "#F8F7F4",
@@ -12,13 +12,13 @@
   "categories": ["housing", "education"],
   "icons": [
     {
-      "src": "/Ntlo/favicon.png",
+      "src": "/favicon.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/Ntlo/favicon.png",
+      "src": "/favicon.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"

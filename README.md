@@ -2,7 +2,7 @@
 
 Student accommodation finder for Botswana — built by Futurify Designs.
 
-**Live site:** https://futurifydesigns.github.io/Ntlo/
+**Live site:** https://ntlo.online/
 
 ## Stack
 

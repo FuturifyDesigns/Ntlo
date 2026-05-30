@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://futurifydesigns.github.io/Ntlo/sitemap.xml
+Sitemap: https://ntlo.online/sitemap.xml

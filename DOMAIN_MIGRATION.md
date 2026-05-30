@@ -1,17 +1,21 @@
 # Domain / Site URL Migration Checklist
 
-Tracks **every place** the site URL, domain, or base path is set, so they can all be
-updated when moving to a custom domain.
+Tracks **every place** the site URL, domain, or base path is set.
+
+> **Status: migrated to custom domain `ntlo.online` (30 May 2026).**
+> Code/config below already point to `https://ntlo.online/`. The remaining work is
+> the external dashboard + DNS steps in Section B.
 
 Current values:
 
 | Thing | Current value |
 |-------|---------------|
-| Site URL | `https://futurifydesigns.github.io/Ntlo/` |
-| Base path | `/Ntlo/` (GitHub Pages project site) |
+| Site URL | `https://ntlo.online/` |
+| Base path | `/` (root custom domain) |
 | Supabase project URL | `https://kbpoljwacmzrakztnlkd.supabase.co` |
 | Contact email | `futurifydesigns@gmail.com` |
 | Company site (separate) | `https://futurifydesigns.com` |
+| Previous URL | `https://futurifydesigns.github.io/Ntlo/` |
 
 > **Key concept — base path:** GitHub Pages serves the app under `/Ntlo/`.
 > A custom **root** domain (e.g. `https://ntlo.co.bw/`) serves from `/`, so every

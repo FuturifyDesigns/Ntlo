@@ -6,12 +6,12 @@
 
 | Setting | Value |
 |---------|--------|
-| Site URL | `https://futurifydesigns.github.io/Ntlo/` |
-| Redirect URLs | `https://futurifydesigns.github.io/Ntlo/auth/verify.html` |
-| | `https://futurifydesigns.github.io/Ntlo/auth/reset.html` |
+| Site URL | `https://ntlo.online/` |
+| Redirect URLs | `https://ntlo.online/auth/verify.html` |
+| | `https://ntlo.online/auth/reset.html` |
 | | `http://localhost:5173/auth/verify.html` |
 | | `http://localhost:5173/auth/reset.html` |
-| | `https://futurifydesigns.github.io/Ntlo/auth/callback.html` |
+| | `https://ntlo.online/auth/callback.html` |
 | | `http://localhost:5173/auth/callback.html` |
 
 ## 2. Email templates
@@ -30,8 +30,8 @@ Suggested subjects:
 
 | Page | URL | Purpose |
 |------|-----|---------|
-| Verify | `/Ntlo/auth/verify.html` | Email confirmation — shows “You’re verified, close this page” |
-| Reset | `/Ntlo/auth/reset.html` | Set new password after email link |
+| Verify | `/auth/verify.html` | Email confirmation — shows “You’re verified, close this page” |
+| Reset | `/auth/reset.html` | Set new password after email link |
 | Forgot password | `/#/forgot-password` | Request reset email |
 | Check email | `/#/check-email` | Shown after register when confirm email is required |
 

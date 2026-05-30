@@ -40,13 +40,13 @@ Configure redirect URLs and paste email templates — see `supabase/email-templa
 2. Create OAuth credentials in [Google Cloud Console](https://console.cloud.google.com/apis/credentials):
    - Application type: **Web application**
    - **Authorized JavaScript origins:**
-     - `https://futurifydesigns.github.io`
+     - `https://ntlo.online`
      - `http://localhost:5173`
    - **Authorized redirect URIs:**
      - `https://kbpoljwacmzrakztnlkd.supabase.co/auth/v1/callback`
 3. Paste the **Client ID** and **Client Secret** into Supabase Google provider settings
 4. In **Authentication** → **URL Configuration**, add redirect URLs:
-   - `https://futurifydesigns.github.io/Ntlo/auth/callback.html`
+   - `https://ntlo.online/auth/callback.html`
    - `http://localhost:5173/auth/callback.html`
 
 ## 5. GitHub Actions secrets
@@ -63,7 +63,7 @@ In your GitHub repo → **Settings** → **Secrets and variables** → **Actions
 2. Create an API key under **APIs & Services** → **Credentials**
 3. Restrict the key (recommended):
    - **Application restrictions:** HTTP referrers
-   - Add `https://futurifydesigns.github.io/*` and `http://localhost:5173/*`
+   - Add `https://ntlo.online/*` and `http://localhost:5173/*`
    - **API restrictions:** Maps JavaScript API
 4. Add to local `.env`:
    ```
@@ -75,9 +75,9 @@ Maps appear on browse (map view), listing detail, landlord dashboard, and the cr
 
 ## 7. GitHub Pages
 
-In repo **Settings** → **Pages** → Source: **GitHub Actions**
+In repo **Settings** → **Pages** → Source: **GitHub Actions**, and set **Custom domain** to `ntlo.online`.
 
-Push to `main` and the site deploys to https://futurifydesigns.github.io/Ntlo/
+Push to `main` and the site deploys to https://ntlo.online/
 
 ## 8. Admin panel & landlord verification
 
