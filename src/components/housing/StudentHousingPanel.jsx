@@ -10,6 +10,7 @@ import Badge from '../ui/Badge'
 import Button from '../ui/Button'
 import Modal from '../ui/Modal'
 import ConversationChat from './ConversationChat'
+import WithdrawReasonModal, { APPLICATION_WITHDRAW_REASONS, VIEWING_CANCEL_REASONS } from './WithdrawReasonModal'
 import { chatOtherProfile } from '../../hooks/usePresence'
 
 function statusVariant(status) {
@@ -28,6 +29,8 @@ export default function StudentHousingPanel() {
   const [activeChatLandlord, setActiveChatLandlord] = useState(null)
   const [busyId, setBusyId] = useState(null)
   const [initialLoad, setInitialLoad] = useState(true)
+  const [withdrawAppId, setWithdrawAppId] = useState(null)
+  const [cancelViewingId, setCancelViewingId] = useState(null)
 
   useEffect(() => {
     if (!loading && !convLoading) setInitialLoad(false)
@@ -47,20 +50,24 @@ export default function StudentHousingPanel() {
     }
   }, [searchParams, conversations, convLoading])
 
-  async function handleWithdraw(id) {
-    setBusyId(id)
+  async function handleWithdraw({ reasonCode, reasonNote }) {
+    if (!withdrawAppId) return
+    setBusyId(withdrawAppId)
     try {
-      await withdrawApplication(id)
+      await withdrawApplication(withdrawAppId, { reasonCode, reasonNote })
+      setWithdrawAppId(null)
       refetch()
     } finally {
       setBusyId(null)
     }
   }
 
-  async function handleCancelViewing(id) {
-    setBusyId(id)
+  async function handleCancelViewing({ reasonCode, reasonNote }) {
+    if (!cancelViewingId) return
+    setBusyId(cancelViewingId)
     try {
-      await cancelViewingRequest(id)
+      await cancelViewingRequest(cancelViewingId, { reasonCode, reasonNote })
+      setCancelViewingId(null)
       refetch()
     } finally {
       setBusyId(null)
@@ -137,7 +144,7 @@ export default function StudentHousingPanel() {
               )}
 
               {['submitted', 'under_review'].includes(app.status) && (
-                <Button size="sm" variant="outline" disabled={busyId === app.id} onClick={() => handleWithdraw(app.id)}>
+                <Button size="sm" variant="outline" disabled={busyId === app.id} onClick={() => setWithdrawAppId(app.id)}>
                   {t('housing.withdrawApplication')}
                 </Button>
               )}
@@ -161,7 +168,7 @@ export default function StudentHousingPanel() {
                 <Badge variant={statusVariant(vr.status)}>{vr.status}</Badge>
               </div>
               {vr.status === 'pending' && (
-                <Button size="sm" variant="outline" disabled={busyId === vr.id} onClick={() => handleCancelViewing(vr.id)}>
+                <Button size="sm" variant="outline" disabled={busyId === vr.id} onClick={() => setCancelViewingId(vr.id)}>
                   {t('housing.cancelViewing')}
                 </Button>
               )}
@@ -191,6 +198,23 @@ export default function StudentHousingPanel() {
           ))}
         </div>
       )}
+
+      <WithdrawReasonModal
+        open={Boolean(withdrawAppId)}
+        onClose={() => setWithdrawAppId(null)}
+        onConfirm={handleWithdraw}
+        title={t('housing.withdrawApplication')}
+        reasons={APPLICATION_WITHDRAW_REASONS}
+        busy={Boolean(withdrawAppId && busyId === withdrawAppId)}
+      />
+      <WithdrawReasonModal
+        open={Boolean(cancelViewingId)}
+        onClose={() => setCancelViewingId(null)}
+        onConfirm={handleCancelViewing}
+        title={t('housing.cancelViewing')}
+        reasons={VIEWING_CANCEL_REASONS}
+        busy={Boolean(cancelViewingId && busyId === cancelViewingId)}
+      />
 
       <Modal open={Boolean(activeChat)} onClose={() => { setActiveChat(null); setActiveChatLandlord(null) }} title={t('housing.messages')}>
         {activeChat && (

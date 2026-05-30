@@ -10,6 +10,7 @@ import Input, { Textarea } from '../ui/Input'
 import { getWhatsAppLink } from '../../lib/utils'
 import { createViewingRequest, submitApplication, mapHousingError, cancelViewingRequest, withdrawApplication } from '../../lib/housing'
 import ConversationChat from './ConversationChat'
+import WithdrawReasonModal, { APPLICATION_WITHDRAW_REASONS, VIEWING_CANCEL_REASONS } from './WithdrawReasonModal'
 import ApplicationDocFields from './ApplicationDocFields'
 import ApplicationRequirementsList from './ApplicationRequirementsList'
 import { APPLICATION_DOC_TYPES } from '../../lib/applicationDocs'
@@ -51,6 +52,9 @@ export default function ListingContactPanel({ listing }) {
   const [applyDone, setApplyDone] = useState(false)
   const [applyDocs, setApplyDocs] = useState({})
   const [applyError, setApplyError] = useState('')
+  const [withdrawOpen, setWithdrawOpen] = useState(false)
+  const [cancelViewingOpen, setCancelViewingOpen] = useState(false)
+  const [withdrawBusy, setWithdrawBusy] = useState(false)
 
   const landlordName = listing.landlord_display_name || listing.landlord?.full_name || 'Landlord'
   const isStudent = profile?.role === 'student'
@@ -130,25 +134,33 @@ export default function ListingContactPanel({ listing }) {
     }
   }
 
-  async function handleCancelViewing() {
-    if (!activeViewing?.id) return
-    try {
-      await cancelViewingRequest(activeViewing.id)
-      refetchStatus()
-    } catch (err) {
-      setApplyError(err.message)
-    }
-  }
-
-  async function handleWithdrawApplication() {
+  async function handleWithdrawApplication({ reasonCode, reasonNote }) {
     if (!activeApplication?.id) return
+    setWithdrawBusy(true)
     try {
-      await withdrawApplication(activeApplication.id)
+      await withdrawApplication(activeApplication.id, { reasonCode, reasonNote })
       refetchStatus()
       setApplyOpen(false)
       setApplyDone(false)
+      setWithdrawOpen(false)
     } catch (err) {
       setApplyError(err.message)
+    } finally {
+      setWithdrawBusy(false)
+    }
+  }
+
+  async function handleCancelViewing({ reasonCode, reasonNote }) {
+    if (!activeViewing?.id) return
+    setWithdrawBusy(true)
+    try {
+      await cancelViewingRequest(activeViewing.id, { reasonCode, reasonNote })
+      refetchStatus()
+      setCancelViewingOpen(false)
+    } catch (err) {
+      setApplyError(err.message)
+    } finally {
+      setWithdrawBusy(false)
     }
   }
 
@@ -216,7 +228,7 @@ export default function ListingContactPanel({ listing }) {
                   : t('housing.scheduleViewing')}
             </Button>
             {viewingPending && (
-              <button type="button" onClick={handleCancelViewing} className="w-full text-center text-xs text-muted underline hover:text-primary">
+              <button type="button" onClick={() => setCancelViewingOpen(true)} className="w-full text-center text-xs text-muted underline hover:text-primary">
                 {t('housing.cancelViewing')}
               </button>
             )}
@@ -229,21 +241,22 @@ export default function ListingContactPanel({ listing }) {
                   : t('housing.applyNow')}
             </Button>
             {applicationPending && (
-              <button type="button" onClick={handleWithdrawApplication} className="w-full text-center text-xs text-muted underline hover:text-primary">
+              <button type="button" onClick={() => setWithdrawOpen(true)} className="w-full text-center text-xs text-muted underline hover:text-primary">
                 {t('housing.withdrawApplication')}
               </button>
             )}
+            <p className="text-center text-xs text-muted">{t('housing.inAppPreferred')}</p>
             <Button
               as="a"
               href={getWhatsAppLink(listing.whatsapp_number, listing.title)}
               target="_blank"
               rel="noopener noreferrer"
-              variant="whatsapp"
-              size="lg"
+              variant="outline"
+              size="sm"
               className="w-full"
             >
-              <WhatsAppIcon />
-              {t('listings.chatWhatsApp')}
+              <WhatsAppIcon size={16} />
+              {t('listings.chatWhatsAppOptional')}
             </Button>
             {applyBlockedReason && applyBlockedReason !== 'genderRequired' && (
               <p className="text-xs text-error">{t(`housing.errors.${applyBlockedReason}`)}</p>
@@ -275,7 +288,7 @@ export default function ListingContactPanel({ listing }) {
           <div className="space-y-3">
             <p className="text-sm text-success">{t('housing.viewingSent')}</p>
             {viewingPending && (
-              <Button variant="outline" size="sm" onClick={handleCancelViewing}>{t('housing.cancelViewing')}</Button>
+              <Button variant="outline" size="sm" onClick={() => setCancelViewingOpen(true)}>{t('housing.cancelViewing')}</Button>
             )}
           </div>
         ) : (
@@ -304,7 +317,7 @@ export default function ListingContactPanel({ listing }) {
           <div className="space-y-3">
             <p className="text-sm text-success">{t('housing.applicationSent')}</p>
             {applicationPending && (
-              <Button variant="outline" size="sm" onClick={handleWithdrawApplication}>{t('housing.withdrawApplication')}</Button>
+              <Button variant="outline" size="sm" onClick={() => setWithdrawOpen(true)}>{t('housing.withdrawApplication')}</Button>
             )}
           </div>
         ) : (
@@ -342,6 +355,23 @@ export default function ListingContactPanel({ listing }) {
           </form>
         )}
       </Modal>
+
+      <WithdrawReasonModal
+        open={withdrawOpen}
+        onClose={() => setWithdrawOpen(false)}
+        onConfirm={handleWithdrawApplication}
+        title={t('housing.withdrawApplication')}
+        reasons={APPLICATION_WITHDRAW_REASONS}
+        busy={withdrawBusy}
+      />
+      <WithdrawReasonModal
+        open={cancelViewingOpen}
+        onClose={() => setCancelViewingOpen(false)}
+        onConfirm={handleCancelViewing}
+        title={t('housing.cancelViewing')}
+        reasons={VIEWING_CANCEL_REASONS}
+        busy={withdrawBusy}
+      />
 
       {canContact && (
         <div className="fixed bottom-16 left-0 right-0 z-40 border-t border-border bg-surface p-3 md:hidden">

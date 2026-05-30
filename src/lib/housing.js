@@ -85,8 +85,16 @@ export async function submitApplication({ listingId, landlordId, moveInDate, dur
     throw new Error('You already have an active application for this room')
   }
 
+  const { data: listingRow } = await supabase
+    .from('listings')
+    .select('landlord_id')
+    .eq('id', listingId)
+    .single()
+
+  const ownerId = listingRow?.landlord_id || landlordId
+
   const payload = {
-    landlord_id: landlordId,
+    landlord_id: ownerId,
     move_in_date: moveInDate || null,
     duration_months: durationMonths ? Number(durationMonths) : null,
     intro_message: introMessage?.trim() || null,
@@ -131,9 +139,6 @@ export async function submitApplication({ listingId, landlordId, moveInDate, dur
       })
     }
   } catch (uploadErr) {
-    if (!existing) {
-      await supabase.from('listing_applications').delete().eq('id', data.id)
-    }
     throw uploadErr
   }
 
@@ -156,9 +161,11 @@ export async function markApplicationRented(applicationId) {
   if (error) throw error
 }
 
-export async function cancelViewingRequest(viewingId) {
+export async function cancelViewingRequest(viewingId, { reasonCode, reasonNote } = {}) {
   const { error } = await supabase.rpc('cancel_viewing_request', {
     p_viewing_id: viewingId,
+    p_reason_code: reasonCode,
+    p_reason_note: reasonNote || null,
   })
   if (error) throw error
 }
@@ -207,9 +214,11 @@ export async function fetchStudentListingStatus(listingId) {
   return { viewing: v.data, application: a.data }
 }
 
-export async function withdrawApplication(applicationId) {
+export async function withdrawApplication(applicationId, { reasonCode, reasonNote } = {}) {
   const { error } = await supabase.rpc('withdraw_application', {
     p_application_id: applicationId,
+    p_reason_code: reasonCode,
+    p_reason_note: reasonNote || null,
   })
   if (error) throw error
 }

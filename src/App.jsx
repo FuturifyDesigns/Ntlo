@@ -38,7 +38,7 @@ import CookieConsentBanner from './components/layout/CookieConsentBanner'
 import CookieFeedbackToast from './components/layout/CookieFeedbackToast'
 import CookiePreferencesModal from './components/layout/CookiePreferencesModal'
 import ExitIntentModal from './components/layout/ExitIntentModal'
-import AnalyticsTracker from './components/layout/AnalyticsTracker'
+import UrgentNotificationLayer from './components/layout/UrgentNotificationLayer'
 import GoogleMapsProvider from './components/maps/GoogleMapsProvider'
 import { SavedListingsProvider } from './context/SavedListingsContext'
 import { useLocale } from './context/LocaleContext'
@@ -131,6 +131,7 @@ function AppShell() {
         <CookieConsentBanner />
         <CookiePreferencesModal />
         <CookieFeedbackToast />
+        <UrgentNotificationLayer />
         <ExitIntentModal />
         <AnalyticsTracker />
       </div>

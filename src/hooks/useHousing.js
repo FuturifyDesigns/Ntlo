@@ -257,8 +257,18 @@ export function useLandlordInquiries() {
         .order('last_message_at', { ascending: false, nullsFirst: false }),
     ])
 
+    if (a.error) {
+      const fallback = await supabase
+        .from('listing_applications')
+        .select('*, listing:listings(id, title, area, city, price, available, gender_preference, room_type), student:profiles!listing_applications_student_id_fkey(id, full_name, phone, university_id, gender)')
+        .eq('landlord_id', user.id)
+        .order('created_at', { ascending: false })
+      setApplications(fallback.data || [])
+    } else {
+      setApplications(a.data || [])
+    }
+
     setViewings(v.data || [])
-    setApplications(a.data || [])
     setConversations(c.data || [])
     if (!silent) setLoading(false)
   }, [user])

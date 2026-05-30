@@ -3,7 +3,9 @@ import { useSearchParams } from 'react-router-dom'
 import { Calendar, CheckCircle2, Home, XCircle, Loader2 } from 'lucide-react'
 import { useTranslation } from '../../hooks/useTranslation'
 import { useLandlordInquiries } from '../../hooks/useHousing'
-import { respondToApplication, markApplicationRented, relistListing, updateViewingRequest } from '../../lib/housing'
+import { respondToApplication, markApplicationRented, relistListing, updateViewingRequest, cancelViewingRequest } from '../../lib/housing'
+import WithdrawReasonModal, { VIEWING_CANCEL_REASONS } from './WithdrawReasonModal'
+import ApplicationAdvisorPanel from '../advisor/ApplicationAdvisorPanel'
 import ApplicationDocumentsList from './ApplicationDocumentsList'
 import ConversationChat from './ConversationChat'
 import { chatOtherProfile } from '../../hooks/usePresence'
@@ -27,6 +29,8 @@ export default function LandlordInquiriesPanel() {
   const [activeChat, setActiveChat] = useState(null)
   const [activeChatStudent, setActiveChatStudent] = useState(null)
   const [initialLoad, setInitialLoad] = useState(true)
+  const [cancelViewingId, setCancelViewingId] = useState(null)
+  const [cancelBusy, setCancelBusy] = useState(false)
 
   useEffect(() => {
     if (!loading) setInitialLoad(false)
@@ -83,6 +87,18 @@ export default function LandlordInquiriesPanel() {
       refetch()
     } finally {
       setBusyId(null)
+    }
+  }
+
+  async function handleCancelViewing({ reasonCode, reasonNote }) {
+    if (!cancelViewingId) return
+    setCancelBusy(true)
+    try {
+      await cancelViewingRequest(cancelViewingId, { reasonCode, reasonNote })
+      setCancelViewingId(null)
+      refetch()
+    } finally {
+      setCancelBusy(false)
     }
   }
 
@@ -166,6 +182,10 @@ export default function LandlordInquiriesPanel() {
 
               <ApplicationDocumentsList documents={app.documents} />
 
+              {['submitted', 'under_review'].includes(app.status) && (
+                <ApplicationAdvisorPanel application={app} />
+              )}
+
               {app.status === 'submitted' && (
                 <div className="flex flex-wrap gap-2">
                   <Button size="sm" disabled={busyId === app.id} onClick={() => handleApplication(app.id, true)}>
@@ -225,13 +245,20 @@ export default function LandlordInquiriesPanel() {
                 </div>
                 <Badge>{vr.status}</Badge>
               </div>
-              {vr.status === 'pending' && (
-                <div className="flex gap-2">
-                  <Button size="sm" disabled={busyId === vr.id} onClick={() => handleViewing(vr.id, 'confirmed')}>
-                    {t('housing.confirmViewing')}
-                  </Button>
-                  <Button size="sm" variant="outline" disabled={busyId === vr.id} onClick={() => handleViewing(vr.id, 'declined')}>
-                    {t('housing.decline')}
+              {['pending', 'confirmed'].includes(vr.status) && (
+                <div className="flex flex-wrap gap-2">
+                  {vr.status === 'pending' && (
+                    <>
+                      <Button size="sm" disabled={busyId === vr.id} onClick={() => handleViewing(vr.id, 'confirmed')}>
+                        {t('housing.confirmViewing')}
+                      </Button>
+                      <Button size="sm" variant="outline" disabled={busyId === vr.id} onClick={() => handleViewing(vr.id, 'declined')}>
+                        {t('housing.decline')}
+                      </Button>
+                    </>
+                  )}
+                  <Button size="sm" variant="outline" disabled={busyId === vr.id} onClick={() => setCancelViewingId(vr.id)}>
+                    {t('housing.cancelViewing')}
                   </Button>
                 </div>
               )}
@@ -261,6 +288,15 @@ export default function LandlordInquiriesPanel() {
           ))}
         </div>
       )}
+
+      <WithdrawReasonModal
+        open={Boolean(cancelViewingId)}
+        onClose={() => setCancelViewingId(null)}
+        onConfirm={handleCancelViewing}
+        title={t('housing.cancelViewing')}
+        reasons={VIEWING_CANCEL_REASONS}
+        busy={cancelBusy}
+      />
 
       <Modal open={Boolean(activeChat)} onClose={() => { setActiveChat(null); setActiveChatStudent(null) }} title={t('housing.messages')}>
         {activeChat && (
