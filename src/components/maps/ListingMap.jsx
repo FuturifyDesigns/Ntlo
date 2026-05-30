@@ -1,6 +1,8 @@
-import { useMemo } from 'react'
-import { Map, Marker } from '@vis.gl/react-google-maps'
+import { useEffect, useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
+import { Map, Marker, InfoWindow, useMap } from '@vis.gl/react-google-maps'
 import {
+  CAMPUS_MAP_ZOOM,
   DEFAULT_MAP_CENTER,
   DEFAULT_MAP_ZOOM,
   MAPS_ENABLED,
@@ -8,9 +10,53 @@ import {
   getListingPosition,
   toLatLng,
 } from '../../lib/googleMaps'
+import { formatPrice } from '../../lib/utils'
+import { useTranslation } from '../../hooks/useTranslation'
 import { MapUnavailable } from './GoogleMapsProvider'
 
-function MapWithMarkers({ listings, center, zoom, height, className, emptyHint }) {
+function MapViewportController({ viewport, plotted }) {
+  const map = useMap()
+
+  useEffect(() => {
+    if (!map) return
+
+    if (viewport?.center) {
+      map.setCenter(viewport.center)
+      map.setZoom(viewport.zoom ?? CAMPUS_MAP_ZOOM)
+      return
+    }
+
+    if (!plotted.length) {
+      map.setCenter(DEFAULT_MAP_CENTER)
+      map.setZoom(DEFAULT_MAP_ZOOM)
+      return
+    }
+
+    if (plotted.length === 1) {
+      map.setCenter(plotted[0].position)
+      map.setZoom(SINGLE_LISTING_ZOOM)
+      return
+    }
+
+    const bounds = new google.maps.LatLngBounds()
+    plotted.forEach(({ position }) => bounds.extend(position))
+    map.fitBounds(bounds, 48)
+  }, [map, viewport, plotted])
+
+  return null
+}
+
+function MapWithMarkers({
+  listings,
+  viewport,
+  height,
+  className,
+  emptyHint,
+  interactive = false,
+}) {
+  const { t } = useTranslation()
+  const [selectedId, setSelectedId] = useState(null)
+
   const plotted = useMemo(
     () =>
       listings
@@ -23,13 +69,17 @@ function MapWithMarkers({ listings, center, zoom, height, className, emptyHint }
     [listings]
   )
 
-  const mapCenter = useMemo(() => {
-    if (center) return center
-    if (plotted[0]) return { lat: plotted[0].position.lat, lng: plotted[0].position.lng }
-    return DEFAULT_MAP_CENTER
-  }, [center, plotted])
+  const selected = plotted.find(({ listing }) => listing.id === selectedId)
 
-  const mapZoom = plotted.length === 1 ? SINGLE_LISTING_ZOOM : zoom
+  const initialCenter = viewport?.center
+    || (plotted[0] ? { lat: plotted[0].position.lat, lng: plotted[0].position.lng } : DEFAULT_MAP_CENTER)
+
+  const initialZoom = viewport?.zoom
+    ?? (plotted.length === 1 ? SINGLE_LISTING_ZOOM : DEFAULT_MAP_ZOOM)
+
+  useEffect(() => {
+    setSelectedId(null)
+  }, [listings, viewport])
 
   return (
     <div className={`relative overflow-hidden rounded-xl border border-border ${className}`} style={{ height }}>
@@ -38,19 +88,55 @@ function MapWithMarkers({ listings, center, zoom, height, className, emptyHint }
           {emptyHint}
         </div>
       )}
+      {viewport?.center && (
+        <div className="absolute inset-x-0 top-0 z-10 border-b border-border bg-primary/90 px-4 py-2 text-center text-sm font-medium text-white">
+          {t('listings.mapCampusFocus', { campus: viewport.label || t('listings.mapCampusDefault') })}
+        </div>
+      )}
       <Map
-        defaultCenter={mapCenter}
-        defaultZoom={mapZoom}
+        defaultCenter={initialCenter}
+        defaultZoom={initialZoom}
         gestureHandling="cooperative"
         style={{ width: '100%', height: '100%' }}
+        onClick={() => setSelectedId(null)}
       >
+        <MapViewportController viewport={viewport} plotted={plotted} />
         {plotted.map(({ listing, position }) => (
           <Marker
             key={listing.id}
             position={{ lat: position.lat, lng: position.lng }}
             title={listing.title}
+            onClick={(event) => {
+              if (typeof event.stop === 'function') event.stop()
+              if (interactive) setSelectedId(listing.id)
+            }}
           />
         ))}
+        {interactive && selected && (
+          <InfoWindow
+            position={{ lat: selected.position.lat, lng: selected.position.lng }}
+            onCloseClick={() => setSelectedId(null)}
+          >
+            <div className="max-w-[220px] space-y-2 p-1">
+              <p className="font-semibold text-primary">{selected.listing.title}</p>
+              <p className="text-sm font-mono font-semibold text-accent">
+                {formatPrice(selected.listing.price)}{t('listings.perMo')}
+              </p>
+              <p className="text-xs text-muted">
+                {[selected.listing.area, selected.listing.city].filter(Boolean).join(', ')}
+              </p>
+              {selected.position.approximate && (
+                <p className="text-xs text-muted">{t('listings.mapApproxPin')}</p>
+              )}
+              <Link
+                to={`/listings/${selected.listing.id}`}
+                className="inline-block text-sm font-semibold text-accent hover:underline"
+              >
+                {t('listings.viewListing')} →
+              </Link>
+            </div>
+          </InfoWindow>
+        )}
       </Map>
     </div>
   )
@@ -58,11 +144,11 @@ function MapWithMarkers({ listings, center, zoom, height, className, emptyHint }
 
 export default function ListingMap({
   listings = [],
-  center,
-  zoom = DEFAULT_MAP_ZOOM,
+  viewport = null,
   height = '400px',
   className = '',
   emptyHint = 'No listing locations yet — showing default map area.',
+  interactive = false,
 }) {
   if (!MAPS_ENABLED) {
     return (
@@ -79,11 +165,11 @@ export default function ListingMap({
   return (
     <MapWithMarkers
       listings={listings}
-      center={center}
-      zoom={zoom}
+      viewport={viewport}
       height={height}
       className={className}
       emptyHint={hasAnyPosition ? null : emptyHint}
+      interactive={interactive}
     />
   )
 }

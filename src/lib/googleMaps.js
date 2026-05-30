@@ -4,6 +4,7 @@ export const MAPS_ENABLED = Boolean(GOOGLE_MAPS_API_KEY)
 /** Gaborone / UB area */
 export const DEFAULT_MAP_CENTER = { lat: -24.6556, lng: 25.909 }
 export const DEFAULT_MAP_ZOOM = 13
+export const CAMPUS_MAP_ZOOM = 14
 export const SINGLE_LISTING_ZOOM = 15
 
 export function toLatLng(lat, lng) {

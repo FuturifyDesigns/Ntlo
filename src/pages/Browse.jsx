@@ -35,6 +35,20 @@ export default function Browse() {
     [filters, view]
   )
 
+  const mapViewport = useMemo(() => {
+    if (filters.universityId && filters.universityId !== 'other') {
+      const university = getUniversityById(filters.universityId)
+      if (university) {
+        return {
+          center: { lat: university.lat, lng: university.lng },
+          zoom: undefined,
+          label: university.short_name,
+        }
+      }
+    }
+    return null
+  }, [filters.universityId])
+
   const { listings, loading, isFetching, error, count, page, setPage, pageSize } = useListings(queryFilters)
   const uni = filters.universityId ? getUniversityById(filters.universityId) : null
 
@@ -98,7 +112,9 @@ export default function Browse() {
         {view === 'map' ? (
           <ListingMap
             listings={listings}
+            viewport={mapViewport}
             height="500px"
+            interactive
             emptyHint={t('listings.mapNoLocations')}
           />
         ) : (
