@@ -11,6 +11,7 @@ import Card from '../components/ui/Card'
 import { Skeleton } from '../components/ui/Skeleton'
 import { formatPrice, getCoverPhoto } from '../lib/utils'
 import ListingMap from '../components/listings/ListingMap'
+import LandlordWelcomeBanner from '../components/landlord/LandlordWelcomeBanner'
 import { MAPS_ENABLED } from '../lib/googleMaps'
 
 const PLACEHOLDER = 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400&q=80'
@@ -82,6 +83,8 @@ export default function LandlordDashboard() {
           {t('dashboard.addListing')}
         </Button>
       </div>
+
+      <LandlordWelcomeBanner userId={user?.id} profile={profile} />
 
       <div className="mb-8 grid gap-4 sm:grid-cols-3">
         <Card className="p-5">

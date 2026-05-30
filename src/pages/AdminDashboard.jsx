@@ -228,6 +228,18 @@ export default function AdminDashboard() {
           notes,
         })
         if (error) throw error
+        setUsers((prev) =>
+          prev.map((u) =>
+            u.id === item.id
+              ? {
+                  ...u,
+                  verification_status: approved ? 'approved' : 'rejected',
+                  is_verified: approved,
+                }
+              : u
+          )
+        )
+        setLandlords((prev) => prev.filter((l) => l.id !== item.id))
         await fetchLandlords()
         await fetchUsers()
         setToast({

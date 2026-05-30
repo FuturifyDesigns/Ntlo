@@ -11,8 +11,8 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true)
   const [profileLoading, setProfileLoading] = useState(false)
 
-  async function fetchProfile(userId) {
-    setProfileLoading(true)
+  async function fetchProfile(userId, { silent = false } = {}) {
+    if (!silent) setProfileLoading(true)
     try {
       const { data } = await supabase
         .from('profiles')
@@ -22,7 +22,7 @@ export function AuthProvider({ children }) {
       setProfile(data)
       return data
     } finally {
-      setProfileLoading(false)
+      if (!silent) setProfileLoading(false)
     }
   }
 
@@ -46,6 +46,25 @@ export function AuthProvider({ children }) {
 
     return () => subscription.unsubscribe()
   }, [])
+
+  // Realtime profile updates (admin approval, ban, feedback, etc.)
+  useEffect(() => {
+    if (!user?.id) return undefined
+
+    const channel = supabase
+      .channel(`auth-profile-${user.id}`)
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'profiles', filter: `id=eq.${user.id}` },
+        (payload) => {
+          if (payload.new) setProfile((prev) => ({ ...prev, ...payload.new }))
+          else fetchProfile(user.id, { silent: true })
+        }
+      )
+      .subscribe()
+
+    return () => supabase.removeChannel(channel)
+  }, [user?.id])
 
   async function signUp({ email, password, fullName, role, phone }) {
     const { data, error } = await supabase.auth.signUp({
@@ -168,7 +187,7 @@ export function AuthProvider({ children }) {
       signOut,
       resetPassword,
       updateProfile,
-      refreshProfile: () => user && fetchProfile(user.id),
+      refreshProfile: () => user && fetchProfile(user.id, { silent: true }),
       isStudent: profile?.role === 'student',
       isLandlord: profile?.role === 'landlord',
       isAdmin: profile?.role === 'admin',

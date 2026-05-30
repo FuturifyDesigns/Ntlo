@@ -113,6 +113,14 @@ export default function LandlordVerify() {
         </div>
         <h1 className="font-display text-3xl font-bold text-primary">{t('verification.approvedTitle')}</h1>
         <p className="mt-3 text-muted">{t('verification.approvedDesc')}</p>
+        {profile?.verification_notes?.trim() && (
+          <div className="mx-auto mt-5 max-w-md rounded-xl border border-success/30 bg-success/5 px-4 py-3 text-left">
+            <p className="text-xs font-semibold uppercase tracking-wide text-success">
+              {t('verification.adminApprovalMessage')}
+            </p>
+            <p className="mt-1.5 text-sm text-primary">{profile.verification_notes}</p>
+          </div>
+        )}
         <div className="mt-8">
           <Button size="lg" onClick={() => navigate('/landlord')}>
             {t('verification.goToDashboard')}
