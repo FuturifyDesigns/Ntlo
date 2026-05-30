@@ -10,6 +10,54 @@ const APPLICATION_SELECT = `
   student:profiles!listing_applications_student_id_fkey(id, full_name, phone, university_id, gender)
 `
 
+async function fetchLandlordApplications(landlordUserId) {
+  const listingJoinSelect = `
+    *,
+    listing:listings!inner(id, title, area, city, price, available, gender_preference, room_type, landlord_id),
+    student:profiles!listing_applications_student_id_fkey(id, full_name, phone, university_id, gender)
+  `
+
+  let { data, error } = await supabase
+    .from('listing_applications')
+    .select(listingJoinSelect)
+    .eq('listing.landlord_id', landlordUserId)
+    .order('created_at', { ascending: false })
+
+  if (error || !data?.length) {
+    const fallback = await supabase
+      .from('listing_applications')
+      .select(`
+        *,
+        listing:listings(id, title, area, city, price, available, gender_preference, room_type),
+        student:profiles!listing_applications_student_id_fkey(id, full_name, phone, university_id, gender)
+      `)
+      .eq('landlord_id', landlordUserId)
+      .order('created_at', { ascending: false })
+    data = fallback.data
+    error = fallback.error
+  }
+
+  if (error || !data?.length) {
+    return { data: data || [], error }
+  }
+
+  const { data: docs } = await supabase
+    .from('application_documents')
+    .select('id, application_id, doc_type, file_name, storage_path, created_at')
+    .in('application_id', data.map((row) => row.id))
+
+  const docsByApp = {}
+  for (const doc of docs || []) {
+    if (!docsByApp[doc.application_id]) docsByApp[doc.application_id] = []
+    docsByApp[doc.application_id].push(doc)
+  }
+
+  return {
+    data: data.map((row) => ({ ...row, documents: docsByApp[row.id] || [] })),
+    error: null,
+  }
+}
+
 export function useConversations() {
   const { user, profile } = useAuth()
   const [conversations, setConversations] = useState([])
@@ -235,17 +283,13 @@ export function useLandlordInquiries() {
     }
 
     if (!silent) setLoading(true)
-    const [v, a, c] = await Promise.all([
+    const [v, appsResult, c] = await Promise.all([
       supabase
         .from('viewing_requests')
         .select('*, listing:listings(id, title), student:profiles!viewing_requests_student_id_fkey(id, full_name, last_seen_at)')
         .eq('landlord_id', user.id)
         .order('created_at', { ascending: false }),
-      supabase
-        .from('listing_applications')
-        .select(APPLICATION_SELECT)
-        .eq('landlord_id', user.id)
-        .order('created_at', { ascending: false }),
+      fetchLandlordApplications(user.id),
       supabase
         .from('conversations')
         .select(`
@@ -257,18 +301,8 @@ export function useLandlordInquiries() {
         .order('last_message_at', { ascending: false, nullsFirst: false }),
     ])
 
-    if (a.error) {
-      const fallback = await supabase
-        .from('listing_applications')
-        .select('*, listing:listings(id, title, area, city, price, available, gender_preference, room_type), student:profiles!listing_applications_student_id_fkey(id, full_name, phone, university_id, gender)')
-        .eq('landlord_id', user.id)
-        .order('created_at', { ascending: false })
-      setApplications(fallback.data || [])
-    } else {
-      setApplications(a.data || [])
-    }
-
     setViewings(v.data || [])
+    setApplications(appsResult.data || [])
     setConversations(c.data || [])
     if (!silent) setLoading(false)
   }, [user])
