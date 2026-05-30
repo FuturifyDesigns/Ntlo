@@ -8,9 +8,12 @@ import Button from '../ui/Button'
 import Modal from '../ui/Modal'
 import Input, { Textarea } from '../ui/Input'
 import { getWhatsAppLink } from '../../lib/utils'
-import { createViewingRequest, submitApplication, isLandlordVerified } from '../../lib/housing'
+import { createViewingRequest, submitApplication, isLandlordVerified, mapHousingError } from '../../lib/housing'
 import ApplicationDocFields from './ApplicationDocFields'
 import { APPLICATION_DOC_TYPES } from '../../lib/applicationDocs'
+import { canStudentApplyToListing } from '../../lib/applicationRules'
+import { useStudentHousing } from '../../hooks/useHousing'
+import { GENDER_PREFERENCES } from '../../lib/utils'
 
 function WhatsAppIcon({ size = 20 }) {
   return (
@@ -84,6 +87,7 @@ export default function ListingContactPanel({ listing }) {
   const { user, profile } = useAuth()
   const navigate = useNavigate()
   const { startConversation } = useMessages(null)
+  const { applications: myApplications } = useStudentHousing()
 
   const [chatOpen, setChatOpen] = useState(false)
   const [conversationId, setConversationId] = useState(null)
@@ -108,6 +112,9 @@ export default function ListingContactPanel({ listing }) {
   const landlordVerified = isLandlordVerified(listing)
   const isStudent = profile?.role === 'student'
   const canContact = listing.available && user && isStudent
+  const applyCheck = isStudent ? canStudentApplyToListing(profile, listing) : { ok: false }
+  const currentlyRented = myApplications?.some((a) => a.status === 'rented')
+  const applyBlockedReason = !applyCheck.ok ? applyCheck.reason : null
 
   function requireAuth(action) {
     if (!user) {
@@ -142,6 +149,9 @@ export default function ListingContactPanel({ listing }) {
         message: viewingMessage,
       })
       setViewingDone(true)
+    } catch (err) {
+      const key = mapHousingError(err.message)
+      setApplyError(t(`housing.errors.${key}`, { defaultValue: err.message }))
     } finally {
       setViewingBusy(false)
     }
@@ -167,10 +177,26 @@ export default function ListingContactPanel({ listing }) {
       })
       setApplyDone(true)
     } catch (err) {
-      setApplyError(err.message || t('housing.applicationFailed'))
+      const key = mapHousingError(err.message)
+      setApplyError(t(`housing.errors.${key}`, { defaultValue: err.message }))
     } finally {
       setApplyBusy(false)
     }
+  }
+
+  function tryOpenApply() {
+    if (!applyCheck.ok) {
+      if (applyCheck.reason === 'genderRequired') {
+        navigate('/complete-profile')
+        return
+      }
+      setApplyError(t(`housing.errors.${applyCheck.reason}`, {
+        preference: applyCheck.preference ? GENDER_PREFERENCES[applyCheck.preference] : '',
+      }))
+      return
+    }
+    setApplyError('')
+    setApplyOpen(true)
   }
 
   function closeApplyModal() {
@@ -205,10 +231,17 @@ export default function ListingContactPanel({ listing }) {
               <Calendar size={18} />
               {t('housing.scheduleViewing')}
             </Button>
-            <Button variant="outline" onClick={() => requireAuth(() => setApplyOpen(true))} className="w-full">
+            <Button variant="outline" onClick={() => requireAuth(tryOpenApply)} className="w-full">
               <FileText size={18} />
               {t('housing.applyNow')}
             </Button>
+            {applyBlockedReason && applyBlockedReason !== 'genderRequired' && (
+              <p className="text-xs text-error">{t(`housing.errors.${applyBlockedReason}`)}</p>
+            )}
+            {currentlyRented && applyCheck.ok && (
+              <p className="text-xs text-muted">{t('housing.applyingWhileRented')}</p>
+            )}
+            {applyError && !applyOpen && <p className="text-xs text-error">{applyError}</p>}
           </>
         )}
 
@@ -305,7 +338,7 @@ export default function ListingContactPanel({ listing }) {
                   {chatBusy ? <Loader2 size={16} className="animate-spin" /> : <MessageCircle size={16} />}
                   {t('housing.chatInApp')}
                 </Button>
-                <Button variant="outline" size="sm" className="flex-1" onClick={() => requireAuth(() => setApplyOpen(true))}>
+                <Button variant="outline" size="sm" className="flex-1" onClick={() => requireAuth(tryOpenApply)}>
                   {t('housing.applyNow')}
                 </Button>
               </>

@@ -128,6 +128,23 @@ export async function withdrawApplication(applicationId) {
   if (error) throw error
 }
 
+export async function relistListing(listingId) {
+  const { error } = await supabase.rpc('relist_listing', {
+    p_listing_id: listingId,
+  })
+  if (error) throw error
+}
+
+export function mapHousingError(message) {
+  if (!message) return 'Something went wrong'
+  if (message.includes('female tenants only')) return 'genderMismatchFemale'
+  if (message.includes('male tenants only')) return 'genderMismatchMale'
+  if (message.includes('Add your gender')) return 'genderRequired'
+  if (message.includes('no longer available')) return 'unavailable'
+  if (message.includes('active application')) return 'duplicateApplication'
+  return message
+}
+
 export function isListingVerified(listing) {
   return Boolean(listing?.is_verified && listing?.verification_status !== 'rejected')
 }

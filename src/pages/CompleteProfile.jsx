@@ -10,6 +10,7 @@ import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
 import AuthTransitionOverlay from '../components/auth/AuthTransitionOverlay'
 import { UniversitySelect } from '../components/universities/OtherUniversityModal'
+import GenderSelect from '../components/auth/GenderSelect'
 import { getPostAuthPath } from '../lib/verification'
 import { consumeOAuthNewSignup } from '../lib/oauthStorage'
 import { getDraftKey } from '../lib/formDrafts'
@@ -26,6 +27,7 @@ export default function CompleteProfile() {
   const [phone, setPhone] = useState(profile?.phone || '')
   const [universityId, setUniversityId] = useState(profile?.university_id ? String(profile.university_id) : '')
   const [customUniversity, setCustomUniversity] = useState('')
+  const [gender, setGender] = useState(profile?.gender || '')
   const [fieldErrors, setFieldErrors] = useState({})
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -38,6 +40,7 @@ export default function CompleteProfile() {
     if (draft.phone) setPhone(draft.phone)
     if (draft.universityId) setUniversityId(draft.universityId)
     if (draft.customUniversity) setCustomUniversity(draft.customUniversity)
+    if (draft.gender) setGender(draft.gender)
   }, [])
 
   const handleDraftClear = useCallback(() => {
@@ -45,13 +48,14 @@ export default function CompleteProfile() {
     setPhone(profile?.phone || '')
     setUniversityId(profile?.university_id ? String(profile.university_id) : '')
     setCustomUniversity('')
+    setGender(profile?.gender || '')
     setFieldErrors({})
     setError('')
   }, [profile, defaultRole])
 
   const { restored: draftRestored, savedLabel, clearDraft, dismissRestored } = useFormDraft(
     draftKey,
-    { role, phone, universityId, customUniversity },
+    { role, phone, universityId, customUniversity, gender },
     handleDraftRestore,
     { enabled: Boolean(user?.id), onClear: handleDraftClear }
   )
@@ -64,6 +68,7 @@ export default function CompleteProfile() {
     universityFullNameMin: t('auth.validation.universityFullNameMin'),
     universityFullNameRequired: t('auth.validation.universityFullNameRequired'),
     universityNoAbbrev: t('auth.validation.universityNoAbbrev'),
+    genderRequired: t('auth.validation.genderRequired'),
     authFailed: t('auth.validation.authFailed'),
   }
 
@@ -91,6 +96,7 @@ export default function CompleteProfile() {
     if (phoneError) errors.phone = phoneError
     const uniError = universityOtherError()
     if (uniError) errors.customUniversity = uniError
+    if (role === 'student' && !gender) errors.gender = validationMessages.genderRequired
     setFieldErrors(errors)
     if (Object.keys(errors).length > 0) return
 
@@ -114,6 +120,7 @@ export default function CompleteProfile() {
         p_university_id: role === 'student' && universityId && universityId !== 'other'
           ? Number(universityId)
           : null,
+        p_gender: role === 'student' ? gender : null,
       })
 
       if (profileError) throw profileError
@@ -232,8 +239,14 @@ export default function CompleteProfile() {
           />
 
           {role === 'student' && (
-            <div>
-              <UniversitySelect
+            <>
+              <GenderSelect
+                value={gender}
+                onChange={setGender}
+                error={fieldErrors.gender}
+              />
+              <div>
+                <UniversitySelect
                 label={t('auth.yourUniversity')}
                 value={universityId}
                 onChange={setUniversityId}
@@ -245,6 +258,7 @@ export default function CompleteProfile() {
                 <p className="mt-1 text-xs text-error">{fieldErrors.customUniversity}</p>
               )}
             </div>
+            </>
           )}
 
           {error && <p className="text-sm text-error">{error}</p>}

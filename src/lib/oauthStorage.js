@@ -43,7 +43,9 @@ export function consumeOAuthIntent() {
 }
 
 export function profileNeedsSetup(profile) {
-  return !profile?.phone?.trim()
+  if (!profile?.phone?.trim()) return true
+  if (profile?.role === 'student' && !profile?.gender) return true
+  return false
 }
 
 export function isNewOAuthUser(user) {

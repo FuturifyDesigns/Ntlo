@@ -3,6 +3,7 @@ import { Loader2 } from 'lucide-react'
 import { useTranslation } from '../../hooks/useTranslation'
 import { useConversations, useMessages, useStudentHousing } from '../../hooks/useHousing'
 import { withdrawApplication } from '../../lib/housing'
+import { getActiveRental } from '../../lib/applicationRules'
 import Card from '../ui/Card'
 import Badge from '../ui/Badge'
 import Button from '../ui/Button'
@@ -68,6 +69,8 @@ export default function StudentHousingPanel() {
     }
   }
 
+  const activeRental = getActiveRental(applications)
+
   const tabs = [
     { id: 'applications', label: t('housing.applications'), count: applications.length },
     { id: 'viewings', label: t('housing.viewings'), count: viewings.length },
@@ -101,6 +104,11 @@ export default function StudentHousingPanel() {
 
       {tab === 'applications' && (
         <div className="space-y-3">
+          {activeRental && (
+            <p className="rounded-lg border border-border bg-surface p-3 text-sm text-muted">
+              {t('housing.currentlyRenting', { title: activeRental.listing?.title })}
+            </p>
+          )}
           {applications.length === 0 && <p className="text-sm text-muted">{t('housing.noApplicationsStudent')}</p>}
           {applications.map((app) => (
             <Card key={app.id} className="space-y-3 p-4">
@@ -123,6 +131,10 @@ export default function StudentHousingPanel() {
 
               {app.status === 'rented' && (
                 <p className="text-sm font-medium text-success">{t('housing.studentRentedNote')}</p>
+              )}
+
+              {app.status === 'ended' && (
+                <p className="text-sm text-muted">{t('housing.tenancyEndedStudent')}</p>
               )}
 
               {app.status === 'submitted' && (

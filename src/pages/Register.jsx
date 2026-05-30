@@ -12,6 +12,8 @@ import PasswordInput from '../components/ui/PasswordInput'
 import GoogleAuthButton from '../components/auth/GoogleAuthButton'
 import AuthTransitionOverlay from '../components/auth/AuthTransitionOverlay'
 import { UniversitySelect } from '../components/universities/OtherUniversityModal'
+import GenderSelect from '../components/auth/GenderSelect'
+import { supabase } from '../lib/supabase'
 import { getPostAuthPath } from '../lib/verification'
 import { getDraftKey } from '../lib/formDrafts'
 import { useFormDraft } from '../hooks/useFormDraft'
@@ -29,6 +31,7 @@ export default function Register() {
     role: defaultRole,
     universityId: '',
     customUniversity: '',
+    gender: '',
   })
   const [fieldErrors, setFieldErrors] = useState({})
   const [error, setError] = useState('')
@@ -46,6 +49,7 @@ export default function Register() {
         role: draft.form.role ?? prev.role,
         universityId: draft.form.universityId ?? prev.universityId,
         customUniversity: draft.form.customUniversity ?? prev.customUniversity,
+        gender: draft.form.gender ?? prev.gender,
       }))
     }
   }, [])
@@ -60,6 +64,7 @@ export default function Register() {
       role: defaultRole,
       universityId: '',
       customUniversity: '',
+      gender: '',
     })
     setFieldErrors({})
     setError('')
@@ -73,8 +78,9 @@ export default function Register() {
       role: form.role,
       universityId: form.universityId,
       customUniversity: form.customUniversity,
+      gender: form.gender,
     },
-  }), [form.fullName, form.email, form.phone, form.role, form.universityId, form.customUniversity])
+  }), [form.fullName, form.email, form.phone, form.role, form.universityId, form.customUniversity, form.gender])
 
   const { restored: draftRestored, savedLabel, clearDraft, dismissRestored } = useFormDraft(
     draftKey,
@@ -118,6 +124,7 @@ export default function Register() {
     universityFullNameMin: t('auth.validation.universityFullNameMin'),
     universityFullNameRequired: t('auth.validation.universityFullNameRequired'),
     universityNoAbbrev: t('auth.validation.universityNoAbbrev'),
+    genderRequired: t('auth.validation.genderRequired'),
     emailTaken: t('auth.validation.emailTaken'),
     authFailed: t('auth.validation.authFailed'),
   }
@@ -165,6 +172,14 @@ export default function Register() {
         role: form.role,
         phone: normalizedPhone,
       })
+
+      if (data.user?.id && form.role === 'student' && form.gender) {
+        const profileUpdates = { gender: form.gender }
+        if (form.universityId && form.universityId !== 'other') {
+          profileUpdates.university_id = Number(form.universityId)
+        }
+        await supabase.from('profiles').update(profileUpdates).eq('id', data.user.id)
+      }
 
       if (form.role === 'student' && form.universityId === 'other' && form.customUniversity.trim()) {
         try {
@@ -333,8 +348,14 @@ export default function Register() {
             autoComplete="new-password"
           />
           {form.role === 'student' && (
-            <div>
-              <UniversitySelect
+            <>
+              <GenderSelect
+                value={form.gender}
+                onChange={(v) => update('gender', v)}
+                error={fieldErrors.gender}
+              />
+              <div>
+                <UniversitySelect
                 label={t('auth.yourUniversity')}
                 value={form.universityId}
                 onChange={(v) => update('universityId', v)}
@@ -353,6 +374,7 @@ export default function Register() {
                 </>
               )}
             </div>
+            </>
           )}
           {error && <p className="text-sm text-error">{error}</p>}
           <Button type="submit" className="w-full" disabled={!authReady || loading || googleLoading || transitioning}>

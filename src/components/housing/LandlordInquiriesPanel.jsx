@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Calendar, CheckCircle2, Home, XCircle, Loader2 } from 'lucide-react'
 import { useTranslation } from '../../hooks/useTranslation'
 import { useLandlordInquiries, useMessages } from '../../hooks/useHousing'
-import { respondToApplication, markApplicationRented, updateViewingRequest } from '../../lib/housing'
+import { respondToApplication, markApplicationRented, relistListing, updateViewingRequest } from '../../lib/housing'
 import ApplicationDocumentsList from './ApplicationDocumentsList'
 import Button from '../ui/Button'
 import Card from '../ui/Card'
@@ -94,6 +94,16 @@ export default function LandlordInquiriesPanel() {
     }
   }
 
+  async function handleRelist(listingId) {
+    setBusyId(listingId)
+    try {
+      await relistListing(listingId)
+      refetch()
+    } finally {
+      setBusyId(null)
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex justify-center py-8">
@@ -138,6 +148,9 @@ export default function LandlordInquiriesPanel() {
                 <div>
                   <p className="font-semibold text-primary">{app.listing?.title}</p>
                   <p className="text-sm text-muted">{app.student?.full_name || t('housing.student')}</p>
+                  {app.student?.gender && (
+                    <p className="text-xs text-muted">{t('auth.gender')}: {t(`auth.gender${app.student.gender === 'male' ? 'Male' : 'Female'}`)}</p>
+                  )}
                   {app.move_in_date && (
                     <p className="text-xs text-muted">{t('housing.moveInDate')}: {app.move_in_date}</p>
                   )}
@@ -175,7 +188,16 @@ export default function LandlordInquiriesPanel() {
               )}
 
               {app.status === 'rented' && (
-                <p className="text-xs font-medium text-success">{t('housing.roomRentedConfirmed')}</p>
+                <div className="space-y-2">
+                  <p className="text-xs font-medium text-success">{t('housing.roomRentedConfirmed')}</p>
+                  <Button size="sm" variant="outline" disabled={busyId === app.listing_id} onClick={() => handleRelist(app.listing_id)}>
+                    {t('housing.listAgain')}
+                  </Button>
+                </div>
+              )}
+
+              {app.status === 'ended' && (
+                <p className="text-xs text-muted">{t('housing.tenancyEnded')}</p>
               )}
             </Card>
           ))}

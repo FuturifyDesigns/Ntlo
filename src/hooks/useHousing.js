@@ -7,7 +7,7 @@ const APPLICATION_SELECT = `
   *,
   listing:listings(id, title, area, city, price, available),
   documents:application_documents(id, doc_type, file_name, storage_path, created_at),
-  student:profiles!listing_applications_student_id_fkey(id, full_name, phone, university_id)
+  student:profiles!listing_applications_student_id_fkey(id, full_name, phone, university_id, gender)
 `
 
 export function useConversations() {

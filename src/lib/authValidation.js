@@ -103,6 +103,9 @@ export function validateRegisterForm(form, messages = {}) {
   if (passwordError) errors.password = passwordError
   if (confirmError) errors.confirmPassword = confirmError
   if (universityError) errors.customUniversity = universityError
+  if (form.role === 'student' && !form.gender) {
+    errors.gender = messages.genderRequired || 'Gender is required'
+  }
 
   return errors
 }

@@ -14,6 +14,7 @@ import ListingMap from '../components/listings/ListingMap'
 import LandlordWelcomeBanner from '../components/landlord/LandlordWelcomeBanner'
 import EarlyAccessBanner from '../components/landlord/EarlyAccessBanner'
 import LandlordInquiriesPanel from '../components/housing/LandlordInquiriesPanel'
+import { relistListing } from '../lib/housing'
 import { MAPS_ENABLED } from '../lib/googleMaps'
 import { CreditCard } from 'lucide-react'
 
@@ -60,9 +61,18 @@ export default function LandlordDashboard() {
     return () => supabase.removeChannel(channel)
   }, [user?.id])
 
-  async function toggleAvailable(id, current) {
-    await supabase.from('listings').update({ available: !current }).eq('id', id)
+  async function markTaken(id) {
+    await supabase.from('listings').update({ available: false }).eq('id', id)
     fetchListings()
+  }
+
+  async function handleRelist(id) {
+    try {
+      await relistListing(id)
+      fetchListings()
+    } catch (err) {
+      alert(err.message)
+    }
   }
 
   async function deleteListing(id) {
@@ -198,9 +208,9 @@ export default function LandlordDashboard() {
                   <Edit size={14} />
                   {t('dashboard.edit')}
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => toggleAvailable(listing.id, listing.available)}>
+                <Button variant="outline" size="sm" onClick={() => (listing.available ? markTaken(listing.id) : handleRelist(listing.id))}>
                   {listing.available ? <ToggleRight size={14} /> : <ToggleLeft size={14} />}
-                  {listing.available ? t('dashboard.markTaken') : t('dashboard.markAvailable')}
+                  {listing.available ? t('dashboard.markTaken') : t('housing.listAgain')}
                 </Button>
                 <Button variant="danger" size="sm" onClick={() => deleteListing(listing.id)}>
                   <Trash2 size={14} />

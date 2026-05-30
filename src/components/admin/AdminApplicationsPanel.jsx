@@ -45,7 +45,9 @@ export default function AdminApplicationsPanel() {
               <div>
                 <p className="font-semibold text-primary">{app.listing?.title}</p>
                 <p className="text-sm text-muted">
-                  {t('housing.student')}: {app.student?.full_name} · {t('housing.landlord')}: {app.landlord?.full_name}
+                  {t('housing.student')}: {app.student?.full_name}
+                  {app.student?.gender && ` · ${t(`auth.gender${app.student.gender === 'male' ? 'Male' : 'Female'}`)}`}
+                  {' · '}{t('housing.landlord')}: {app.landlord?.full_name}
                 </p>
                 <p className="text-xs text-muted">
                   {new Date(app.created_at).toLocaleString()}

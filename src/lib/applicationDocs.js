@@ -1,8 +1,6 @@
 import { supabase } from './supabase'
 
 export const APPLICATION_DOC_TYPES = [
-  { id: 'student_id', labelKey: 'housing.docStudentId' },
-  { id: 'student_card', labelKey: 'housing.docStudentCard' },
   { id: 'registration_proof', labelKey: 'housing.docRegistration' },
 ]
 
