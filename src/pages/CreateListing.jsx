@@ -14,7 +14,7 @@ import { LocationPicker } from '../components/maps/ListingMap'
 
 import { LISTING_DOC_TYPES } from '../lib/verification'
 import { uploadVerificationDoc } from '../lib/verificationStorage'
-import DocumentUpload from '../components/verification/DocumentUpload'
+import LandlordListingCoach from '../components/advisor/LandlordListingCoach'
 import { useTranslation } from '../hooks/useTranslation'
 
 const STEPS = ['Basics', 'Location', 'Photos', 'Amenities', 'Contact', 'Documents', 'Review']
@@ -305,18 +305,21 @@ export default function CreateListing() {
             )}
 
             {step === 6 && (
-              <div className="space-y-3 text-sm">
-                <p><strong>Title:</strong> {form.title}</p>
-                <p><strong>Price:</strong> {formatPrice(form.price)}/month</p>
-                <p><strong>Type:</strong> {ROOM_TYPES[form.room_type]}</p>
-                <p><strong>Location:</strong> {form.address}, {form.area}, {form.city}</p>
-                {uni && <p><strong>University:</strong> {uni.short_name}</p>}
-                {form.nearest_university_id === 'other' && (
-                  <p><strong>University:</strong> {form.custom_university_name} (other)</p>
-                )}
-                <p><strong>Photos:</strong> {photos.length} uploaded</p>
-                <p><strong>Amenities:</strong> {form.amenities.length ? form.amenities.join(', ') : 'None'}</p>
-                <p><strong>WhatsApp:</strong> {form.whatsapp_number}</p>
+              <div className="space-y-4">
+                <div className="space-y-3 text-sm">
+                  <p><strong>Title:</strong> {form.title}</p>
+                  <p><strong>Price:</strong> {formatPrice(form.price)}/month</p>
+                  <p><strong>Type:</strong> {ROOM_TYPES[form.room_type]}</p>
+                  <p><strong>Location:</strong> {form.address}, {form.area}, {form.city}</p>
+                  {uni && <p><strong>University:</strong> {uni.short_name}</p>}
+                  {form.nearest_university_id === 'other' && (
+                    <p><strong>University:</strong> {form.custom_university_name} (other)</p>
+                  )}
+                  <p><strong>Photos:</strong> {photos.length} uploaded</p>
+                  <p><strong>Amenities:</strong> {form.amenities.length ? form.amenities.join(', ') : 'None'}</p>
+                  <p><strong>WhatsApp:</strong> {form.whatsapp_number}</p>
+                </div>
+                <LandlordListingCoach form={form} photoCount={photos.length} />
               </div>
             )}
           </motion.div>

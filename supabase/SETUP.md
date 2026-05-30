@@ -100,3 +100,23 @@ update public.profiles set role = 'admin' where id = 'YOUR-USER-UUID';
 **Enable Realtime** in Supabase Dashboard → Database → Replication if tables are not already in the publication.
 
 Landlords must upload ID + selfie + proof of ownership/authority at `/landlord/verify` before listing rooms. Admins review at `/admin`.
+
+## 9. Ntlo Advisor (optional AI)
+
+**Smart scoring works without AI** — match scores, compare saved rooms, and landlord listing coach run locally using distance, price, trust, and amenities.
+
+To enable **AI-written summaries** (OpenAI):
+
+1. Deploy the Edge Function:
+   ```bash
+   npx supabase functions deploy ai-advisor --project-ref kbpoljwacmzrakztnlkd
+   ```
+2. In Supabase **Project Settings → Edge Functions → Secrets**, add:
+   - `OPENAI_API_KEY` = your OpenAI key
+   - Optional: `OPENAI_MODEL` = `gpt-4o-mini` (default)
+3. Set in local `.env` and GitHub Actions:
+   ```
+   VITE_AI_ADVISOR_ENABLED=true
+   ```
+
+Without this, students and landlords still see scores, pros/cons, and coaching tips — only the “AI insight” paragraph is skipped.

@@ -12,6 +12,8 @@ import ListingCard from '../components/listings/ListingCard'
 import Badge from '../components/ui/Badge'
 import Button from '../components/ui/Button'
 import { ListingGridSkeleton, Skeleton } from '../components/ui/Skeleton'
+import ListingAdvisorPanel from '../components/advisor/ListingAdvisorPanel'
+import { useAuth } from '../hooks/useAuth'
 import {
   formatPrice,
   formatDistance,
@@ -31,6 +33,7 @@ function WhatsAppIcon({ size = 20 }) {
 export default function ListingDetail() {
   const { id } = useParams()
   const { t } = useTranslation()
+  const { profile } = useAuth()
   const { listing, loading, error } = useListing(id)
   const { listings: related } = useListings(
     listing?.landlord_id ? { landlordId: listing.landlord_id, availableOnly: true } : {}
@@ -157,6 +160,11 @@ export default function ListingDetail() {
               )}
 
               <p className="text-xs text-muted text-center">{t('listingDetail.paymentNote')}</p>
+
+              <ListingAdvisorPanel
+                listing={listing}
+                studentUniversityId={profile?.role === 'student' ? profile.university_id : undefined}
+              />
             </div>
           </div>
         </div>

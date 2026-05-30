@@ -24,9 +24,11 @@ export function useSavedListings() {
           `
           listing_id,
           listing:listings(
-            id, title, price, room_type, area, city,
-            distance_to_campus, available, is_verified,
-            nearest_university:universities(short_name, name),
+            id, title, price, room_type, area, city, lat, lng,
+            distance_to_campus, available, is_verified, amenities,
+            nearest_university_id, gender_preference,
+            nearest_university:universities(id, short_name, name, lat, lng),
+            landlord:profiles(is_verified),
             cover_photo:listing_photos(url, is_cover)
           )
         `

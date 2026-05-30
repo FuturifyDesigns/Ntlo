@@ -6,6 +6,7 @@ import { useTranslation } from '../hooks/useTranslation'
 import ListingCard from '../components/listings/ListingCard'
 import Button from '../components/ui/Button'
 import { ListingGridSkeleton } from '../components/ui/Skeleton'
+import CompareAdvisor from '../components/advisor/CompareAdvisor'
 import { UNIVERSITIES } from '../lib/universities'
 
 export default function StudentDashboard() {
@@ -54,11 +55,14 @@ export default function StudentDashboard() {
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <>
+            <CompareAdvisor listings={savedListings} />
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {savedListings.map((listing) => (
               <ListingCard key={listing.id} listing={listing} />
             ))}
-          </div>
+            </div>
+          </>
         )}
       </div>
     </div>
