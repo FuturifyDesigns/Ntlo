@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import {
   Users, GraduationCap, Shield, Home, Ban, Trash2, Check, X,
-  RefreshCw, Radio, Search, MapPin, CreditCard, ClipboardList,
+  RefreshCw, Radio, Search, MapPin, CreditCard, ClipboardList, Star,
 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useTranslation } from '../hooks/useTranslation'
@@ -21,10 +21,12 @@ import AdminActionModal from '../components/admin/AdminActionModal'
 import AdminToast from '../components/admin/AdminToast'
 import AdminSubscriptionsPanel from '../components/admin/AdminSubscriptionsPanel'
 import AdminApplicationsPanel from '../components/admin/AdminApplicationsPanel'
+import AdminReviewsPanel from '../components/admin/AdminReviewsPanel'
 
 const TABS = [
   { id: 'requests', icon: GraduationCap, labelKey: 'admin.tabRequests' },
   { id: 'applications', icon: ClipboardList, labelKey: 'admin.tabApplications' },
+  { id: 'reviews', icon: Star, labelKey: 'admin.tabReviews' },
   { id: 'users', icon: Users, labelKey: 'admin.tabUsers' },
   { id: 'landlords', icon: Shield, labelKey: 'admin.tabLandlords' },
   { id: 'listings', icon: Home, labelKey: 'admin.tabListings' },
@@ -458,6 +460,8 @@ export default function AdminDashboard() {
           )}
 
           {tab === 'applications' && <AdminApplicationsPanel />}
+
+          {tab === 'reviews' && <AdminReviewsPanel />}
 
           {tab === 'users' && (
             <div className="space-y-4">

@@ -1,53 +1,18 @@
 import { useState } from 'react'
 import { Loader2 } from 'lucide-react'
 import { useTranslation } from '../../hooks/useTranslation'
-import { useConversations, useMessages, useStudentHousing } from '../../hooks/useHousing'
-import { withdrawApplication } from '../../lib/housing'
+import { useConversations, useStudentHousing } from '../../hooks/useHousing'
+import { withdrawApplication, cancelViewingRequest } from '../../lib/housing'
 import { getActiveRental } from '../../lib/applicationRules'
 import Card from '../ui/Card'
 import Badge from '../ui/Badge'
 import Button from '../ui/Button'
 import Modal from '../ui/Modal'
-
-function ConversationChatModal({ conversationId, open, onClose }) {
-  const { t } = useTranslation()
-  const { messages, loading, send, userId } = useMessages(conversationId)
-
-  async function handleSubmit(e) {
-    e.preventDefault()
-    const form = e.target
-    const input = form.elements.message
-    if (!input.value.trim()) return
-    await send(input.value.trim())
-    input.value = ''
-  }
-
-  return (
-    <Modal open={open} onClose={onClose} title={t('housing.messages')}>
-      <div className="max-h-80 space-y-2 overflow-y-auto">
-        {loading && <p className="text-xs text-muted">{t('housing.chatLoading')}</p>}
-        {messages.map((msg) => (
-          <div
-            key={msg.id}
-            className={`max-w-[85%] rounded-lg px-3 py-2 text-sm ${
-              msg.sender_id === userId ? 'ml-auto bg-accent text-primary' : 'border border-border bg-background'
-            }`}
-          >
-            {msg.body}
-          </div>
-        ))}
-      </div>
-      <form onSubmit={handleSubmit} className="mt-3 flex gap-2">
-        <input name="message" className="flex-1 rounded-lg border border-border px-3 py-2 text-sm" placeholder={t('housing.messagePlaceholder')} />
-        <Button type="submit" size="sm">{t('housing.send')}</Button>
-      </form>
-    </Modal>
-  )
-}
+import ConversationChat from './ConversationChat'
 
 function statusVariant(status) {
-  if (status === 'accepted' || status === 'rented') return 'success'
-  if (status === 'rejected' || status === 'withdrawn') return 'error'
+  if (status === 'accepted' || status === 'rented' || status === 'confirmed') return 'success'
+  if (status === 'rejected' || status === 'withdrawn' || status === 'declined' || status === 'cancelled') return 'error'
   return 'default'
 }
 
@@ -57,12 +22,23 @@ export default function StudentHousingPanel() {
   const { viewings, applications, loading, refetch } = useStudentHousing()
   const [tab, setTab] = useState('applications')
   const [activeChat, setActiveChat] = useState(null)
+  const [activeChatLandlord, setActiveChatLandlord] = useState(null)
   const [busyId, setBusyId] = useState(null)
 
   async function handleWithdraw(id) {
     setBusyId(id)
     try {
       await withdrawApplication(id)
+      refetch()
+    } finally {
+      setBusyId(null)
+    }
+  }
+
+  async function handleCancelViewing(id) {
+    setBusyId(id)
+    try {
+      await cancelViewingRequest(id)
       refetch()
     } finally {
       setBusyId(null)
@@ -93,7 +69,7 @@ export default function StudentHousingPanel() {
             key={item.id}
             type="button"
             onClick={() => setTab(item.id)}
-            className={`rounded-lg border px-3 py-1.5 text-sm font-medium ${
+            className={`rounded-lg border px-4 py-2 text-sm font-semibold transition-colors ${
               tab === item.id ? 'border-accent bg-accent/10 text-primary' : 'border-border text-muted'
             }`}
           >
@@ -137,7 +113,7 @@ export default function StudentHousingPanel() {
                 <p className="text-sm text-muted">{t('housing.tenancyEndedStudent')}</p>
               )}
 
-              {app.status === 'submitted' && (
+              {['submitted', 'under_review'].includes(app.status) && (
                 <Button size="sm" variant="outline" disabled={busyId === app.id} onClick={() => handleWithdraw(app.id)}>
                   {t('housing.withdrawApplication')}
                 </Button>
@@ -151,12 +127,21 @@ export default function StudentHousingPanel() {
         <div className="space-y-3">
           {viewings.length === 0 && <p className="text-sm text-muted">{t('housing.noViewingsStudent')}</p>}
           {viewings.map((vr) => (
-            <Card key={vr.id} className="p-4">
-              <p className="font-semibold">{vr.listing?.title}</p>
-              {vr.preferred_at && (
-                <p className="text-sm text-muted">{new Date(vr.preferred_at).toLocaleString()}</p>
+            <Card key={vr.id} className="space-y-3 p-4">
+              <div className="flex justify-between gap-2">
+                <div>
+                  <p className="font-semibold">{vr.listing?.title}</p>
+                  {vr.preferred_at && (
+                    <p className="text-sm text-muted">{new Date(vr.preferred_at).toLocaleString()}</p>
+                  )}
+                </div>
+                <Badge variant={statusVariant(vr.status)}>{vr.status}</Badge>
+              </div>
+              {vr.status === 'pending' && (
+                <Button size="sm" variant="outline" disabled={busyId === vr.id} onClick={() => handleCancelViewing(vr.id)}>
+                  {t('housing.cancelViewing')}
+                </Button>
               )}
-              <Badge className="mt-2">{vr.status}</Badge>
             </Card>
           ))}
         </div>
@@ -166,7 +151,14 @@ export default function StudentHousingPanel() {
         <div className="space-y-3">
           {conversations.length === 0 && <p className="text-sm text-muted">{t('housing.noMessages')}</p>}
           {conversations.map((c) => (
-            <Card key={c.id} className="flex cursor-pointer items-center justify-between p-4" onClick={() => setActiveChat(c.id)}>
+            <Card
+              key={c.id}
+              className="flex cursor-pointer items-center justify-between p-4"
+              onClick={() => {
+                setActiveChat(c.id)
+                setActiveChatLandlord(c.landlord)
+              }}
+            >
               <div>
                 <p className="font-semibold">{c.listing?.title}</p>
                 <p className="text-sm text-muted">{c.landlord?.full_name || t('housing.landlord')}</p>
@@ -177,11 +169,11 @@ export default function StudentHousingPanel() {
         </div>
       )}
 
-      <ConversationChatModal
-        conversationId={activeChat}
-        open={Boolean(activeChat)}
-        onClose={() => setActiveChat(null)}
-      />
+      <Modal open={Boolean(activeChat)} onClose={() => { setActiveChat(null); setActiveChatLandlord(null) }} title={t('housing.messages')}>
+        {activeChat && (
+          <ConversationChat conversationId={activeChat} otherProfile={activeChatLandlord} />
+        )}
+      </Modal>
     </div>
   )
 }

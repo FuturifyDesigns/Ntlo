@@ -121,6 +121,57 @@ export async function markApplicationRented(applicationId) {
   if (error) throw error
 }
 
+export async function cancelViewingRequest(viewingId) {
+  const { error } = await supabase.rpc('cancel_viewing_request', {
+    p_viewing_id: viewingId,
+  })
+  if (error) throw error
+}
+
+export async function cancelViewingRequestByListing(listingId) {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Not authenticated')
+
+  const { data, error } = await supabase
+    .from('viewing_requests')
+    .update({ status: 'cancelled', updated_at: new Date().toISOString() })
+    .eq('listing_id', listingId)
+    .eq('student_id', user.id)
+    .eq('status', 'pending')
+    .select('id')
+
+  if (error) throw error
+  return data
+}
+
+export async function fetchStudentListingStatus(listingId) {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { viewing: null, application: null }
+
+  const [v, a] = await Promise.all([
+    supabase
+      .from('viewing_requests')
+      .select('id, status, preferred_at')
+      .eq('listing_id', listingId)
+      .eq('student_id', user.id)
+      .in('status', ['pending', 'confirmed'])
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+    supabase
+      .from('listing_applications')
+      .select('id, status')
+      .eq('listing_id', listingId)
+      .eq('student_id', user.id)
+      .in('status', ['submitted', 'under_review', 'accepted', 'rented'])
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+  ])
+
+  return { viewing: v.data, application: a.data }
+}
+
 export async function withdrawApplication(applicationId) {
   const { error } = await supabase.rpc('withdraw_application', {
     p_application_id: applicationId,
@@ -142,6 +193,8 @@ export function mapHousingError(message) {
   if (message.includes('Add your gender')) return 'genderRequired'
   if (message.includes('no longer available')) return 'unavailable'
   if (message.includes('active application')) return 'duplicateApplication'
+  if (message.includes('doc_type') || message.includes('application_documents')) return 'documentsFailed'
+  if (message.includes('Bucket not found') || message.includes('application-docs')) return 'documentsStorage'
   return message
 }
 

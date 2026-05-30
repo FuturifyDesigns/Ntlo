@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Calendar, FileText, MessageCircle, Send, Loader2 } from 'lucide-react'
+import { Calendar, FileText, MessageCircle, Loader2 } from 'lucide-react'
 import { useTranslation } from '../../hooks/useTranslation'
 import { useAuth } from '../../hooks/useAuth'
 import { useMessages } from '../../hooks/useHousing'
@@ -8,12 +8,13 @@ import Button from '../ui/Button'
 import Modal from '../ui/Modal'
 import Input, { Textarea } from '../ui/Input'
 import { getWhatsAppLink } from '../../lib/utils'
-import { createViewingRequest, submitApplication, mapHousingError } from '../../lib/housing'
+import { createViewingRequest, submitApplication, mapHousingError, cancelViewingRequest, withdrawApplication } from '../../lib/housing'
+import ConversationChat from './ConversationChat'
 import ApplicationDocFields from './ApplicationDocFields'
 import ApplicationRequirementsList from './ApplicationRequirementsList'
 import { APPLICATION_DOC_TYPES } from '../../lib/applicationDocs'
 import { canStudentApplyToListing } from '../../lib/applicationRules'
-import { useStudentHousing } from '../../hooks/useHousing'
+import { useStudentHousing, useStudentListingStatus } from '../../hooks/useHousing'
 import { GENDER_PREFERENCES } from '../../lib/utils'
 
 function WhatsAppIcon({ size = 20 }) {
@@ -24,71 +25,13 @@ function WhatsAppIcon({ size = 20 }) {
   )
 }
 
-function InlineChat({ conversationId, onClose }) {
-  const { t } = useTranslation()
-  const { messages, loading, send, userId } = useMessages(conversationId)
-  const [text, setText] = useState('')
-  const [sending, setSending] = useState(false)
-  const bottomRef = useRef(null)
-
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
-
-  async function handleSend(e) {
-    e.preventDefault()
-    if (!text.trim() || sending) return
-    setSending(true)
-    try {
-      await send(text.trim())
-      setText('')
-    } finally {
-      setSending(false)
-    }
-  }
-
-  return (
-    <div className="flex h-72 flex-col rounded-lg border border-border bg-background">
-      <div className="flex-1 space-y-2 overflow-y-auto p-3">
-        {loading && <p className="text-xs text-muted">{t('housing.chatLoading')}</p>}
-        {!loading && messages.length === 0 && (
-          <p className="text-xs text-muted">{t('housing.chatEmpty')}</p>
-        )}
-        {messages.map((msg) => (
-          <div
-            key={msg.id}
-            className={`max-w-[85%] rounded-lg px-3 py-2 text-sm ${
-              msg.sender_id === userId
-                ? 'ml-auto bg-accent text-primary'
-                : 'bg-surface text-primary border border-border'
-            }`}
-          >
-            {msg.body}
-          </div>
-        ))}
-        <div ref={bottomRef} />
-      </div>
-      <form onSubmit={handleSend} className="flex gap-2 border-t border-border p-2">
-        <input
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder={t('housing.messagePlaceholder')}
-          className="flex-1 rounded-lg border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-accent"
-        />
-        <Button type="submit" size="sm" disabled={sending || !text.trim()}>
-          {sending ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
-        </Button>
-      </form>
-    </div>
-  )
-}
-
 export default function ListingContactPanel({ listing }) {
   const { t } = useTranslation()
   const { user, profile } = useAuth()
   const navigate = useNavigate()
   const { startConversation } = useMessages(null)
   const { applications: myApplications } = useStudentHousing()
+  const { viewing: activeViewing, application: activeApplication, refetch: refetchStatus } = useStudentListingStatus(listing.id)
 
   const [chatOpen, setChatOpen] = useState(false)
   const [conversationId, setConversationId] = useState(null)
@@ -150,6 +93,7 @@ export default function ListingContactPanel({ listing }) {
         message: viewingMessage,
       })
       setViewingDone(true)
+      refetchStatus()
     } catch (err) {
       const key = mapHousingError(err.message)
       setApplyError(t(`housing.errors.${key}`, { defaultValue: err.message }))
@@ -177,6 +121,7 @@ export default function ListingContactPanel({ listing }) {
         documents: applyDocs,
       })
       setApplyDone(true)
+      refetchStatus()
     } catch (err) {
       const key = mapHousingError(err.message)
       setApplyError(t(`housing.errors.${key}`, { defaultValue: err.message }))
@@ -184,6 +129,33 @@ export default function ListingContactPanel({ listing }) {
       setApplyBusy(false)
     }
   }
+
+  async function handleCancelViewing() {
+    if (!activeViewing?.id) return
+    try {
+      await cancelViewingRequest(activeViewing.id)
+      refetchStatus()
+    } catch (err) {
+      setApplyError(err.message)
+    }
+  }
+
+  async function handleWithdrawApplication() {
+    if (!activeApplication?.id) return
+    try {
+      await withdrawApplication(activeApplication.id)
+      refetchStatus()
+      setApplyOpen(false)
+      setApplyDone(false)
+    } catch (err) {
+      setApplyError(err.message)
+    }
+  }
+
+  const viewingPending = activeViewing?.status === 'pending'
+  const viewingConfirmed = activeViewing?.status === 'confirmed'
+  const applicationPending = activeApplication && ['submitted', 'under_review'].includes(activeApplication.status)
+  const applicationAccepted = activeApplication && ['accepted', 'rented'].includes(activeApplication.status)
 
   function tryOpenApply() {
     if (!applyCheck.ok) {
@@ -235,14 +207,32 @@ export default function ListingContactPanel({ listing }) {
               {chatBusy ? <Loader2 size={18} className="animate-spin" /> : <MessageCircle size={18} />}
               {t('housing.chatInApp')}
             </Button>
-            <Button variant="outline" onClick={() => requireAuth(() => setViewingOpen(true))} className="w-full">
+            <Button variant="outline" onClick={() => requireAuth(() => setViewingOpen(true))} className="w-full" disabled={viewingPending || viewingConfirmed}>
               <Calendar size={18} />
-              {t('housing.scheduleViewing')}
+              {viewingConfirmed
+                ? t('housing.viewingConfirmed')
+                : viewingPending
+                  ? t('housing.viewingPending')
+                  : t('housing.scheduleViewing')}
             </Button>
-            <Button variant="outline" onClick={() => requireAuth(tryOpenApply)} className="w-full">
+            {viewingPending && (
+              <button type="button" onClick={handleCancelViewing} className="w-full text-center text-xs text-muted underline hover:text-primary">
+                {t('housing.cancelViewing')}
+              </button>
+            )}
+            <Button variant="outline" onClick={() => requireAuth(tryOpenApply)} className="w-full" disabled={applicationPending || applicationAccepted}>
               <FileText size={18} />
-              {t('housing.applyNow')}
+              {applicationAccepted
+                ? t('housing.applicationAccepted')
+                : applicationPending
+                  ? t('housing.applicationPending')
+                  : t('housing.applyNow')}
             </Button>
+            {applicationPending && (
+              <button type="button" onClick={handleWithdrawApplication} className="w-full text-center text-xs text-muted underline hover:text-primary">
+                {t('housing.withdrawApplication')}
+              </button>
+            )}
             <Button
               as="a"
               href={getWhatsAppLink(listing.whatsapp_number, listing.title)}
@@ -271,12 +261,23 @@ export default function ListingContactPanel({ listing }) {
       </div>
 
       <Modal open={chatOpen} onClose={() => setChatOpen(false)} title={t('housing.chatInApp')}>
-        {conversationId && <InlineChat conversationId={conversationId} />}
+        {conversationId && (
+          <ConversationChat
+            conversationId={conversationId}
+            otherProfile={{ id: listing.landlord_id, last_seen_at: listing.landlord?.last_seen_at }}
+            compact
+          />
+        )}
       </Modal>
 
       <Modal open={viewingOpen} onClose={() => { setViewingOpen(false); setViewingDone(false) }} title={t('housing.scheduleViewing')}>
-        {viewingDone ? (
-          <p className="text-sm text-success">{t('housing.viewingSent')}</p>
+        {viewingDone || viewingPending ? (
+          <div className="space-y-3">
+            <p className="text-sm text-success">{t('housing.viewingSent')}</p>
+            {viewingPending && (
+              <Button variant="outline" size="sm" onClick={handleCancelViewing}>{t('housing.cancelViewing')}</Button>
+            )}
+          </div>
         ) : (
           <form onSubmit={submitViewing} className="space-y-4">
             <Input
@@ -298,9 +299,14 @@ export default function ListingContactPanel({ listing }) {
         )}
       </Modal>
 
-      <Modal open={applyOpen} onClose={closeApplyModal} title={t('housing.applyNow')}>
-        {applyDone ? (
-          <p className="text-sm text-success">{t('housing.applicationSent')}</p>
+      <Modal open={applyOpen} onClose={closeApplyModal} title={t('housing.applyNow')} size="lg">
+        {applyDone || applicationPending ? (
+          <div className="space-y-3">
+            <p className="text-sm text-success">{t('housing.applicationSent')}</p>
+            {applicationPending && (
+              <Button variant="outline" size="sm" onClick={handleWithdrawApplication}>{t('housing.withdrawApplication')}</Button>
+            )}
+          </div>
         ) : (
           <form onSubmit={submitApply} className="space-y-4">
             <ApplicationRequirementsList />

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from './useAuth'
-import { getOrCreateConversation, sendMessage, markMessagesRead } from '../lib/housing'
+import { getOrCreateConversation, sendMessage, markMessagesRead, fetchStudentListingStatus } from '../lib/housing'
 
 const APPLICATION_SELECT = `
   *,
@@ -31,8 +31,8 @@ export function useConversations() {
       .select(`
         *,
         listing:listings(id, title, price, area, city, cover_photo:listing_photos(url, is_cover)),
-        student:profiles!conversations_student_id_fkey(id, full_name),
-        landlord:profiles!conversations_landlord_id_fkey(id, full_name)
+        student:profiles!conversations_student_id_fkey(id, full_name, last_seen_at),
+        landlord:profiles!conversations_landlord_id_fkey(id, full_name, last_seen_at)
       `)
       .eq(filterCol, user.id)
       .order('last_message_at', { ascending: false, nullsFirst: false })
@@ -59,6 +59,42 @@ export function useConversations() {
   }, [user?.id, fetchConversations])
 
   return { conversations, loading, refetch: fetchConversations }
+}
+
+export function useStudentListingStatus(listingId) {
+  const { user } = useAuth()
+  const [status, setStatus] = useState({ viewing: null, application: null })
+  const [loading, setLoading] = useState(true)
+
+  const refetch = useCallback(async () => {
+    if (!user || !listingId) {
+      setStatus({ viewing: null, application: null })
+      setLoading(false)
+      return
+    }
+    setLoading(true)
+    const data = await fetchStudentListingStatus(listingId)
+    setStatus(data)
+    setLoading(false)
+  }, [user, listingId])
+
+  useEffect(() => {
+    refetch()
+  }, [refetch])
+
+  useEffect(() => {
+    if (!user?.id || !listingId) return undefined
+
+    const channel = supabase
+      .channel(`listing-status-${listingId}-${user.id}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'viewing_requests' }, refetch)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'listing_applications' }, refetch)
+      .subscribe()
+
+    return () => supabase.removeChannel(channel)
+  }, [user?.id, listingId, refetch])
+
+  return { ...status, loading, refetch }
 }
 
 export function useMessages(conversationId) {
@@ -98,7 +134,10 @@ export function useMessages(conversationId) {
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'messages', filter: `conversation_id=eq.${conversationId}` },
         (payload) => {
-          setMessages((prev) => [...prev, payload.new])
+          setMessages((prev) => {
+            if (prev.some((m) => m.id === payload.new.id)) return prev
+            return [...prev, payload.new]
+          })
           markMessagesRead(conversationId)
         }
       )
@@ -109,7 +148,7 @@ export function useMessages(conversationId) {
 
   const send = useCallback(async (body) => {
     const msg = await sendMessage(conversationId, body)
-    setMessages((prev) => [...prev, msg])
+    setMessages((prev) => (prev.some((m) => m.id === msg.id) ? prev : [...prev, msg]))
     return msg
   }, [conversationId])
 
@@ -194,7 +233,7 @@ export function useLandlordInquiries() {
     const [v, a, c] = await Promise.all([
       supabase
         .from('viewing_requests')
-        .select('*, listing:listings(id, title), student:profiles!viewing_requests_student_id_fkey(id, full_name)')
+        .select('*, listing:listings(id, title), student:profiles!viewing_requests_student_id_fkey(id, full_name, last_seen_at)')
         .eq('landlord_id', user.id)
         .order('created_at', { ascending: false }),
       supabase
@@ -207,7 +246,7 @@ export function useLandlordInquiries() {
         .select(`
           *,
           listing:listings(id, title),
-          student:profiles!conversations_student_id_fkey(id, full_name)
+          student:profiles!conversations_student_id_fkey(id, full_name, last_seen_at)
         `)
         .eq('landlord_id', user.id)
         .order('last_message_at', { ascending: false, nullsFirst: false }),

@@ -5,11 +5,13 @@ import { useAuth } from '../../hooks/useAuth'
 import { useTranslation } from '../../hooks/useTranslation'
 import { useNavLinks } from '../../hooks/useNavLinks'
 import Button from '../ui/Button'
-import UserMenu from './UserMenu'
+import NotificationBell from './NotificationBell'
+import { usePresenceHeartbeat } from '../../hooks/usePresence'
 
 export default function Navbar() {
   const [open, setOpen] = useState(false)
   const { user, isLandlord } = useAuth()
+  usePresenceHeartbeat()
   const { t } = useTranslation()
   const location = useLocation()
   const navLinks = useNavLinks()
@@ -47,7 +49,8 @@ export default function Navbar() {
           ))}
         </nav>
 
-        <div className="hidden items-center gap-3 md:flex">
+        <div className="hidden items-center gap-2 md:flex">
+          {user && <NotificationBell />}
           {user ? (
             <UserMenu />
           ) : (
@@ -60,7 +63,8 @@ export default function Navbar() {
           </Button>
         </div>
 
-        <div className="flex items-center gap-2 md:hidden">
+        <div className="flex items-center gap-1 md:hidden">
+          {user && <NotificationBell />}
           {user && <UserMenu onNavigate={() => setOpen(false)} />}
           <button
             className="rounded-lg p-2 text-primary"

@@ -1,49 +1,14 @@
 import { useState } from 'react'
 import { Calendar, CheckCircle2, Home, XCircle, Loader2 } from 'lucide-react'
 import { useTranslation } from '../../hooks/useTranslation'
-import { useLandlordInquiries, useMessages } from '../../hooks/useHousing'
+import { useLandlordInquiries } from '../../hooks/useHousing'
 import { respondToApplication, markApplicationRented, relistListing, updateViewingRequest } from '../../lib/housing'
 import ApplicationDocumentsList from './ApplicationDocumentsList'
+import ConversationChat from './ConversationChat'
 import Button from '../ui/Button'
 import Card from '../ui/Card'
 import Badge from '../ui/Badge'
 import Modal from '../ui/Modal'
-
-function ConversationChatModal({ conversationId, open, onClose }) {
-  const { t } = useTranslation()
-  const { messages, loading, send, userId } = useMessages(conversationId)
-
-  async function handleSubmit(e) {
-    e.preventDefault()
-    const form = e.target
-    const input = form.elements.message
-    if (!input.value.trim()) return
-    await send(input.value.trim())
-    input.value = ''
-  }
-
-  return (
-    <Modal open={open} onClose={onClose} title={t('housing.messages')}>
-      <div className="max-h-80 space-y-2 overflow-y-auto">
-        {loading && <p className="text-xs text-muted">{t('housing.chatLoading')}</p>}
-        {messages.map((msg) => (
-          <div
-            key={msg.id}
-            className={`max-w-[85%] rounded-lg px-3 py-2 text-sm ${
-              msg.sender_id === userId ? 'ml-auto bg-accent text-primary' : 'border border-border bg-background'
-            }`}
-          >
-            {msg.body}
-          </div>
-        ))}
-      </div>
-      <form onSubmit={handleSubmit} className="mt-3 flex gap-2">
-        <input name="message" className="flex-1 rounded-lg border border-border px-3 py-2 text-sm" placeholder={t('housing.messagePlaceholder')} />
-        <Button type="submit" size="sm">{t('housing.send')}</Button>
-      </form>
-    </Modal>
-  )
-}
 
 function statusVariant(status) {
   if (status === 'accepted' || status === 'rented') return 'success'
@@ -57,6 +22,11 @@ export default function LandlordInquiriesPanel() {
   const [tab, setTab] = useState('applications')
   const [busyId, setBusyId] = useState(null)
   const [activeChat, setActiveChat] = useState(null)
+  const [activeChatStudent, setActiveChatStudent] = useState(null)
+
+  const pendingApplications = applications.filter((a) => a.status === 'submitted').length
+  const pendingViewings = viewings.filter((v) => v.status === 'pending').length
+  const pendingTotal = pendingApplications + pendingViewings
 
   async function handleViewing(id, status) {
     setBusyId(id)
@@ -113,16 +83,21 @@ export default function LandlordInquiriesPanel() {
   }
 
   const tabs = [
-    { id: 'applications', label: t('housing.applications'), count: applications.length },
-    { id: 'viewings', label: t('housing.viewings'), count: viewings.length },
-    { id: 'messages', label: t('housing.messages'), count: conversations.length },
+    { id: 'applications', label: t('housing.applications'), count: applications.length, pending: pendingApplications },
+    { id: 'viewings', label: t('housing.viewings'), count: viewings.length, pending: pendingViewings },
+    { id: 'messages', label: t('housing.messages'), count: conversations.length, pending: 0 },
   ]
 
   return (
-    <div className="space-y-4">
-      <div>
-        <h2 className="font-display text-xl font-semibold text-primary">{t('housing.inquiriesTitle')}</h2>
-        <p className="mt-1 text-sm text-muted">{t('housing.landlordFlowHint')}</p>
+    <div className="space-y-4 rounded-xl border border-border bg-surface p-5">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h2 className="font-display text-xl font-semibold text-primary">{t('housing.inquiriesTitle')}</h2>
+          <p className="mt-1 text-sm text-muted">{t('housing.landlordFlowHint')}</p>
+        </div>
+        {pendingTotal > 0 && (
+          <Badge variant="error">{t('housing.pendingCount', { count: pendingTotal })}</Badge>
+        )}
       </div>
       <div className="flex flex-wrap gap-2">
         {tabs.map((item) => (
@@ -130,11 +105,16 @@ export default function LandlordInquiriesPanel() {
             key={item.id}
             type="button"
             onClick={() => setTab(item.id)}
-            className={`rounded-lg border px-3 py-1.5 text-sm font-medium ${
+            className={`relative rounded-lg border px-3 py-2 text-sm font-semibold ${
               tab === item.id ? 'border-accent bg-accent/10 text-primary' : 'border-border text-muted'
             }`}
           >
             {item.label} ({item.count})
+            {item.pending > 0 && (
+              <span className="ml-1.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-error px-1 text-[10px] font-bold text-white">
+                {item.pending}
+              </span>
+            )}
           </button>
         ))}
       </div>
@@ -245,7 +225,10 @@ export default function LandlordInquiriesPanel() {
             <Card
               key={c.id}
               className="flex cursor-pointer items-center justify-between p-4 transition hover:border-accent"
-              onClick={() => setActiveChat(c.id)}
+              onClick={() => {
+                setActiveChat(c.id)
+                setActiveChatStudent(c.student)
+              }}
             >
               <div>
                 <p className="font-semibold text-primary">{c.listing?.title}</p>
@@ -257,11 +240,14 @@ export default function LandlordInquiriesPanel() {
         </div>
       )}
 
-      <ConversationChatModal
-        conversationId={activeChat}
-        open={Boolean(activeChat)}
-        onClose={() => setActiveChat(null)}
-      />
+      <Modal open={Boolean(activeChat)} onClose={() => { setActiveChat(null); setActiveChatStudent(null) }} title={t('housing.messages')}>
+        {activeChat && (
+          <ConversationChat
+            conversationId={activeChat}
+            otherProfile={activeChatStudent ? { ...activeChatStudent, last_seen_at: activeChatStudent.last_seen_at } : null}
+          />
+        )}
+      </Modal>
     </div>
   )
 }

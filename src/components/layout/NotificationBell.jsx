@@ -1,0 +1,77 @@
+import { useState, useRef, useEffect } from 'react'
+import { Link } from 'react-router-dom'
+import { Bell } from 'lucide-react'
+import { useNotifications } from '../../hooks/useNotifications'
+import { useTranslation } from '../../hooks/useTranslation'
+import { notificationHref } from '../../lib/notifications'
+
+export default function NotificationBell() {
+  const { t } = useTranslation()
+  const { items, unreadCount, readOne, readAll } = useNotifications()
+  const [open, setOpen] = useState(false)
+  const ref = useRef(null)
+
+  useEffect(() => {
+    function onDocClick(e) {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false)
+    }
+    document.addEventListener('mousedown', onDocClick)
+    return () => document.removeEventListener('mousedown', onDocClick)
+  }, [])
+
+  async function handleClick(n) {
+    if (!n.read_at) await readOne(n.id)
+    setOpen(false)
+  }
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="relative rounded-lg p-2 text-muted transition-colors hover:bg-background hover:text-primary"
+        aria-label={t('notifications.title')}
+      >
+        <Bell size={20} />
+        {unreadCount > 0 && (
+          <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[10px] font-bold text-primary">
+            {unreadCount > 9 ? '9+' : unreadCount}
+          </span>
+        )}
+      </button>
+
+      {open && (
+        <div className="absolute right-0 z-50 mt-2 w-80 max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-border bg-surface shadow-xl">
+          <div className="flex items-center justify-between border-b border-border px-4 py-3">
+            <p className="text-sm font-semibold text-primary">{t('notifications.title')}</p>
+            {unreadCount > 0 && (
+              <button type="button" onClick={readAll} className="text-xs font-medium text-accent hover:underline">
+                {t('notifications.markAllRead')}
+              </button>
+            )}
+          </div>
+          <div className="max-h-80 overflow-y-auto">
+            {items.length === 0 ? (
+              <p className="px-4 py-6 text-center text-sm text-muted">{t('notifications.empty')}</p>
+            ) : (
+              items.map((n) => (
+                <Link
+                  key={n.id}
+                  to={notificationHref(n.link)}
+                  onClick={() => handleClick(n)}
+                  className={`block border-b border-border/60 px-4 py-3 text-left transition-colors hover:bg-background ${
+                    n.read_at ? 'opacity-75' : 'bg-accent/5'
+                  }`}
+                >
+                  <p className="text-sm font-medium text-primary">{n.title}</p>
+                  {n.body && <p className="mt-0.5 line-clamp-2 text-xs text-muted">{n.body}</p>}
+                  <p className="mt-1 text-[10px] text-muted">{new Date(n.created_at).toLocaleString()}</p>
+                </Link>
+              ))
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}

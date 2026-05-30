@@ -181,7 +181,7 @@ export function useListing(id) {
             *,
             nearest_university:universities(id, short_name, name, lat, lng),
             listing_photos(id, url, is_cover, display_order),
-            landlord:profiles(id, full_name, is_verified, phone)
+            landlord:profiles(id, full_name, is_verified, phone, last_seen_at)
           `
           )
           .eq('id', id)

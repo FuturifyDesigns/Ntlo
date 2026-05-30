@@ -1,3 +1,5 @@
+import { useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { X } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
@@ -9,10 +11,19 @@ export default function Modal({ open, onClose, title, children, size = 'md' }) {
     xl: 'max-w-4xl',
   }
 
-  return (
+  useEffect(() => {
+    if (!open) return undefined
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = prev
+    }
+  }, [open])
+
+  return createPortal(
     <AnimatePresence>
       {open && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center p-4 sm:items-center">
+        <div className="fixed inset-0 z-[100] flex items-end justify-center p-4 sm:items-center">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -24,11 +35,17 @@ export default function Modal({ open, onClose, title, children, size = 'md' }) {
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 40 }}
-            className={`relative w-full ${sizes[size]} max-h-[90vh] overflow-y-auto rounded-2xl bg-surface p-6 shadow-xl`}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={title ? 'modal-title' : undefined}
+            className={`relative flex max-h-[min(90vh,720px)] w-full flex-col ${sizes[size]} rounded-2xl bg-surface shadow-xl`}
           >
-            <div className="mb-4 flex items-center justify-between">
-              {title && <h2 className="font-display text-xl font-semibold text-primary">{title}</h2>}
+            <div className="flex shrink-0 items-center justify-between border-b border-border px-6 py-4">
+              {title && (
+                <h2 id="modal-title" className="font-display text-xl font-semibold text-primary">{title}</h2>
+              )}
               <button
+                type="button"
                 onClick={onClose}
                 className="ml-auto rounded-lg p-1.5 text-muted hover:bg-background hover:text-primary"
                 aria-label="Close"
@@ -36,10 +53,11 @@ export default function Modal({ open, onClose, title, children, size = 'md' }) {
                 <X size={20} />
               </button>
             </div>
-            {children}
+            <div className="min-h-0 flex-1 overflow-y-auto px-6 py-4">{children}</div>
           </motion.div>
         </div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   )
 }

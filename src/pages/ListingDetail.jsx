@@ -141,7 +141,7 @@ export default function ListingDetail() {
           </div>
 
           <div className="lg:col-span-1">
-            <div className="sticky top-24 space-y-4 rounded-xl border border-border bg-surface p-6 shadow-sm">
+            <div className="sticky top-24 max-h-[calc(100vh-6rem)] space-y-4 overflow-y-auto rounded-xl border border-border bg-surface p-6 shadow-sm">
               <ListingContactPanel listing={listing} />
 
               <ListingAdvisorPanel
