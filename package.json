@@ -22,7 +22,8 @@
     "react-dom": "^19.2.6",
     "react-hook-form": "^7.76.1",
     "react-leaflet": "^5.0.0",
-    "react-router-dom": "^7.16.0"
+    "react-router-dom": "^7.16.0",
+    "tesseract.js": "^7.0.0"
   },
   "devDependencies": {
     "@emnapi/core": "^1.10.0",

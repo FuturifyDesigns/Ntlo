@@ -1,11 +1,17 @@
-import { motion } from 'framer-motion'
+import { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
   Check, X, Sparkles, ThumbsUp, AlertTriangle, Lightbulb, Clock,
   CreditCard, Camera, Home, FileSignature, MapPin, Building2,
-  Receipt, Zap, ScrollText, FileText,
+  Receipt, Zap, ScrollText, FileText, ScanSearch, Loader2,
+  CheckCircle2, XCircle, Info, ChevronDown,
 } from 'lucide-react'
 import { useTranslation } from '../../hooks/useTranslation'
 import { getScoreColor } from '../../lib/aiAdvisor'
+import { isImagePath, isPdfPath } from '../../lib/adminAdvisor'
+import { getSignedDocUrl } from '../../lib/verificationStorage'
+import { recognizeImage } from '../../lib/ocr'
+import { analyzeDocCompliance, VERDICT_STYLE } from '../../lib/docCompliance'
 import Button from '../ui/Button'
 
 const DOC_ICONS = {
@@ -33,6 +39,9 @@ const STATUS_STYLE = {
 
 const DOC_STATUS_DOT = { approved: 'bg-success', rejected: 'bg-error', pending: 'bg-amber-500' }
 
+const CHECK_ICON = { pass: CheckCircle2, warn: AlertTriangle, fail: XCircle, manual: Info }
+const CHECK_COLOR = { pass: 'text-success', warn: 'text-amber-600', fail: 'text-error', manual: 'text-muted' }
+
 function initials(name = '?') {
   return name.trim().split(/\s+/).slice(0, 2).map((w) => w[0]?.toUpperCase()).join('') || '?'
 }
@@ -44,6 +53,44 @@ export default function VerificationCard({ subject, analysis, kind, onOpenDocs, 
   const sub = kind === 'landlord'
     ? (subject.phone || '—')
     : `${subject.city} · ${subject.landlord?.full_name || '—'}`
+
+  const [results, setResults] = useState({})
+  const [scanning, setScanning] = useState(false)
+  const [progress, setProgress] = useState(0)
+  const [scanError, setScanError] = useState('')
+  const [showReport, setShowReport] = useState(true)
+
+  const imageDocs = docs.filter((d) => isImagePath(d.storage_path, d.file_name))
+  const scanned = Object.keys(results).length > 0
+
+  async function runScan() {
+    if (scanning || docs.length === 0) return
+    setScanning(true)
+    setScanError('')
+    setProgress(0)
+    const next = {}
+    docs.forEach((d) => {
+      if (isPdfPath(d.storage_path, d.file_name)) next[d.id] = { verdict: 'pdf', checks: [], score: null }
+    })
+    setResults({ ...next })
+    try {
+      for (let i = 0; i < imageDocs.length; i++) {
+        const d = imageDocs[i]
+        const url = await getSignedDocUrl(d.storage_path)
+        // eslint-disable-next-line no-await-in-loop
+        const { text, confidence } = await recognizeImage(url, (p) =>
+          setProgress((i + p) / imageDocs.length)
+        )
+        next[d.id] = analyzeDocCompliance(d.doc_type, text, confidence)
+        setResults({ ...next })
+      }
+      setProgress(1)
+    } catch (err) {
+      setScanError(err.message || t('admin.compliance.scanError'))
+    } finally {
+      setScanning(false)
+    }
+  }
 
   return (
     <motion.div
@@ -105,9 +152,25 @@ export default function VerificationCard({ subject, analysis, kind, onOpenDocs, 
 
       {/* Documents */}
       <div className="px-4 pb-4 sm:px-5">
-        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted">
-          {t('admin.documents')} {docs.length > 0 && `(${docs.length})`}
-        </p>
+        <div className="mb-2 flex items-center justify-between gap-2">
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted">
+            {t('admin.documents')} {docs.length > 0 && `(${docs.length})`}
+          </p>
+          {docs.length > 0 && (
+            <button
+              type="button"
+              onClick={runScan}
+              disabled={scanning}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-accent/30 bg-accent/5 px-2.5 py-1 text-xs font-semibold text-accent transition-colors hover:bg-accent/10 disabled:opacity-60"
+            >
+              {scanning ? <Loader2 size={13} className="animate-spin" /> : <ScanSearch size={13} />}
+              {scanning
+                ? t('admin.compliance.scanning', { pct: Math.round(progress * 100) })
+                : scanned ? t('admin.compliance.rescan') : t('admin.compliance.run')}
+            </button>
+          )}
+        </div>
+
         {docs.length === 0 ? (
           <p className="rounded-lg border border-dashed border-border px-3 py-4 text-center text-sm text-muted">
             {t('admin.noDocuments')}
@@ -116,6 +179,8 @@ export default function VerificationCard({ subject, analysis, kind, onOpenDocs, 
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             {docs.map((doc, i) => {
               const Icon = DOC_ICONS[doc.doc_type] || FileText
+              const result = results[doc.id]
+              const vStyle = result && VERDICT_STYLE[result.verdict]
               return (
                 <button
                   key={doc.id}
@@ -132,12 +197,92 @@ export default function VerificationCard({ subject, analysis, kind, onOpenDocs, 
                     </span>
                     <span className="block truncate text-xs text-muted">{doc.file_name}</span>
                   </span>
-                  <span className={`h-2 w-2 shrink-0 rounded-full ${DOC_STATUS_DOT[doc.status] || 'bg-amber-500'}`} title={doc.status} />
+                  {result ? (
+                    <span className={`inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${vStyle?.color}`}>
+                      <span className={`h-1.5 w-1.5 rounded-full ${vStyle?.dot}`} />
+                      {result.verdict === 'pdf'
+                        ? t('admin.compliance.verdict.pdf')
+                        : t(`admin.compliance.verdict.${result.verdict}`)}
+                    </span>
+                  ) : (
+                    <span className={`h-2 w-2 shrink-0 rounded-full ${DOC_STATUS_DOT[doc.status] || 'bg-amber-500'}`} title={doc.status} />
+                  )}
                 </button>
               )
             })}
           </div>
         )}
+
+        {scanError && (
+          <p className="mt-2 text-xs text-error">{t('admin.compliance.scanError')}</p>
+        )}
+
+        {/* Compliance report */}
+        <AnimatePresence initial={false}>
+          {scanned && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="mt-3 overflow-hidden rounded-xl border border-border bg-background"
+            >
+              <button
+                type="button"
+                onClick={() => setShowReport((s) => !s)}
+                className="flex w-full items-center justify-between gap-2 px-3 py-2.5 text-left"
+              >
+                <span className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-primary">
+                  <ScanSearch size={14} className="text-accent" />
+                  {t('admin.compliance.report')}
+                </span>
+                <ChevronDown size={16} className={`text-muted transition-transform ${showReport ? 'rotate-180' : ''}`} />
+              </button>
+
+              {showReport && (
+                <div className="space-y-3 border-t border-border px-3 py-3">
+                  {docs.map((doc) => {
+                    const result = results[doc.id]
+                    if (!result) return null
+                    const vStyle = VERDICT_STYLE[result.verdict] || VERDICT_STYLE.manual
+                    return (
+                      <div key={doc.id} className="rounded-lg border border-border bg-surface p-3">
+                        <div className="mb-1.5 flex items-center justify-between gap-2">
+                          <p className="text-sm font-semibold text-primary">{t(`admin.docType.${doc.doc_type}`)}</p>
+                          <span className={`flex items-center gap-1 text-xs font-semibold ${vStyle.color}`}>
+                            <span className={`h-1.5 w-1.5 rounded-full ${vStyle.dot}`} />
+                            {result.verdict === 'pdf'
+                              ? t('admin.compliance.verdict.pdf')
+                              : t(`admin.compliance.verdict.${result.verdict}`)}
+                            {typeof result.score === 'number' && ` · ${result.score}`}
+                          </span>
+                        </div>
+                        {result.verdict === 'pdf' ? (
+                          <p className="text-xs text-muted">{t('admin.compliance.pdfNote')}</p>
+                        ) : (
+                          <ul className="space-y-1">
+                            {result.checks.map((c, i) => {
+                              const Icon = CHECK_ICON[c.status] || Info
+                              return (
+                                <li key={i} className={`flex items-start gap-1.5 text-xs ${CHECK_COLOR[c.status]}`}>
+                                  <Icon size={13} className="mt-0.5 shrink-0" />
+                                  <span>{t(`admin.compliance.check.${c.key}`, c.meta || {})}</span>
+                                </li>
+                              )
+                            })}
+                          </ul>
+                        )}
+                        <p className="mt-2 border-t border-border pt-1.5 text-[11px] italic text-muted">
+                          {t(`admin.compliance.reg.${result.regulationKey || doc.doc_type}`)}
+                        </p>
+                      </div>
+                    )
+                  })}
+                  <p className="text-[11px] text-muted">{t('admin.compliance.disclaimer')}</p>
+                </div>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Actions */}
