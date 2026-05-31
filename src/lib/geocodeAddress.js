@@ -1,5 +1,6 @@
 import { getCachedGeocode, setCachedGeocode } from './geocodeCache'
 import { normalizeUniversityName } from './universityNames'
+import { searchPlacesCampus } from './googleGeocoder'
 
 const CAMPUS_TYPES = new Set([
   'university',
@@ -76,25 +77,113 @@ export function buildAddressQueries({ address, area, city, universityCity, count
   return [...new Set(queries.filter(Boolean))]
 }
 
-/** Build queries for custom / unknown university campus names. */
-export function buildUniversityCampusQueries({ name, city, country = 'Botswana' }) {
-  const campusName = normalizeUniversityName(name?.trim() || '')
-  const cityPart = normalizeUniversityName(city?.trim() || '') || country
-  if (!campusName) return []
+/** Major Botswana towns — used when the submitted city is slightly off (e.g. Gaborone vs Sebele). */
+const BOTSWANA_CAMPUS_CITIES = [
+  'Gaborone', 'Sebele', 'Francistown', 'Palapye', 'Maun', 'Kanye', 'Lobatse',
+  'Serowe', 'Mahalapye', 'Molepolole', 'Selibe Phikwe', 'Kasane', 'Oodi',
+]
 
-  const queries = [
-    `${campusName}, ${cityPart}, ${country}`,
-    `${campusName}, ${country}`,
-    `${campusName}, ${cityPart}`,
-  ]
+const ACRONYM_STOP = new Set(['of', 'the', 'and', 'a', 'in', 'for', 'at', 'to'])
 
-  if (!/\b(university|college|institute|polytechnic|campus)\b/i.test(campusName)) {
-    queries.push(`${campusName} university, ${cityPart}, ${country}`)
-    queries.push(`${campusName} college, ${cityPart}, ${country}`)
-    queries.push(`${campusName} campus, ${cityPart}, ${country}`)
+/** Extra search phrases for campuses that Google lists under a nearby town or alias. */
+const KNOWN_CAMPUS_ALIASES = {
+  'botswana university of agriculture and natural resources': [
+    'BUAN Botswana',
+    'Botswana University of Agriculture & Natural Resources',
+    'Botswana University of Agriculture and Natural Resources Sebele',
+  ],
+}
+
+export function buildCampusAcronym(name) {
+  const words = normalizeUniversityName(name).split(/\s+/).filter(Boolean)
+  const significant = words.filter((w) => !ACRONYM_STOP.has(w.toLowerCase()))
+  if (significant.length < 3) return null
+  const acronym = significant.map((w) => w[0]).join('').toUpperCase()
+  return acronym.length >= 3 ? acronym : null
+}
+
+function campusNameVariants(name) {
+  const base = normalizeUniversityName(name?.trim() || '')
+  if (!base) return []
+
+  const variants = new Set([base])
+
+  const noParens = base.replace(/\([^)]*\)/g, '').replace(/\s+/g, ' ').trim()
+  if (noParens) variants.add(noParens)
+
+  if (/\band\b/i.test(base)) {
+    variants.add(base.replace(/\band\b/gi, '&'))
+  }
+  if (base.includes('&')) {
+    variants.add(base.replace(/&/g, 'and'))
   }
 
-  return [...new Set(queries)]
+  const acronym = buildCampusAcronym(base)
+  if (acronym) variants.add(acronym)
+
+  const aliasKey = base.toLowerCase()
+  for (const alias of KNOWN_CAMPUS_ALIASES[aliasKey] || []) {
+    variants.add(alias)
+  }
+
+  return [...variants]
+}
+
+/** Build geocode query strings — many variants so obscure / mis-typed campuses still resolve. */
+export function buildUniversityCampusQueries({ name, city, country = 'Botswana' }) {
+  const cityPart = normalizeUniversityName(city?.trim() || '')
+  const names = campusNameVariants(name)
+  if (!names.length) return []
+
+  const queries = new Set()
+
+  for (const campusName of names) {
+    if (cityPart) {
+      queries.add(`${campusName}, ${cityPart}, ${country}`)
+      queries.add(`${campusName}, ${cityPart}`)
+    }
+    queries.add(`${campusName}, ${country}`)
+    queries.add(`${campusName} ${country}`)
+
+    if (!/\b(university|college|institute|polytechnic|campus|school)\b/i.test(campusName)) {
+      if (cityPart) {
+        queries.add(`${campusName} university, ${cityPart}, ${country}`)
+        queries.add(`${campusName} college, ${cityPart}, ${country}`)
+      }
+      queries.add(`${campusName} university, ${country}`)
+      queries.add(`${campusName} college, ${country}`)
+    }
+  }
+
+  // Submitted city may be wrong — try other Botswana towns (Sebele for BUAN, Palapye for BIUST, etc.)
+  const primary = names[0]
+  const altCities = BOTSWANA_CAMPUS_CITIES.filter(
+    (c) => !cityPart || c.toLowerCase() !== cityPart.toLowerCase()
+  )
+  for (const altCity of altCities) {
+    queries.add(`${primary}, ${altCity}, ${country}`)
+  }
+
+  return [...queries]
+}
+
+/** Shorter queries for Places text search (more tolerant of wording). */
+export function buildUniversityPlacesQueries({ name, city, country = 'Botswana' }) {
+  const cityPart = normalizeUniversityName(city?.trim() || '')
+  const names = campusNameVariants(name)
+  if (!names.length) return []
+
+  const queries = new Set()
+  for (const campusName of names) {
+    queries.add(campusName)
+    if (cityPart) queries.add(`${campusName} ${cityPart}`)
+    queries.add(`${campusName} university`)
+  }
+
+  if (cityPart) queries.add(`${names[0]} ${cityPart} ${country}`)
+  queries.add(`${names[0]} ${country}`)
+
+  return [...queries]
 }
 
 /** Google Maps JS Geocoder (works in browser — no CORS). */
@@ -189,13 +278,19 @@ export async function resolveAddressCoords({ geocoder, address, area, city, univ
   return null
 }
 
-/** Geocode a university / campus name (for "Other" university or obscure institutions). */
-export async function resolveUniversityCampusCoords({ geocoder, name, city }) {
-  const queries = buildUniversityCampusQueries({ name, city })
+/** Geocode a university / campus name — tries many query variants, Places search, then OSM. */
+export async function resolveUniversityCampusCoords({ geocoder, name, city, country = 'Botswana' }) {
+  const queries = buildUniversityCampusQueries({ name, city, country })
 
   for (const query of queries) {
     const google = geocoder ? await geocodeWithGoogle(geocoder, query, { preferCampus: true }) : null
     if (google) return google
+  }
+
+  const placesQueries = buildUniversityPlacesQueries({ name, city, country })
+  for (const query of placesQueries) {
+    const place = await searchPlacesCampus(query)
+    if (place) return place
   }
 
   for (const query of queries) {

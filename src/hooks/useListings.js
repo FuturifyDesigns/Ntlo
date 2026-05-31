@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase'
 import { subscribeListingsLive } from '../lib/listingsLiveBus'
 import { dedupeAsync } from '../lib/queryOptim'
 import { getUniversityIdsFromSearch, escapeIlikePattern } from '../lib/universitySearch'
+import { mergeListingRow } from '../lib/listingMerge'
 
 const PAGE_SIZE = 12
 
@@ -237,7 +238,9 @@ export function useListing(id) {
         'postgres_changes',
         { event: 'UPDATE', schema: 'public', table: 'listings', filter: `id=eq.${id}` },
         (payload) => {
-          if (payload.new) setListing((prev) => (prev ? { ...prev, ...payload.new } : payload.new))
+          if (payload.new) {
+            setListing((prev) => mergeListingRow(prev, payload.new))
+          }
         }
       )
       .subscribe()

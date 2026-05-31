@@ -16,7 +16,7 @@ export async function createUniversityFromRequest(request) {
 
   const coords = await geocodeCampus({ name: fullName, city })
   if (!coords) {
-    throw new Error('Could not find this campus on the map. Check the full name and city match Google Maps, then try again.')
+    throw new Error('Could not locate this campus on Google Maps after searching across Botswana. The name looks valid — try approving again in a moment, or check the spelling matches Google Maps.')
   }
 
   const slug = slugifyUniversity(fullName)

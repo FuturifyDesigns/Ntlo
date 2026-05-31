@@ -14,7 +14,7 @@ import WithdrawReasonModal, { APPLICATION_WITHDRAW_REASONS, VIEWING_CANCEL_REASO
 import ApplicationDocFields from './ApplicationDocFields'
 import ApplicationRequirementsList from './ApplicationRequirementsList'
 import { APPLICATION_DOC_TYPES } from '../../lib/applicationDocs'
-import { canStudentApplyToListing } from '../../lib/applicationRules'
+import { canStudentApplyToListing, genderMatchesListing } from '../../lib/applicationRules'
 import { isListingOpenForApply } from '../../lib/listingOccupancy'
 import { useStudentHousing, useStudentListingStatus } from '../../hooks/useHousing'
 import { GENDER_PREFERENCES } from '../../lib/utils'
@@ -60,7 +60,13 @@ export default function ListingContactPanel({ listing }) {
   const landlordName = listing.landlord_display_name || listing.landlord?.full_name || 'Landlord'
   const isStudent = profile?.role === 'student'
   const isGuest = !user
-  const canContact = user && isStudent && (isListingOpenForApply(listing) || activeApplication?.status === 'changes_requested')
+  const genderRestricted = isStudent
+    && profile?.gender
+    && listing.gender_preference
+    && listing.gender_preference !== 'any'
+    && !genderMatchesListing(profile.gender, listing.gender_preference)
+  const canContact = user && isStudent && !genderRestricted
+    && (isListingOpenForApply(listing) || activeApplication?.status === 'changes_requested')
   const applyCheck = isStudent ? canStudentApplyToListing(profile, listing) : { ok: false }
   const currentlyRented = myApplications?.some((a) => a.status === 'rented')
   const applyBlockedReason = !applyCheck.ok ? applyCheck.reason : null
@@ -220,6 +226,18 @@ export default function ListingContactPanel({ listing }) {
           </div>
         )}
 
+        {genderRestricted && (
+          <div className="rounded-xl border border-border bg-background p-4 text-center">
+            <p className="font-medium text-primary">{t('housing.genderRestrictionTitle')}</p>
+            <p className="mt-2 text-sm text-muted">
+              {listing.gender_preference === 'female'
+                ? t('housing.genderRestrictionFemale')
+                : t('housing.genderRestrictionMale')}
+            </p>
+            <p className="mt-3 text-xs text-muted">{t('housing.genderRestrictionHint')}</p>
+          </div>
+        )}
+
         {canContact && (
           <>
             <Button onClick={openChat} disabled={chatBusy} size="lg" className="w-full">
@@ -273,7 +291,15 @@ export default function ListingContactPanel({ listing }) {
               <WhatsAppIcon size={16} />
               {t('listings.chatWhatsAppOptional')}
             </Button>
-            {applyBlockedReason && applyBlockedReason !== 'genderRequired' && (
+            {applyBlockedReason === 'genderRequired' && (
+              <p className="text-xs text-muted">
+                {t('housing.errors.genderRequired')}{' '}
+                <Link to="/complete-profile" className="font-medium text-accent underline">
+                  {t('housing.completeProfileLink')}
+                </Link>
+              </p>
+            )}
+            {applyBlockedReason && applyBlockedReason !== 'genderRequired' && applyBlockedReason !== 'genderMismatch' && (
               <p className="text-xs text-error">{t(`housing.errors.${applyBlockedReason}`)}</p>
             )}
             {currentlyRented && applyCheck.ok && (

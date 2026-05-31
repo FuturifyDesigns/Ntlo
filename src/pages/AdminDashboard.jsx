@@ -52,6 +52,7 @@ export default function AdminDashboard() {
   const [landlords, setLandlords] = useState([])
   const [listings, setListings] = useState([])
   const [actionError, setActionError] = useState('')
+  const [geocodingRequestId, setGeocodingRequestId] = useState(null)
   const [sortMode, setSortMode] = useState('smart')
   const [preview, setPreview] = useState(null)
   const [userSearch, setUserSearch] = useState('')
@@ -152,10 +153,15 @@ export default function AdminDashboard() {
   }
 
   async function approveRequest(req) {
-    await runAction(async () => {
-      await createUniversityFromRequest(req)
-      await fetchRequests()
-    })
+    setGeocodingRequestId(req.id)
+    try {
+      await runAction(async () => {
+        await createUniversityFromRequest(req)
+        await fetchRequests()
+      })
+    } finally {
+      setGeocodingRequestId(null)
+    }
   }
 
   async function reviewRequest(id, status) {
@@ -451,11 +457,11 @@ export default function AdminDashboard() {
                       </div>
                     </div>
                     <div className="flex gap-2">
-                      <Button size="sm" onClick={() => reviewRequest(req.id, 'approved')}>
-                        <Check size={14} />
-                        {t('admin.approve')}
+                      <Button size="sm" onClick={() => reviewRequest(req.id, 'approved')} disabled={geocodingRequestId === req.id}>
+                        {geocodingRequestId === req.id ? <RefreshCw size={14} className="animate-spin" /> : <Check size={14} />}
+                        {geocodingRequestId === req.id ? t('admin.geocodingCampus') : t('admin.approve')}
                       </Button>
-                      <Button size="sm" variant="danger" onClick={() => reviewRequest(req.id, 'rejected')}>
+                      <Button size="sm" variant="danger" onClick={() => reviewRequest(req.id, 'rejected')} disabled={geocodingRequestId === req.id}>
                         <X size={14} />
                         {t('admin.reject')}
                       </Button>
