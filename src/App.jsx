@@ -40,6 +40,7 @@ import CookiePreferencesModal from './components/layout/CookiePreferencesModal'
 import ExitIntentModal from './components/layout/ExitIntentModal'
 import AnalyticsTracker from './components/layout/AnalyticsTracker'
 import UrgentNotificationLayer from './components/layout/UrgentNotificationLayer'
+import NotificationSoundLayer from './components/layout/NotificationSoundLayer'
 import GoogleMapsProvider from './components/maps/GoogleMapsProvider'
 import { SavedListingsProvider } from './context/SavedListingsContext'
 import { useLocale } from './context/LocaleContext'
@@ -133,6 +134,7 @@ function AppShell() {
         <CookiePreferencesModal />
         <CookieFeedbackToast />
         <UrgentNotificationLayer />
+        <NotificationSoundLayer />
         <ExitIntentModal />
         <AnalyticsTracker />
       </div>
