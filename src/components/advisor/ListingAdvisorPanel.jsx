@@ -86,7 +86,7 @@ export default function ListingAdvisorPanel({ listing, studentUniversityId }) {
 
       {insightText && (
         <div className="rounded-lg border border-accent/20 bg-accent/5 p-3">
-          <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-accent">
+          <p className="mb-1 text-sm font-medium text-accent">
             {t('advisor.insightSummary')}
           </p>
           <p className="text-sm leading-relaxed text-primary">{insightText}</p>
@@ -104,21 +104,21 @@ export default function ListingAdvisorPanel({ listing, studentUniversityId }) {
 
       {analysis.pros.length > 0 && (
         <div>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted">{t('advisor.pros')}</p>
+          <p className="mb-2 text-sm font-medium text-muted">{t('advisor.pros')}</p>
           <InsightList items={analysis.pros} icon={ThumbsUp} variant="pro" />
         </div>
       )}
 
       {analysis.cons.length > 0 && (
         <div>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted">{t('advisor.cons')}</p>
+          <p className="mb-2 text-sm font-medium text-muted">{t('advisor.cons')}</p>
           <InsightList items={analysis.cons} icon={AlertTriangle} variant="con" />
         </div>
       )}
 
       {analysis.tips.length > 0 && (
         <div>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted">{t('advisor.tips')}</p>
+          <p className="mb-2 text-sm font-medium text-muted">{t('advisor.tips')}</p>
           <InsightList items={analysis.tips} icon={Lightbulb} variant="tip" />
         </div>
       )}

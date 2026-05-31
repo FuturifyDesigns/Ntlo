@@ -363,9 +363,9 @@ export default function EditListing() {
                   {t('advisor.competitive.rankBadge', { rank: liveCompetition.rank, total: liveCompetition.availableCount })}
                 </p>
               )}
-              <ul className="mt-2 space-y-1 text-muted">
+              <ul className="mt-2 space-y-1.5 text-sm text-muted">
                 {liveCompetition.actions.slice(0, 3).map((a, i) => (
-                  <li key={i}>• {t(`advisor.competitive.action.${a.key}`, a.meta || {})}</li>
+                  <li key={i} className="leading-relaxed">{t(`advisor.competitive.action.${a.key}`, a.meta || {})}</li>
                 ))}
               </ul>
             </div>

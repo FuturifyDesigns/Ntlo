@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from './useAuth'
+import { getUniversityIdsFromSearch, escapeIlikePattern } from '../lib/universitySearch'
 
 const PAGE_SIZE = 12
 
@@ -84,9 +85,16 @@ export function useListings(filters = {}) {
       }
       if (landlordId) query = query.eq('landlord_id', landlordId)
       if (search) {
-        query = query.or(
-          `title.ilike.%${search}%,area.ilike.%${search}%,city.ilike.%${search}%,address.ilike.%${search}%`
-        )
+        const trimmed = escapeIlikePattern(search.trim())
+        if (trimmed) {
+          const matchedUniIds = universityId ? [] : getUniversityIdsFromSearch(trimmed)
+          const textOr = `title.ilike.%${trimmed}%,area.ilike.%${trimmed}%,city.ilike.%${trimmed}%,address.ilike.%${trimmed}%,custom_university_name.ilike.%${trimmed}%`
+          if (matchedUniIds.length > 0) {
+            query = query.or(`${textOr},nearest_university_id.in.(${matchedUniIds.join(',')})`)
+          } else {
+            query = query.or(textOr)
+          }
+        }
       }
       if (amenities.length) {
         query = query.contains('amenities', amenities)

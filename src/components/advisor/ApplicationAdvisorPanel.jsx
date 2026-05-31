@@ -41,15 +41,15 @@ export default function ApplicationAdvisorPanel({ application }) {
       <p className="mb-3 text-xs text-muted">{t(`applicationAdvisor.label.${analysis.label}`)}</p>
       <div className="grid gap-3 sm:grid-cols-3">
         <div>
-          <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-muted">{t('advisor.pros')}</p>
+          <p className="mb-1 text-sm font-medium text-muted">{t('advisor.pros')}</p>
           <InsightList items={analysis.pros} icon={ThumbsUp} variant="pro" />
         </div>
         <div>
-          <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-muted">{t('advisor.cons')}</p>
+          <p className="mb-1 text-sm font-medium text-muted">{t('advisor.cons')}</p>
           <InsightList items={analysis.cons} icon={AlertTriangle} variant="con" />
         </div>
         <div>
-          <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-muted">{t('advisor.tips')}</p>
+          <p className="mb-1 text-sm font-medium text-muted">{t('advisor.tips')}</p>
           <InsightList items={analysis.tips} icon={Lightbulb} variant="tip" />
         </div>
       </div>

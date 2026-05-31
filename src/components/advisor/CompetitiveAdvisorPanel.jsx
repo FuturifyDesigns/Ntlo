@@ -110,13 +110,13 @@ export default function CompetitiveAdvisorPanel({ listing }) {
 
         {pos.strengths.length > 0 && (
           <div>
-            <p className="mb-2 flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-success">
-              <TrendingUp size={12} />
+            <p className="mb-2 flex items-center gap-1 text-sm font-medium text-success">
+              <TrendingUp size={14} />
               {t('advisor.competitive.strengths')}
             </p>
-            <ul className="space-y-1 text-sm text-muted">
+            <ul className="space-y-1.5 text-sm text-muted">
               {pos.strengths.map((s, i) => (
-                <li key={i}>• {t(`advisor.competitive.strength.${s.key}`, s.meta || {})}</li>
+                <li key={i} className="leading-relaxed">{t(`advisor.competitive.strength.${s.key}`, s.meta || {})}</li>
               ))}
             </ul>
           </div>
@@ -124,13 +124,13 @@ export default function CompetitiveAdvisorPanel({ listing }) {
 
         {pos.weaknesses.length > 0 && (
           <div>
-            <p className="mb-2 flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-amber-600">
-              <TrendingDown size={12} />
+            <p className="mb-2 flex items-center gap-1 text-sm font-medium text-amber-700">
+              <TrendingDown size={14} />
               {t('advisor.competitive.gaps')}
             </p>
-            <ul className="space-y-1 text-sm text-muted">
+            <ul className="space-y-1.5 text-sm text-muted">
               {pos.weaknesses.map((w, i) => (
-                <li key={i}>• {t(`advisor.competitive.gap.${w.key}`, w.meta || {})}</li>
+                <li key={i} className="leading-relaxed">{t(`advisor.competitive.gap.${w.key}`, w.meta || {})}</li>
               ))}
             </ul>
           </div>
@@ -138,7 +138,7 @@ export default function CompetitiveAdvisorPanel({ listing }) {
 
         {pos.actions.length > 0 && (
           <div>
-            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-accent">{t('advisor.competitive.actions')}</p>
+            <p className="mb-2 text-sm font-medium text-accent">{t('advisor.competitive.actions')}</p>
             <ul className="space-y-2">
               {pos.actions.map((a, i) => (
                 <li key={i} className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-primary">
@@ -216,19 +216,19 @@ export default function CompetitiveAdvisorPanel({ listing }) {
               </div>
               <p className={`text-sm font-semibold ${getScoreColor(position.targetScore.overall)}`}>
                 {t('advisor.competitive.yourScore', { score: position.targetScore.overall })}
-                {' · '}
+                <span className="font-normal text-muted"> · </span>
                 {t('advisor.competitive.vsScore', { score: vs.competitorAnalysis.overall })}
               </p>
               {gaps.length > 0 && (
-                <ul className="space-y-1 text-xs text-muted">
+                <ul className="space-y-1.5 text-sm text-muted">
                   {gaps.map((g, i) => (
-                    <li key={i}>• {t(`advisor.competitive.gap.${g.key}`, g.meta || {})}</li>
+                    <li key={i} className="leading-relaxed">{t(`advisor.competitive.gap.${g.key}`, g.meta || {})}</li>
                   ))}
                 </ul>
               )}
               {position.actions.slice(0, 2).map((a, i) => (
-                <p key={i} className="text-xs text-accent">
-                  → {t(`advisor.competitive.action.${a.key}`, a.meta || {})}
+                <p key={i} className="text-sm text-primary">
+                  {t(`advisor.competitive.action.${a.key}`, a.meta || {})}
                 </p>
               ))}
               <Button as={Link} to={`/landlord/listings/${mine.id}/edit`} variant="outline" size="sm">

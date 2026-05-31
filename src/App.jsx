@@ -61,8 +61,8 @@ function AppRoutes() {
   const isAuthRoute = ['/login', '/register', '/forgot-password', '/complete-profile', '/check-email'].includes(location.pathname)
   const isDashboardRoute = location.pathname === '/student' || location.pathname === '/landlord' || location.pathname.startsWith('/landlord/') || location.pathname === '/admin'
   const transition = isAuthRoute || isDashboardRoute
-    ? { duration: prefs.reduceMotion ? 0 : 0.2, ease: [0.22, 1, 0.36, 1] }
-    : { duration: prefs.reduceMotion ? 0 : 0.28, ease: [0.22, 1, 0.36, 1] }
+    ? { duration: prefs.reduceMotion ? 0 : 0.18, ease: [0.25, 0.1, 0.25, 1] }
+    : { duration: prefs.reduceMotion ? 0 : 0.22, ease: [0.25, 0.1, 0.25, 1] }
 
   useEffect(() => {
     if (prefs.reduceMotion || isTabRoute) scrollToTop()
@@ -103,9 +103,9 @@ function AppRoutes() {
     <AnimatePresence mode="wait" onExitComplete={scrollToTop}>
       <motion.div
         key={location.pathname}
-        initial={{ opacity: 0, y: 8 }}
+        initial={{ opacity: 0, y: 4 }}
         animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -4 }}
+        exit={{ opacity: 0 }}
         transition={transition}
       >
         {routes}

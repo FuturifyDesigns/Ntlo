@@ -1,12 +1,12 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Map, LayoutGrid } from 'lucide-react'
-import { motion } from 'framer-motion'
 import FilterBar from '../components/listings/FilterBar'
 import ListingGrid from '../components/listings/ListingGrid'
 import ListingMap from '../components/listings/ListingMap'
 import { useListings } from '../hooks/useListings'
 import { getUniversityById, getUniversityMapViewport, getUniversityDisplayName } from '../lib/universities'
+import { pickPrimaryUniversityMatch } from '../lib/universitySearch'
 import { useTranslation } from '../hooks/useTranslation'
 
 export default function Browse() {
@@ -35,12 +35,20 @@ export default function Browse() {
     [filters, view]
   )
 
+  const searchUniversityMatch = useMemo(() => {
+    if (filters.universityId) return null
+    return pickPrimaryUniversityMatch(filters.search)
+  }, [filters.search, filters.universityId])
+
   const mapViewport = useMemo(() => {
     if (filters.universityId && filters.universityId !== 'other') {
       return getUniversityMapViewport(getUniversityById(filters.universityId))
     }
+    if (searchUniversityMatch) {
+      return getUniversityMapViewport(searchUniversityMatch)
+    }
     return null
-  }, [filters.universityId])
+  }, [filters.universityId, searchUniversityMatch])
 
   const syncSearchToUrl = useCallback(() => {
     const params = new URLSearchParams()
@@ -52,14 +60,10 @@ export default function Browse() {
   }, [filters.search, filters.universityId, view, setSearchParams])
 
   const { listings, loading, isFetching, error, count, page, setPage, pageSize } = useListings(queryFilters)
-  const uni = filters.universityId ? getUniversityById(filters.universityId) : null
+  const uni = filters.universityId ? getUniversityById(filters.universityId) : searchUniversityMatch
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="mx-auto max-w-7xl px-4 py-5 sm:px-6 sm:py-8 lg:px-8"
-    >
+    <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 sm:py-8 lg:px-8">
       <div className="mb-5 sm:mb-8">
         <h1 className="font-display text-2xl font-bold text-primary sm:text-3xl">{t('listings.browseTitle')}</h1>
         <p className="mt-2 text-muted">{t('listings.browseSubtitle')}</p>
@@ -133,6 +137,6 @@ export default function Browse() {
           />
         )}
       </div>
-    </motion.div>
+    </div>
   )
 }

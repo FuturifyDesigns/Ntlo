@@ -1,12 +1,15 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { AnimatePresence, motion } from 'framer-motion'
 import { X } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../hooks/useAuth'
-import { navigateToNotification } from '../../lib/notifications'
+import { navigateToNotification, markNotificationRead } from '../../lib/notifications'
 import { useTranslation } from '../../hooks/useTranslation'
+import { useLocale } from '../../context/LocaleContext'
+import Button from '../ui/Button'
 
-const URGENT_TYPES = new Set([
+export const URGENT_NOTIFICATION_TYPES = new Set([
   'application_submitted',
   'application_accepted',
   'application_rejected',
@@ -23,16 +26,49 @@ const URGENT_TYPES = new Set([
   'listing_changes_requested',
 ])
 
+export function isUrgentNotification(notification) {
+  return Boolean(notification?.is_urgent || URGENT_NOTIFICATION_TYPES.has(notification?.type))
+}
+
 export function useUrgentNotificationToasts() {
   const { user, profile } = useAuth()
   const [toasts, setToasts] = useState([])
+  const dismissedRef = useRef(new Set())
+
+  const pushToast = useCallback((notification) => {
+    if (!isUrgentNotification(notification)) return
+    if (dismissedRef.current.has(notification.id)) return
+    setToasts((prev) => {
+      if (prev.some((item) => item.id === notification.id)) return prev
+      return [notification, ...prev].slice(0, 3)
+    })
+  }, [])
 
   const dismiss = useCallback((id) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id))
+    dismissedRef.current.add(id)
+    setToasts((prev) => prev.filter((item) => item.id !== id))
   }, [])
 
   useEffect(() => {
     if (!user?.id) return undefined
+
+    async function loadUnreadUrgent() {
+      const { data } = await supabase
+        .from('notifications')
+        .select('*')
+        .eq('user_id', user.id)
+        .is('read_at', null)
+        .order('created_at', { ascending: false })
+        .limit(12)
+
+      if (!data?.length) return
+
+      data
+        .filter((notification) => isUrgentNotification(notification) && !dismissedRef.current.has(notification.id))
+        .forEach((notification) => pushToast(notification))
+    }
+
+    loadUnreadUrgent()
 
     const channelName = `urgent-toast-${user.id}`
     supabase.getChannels().forEach((ch) => {
@@ -44,70 +80,92 @@ export function useUrgentNotificationToasts() {
       .on(
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.id}` },
-        (payload) => {
-          const n = payload.new
-          const urgent = n.is_urgent || URGENT_TYPES.has(n.type)
-          if (!urgent) return
-          setToasts((prev) => {
-            if (prev.some((x) => x.id === n.id)) return prev
-            return [n, ...prev].slice(0, 4)
-          })
-        }
+        (payload) => pushToast(payload.new)
       )
       .subscribe()
 
     return () => supabase.removeChannel(channel)
-  }, [user?.id])
+  }, [user?.id, pushToast])
 
   return { toasts, dismiss, role: profile?.role }
 }
 
 export default function UrgentNotificationLayer() {
   const { t } = useTranslation()
+  const { prefs } = useLocale()
   const navigate = useNavigate()
   const { toasts, dismiss, role } = useUrgentNotificationToasts()
+  const active = toasts[0]
 
-  useEffect(() => {
-    const timers = toasts.map((toast) => setTimeout(() => dismiss(toast.id), 8000))
-    return () => timers.forEach(clearTimeout)
-  }, [toasts, dismiss])
+  async function handleView(notification) {
+    dismiss(notification.id)
+    if (!notification.read_at) {
+      await markNotificationRead(notification.id).catch(() => {})
+    }
+    navigateToNotification(navigate, notification, role)
+  }
 
-  if (!toasts.length) return null
+  if (!active) return null
+
+  const motionProps = prefs.reduceMotion
+    ? {}
+    : {
+        initial: { opacity: 0, scale: 0.96, y: 8 },
+        animate: { opacity: 1, scale: 1, y: 0 },
+        exit: { opacity: 0, scale: 0.98, y: 4 },
+        transition: { duration: 0.22, ease: [0.22, 1, 0.36, 1] },
+      }
 
   return (
-    <div className="pointer-events-none fixed bottom-20 right-4 z-[110] flex w-[min(100vw-2rem,22rem)] flex-col gap-2 md:bottom-6">
-      {toasts.map((n) => (
-        <div
-          key={n.id}
-          className="pointer-events-auto rounded-xl border border-accent/40 bg-surface p-4 shadow-xl"
+    <AnimatePresence>
+      <motion.div
+        key={active.id}
+        className="fixed inset-0 z-[120] flex items-center justify-center p-4"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: prefs.reduceMotion ? 0 : 0.2 }}
+      >
+        <button
+          type="button"
+          className="absolute inset-0 bg-primary/40 backdrop-blur-[2px]"
+          aria-label={t('notifications.dismiss')}
+          onClick={() => dismiss(active.id)}
+        />
+        <motion.div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="urgent-notification-title"
+          className="relative w-full max-w-md rounded-2xl border border-accent/30 bg-surface p-6 shadow-2xl"
+          {...motionProps}
         >
-          <div className="flex items-start gap-2">
-            <div className="flex-1">
-              <p className="text-xs font-semibold uppercase tracking-wide text-accent">{t('notifications.urgent')}</p>
-              <p className="mt-1 text-sm font-semibold text-primary">{n.title}</p>
-              {n.body && <p className="mt-0.5 line-clamp-2 text-xs text-muted">{n.body}</p>}
-              <button
-                type="button"
-                onClick={() => {
-                  dismiss(n.id)
-                  navigateToNotification(navigate, n, role)
-                }}
-                className="mt-2 inline-block text-xs font-medium text-accent hover:underline"
-              >
-                {t('notifications.viewNow')}
-              </button>
-            </div>
-            <button
-              type="button"
-              onClick={() => dismiss(n.id)}
-              className="rounded p-1 text-muted hover:text-primary"
-              aria-label={t('notifications.dismiss')}
-            >
-              <X size={16} />
-            </button>
+          <button
+            type="button"
+            onClick={() => dismiss(active.id)}
+            className="absolute right-3 top-3 rounded-lg p-1.5 text-muted hover:bg-background hover:text-primary"
+            aria-label={t('notifications.dismiss')}
+          >
+            <X size={18} />
+          </button>
+
+          <p className="text-xs font-medium text-accent">{t('notifications.urgent')}</p>
+          <h2 id="urgent-notification-title" className="mt-2 pr-8 font-display text-xl font-semibold text-primary">
+            {active.title}
+          </h2>
+          {active.body && (
+            <p className="mt-2 text-sm leading-relaxed text-muted">{active.body}</p>
+          )}
+
+          <div className="mt-6 flex flex-wrap gap-2">
+            <Button type="button" onClick={() => handleView(active)}>
+              {t('notifications.viewNow')}
+            </Button>
+            <Button type="button" variant="outline" onClick={() => dismiss(active.id)}>
+              {t('notifications.dismiss')}
+            </Button>
           </div>
-        </div>
-      ))}
-    </div>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
   )
 }

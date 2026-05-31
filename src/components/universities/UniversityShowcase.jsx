@@ -25,6 +25,8 @@ export default function UniversityShowcase({ counts = {} }) {
         !q ||
         uni.name.toLowerCase().includes(q) ||
         getUniversityDisplayName(uni).toLowerCase().includes(q) ||
+        (uni.short_name || '').toLowerCase().includes(q) ||
+        (uni.slug || '').toLowerCase().includes(q) ||
         uni.city.toLowerCase().includes(q) ||
         (uni.nearby_areas || []).some((a) => a.toLowerCase().includes(q))
       return matchCity && matchSearch
