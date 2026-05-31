@@ -23,10 +23,11 @@ import {
 } from '../components/ping/PingScrollReveal'
 import { PLAY_URL } from '../components/ping/PingNavButton'
 import PingIcon from '../components/ping/PingIcon'
+import PingCollabMark from '../components/ping/PingCollabMark'
 import { useTranslation } from '../hooks/useTranslation'
 
 const BASE = import.meta.env.BASE_URL
-const NTLO_LOGO = `${BASE}logo-brand.png`
+const NTLO_ICON = `${BASE}ntlo-icon.png`
 
 const features = [
   { key: 'stops', icon: MapPin, image: `${BASE}ping/feature-stops.png` },
@@ -84,9 +85,7 @@ export default function PingPromo() {
             <ArrowLeft size={16} />
             {t('ping.backToNtlo')}
           </Link>
-          <p className="hidden text-xs font-medium uppercase tracking-[0.2em] text-sky-300/70 sm:block">
-            {t('ping.collabBadge')}
-          </p>
+          <PingCollabMark size="sm" className="hidden sm:flex" />
         </div>
 
         {/* Hero */}
@@ -134,7 +133,11 @@ export default function PingPromo() {
             <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-6 backdrop-blur-sm sm:p-10">
               <div className="flex flex-col items-center gap-6 text-center lg:flex-row lg:text-left">
                 <div className="flex shrink-0 items-center gap-4">
-                  <img src={NTLO_LOGO} alt="Ntlo" className="h-14 w-auto object-contain brightness-0 invert sm:h-16" />
+                  <img
+                    src={NTLO_ICON}
+                    alt="Ntlo"
+                    className="h-14 w-14 rounded-xl object-contain shadow-[0_4px_16px_rgba(0,0,0,0.35)] sm:h-16 sm:w-16"
+                  />
                   <Handshake className="text-sky-400/80" size={28} />
                   <PingIcon size="lg" glow />
                 </div>
