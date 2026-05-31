@@ -147,7 +147,10 @@ export default function AdminDashboard() {
         fetchUsers()
         fetchLandlords()
       })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'verification_documents' }, fetchLandlords)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'verification_documents' }, () => {
+        fetchLandlords()
+        fetchListings()
+      })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'listings' }, fetchListings)
       .subscribe((status) => setLive(status === 'SUBSCRIBED'))
 

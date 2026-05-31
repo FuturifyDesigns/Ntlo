@@ -186,7 +186,7 @@ export const translations = {
       applicationAcceptedNote: 'Application accepted. Coordinate deposit, lease, and move-in directly with the student.',
       applicationRejectedNote: 'Thank you for your interest.',
       acceptedExternalNote: 'Deposit, lease signing, and move-in happen outside Ntlo — use chat or WhatsApp. Mark as rented once the student has moved in.',
-      markRentedOut: 'Mark as rented out',
+      markRentedOut: 'Mark as rented',
       roomRentedConfirmed: 'Room marked as rented. Listing still shows as rented until you list again.',
       requestChanges: 'Request changes',
       requestChangesHint: 'Tell the student what to fix in their documents or application.',

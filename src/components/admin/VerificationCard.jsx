@@ -82,14 +82,14 @@ export default function VerificationCard({
   const scanned = Object.keys(results).length > 0
   const readiness = combineReadiness(analysis, currentDocs, results)
 
-  const requireAllOk = kind === 'landlord'
+  const requireAllOk = currentDocs.length > 0
   const okCount = currentDocs.filter((d) => d.status === 'approved').length
   const allMarkedOk = currentDocs.length > 0 && okCount === currentDocs.length
   const approveBlocked = requireAllOk && !allMarkedOk
 
   function handleApproveClick() {
     if (approveBlocked) return
-    if (kind === 'landlord' && readiness.score < ACCEPT_THRESHOLD) {
+    if (readiness.score < ACCEPT_THRESHOLD) {
       setConfirmApprove(true)
     } else {
       onApprove()
