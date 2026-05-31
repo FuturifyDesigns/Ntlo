@@ -151,3 +151,71 @@ export async function publishUniversityDraft(draft) {
   if (error) throw error
   return data
 }
+
+/** Build an editable draft from an existing university row. */
+export function prepareUniversityEditDraft(uni) {
+  return {
+    id: uni.id,
+    requestId: null,
+    name: uni.name,
+    shortName: uni.short_name || uni.name,
+    city: uni.city,
+    slug: uni.slug,
+    lat: Number(uni.lat),
+    lng: Number(uni.lng),
+    mapZoom: uni.map_zoom ?? 15,
+    nearbyAreas: [...(uni.nearby_areas || [])],
+    formattedAddress: '',
+    geocodeSource: 'saved',
+    imageFile: null,
+    imagePreviewUrl: uni.image_url || uni.image || null,
+  }
+}
+
+/** Update an existing university — changes sync everywhere via realtime. */
+export async function updateUniversityDraft(draft) {
+  if (!draft.id) throw new Error('Missing university id')
+
+  const name = normalizeUniversityName(draft.name)
+  const city = normalizeUniversityName(draft.city)
+  const validationError = validateFullUniversityName(name)
+  if (validationError) {
+    throw new Error('University name must be the full official name as shown on Google Maps (include University or College).')
+  }
+
+  const slug = slugifyUniversity(name)
+  let imageUrl = draft.imagePreviewUrl?.startsWith('http') && !draft.imageFile
+    ? draft.imagePreviewUrl
+    : null
+
+  if (draft.imageFile) {
+    imageUrl = await uploadUniversityPhoto(slug, draft.imageFile)
+  }
+
+  const nearbyAreas = (draft.nearbyAreas || [])
+    .map((a) => a.trim())
+    .filter(Boolean)
+
+  const { data, error } = await supabase.rpc('admin_update_university', {
+    p_id: draft.id,
+    p_name: name,
+    p_city: city,
+    p_slug: slug,
+    p_short_name: normalizeUniversityName(draft.shortName || name),
+    p_lat: draft.lat,
+    p_lng: draft.lng,
+    p_map_zoom: draft.mapZoom ?? 15,
+    p_nearby_areas: nearbyAreas,
+    p_image_url: imageUrl,
+  })
+
+  if (error) throw error
+  return data
+}
+
+/** Remove a university; linked listings and student profiles are unlinked first. */
+export async function deleteUniversity(id) {
+  const { data, error } = await supabase.rpc('admin_delete_university', { p_id: id })
+  if (error) throw error
+  return data
+}

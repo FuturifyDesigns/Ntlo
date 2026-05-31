@@ -7,6 +7,7 @@ import Input, { Textarea } from '../ui/Input'
 import { GOOGLE_MAPS_MAP_ID } from '../../lib/googleMaps'
 import {
   publishUniversityDraft,
+  updateUniversityDraft,
   refreshNearbyAreasForPin,
   refreshUniversityDraftCoords,
 } from '../../lib/adminUniversities'
@@ -41,8 +42,16 @@ function CampusMap({ lat, lng, onPinMove }) {
   )
 }
 
-export default function UniversityPublishModal({ open, draft: initialDraft, onClose, onPublished }) {
+export default function UniversityPublishModal({
+  open,
+  draft: initialDraft,
+  mode = 'create',
+  onClose,
+  onPublished,
+  onUpdated,
+}) {
   const { t } = useTranslation()
+  const isEdit = mode === 'edit'
   const [draft, setDraft] = useState(initialDraft)
   const [busy, setBusy] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
@@ -108,8 +117,13 @@ export default function UniversityPublishModal({ open, draft: initialDraft, onCl
     setBusy(true)
     setError('')
     try {
-      await publishUniversityDraft(draft)
-      onPublished?.()
+      if (isEdit) {
+        await updateUniversityDraft(draft)
+        onUpdated?.()
+      } else {
+        await publishUniversityDraft(draft)
+        onPublished?.()
+      }
       onClose()
     } catch (err) {
       setError(err.message || t('admin.actionFailed'))
@@ -123,9 +137,16 @@ export default function UniversityPublishModal({ open, draft: initialDraft, onCl
   const previewImage = draft.imagePreviewUrl
 
   return (
-    <Modal open={open} onClose={onClose} title={t('admin.universityPublishTitle')} size="xl">
+    <Modal
+      open={open}
+      onClose={onClose}
+      title={isEdit ? t('admin.universityEditTitle') : t('admin.universityPublishTitle')}
+      size="xl"
+    >
       <div className="space-y-5">
-        <p className="text-sm text-muted">{t('admin.universityPublishHint')}</p>
+        <p className="text-sm text-muted">
+          {isEdit ? t('admin.universityEditHint') : t('admin.universityPublishHint')}
+        </p>
 
         {draft.formattedAddress && (
           <div className="flex items-start gap-2 rounded-lg border border-border bg-background px-3 py-2 text-sm text-muted">
@@ -206,7 +227,9 @@ export default function UniversityPublishModal({ open, draft: initialDraft, onCl
           </Button>
           <Button type="button" onClick={handlePublish} disabled={busy || refreshing}>
             {busy ? <Loader2 size={16} className="animate-spin" /> : null}
-            {busy ? t('admin.universityPublishing') : t('admin.universityPublish')}
+            {busy
+              ? (isEdit ? t('admin.universitySaving') : t('admin.universityPublishing'))
+              : (isEdit ? t('admin.universitySave') : t('admin.universityPublish'))}
           </Button>
         </div>
       </div>

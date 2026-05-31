@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import {
   Users, GraduationCap, Shield, Home, Ban, Trash2, Check, X,
-  RefreshCw, Radio, Search, MapPin, CreditCard, ClipboardList, Star,
+  RefreshCw, Radio, Search, MapPin, CreditCard, ClipboardList, Star, Building2,
 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useTranslation } from '../hooks/useTranslation'
@@ -14,8 +14,9 @@ import Button from '../components/ui/Button'
 import Badge from '../components/ui/Badge'
 import Card from '../components/ui/Card'
 import { Skeleton } from '../components/ui/Skeleton'
-import { prepareUniversityDraft } from '../lib/adminUniversities'
+import { prepareUniversityDraft, prepareUniversityEditDraft, deleteUniversity } from '../lib/adminUniversities'
 import UniversityPublishModal from '../components/admin/UniversityPublishModal'
+import AdminUniversitiesPanel from '../components/admin/AdminUniversitiesPanel'
 import AdminAdvisorPanel from '../components/admin/AdminAdvisorPanel'
 import VerificationCard from '../components/admin/VerificationCard'
 import DocumentPreviewModal from '../components/admin/DocumentPreviewModal'
@@ -27,6 +28,7 @@ import AdminReviewsPanel from '../components/admin/AdminReviewsPanel'
 
 const TABS = [
   { id: 'requests', icon: GraduationCap, labelKey: 'admin.tabRequests' },
+  { id: 'universities', icon: Building2, labelKey: 'admin.tabUniversities' },
   { id: 'applications', icon: ClipboardList, labelKey: 'admin.tabApplications' },
   { id: 'reviews', icon: Star, labelKey: 'admin.tabReviews' },
   { id: 'users', icon: Users, labelKey: 'admin.tabUsers' },
@@ -55,6 +57,7 @@ export default function AdminDashboard() {
   const [actionError, setActionError] = useState('')
   const [geocodingRequestId, setGeocodingRequestId] = useState(null)
   const [publishDraft, setPublishDraft] = useState(null)
+  const [editorMode, setEditorMode] = useState('create')
   const [sortMode, setSortMode] = useState('smart')
   const [preview, setPreview] = useState(null)
   const [userSearch, setUserSearch] = useState('')
@@ -159,6 +162,7 @@ export default function AdminDashboard() {
     setActionError('')
     try {
       const draft = await prepareUniversityDraft(req)
+      setEditorMode('create')
       setPublishDraft(draft)
     } catch (err) {
       setActionError(err.message || t('admin.actionFailed'))
@@ -167,10 +171,35 @@ export default function AdminDashboard() {
     }
   }
 
+  function openEditUniversity(uni) {
+    setEditorMode('edit')
+    setPublishDraft(prepareUniversityEditDraft(uni))
+  }
+
+  function openDeleteUniversity(uni) {
+    setDialog({
+      mode: 'confirm',
+      title: t('admin.universityDeleteTitle'),
+      subtitle: uni.name,
+      description: t('admin.universityDeleteConfirm'),
+      confirmLabel: t('admin.delete'),
+      confirmVariant: 'danger',
+      onConfirm: async () => {
+        await deleteUniversity(uni.id)
+        setToast({ type: 'success', message: t('admin.universityDeletedToast') })
+      },
+    })
+  }
+
   function handleUniversityPublished() {
     setPublishDraft(null)
     fetchRequests()
     setToast({ type: 'success', message: t('admin.universityPublishedToast') })
+  }
+
+  function handleUniversityUpdated() {
+    setPublishDraft(null)
+    setToast({ type: 'success', message: t('admin.universityUpdatedToast') })
   }
 
   async function reviewRequest(id, status) {
@@ -359,6 +388,7 @@ export default function AdminDashboard() {
 
   const tabCounts = {
     requests: pendingRequests.length,
+    universities: 0,
     landlords: landlords.length,
     listings: listings.length,
   }
@@ -479,6 +509,13 @@ export default function AdminDashboard() {
                 ))
               )}
             </div>
+          )}
+
+          {tab === 'universities' && (
+            <AdminUniversitiesPanel
+              onEdit={openEditUniversity}
+              onDelete={openDeleteUniversity}
+            />
           )}
 
           {tab === 'applications' && <AdminApplicationsPanel />}
@@ -671,8 +708,10 @@ export default function AdminDashboard() {
       <UniversityPublishModal
         open={Boolean(publishDraft)}
         draft={publishDraft}
+        mode={editorMode}
         onClose={() => setPublishDraft(null)}
         onPublished={handleUniversityPublished}
+        onUpdated={handleUniversityUpdated}
       />
     </motion.div>
   )
