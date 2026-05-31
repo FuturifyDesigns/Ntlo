@@ -18,6 +18,7 @@ import DocumentUpload from '../components/verification/DocumentUpload'
 import { LISTING_DOC_TYPES } from '../lib/verification'
 import { uploadVerificationDoc } from '../lib/verificationStorage'
 import LandlordListingCoach from '../components/advisor/LandlordListingCoach'
+import { useCompetitiveMarket } from '../hooks/useCompetitiveMarket'
 import { useTranslation } from '../hooks/useTranslation'
 import { validateListingStep, normalizeListingPhone } from '../lib/listingValidation'
 import { getDraftKey } from '../lib/formDrafts'
@@ -63,6 +64,20 @@ export default function CreateListing() {
   const [submitting, setSubmitting] = useState(false)
 
   const draftKey = useMemo(() => getDraftKey('listing', user?.id), [user?.id])
+
+  const coachAnchor = useMemo(() => {
+    const hasCampus = form.nearest_university_id && form.nearest_university_id !== 'other'
+    const hasCity = Boolean(form.city?.trim())
+    if (!hasCampus && !hasCity) return null
+    return {
+      nearest_university_id: hasCampus ? Number(form.nearest_university_id) : null,
+      city: form.city,
+      room_type: form.room_type || 'single',
+      price: Number(form.price) || 0,
+    }
+  }, [form.nearest_university_id, form.city, form.room_type, form.price])
+
+  const { marketListings: coachMarketListings } = useCompetitiveMarket(coachAnchor)
 
   const handleDraftRestore = useCallback((draft) => {
     if (draft.form) setForm({ ...initialForm, ...draft.form })
@@ -609,7 +624,7 @@ export default function CreateListing() {
                   <p><strong>Amenities:</strong> {form.amenities.length ? form.amenities.join(', ') : 'None'}</p>
                   <p><strong>WhatsApp:</strong> {form.whatsapp_number}</p>
                 </div>
-                <LandlordListingCoach form={form} photoCount={photos.length} />
+                <LandlordListingCoach form={form} photoCount={photos.length} marketListings={coachMarketListings} />
               </div>
             )}
           </motion.div>

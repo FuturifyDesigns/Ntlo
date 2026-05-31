@@ -3,11 +3,12 @@ import { Link } from 'react-router-dom'
 import { Sparkles, TrendingUp, TrendingDown, Trophy, Loader2, Edit, BarChart3 } from 'lucide-react'
 import { useTranslation } from '../../hooks/useTranslation'
 import { useAuth } from '../../hooks/useAuth'
-import { useCompetitiveMarket, useLandlordListings } from '../../hooks/useCompetitiveMarket'
+import { useCompetitiveMarket, useLandlordListings, useBatchCompetitiveMarkets } from '../../hooks/useCompetitiveMarket'
 import {
   analyzeCompetitivePosition,
   analyzeLandlordVsListing,
   buildCompetitiveSummary,
+  getMarketKey,
 } from '../../lib/competitiveAdvisor'
 import { getScoreColor } from '../../lib/aiAdvisor'
 import { getListingOccupancy, isListingRented } from '../../lib/listingOccupancy'
@@ -15,6 +16,8 @@ import { formatPrice } from '../../lib/utils'
 import Card from '../ui/Card'
 import Badge from '../ui/Badge'
 import Button from '../ui/Button'
+import AdvisorLiveBanner from './AdvisorLiveBanner'
+import { useLiveRevision } from '../../hooks/useLiveRevision'
 
 function ScoreBar({ label, score, t }) {
   return (
@@ -33,10 +36,18 @@ function ScoreBar({ label, score, t }) {
 export default function CompetitiveAdvisorPanel({ listing }) {
   const { t } = useTranslation()
   const { user, profile, isLandlord } = useAuth()
-  const { marketListings, loading } = useCompetitiveMarket(listing)
+  const { marketListings, loading, lastSyncedAt } = useCompetitiveMarket(listing)
   const { listings: myListings } = useLandlordListings(isLandlord ? user?.id : null)
 
   const isOwn = listing?.landlord_id === user?.id
+
+  const { isFresh } = useLiveRevision([
+    listing?.id,
+    listing?.updated_at,
+    listing?.price,
+    marketListings?.length,
+    myListings?.length,
+  ])
 
   const result = useMemo(() => {
     if (!listing || !isLandlord) return null
@@ -77,12 +88,15 @@ export default function CompetitiveAdvisorPanel({ listing }) {
 
     return (
       <Card className="space-y-4 border-accent/25 p-5">
-        <div className="flex items-start gap-2">
-          <BarChart3 size={18} className="mt-0.5 shrink-0 text-accent" />
-          <div>
-            <h3 className="font-display font-semibold text-primary">{t('advisor.competitive.title')}</h3>
-            <p className="mt-1 text-xs text-muted">{t('advisor.competitive.subtitle')}</p>
+        <div className="flex flex-wrap items-start justify-between gap-2">
+          <div className="flex items-start gap-2">
+            <BarChart3 size={18} className="mt-0.5 shrink-0 text-accent" />
+            <div>
+              <h3 className="font-display font-semibold text-primary">{t('advisor.competitive.title')}</h3>
+              <p className="mt-1 text-xs text-muted">{t('advisor.competitive.subtitle')}</p>
+            </div>
           </div>
+          <AdvisorLiveBanner isFresh={isFresh} updatedAt={lastSyncedAt} />
         </div>
 
         <div className="rounded-lg border border-border bg-background p-3">
@@ -258,11 +272,9 @@ export function LandlordMarketOverview({ listings: propListings }) {
     return listings
       .filter((l) => getListingOccupancy(l) !== 'unavailable')
       .slice(0, 6)
-      .map((listing) => ({
-        listing,
-        key: `${listing.nearest_university_id || listing.city}-${listing.room_type}`,
-      }))
   }, [listings])
+
+  const { marketsByKey, loading: marketsLoading } = useBatchCompetitiveMarkets(overview)
 
   if (loading && !listings.length) {
     return (
@@ -289,16 +301,22 @@ export function LandlordMarketOverview({ listings: propListings }) {
         </Button>
       </div>
       <div className="grid gap-3 sm:grid-cols-2">
-        {overview.map(({ listing }) => (
-          <MarketListingCard key={listing.id} listing={listing} landlordId={user?.id} t={t} />
+        {overview.map((listing) => (
+          <MarketListingCard
+            key={listing.id}
+            listing={listing}
+            landlordId={user?.id}
+            marketListings={marketsByKey.get(getMarketKey(listing)) || []}
+            loadingMarket={marketsLoading}
+            t={t}
+          />
         ))}
       </div>
     </div>
   )
 }
 
-function MarketListingCard({ listing, landlordId, t }) {
-  const { marketListings, loading } = useCompetitiveMarket(listing)
+function MarketListingCard({ listing, landlordId, marketListings, loadingMarket, t }) {
   const pos = useMemo(
     () => analyzeCompetitivePosition(listing, marketListings, { landlordId, context: {} }),
     [listing, marketListings, landlordId]
@@ -311,7 +329,7 @@ function MarketListingCard({ listing, landlordId, t }) {
     >
       <p className="font-semibold text-primary line-clamp-1">{listing.title}</p>
       <p className="mt-1 text-sm text-muted">{formatPrice(listing.price)}{t('listings.perMo')}</p>
-      {loading && !pos ? (
+      {loadingMarket && !pos ? (
         <Loader2 size={14} className="mt-2 animate-spin text-muted" />
       ) : pos ? (
         <div className="mt-2 flex flex-wrap gap-2">
@@ -322,7 +340,7 @@ function MarketListingCard({ listing, landlordId, t }) {
           ) : (
             <Badge variant="warning">{t(`advisor.competitive.position.${pos.position}`)}</Badge>
           )}
-          <span className={`text-xs font-semibold ${getScoreColor(pos.targetScore.overall)}`}>
+          <span className={`text-xs font-semibold transition-all duration-500 ${getScoreColor(pos.targetScore.overall)}`}>
             {pos.targetScore.overall}/100
           </span>
         </div>

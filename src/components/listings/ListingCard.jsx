@@ -2,6 +2,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Heart } from 'lucide-react'
 import { useState } from 'react'
 import { getListingOccupancy, isListingRented } from '../../lib/listingOccupancy'
+import { isListingRecentlyUpdated } from '../../lib/listingFreshness'
 import { formatPrice, formatDistance, getListingPhotos, getNearestUniversity, ROOM_TYPES, AMENITIES, cn } from '../../lib/utils'
 import PhotoCarousel from './PhotoCarousel'
 import * as LucideIcons from 'lucide-react'
@@ -13,6 +14,7 @@ import Badge from '../ui/Badge'
 import { IconLocation } from '../ui/Icons'
 import TrustedBadge from '../trust/TrustedBadge'
 import { resolveListingTrustBadge } from '../../lib/tierBenefits'
+import ListingRecentlyUpdatedBadge from './ListingRecentlyUpdatedBadge'
 
 export default function ListingCard({ listing, compact = false, carouselIndex = 0 }) {
   const { user } = useAuth()
@@ -92,6 +94,12 @@ export default function ListingCard({ listing, compact = false, carouselIndex = 
           {isListingRented(listing) && (
             <div className="absolute left-3 bottom-3 z-[2]">
               <Badge variant="warning">{t('listings.rented')}</Badge>
+            </div>
+          )}
+
+          {!isListingRented(listing) && isListingRecentlyUpdated(listing) && (
+            <div className="absolute left-3 bottom-3 z-[2]">
+              <ListingRecentlyUpdatedBadge listing={listing} />
             </div>
           )}
 

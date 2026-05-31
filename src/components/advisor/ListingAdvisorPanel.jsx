@@ -1,7 +1,10 @@
 import { useMemo } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
 import { Sparkles, ThumbsUp, AlertTriangle, Lightbulb } from 'lucide-react'
 import { getListingAdvisorResult, getScoreColor, getScoreRingColor } from '../../lib/aiAdvisor'
 import { useTranslation } from '../../hooks/useTranslation'
+import { useLiveRevision } from '../../hooks/useLiveRevision'
+import AdvisorLiveBanner from './AdvisorLiveBanner'
 import Card from '../ui/Card'
 
 function ScoreRing({ score }) {
@@ -68,17 +71,38 @@ export default function ListingAdvisorPanel({ listing, studentUniversityId }) {
     [listing, context, t]
   )
 
+  const { revision, isFresh } = useLiveRevision([
+    listing?.id,
+    listing?.price,
+    listing?.updated_at,
+    listing?.distance_to_campus,
+    listing?.amenities?.join(','),
+    analysis?.overall,
+  ])
+
   if (!listing || !analysis) return null
 
   return (
     <Card className="space-y-4 p-5">
-      <div className="flex items-center gap-2">
-        <Sparkles size={18} className="text-accent" />
-        <h3 className="font-display font-semibold text-primary">{t('advisor.title')}</h3>
+      <div className="flex flex-wrap items-start justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <Sparkles size={18} className="text-accent" />
+          <h3 className="font-display font-semibold text-primary">{t('advisor.title')}</h3>
+        </div>
+        <AdvisorLiveBanner isFresh={isFresh} updatedAt={listing.updated_at} />
       </div>
 
       <p className="text-xs text-muted">{t('advisor.subtitle')}</p>
 
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={`${listing.id}-${revision}`}
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          className="space-y-4"
+        >
       <ScoreRing score={analysis.overall} />
       <p className="text-center text-sm font-medium text-primary">
         {t(`advisor.label.${analysis.label}`)}
@@ -122,6 +146,8 @@ export default function ListingAdvisorPanel({ listing, studentUniversityId }) {
           <InsightList items={analysis.tips} icon={Lightbulb} variant="tip" />
         </div>
       )}
+        </motion.div>
+      </AnimatePresence>
     </Card>
   )
 }

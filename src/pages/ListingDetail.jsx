@@ -19,7 +19,9 @@ import { resolveListingTrustBadge } from '../lib/tierBenefits'
 import { useAuth } from '../hooks/useAuth'
 import { getUniversityDisplayName } from '../lib/universityNames'
 import { getListingOccupancy, isListingRented } from '../lib/listingOccupancy'
+import { isListingRecentlyUpdated } from '../lib/listingFreshness'
 import CompetitiveAdvisorPanel from '../components/advisor/CompetitiveAdvisorPanel'
+import ListingRecentlyUpdatedBadge from '../components/listings/ListingRecentlyUpdatedBadge'
 import {
   formatPrice,
   formatDistance,
@@ -106,6 +108,7 @@ export default function ListingDetail() {
                 {listing.deposit_pula != null && listing.deposit_pula > 0 && (
                   <Badge variant="default">{t('listingForm.deposit')}: P{listing.deposit_pula}</Badge>
                 )}
+                <ListingRecentlyUpdatedBadge listing={listing} />
                 {listing.utilities_included && (
                   <Badge variant="default">{UTILITIES_OPTIONS[listing.utilities_included]}</Badge>
                 )}
@@ -116,6 +119,12 @@ export default function ListingDetail() {
                 {listing.address}{listing.area ? `, ${listing.area}` : ''}, {listing.city}
               </p>
             </div>
+
+            {isListingRecentlyUpdated(listing) && (
+              <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 px-4 py-3 text-sm text-primary">
+                {t('listings.landlordEditedRecently')}
+              </div>
+            )}
 
             {listing.amenities?.length > 0 && (
               <div>

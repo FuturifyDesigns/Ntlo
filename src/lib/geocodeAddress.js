@@ -1,3 +1,4 @@
+import { getCachedGeocode, setCachedGeocode } from './geocodeCache'
 import { normalizeUniversityName } from './universityNames'
 
 const CAMPUS_TYPES = new Set([
@@ -100,6 +101,9 @@ export function buildUniversityCampusQueries({ name, city, country = 'Botswana' 
 export function geocodeWithGoogle(geocoder, query, { preferCampus = false } = {}) {
   if (!geocoder || !query?.trim()) return Promise.resolve(null)
 
+  const cached = getCachedGeocode(query)
+  if (cached) return Promise.resolve(cached)
+
   return new Promise((resolve) => {
     geocoder.geocode(
       { address: query.trim(), componentRestrictions: { country: 'BW' } },
@@ -119,12 +123,14 @@ export function geocodeWithGoogle(geocoder, query, { preferCampus = false } = {}
           return
         }
         const loc = picked.geometry.location
-        resolve({
+        const result = {
           lat: loc.lat(),
           lng: loc.lng(),
           formatted: picked.formatted_address,
           source: 'google',
-        })
+        }
+        setCachedGeocode(query, result)
+        resolve(result)
       }
     )
   })
@@ -133,6 +139,9 @@ export function geocodeWithGoogle(geocoder, query, { preferCampus = false } = {}
 /** OpenStreetMap fallback when Google returns no match. */
 export async function geocodeWithNominatim(query) {
   if (!query?.trim()) return null
+
+  const cached = getCachedGeocode(`osm:${query}`)
+  if (cached) return cached
 
   try {
     const url = new URL('https://nominatim.openstreetmap.org/search')
@@ -150,12 +159,14 @@ export async function geocodeWithNominatim(query) {
     if (!data?.[0]) return null
 
     const best = data[0]
-    return {
+    const result = {
       lat: Number(best.lat),
       lng: Number(best.lon),
       formatted: best.display_name,
       source: 'nominatim',
     }
+    setCachedGeocode(`osm:${query}`, result)
+    return result
   } catch {
     return null
   }
