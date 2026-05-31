@@ -34,6 +34,7 @@ import Pricing from './pages/Pricing'
 import Privacy from './pages/Privacy'
 import Terms from './pages/Terms'
 import Guidelines from './pages/Guidelines'
+import PingPromo from './pages/PingPromo'
 import GrainOverlay from './components/ui/Motion'
 import CookieConsentBanner from './components/layout/CookieConsentBanner'
 import CookieFeedbackToast from './components/layout/CookieFeedbackToast'
@@ -44,6 +45,8 @@ import UrgentNotificationLayer from './components/layout/UrgentNotificationLayer
 import BanEnforcementLayer from './components/ban/BanEnforcementLayer'
 import NotificationSoundLayer from './components/layout/NotificationSoundLayer'
 import NotificationSoundUnlockBanner from './components/layout/NotificationSoundUnlockBanner'
+import PingGalaxyOverlay from './components/ping/PingGalaxyOverlay'
+import { PingTransitionProvider } from './context/PingTransitionContext'
 import GoogleMapsProvider from './components/maps/GoogleMapsProvider'
 import { SavedListingsProvider } from './context/SavedListingsContext'
 import { useLocale } from './context/LocaleContext'
@@ -64,6 +67,7 @@ function AppRoutes() {
   const isTabRoute = TAB_ROUTES.has(location.pathname)
   const isAuthRoute = ['/login', '/register', '/forgot-password', '/complete-profile', '/check-email'].includes(location.pathname)
   const isDashboardRoute = location.pathname === '/student' || location.pathname === '/landlord' || location.pathname.startsWith('/landlord/') || location.pathname === '/admin'
+  const isPingRoute = location.pathname === '/ping'
   const transition = isAuthRoute || isDashboardRoute
     ? { duration: prefs.reduceMotion ? 0 : 0.18, ease: [0.25, 0.1, 0.25, 1] }
     : { duration: prefs.reduceMotion ? 0 : 0.22, ease: [0.25, 0.1, 0.25, 1] }
@@ -88,6 +92,7 @@ function AppRoutes() {
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/guidelines" element={<Guidelines />} />
+          <Route path="/ping" element={<PingPromo />} />
           <Route path="/student" element={<ProtectedRoute role="student"><StudentDashboard /></ProtectedRoute>} />
           <Route path="/admin" element={<ProtectedRoute role="admin"><AdminDashboard /></ProtectedRoute>} />
           <Route path="/landlord/verify" element={<ProtectedRoute role="landlord"><LandlordVerify /></ProtectedRoute>} />
@@ -100,7 +105,7 @@ function AppRoutes() {
   )
 
   // Main nav tabs swap instantly — no blank fade between Home, Browse, Saved, etc.
-  if (isTabRoute || prefs.reduceMotion) {
+  if (isTabRoute || prefs.reduceMotion || isPingRoute) {
     return routes
   }
 
@@ -121,18 +126,20 @@ function AppRoutes() {
 
 function AppShell() {
   const { t } = useTranslation()
+  const location = useLocation()
+  const isPingRoute = location.pathname === '/ping'
 
   return (
     <>
       <a href="#main-content" className="skip-link">{t('a11y.skipToContent')}</a>
-      <GrainOverlay />
-      <div className="flex min-h-screen flex-col pb-16 md:pb-0">
+      {!isPingRoute && <GrainOverlay />}
+      <div className={`flex min-h-screen flex-col ${isPingRoute ? '' : 'pb-16 md:pb-0'}`}>
         <Navbar />
         <main id="main-content" className="flex-1">
           <AppRoutes />
         </main>
-        <Footer />
-        <MobileNav />
+        {!isPingRoute && <Footer />}
+        {!isPingRoute && <MobileNav />}
         <AccessibilityMenu />
         <CookieConsentBanner />
         <CookiePreferencesModal />
@@ -141,6 +148,7 @@ function AppShell() {
         <BanEnforcementLayer />
         <NotificationSoundLayer />
         <NotificationSoundUnlockBanner />
+        <PingGalaxyOverlay />
         <ExitIntentModal />
         <AnalyticsTracker />
       </div>
@@ -158,7 +166,9 @@ export default function App() {
             <GoogleMapsProvider>
               <CookieConsentProvider>
                 <WelcomeReturnProvider>
-                  <AppShell />
+                  <PingTransitionProvider>
+                    <AppShell />
+                  </PingTransitionProvider>
                 </WelcomeReturnProvider>
               </CookieConsentProvider>
             </GoogleMapsProvider>

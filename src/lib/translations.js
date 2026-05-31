@@ -18,6 +18,7 @@ export const translations = {
       roleLandlord: 'Landlord',
       roleAdmin: 'Admin',
       admin: 'Admin panel',
+      ping: 'Ping',
     },
     hero: {
       title1: 'Your campus home,',
@@ -272,6 +273,52 @@ export const translations = {
       soundPromptTitle: 'Enable notification sounds',
       soundPromptBody: 'Tap below so Ntlo can play a sound when you get messages, applications, and other alerts.',
       soundPromptEnable: 'Enable sounds',
+    },
+    ping: {
+      backToNtlo: 'Back to Ntlo',
+      collabBadge: 'Ntlo × Ping',
+      heroSubtitle: 'Community-powered transit for Botswana. Find bus stops near you, browse routes, get directions, and help fellow commuters — all in one app.',
+      freeOnAndroid: 'Free on Android · Built by Futurify Designs',
+      builtBy: 'Built by Futurify Designs',
+      stats: {
+        stops: 'Nearby stops',
+        routes: 'Route browsing',
+        directions: 'One-tap directions',
+        community: 'Community powered',
+      },
+      features: {
+        stops: {
+          eyebrow: 'Map',
+          title: 'Find bus stops near you',
+          body: 'Open the map and instantly see bus stops around you. Your current location and nearby stops are displayed instantly, making it easy to find your next ride.',
+        },
+        routes: {
+          eyebrow: 'Routes',
+          title: 'Track all your bus routes',
+          body: 'Browse routes that serve each stop. See route numbers, destinations, and stops along the way to plan your journey with confidence before you leave home.',
+        },
+        details: {
+          eyebrow: 'Stops',
+          title: 'Get complete stop information',
+          body: 'Tap any stop to view details, photos, routes, and directions. See how many routes serve an area and explore exact spots pinned by the community.',
+        },
+        community: {
+          eyebrow: 'Community',
+          title: 'Help build the community map',
+          body: 'Ping gets better with every user. Add new bus stops in seconds, upload photos, and help fellow commuters find their way. Every contribution earns you karma points.',
+        },
+        karma: {
+          eyebrow: 'Rewards',
+          title: 'Earn karma & unlock badges',
+          body: 'Gain karma points for every contribution. Unlock exclusive achievement badges as you add stops, upload photos, and help the community — from First Step all the way to Legend.',
+        },
+      },
+      cta: {
+        eyebrow: 'Download now',
+        title: 'Find your stop, faster',
+        body: 'Make your daily commute easier. Download Ping on Google Play and join a community making public transit simpler for everyone.',
+        footer: 'Available on Google Play · com.ping.bw',
+      },
     },
     withdraw: {
       prompt: 'Please tell us why — this helps the other person.',
@@ -1427,6 +1474,7 @@ export const translations = {
       roleLandlord: 'Mong wa lefelo',
       roleAdmin: 'Admin',
       admin: 'Panel ya admin',
+      ping: 'Ping',
     },
     hero: {
       title1: 'Gae ga gago mo khamposeng,',
@@ -1679,6 +1727,52 @@ export const translations = {
       soundPromptTitle: 'Tsenya modumo wa ditsebiso',
       soundPromptBody: 'Tobetsa fa tlase gore Ntlo e kgone go opela modumo fa o amogela melaetsa, dikopo, le ditsebiso tse dingwe.',
       soundPromptEnable: 'Tsenya modumo',
+    },
+    ping: {
+      backToNtlo: 'Boela kwa Ntlo',
+      collabBadge: 'Ntlo × Ping',
+      heroSubtitle: 'Ditsela tsa dipalangwang tse di tshegetseng ke setšhaba mo Botswana. Bona mafelo a dibese a a gaufi, lebelela ditsela, bona ditsela tsa go ya, mme o thusa baeti ba bangwe — tsotlhe mo app e le nngwe.',
+      freeOnAndroid: 'Mahala mo Android · E agilwe ke Futurify Designs',
+      builtBy: 'E agilwe ke Futurify Designs',
+      stats: {
+        stops: 'Mafelo a a gaufi',
+        routes: 'Go lebelela ditsela',
+        directions: 'Ditsela ka go tobetsa gangwe',
+        community: 'E tshegeditswe ke setšhaba',
+      },
+      features: {
+        stops: {
+          eyebrow: 'Mepu',
+          title: 'Bona mafelo a dibese a a gaufi',
+          body: 'Bula mepu o bone mafelo a dibese a a gaufi nako e le nngwe. Lefelo la gago le mafelo a a gaufi a a bontshiwang ka bonako, go nolofatsa go bona palangwa e e latelang.',
+        },
+        routes: {
+          eyebrow: 'Ditsela',
+          title: 'Latela ditsela tsotlhe tsa dibese',
+          body: 'Lebelela ditsela tse di sebeletsang mafelo a mongwe le mongwe. Bona dinomoro tsa ditsela, mafelo a ba ya go one, le mafelo mo tseleng go rala leeto la gago ka kgotso.',
+        },
+        details: {
+          eyebrow: 'Mafelo',
+          title: 'Bona tshedimosetso e e feletseng ya mafelo',
+          body: 'Tobetsa lefelo le lengwe le le lengwe go bona dintlha, dinepe, ditsela, le ditsela tsa go ya. Bona gore ditsela di le kae tse di sebeletsang lefelo.',
+        },
+        community: {
+          eyebrow: 'Setšhaba',
+          title: 'Thus\'a go aga mepu ya setšhaba',
+          body: 'Ping e nna botoka fa mongwe le mongwe a tsenya. Tsenya mafelo a dibese a masha, tsenya dinepe, mme o thusa baeti ba bangwe. Tsenyo nngwe le nngwe e go fa dintlha tsa karma.',
+        },
+        karma: {
+          eyebrow: 'Melemo',
+          title: 'Bona karma & bula dibeche',
+          body: 'Bona dintlha tsa karma ka tsenyo nngwe le nngwe. Bula dibeche tsa ditshono fa o tsenya mafelo, o tsenya dinepe, mme o thusa setšhaba.',
+        },
+      },
+      cta: {
+        eyebrow: 'Taonloada jaanong',
+        title: 'Bona lefelo la gago ka bonako',
+        body: 'Nolofatsa leeto la gago la letsatsi le letsatsi. Taonloada Ping mo Google Play mme o tsenye setšhaba se se nolofatsang ditsela tsa dipalangwang.',
+        footer: 'E teng mo Google Play · com.ping.bw',
+      },
     },
     withdraw: {
       prompt: 'Re kopa o re bolelele gore ke eng — e thusa motho yo mongwe.',

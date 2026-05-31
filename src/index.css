@@ -223,3 +223,61 @@ html[data-reduce-motion="true"] .skeleton {
   left: 1rem;
   top: 1rem;
 }
+
+/* Ping collab nav + galaxy transition */
+.ping-nav-pulse {
+  background: radial-gradient(circle at 50% 50%, rgba(56, 189, 248, 0.35) 0%, transparent 65%);
+  animation: ping-pulse 2.4s ease-in-out infinite;
+}
+
+.ping-nav-pulse--delayed {
+  animation-delay: 1.2s;
+  background: radial-gradient(circle at 50% 50%, rgba(29, 78, 216, 0.3) 0%, transparent 70%);
+}
+
+@keyframes ping-pulse {
+  0%, 100% { opacity: 0.35; transform: scale(0.92); }
+  50% { opacity: 1; transform: scale(1.08); }
+}
+
+.ping-nav-btn::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: 9999px;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.7), rgba(15, 23, 42, 0.9), rgba(37, 99, 235, 0.8));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  animation: ping-border-glow 3s ease-in-out infinite;
+}
+
+@keyframes ping-border-glow {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+
+.ping-galaxy-wave {
+  background:
+    linear-gradient(
+      105deg,
+      transparent 0%,
+      rgba(15, 23, 42, 0.95) 18%,
+      rgba(37, 99, 235, 0.85) 42%,
+      rgba(56, 189, 248, 0.75) 55%,
+      rgba(15, 23, 42, 0.9) 72%,
+      transparent 100%
+    );
+  filter: blur(0.5px);
+}
+
+.ping-galaxy-wave--soft {
+  opacity: 0.65;
+  filter: blur(8px);
+}
+
+.ping-galaxy-star {
+  box-shadow: 0 0 8px rgba(186, 230, 253, 0.9);
+}

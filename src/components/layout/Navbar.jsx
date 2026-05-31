@@ -7,6 +7,7 @@ import { useNavLinks } from '../../hooks/useNavLinks'
 import Button from '../ui/Button'
 import NotificationBell from './NotificationBell'
 import UserMenu from './UserMenu'
+import PingNavButton from '../ping/PingNavButton'
 import { usePresenceHeartbeat } from '../../hooks/usePresence'
 
 export default function Navbar() {
@@ -22,8 +23,14 @@ export default function Navbar() {
     return location.pathname === path || location.pathname.startsWith(`${path}/`)
   }
 
+  const onPingPage = location.pathname === '/ping'
+
   return (
-    <header className="sticky top-0 z-40 border-b border-border/60 bg-surface/85 backdrop-blur-xl">
+    <header className={`sticky top-0 z-40 border-b backdrop-blur-xl ${
+      onPingPage
+        ? 'border-white/10 bg-[#030308]/80'
+        : 'border-border/60 bg-surface/85'
+    }`}>
       <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-3 sm:h-16 sm:px-6 lg:h-[4.25rem] lg:px-8">
         <Link to="/" className="flex shrink-0 items-center py-1">
           <img
@@ -39,7 +46,9 @@ export default function Navbar() {
               key={link.to}
               to={link.to}
               className={`relative rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
-                isActive(link.to) ? 'text-primary' : 'text-muted hover:text-primary'
+                onPingPage
+                  ? isActive(link.to) ? 'text-white' : 'text-white/60 hover:text-white'
+                  : isActive(link.to) ? 'text-primary' : 'text-muted hover:text-primary'
               }`}
             >
               {link.label}
@@ -48,16 +57,24 @@ export default function Navbar() {
               )}
             </Link>
           ))}
+          <div className={`ml-2 pl-2 border-l ${onPingPage ? 'border-white/15' : 'border-border/60'}`}>
+            <PingNavButton />
+          </div>
         </nav>
 
         <div className="flex items-center gap-1 sm:gap-2">
+          <div className="md:hidden">
+            <PingNavButton compact />
+          </div>
           {user && <NotificationBell />}
 
           <div className="hidden items-center gap-2 md:flex">
             {user ? (
               <UserMenu />
             ) : (
-              <Link to="/login" className="text-sm font-medium text-muted transition-colors hover:text-primary">
+              <Link to="/login" className={`text-sm font-medium transition-colors ${
+                onPingPage ? 'text-white/70 hover:text-white' : 'text-muted hover:text-primary'
+              }`}>
                 {t('nav.signIn')}
               </Link>
             )}
@@ -95,6 +112,9 @@ export default function Navbar() {
                 {link.label}
               </Link>
             ))}
+            <div className="px-3 py-2">
+              <PingNavButton compact onNavigate={() => setOpen(false)} />
+            </div>
             {!user && (
               <Link
                 to="/login"
