@@ -28,8 +28,8 @@ export const translations = {
       browseListings: 'Browse listings',
       viewUniversities: 'View universities',
       liveListings: 'Live listings',
-      campuses: 'Campuses',
-      verified: 'Verified',
+      campuses: 'Campuses covered',
+      landlords: 'Landlords on Ntlo',
     },
     home: {
       welcomeBackTitle: 'Welcome back',
@@ -1332,8 +1332,8 @@ export const translations = {
       browseListings: 'Batla dilong',
       viewUniversities: 'Bona diunivesiti',
       liveListings: 'Dilong tse di phelang',
-      campuses: 'Di khamposi',
-      verified: 'E netefaditswe',
+      campuses: 'Di khamposi tse di kabiwa',
+      landlords: 'Baathati mo Ntlo',
     },
     home: {
       welcomeBackTitle: 'O amogelwa gape',

@@ -91,7 +91,7 @@ export default function Hero() {
                 {[
                   { value: stats.listings, label: t('hero.liveListings') },
                   { value: stats.universitiesWithListings || stats.universities, label: t('hero.campuses') },
-                  { value: stats.verified, label: t('hero.verified') },
+                  { value: stats.landlords, label: t('hero.landlords') },
                 ].map(({ value, label }) => (
                   <div key={label}>
                     <p className="font-display text-2xl font-semibold text-accent">

@@ -1,6 +1,43 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { useUniversities } from './useUniversities'
+import { subscribeListingsLive } from '../lib/listingsLiveBus'
+
+function campusKeyFromListing(row) {
+  if (row?.nearest_university_id) return `id:${row.nearest_university_id}`
+  const custom = row?.custom_university_name?.trim()
+  if (custom) return `custom:${custom.toLowerCase()}`
+  return null
+}
+
+async function fetchPublicListingStats() {
+  const [listingsRes, campusRes, landlordsRes] = await Promise.all([
+    supabase
+      .from('listings')
+      .select('id', { count: 'exact', head: true })
+      .eq('verification_status', 'approved')
+      .in('occupancy_status', ['available', 'rented']),
+    supabase
+      .from('listings')
+      .select('nearest_university_id, custom_university_name')
+      .eq('verification_status', 'approved')
+      .in('occupancy_status', ['available', 'rented']),
+    supabase
+      .from('profiles')
+      .select('id', { count: 'exact', head: true })
+      .eq('role', 'landlord'),
+  ])
+
+  const campusKeys = new Set(
+    (campusRes.data || []).map(campusKeyFromListing).filter(Boolean)
+  )
+
+  return {
+    listings: listingsRes.count || 0,
+    universitiesWithListings: campusKeys.size,
+    landlords: landlordsRes.count || 0,
+  }
+}
 
 export function useStats() {
   const { universities } = useUniversities()
@@ -8,55 +45,30 @@ export function useStats() {
     listings: 0,
     universities: universities.length,
     universitiesWithListings: 0,
-    verified: 0,
     landlords: 0,
     loading: true,
   })
 
   useEffect(() => {
-    async function fetchStats() {
+    let cancelled = false
+
+    async function load() {
       try {
-        const [listingsRes, verifiedRes, uniRes, landlordsRes] = await Promise.all([
-          supabase
-            .from('listings')
-            .select('id', { count: 'exact', head: true })
-            .eq('available', true)
-            .eq('verification_status', 'approved'),
-          supabase
-            .from('listings')
-            .select('id', { count: 'exact', head: true })
-            .eq('available', true)
-            .eq('verification_status', 'approved')
-            .eq('is_verified', true),
-          supabase
-            .from('listings')
-            .select('nearest_university_id')
-            .eq('available', true)
-            .eq('verification_status', 'approved')
-            .not('nearest_university_id', 'is', null),
-          supabase
-            .from('profiles')
-            .select('id', { count: 'exact', head: true })
-            .eq('role', 'landlord'),
-        ])
-
-        const uniqueUnis = new Set(
-          (uniRes.data || []).map((l) => l.nearest_university_id).filter(Boolean)
-        )
-
-        setStats({
-          listings: listingsRes.count || 0,
-          universities: universities.length,
-          universitiesWithListings: uniqueUnis.size,
-          verified: verifiedRes.count || 0,
-          landlords: landlordsRes.count || 0,
-          loading: false,
-        })
+        const data = await fetchPublicListingStats()
+        if (!cancelled) {
+          setStats({
+            ...data,
+            universities: universities.length,
+            loading: false,
+          })
+        }
       } catch {
-        setStats((s) => ({ ...s, loading: false }))
+        if (!cancelled) setStats((s) => ({ ...s, loading: false }))
       }
     }
-    fetchStats()
+
+    load()
+    return subscribeListingsLive(() => load())
   }, [universities.length])
 
   return stats

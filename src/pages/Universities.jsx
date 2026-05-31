@@ -17,8 +17,8 @@ export default function Universities() {
       const { data } = await supabase
         .from('listings')
         .select('nearest_university_id')
-        .eq('available', true)
         .eq('verification_status', 'approved')
+        .in('occupancy_status', ['available', 'rented'])
       if (data) {
         const counts = {}
         data.forEach((l) => {
