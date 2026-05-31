@@ -56,8 +56,9 @@ const TAB_ROUTES = new Set(['/', '/listings', '/universities', '/student', '/lan
 
 function scrollToTop() {
   if (typeof window === 'undefined') return
-  window.scrollTo(0, 0)
-  // Some mobile browsers track scroll on the documentElement/body separately.
+  window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
+  document.documentElement.scrollTop = 0
+  document.body.scrollTop = 0
   if (document.scrollingElement) document.scrollingElement.scrollTop = 0
 }
 
@@ -73,8 +74,18 @@ function AppRoutes() {
     : { duration: prefs.reduceMotion ? 0 : 0.22, ease: [0.25, 0.1, 0.25, 1] }
 
   useEffect(() => {
-    if (prefs.reduceMotion || isTabRoute) scrollToTop()
-  }, [location.pathname, prefs.reduceMotion, isTabRoute])
+    if ('scrollRestoration' in history) history.scrollRestoration = 'manual'
+  }, [])
+
+  useEffect(() => {
+    scrollToTop()
+    // Mobile browsers may restore scroll after paint — reset again on next frames.
+    const raf = requestAnimationFrame(() => {
+      scrollToTop()
+      requestAnimationFrame(scrollToTop)
+    })
+    return () => cancelAnimationFrame(raf)
+  }, [location.pathname, location.key])
 
   const routes = (
     <Routes location={location}>
@@ -110,7 +121,7 @@ function AppRoutes() {
   }
 
   return (
-    <AnimatePresence mode="wait" onExitComplete={scrollToTop}>
+    <AnimatePresence mode="wait">
       <motion.div
         key={location.pathname}
         initial={{ opacity: 0, y: 4 }}
