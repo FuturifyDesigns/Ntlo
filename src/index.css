@@ -224,71 +224,106 @@ html[data-reduce-motion="true"] .skeleton {
   top: 1rem;
 }
 
-/* Ping collab nav + galaxy transition */
-.ping-nav-ring {
-  background: conic-gradient(from 0deg, rgba(56, 189, 248, 0.7), rgba(2, 6, 23, 0.9), rgba(37, 99, 235, 0.8), rgba(56, 189, 248, 0.7));
-  opacity: 0.55;
-  animation: ping-ring-spin 4s linear infinite;
-  filter: blur(4px);
+/* Ping collab — aurora background + image blending */
+.ping-aurora {
+  background: #010104;
 }
 
-@keyframes ping-ring-spin {
-  to { transform: rotate(360deg); }
-}
-
-.ping-nav-shimmer {
-  background: linear-gradient(
-    105deg,
-    transparent 30%,
-    rgba(186, 230, 253, 0.25) 50%,
-    transparent 70%
-  );
-  background-size: 200% 100%;
-  animation: ping-shimmer 2.8s ease-in-out infinite;
-}
-
-@keyframes ping-shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
-}
-
-.ping-nav-pulse {
-  background: radial-gradient(circle at 50% 50%, rgba(56, 189, 248, 0.4) 0%, transparent 68%);
-  animation: ping-pulse 2.2s ease-in-out infinite;
-}
-
-.ping-nav-pulse--delayed {
-  animation-delay: 1.1s;
-  background: radial-gradient(circle at 50% 50%, rgba(29, 78, 216, 0.35) 0%, transparent 72%);
-}
-
-@keyframes ping-pulse {
-  0%, 100% { opacity: 0.3; transform: scale(0.94); }
-  50% { opacity: 1; transform: scale(1.1); }
-}
-
-.ping-nav-btn::before {
-  content: "";
+.ping-aurora-glow {
   position: absolute;
-  inset: -1px;
-  border-radius: 9999px;
-  padding: 1px;
-  background: linear-gradient(135deg, rgba(56, 189, 248, 0.85), rgba(15, 23, 42, 0.95), rgba(37, 99, 235, 0.85));
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  pointer-events: none;
-  animation: ping-border-glow 2.5s ease-in-out infinite;
+  right: -10%;
+  bottom: -15%;
+  width: 75%;
+  height: 55%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(37, 99, 235, 0.22) 0%, rgba(14, 165, 233, 0.08) 45%, transparent 70%);
+  filter: blur(40px);
+  animation: ping-aurora-pulse 14s ease-in-out infinite;
 }
 
-.ping-nav-btn:hover::before {
-  animation-duration: 1.2s;
-  opacity: 1;
+.ping-aurora-ribbon {
+  position: absolute;
+  width: 150%;
+  height: 28%;
+  border-radius: 45%;
+  filter: blur(48px);
+  opacity: 0.45;
+  will-change: transform;
 }
 
-@keyframes ping-border-glow {
-  0%, 100% { opacity: 0.5; }
-  50% { opacity: 1; }
+.ping-aurora-ribbon--1 {
+  right: -35%;
+  bottom: 8%;
+  background: linear-gradient(100deg, transparent 0%, rgba(56, 189, 248, 0.55) 35%, rgba(37, 99, 235, 0.45) 55%, transparent 85%);
+  animation: ping-aurora-drift-1 22s ease-in-out infinite;
+}
+
+.ping-aurora-ribbon--2 {
+  right: -25%;
+  bottom: 2%;
+  background: linear-gradient(95deg, transparent 5%, rgba(14, 165, 233, 0.4) 40%, rgba(59, 130, 246, 0.35) 60%, transparent 90%);
+  animation: ping-aurora-drift-2 26s ease-in-out infinite;
+}
+
+.ping-aurora-ribbon--3 {
+  right: -40%;
+  bottom: 14%;
+  height: 22%;
+  opacity: 0.3;
+  background: linear-gradient(105deg, transparent 0%, rgba(125, 211, 252, 0.35) 45%, transparent 80%);
+  animation: ping-aurora-drift-3 30s ease-in-out infinite;
+}
+
+.ping-aurora-ribbon--4 {
+  right: -20%;
+  bottom: 18%;
+  height: 18%;
+  opacity: 0.25;
+  background: linear-gradient(90deg, transparent 10%, rgba(37, 99, 235, 0.5) 50%, transparent 85%);
+  animation: ping-aurora-drift-1 34s ease-in-out infinite reverse;
+}
+
+@keyframes ping-aurora-pulse {
+  0%, 100% { opacity: 0.75; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.06); }
+}
+
+@keyframes ping-aurora-drift-1 {
+  0%, 100% { transform: translate(0, 0) rotate(-8deg) scale(1); }
+  50% { transform: translate(-4%, -3%) rotate(-5deg) scale(1.05); }
+}
+
+@keyframes ping-aurora-drift-2 {
+  0%, 100% { transform: translate(0, 0) rotate(-12deg); }
+  50% { transform: translate(-6%, 2%) rotate(-9deg); }
+}
+
+@keyframes ping-aurora-drift-3 {
+  0%, 100% { transform: translate(0, 0) rotate(-6deg); }
+  50% { transform: translate(-3%, -4%) rotate(-3deg); }
+}
+
+/* Black PNG backgrounds → transparent on dark UI */
+.ping-img-blend,
+.ping-hero-img {
+  mix-blend-mode: lighten;
+}
+
+/* Light promo screenshots → blend into dark page */
+.ping-feature-frame {
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: 1rem;
+}
+
+.ping-feature-img {
+  mix-blend-mode: lighten;
+  opacity: 0.96;
+}
+
+html[data-reduce-motion="true"] .ping-aurora-ribbon,
+html[data-reduce-motion="true"] .ping-aurora-glow {
+  animation: none;
 }
 
 .ping-galaxy-wave {

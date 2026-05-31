@@ -1,74 +1,53 @@
-import { motion, useInView } from 'framer-motion'
-import { useRef } from 'react'
+import { motion } from 'framer-motion'
 import { useLocale } from '../../context/LocaleContext'
 
-const EASE = [0.16, 1, 0.3, 1]
+const EASE = [0.22, 1, 0.36, 1]
 
-/** Lusion-style scroll reveal: clip mask + blur dissolve + lift. */
+const viewport = { once: true, amount: 0.12, margin: '0px 0px -40px 0px' }
+
 export function PingScrollReveal({
   children,
   className = '',
   delay = 0,
-  y = 72,
-  once = true,
-  amount = 0.22,
+  y = 20,
 }) {
-  const ref = useRef(null)
-  const inView = useInView(ref, { once, amount })
   const { prefs } = useLocale()
 
   if (prefs.reduceMotion) {
-    return (
-      <div ref={ref} className={className}>
-        {children}
-      </div>
-    )
+    return <div className={className}>{children}</div>
   }
 
   return (
     <motion.div
-      ref={ref}
       className={className}
-      initial={{ opacity: 0, y, filter: 'blur(12px)', clipPath: 'inset(100% 0 0 0)' }}
-      animate={
-        inView
-          ? { opacity: 1, y: 0, filter: 'blur(0px)', clipPath: 'inset(0% 0 0 0)' }
-          : { opacity: 0, y, filter: 'blur(12px)', clipPath: 'inset(100% 0 0 0)' }
-      }
-      transition={{ duration: 1.05, delay, ease: EASE }}
+      initial={{ opacity: 0, y }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={viewport}
+      transition={{ duration: 0.55, delay, ease: EASE }}
     >
       {children}
     </motion.div>
   )
 }
 
-/** Stagger inner children on scroll — good for grids and feature rows. */
 export function PingScrollStagger({
   children,
   className = '',
-  stagger = 0.1,
+  stagger = 0.06,
   delay = 0,
-  once = true,
-  amount = 0.2,
 }) {
-  const ref = useRef(null)
-  const inView = useInView(ref, { once, amount })
   const { prefs } = useLocale()
 
   if (prefs.reduceMotion) {
-    return (
-      <div ref={ref} className={className}>
-        {children}
-      </div>
-    )
+    return <div className={className}>{children}</div>
   }
 
   return (
     <motion.div
-      ref={ref}
       className={className}
       initial="hidden"
-      animate={inView ? 'show' : 'hidden'}
+      whileInView="show"
+      viewport={viewport}
       variants={{
         hidden: {},
         show: { transition: { staggerChildren: stagger, delayChildren: delay } },
@@ -79,7 +58,7 @@ export function PingScrollStagger({
   )
 }
 
-export function PingScrollStaggerItem({ children, className = '', y = 48 }) {
+export function PingScrollStaggerItem({ children, className = '', y = 16 }) {
   const { prefs } = useLocale()
 
   if (prefs.reduceMotion) {
@@ -90,13 +69,8 @@ export function PingScrollStaggerItem({ children, className = '', y = 48 }) {
     <motion.div
       className={className}
       variants={{
-        hidden: { opacity: 0, y, filter: 'blur(10px)' },
-        show: {
-          opacity: 1,
-          y: 0,
-          filter: 'blur(0px)',
-          transition: { duration: 0.95, ease: EASE },
-        },
+        hidden: { opacity: 0, y },
+        show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: EASE } },
       }}
     >
       {children}
@@ -104,15 +78,12 @@ export function PingScrollStaggerItem({ children, className = '', y = 48 }) {
   )
 }
 
-/** Split heading reveal — each line slides up with mask. */
 export function PingScrollLines({ lines, className = '', lineClassName = '' }) {
-  const ref = useRef(null)
-  const inView = useInView(ref, { once: true, amount: 0.5 })
   const { prefs } = useLocale()
 
   if (prefs.reduceMotion) {
     return (
-      <div ref={ref} className={className}>
+      <div className={className}>
         {lines.map((line) => (
           <div key={line} className={lineClassName}>
             {line}
@@ -123,50 +94,52 @@ export function PingScrollLines({ lines, className = '', lineClassName = '' }) {
   }
 
   return (
-    <div ref={ref} className={className}>
-      {lines.map((line, i) => (
-        <div key={line} className="overflow-hidden">
-          <motion.div
-            className={lineClassName}
-            initial={{ y: '110%', opacity: 0 }}
-            animate={inView ? { y: 0, opacity: 1 } : { y: '110%', opacity: 0 }}
-            transition={{ duration: 0.9, delay: i * 0.12, ease: EASE }}
-          >
-            {line}
-          </motion.div>
+    <motion.div
+      className={className}
+      initial={{ opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={viewport}
+      transition={{ duration: 0.55, ease: EASE }}
+    >
+      {lines.map((line) => (
+        <div key={line} className={lineClassName}>
+          {line}
         </div>
       ))}
-    </div>
+    </motion.div>
   )
 }
 
-/** Image/card reveal with scale — Lusion project card feel. */
 export function PingScrollMedia({ children, className = '', delay = 0 }) {
-  const ref = useRef(null)
-  const inView = useInView(ref, { once: true, amount: 0.25 })
   const { prefs } = useLocale()
 
   if (prefs.reduceMotion) {
-    return (
-      <div ref={ref} className={className}>
-        {children}
-      </div>
-    )
+    return <div className={className}>{children}</div>
   }
 
   return (
     <motion.div
-      ref={ref}
       className={className}
-      initial={{ opacity: 0, scale: 0.92, y: 40, filter: 'blur(8px)' }}
-      animate={
-        inView
-          ? { opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' }
-          : { opacity: 0, scale: 0.92, y: 40, filter: 'blur(8px)' }
-      }
-      transition={{ duration: 1.1, delay, ease: EASE }}
+      initial={{ opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={viewport}
+      transition={{ duration: 0.6, delay, ease: EASE }}
     >
       {children}
     </motion.div>
   )
+}
+
+/** Feature screenshots — light backgrounds blend into the dark page. */
+export function PingFeatureImage({ src, alt = '', className = '' }) {
+  return (
+    <div className={`ping-feature-frame ${className}`}>
+      <img src={src} alt={alt} className="ping-feature-img w-full object-contain" loading="lazy" />
+    </div>
+  )
+}
+
+/** Hero / logo assets — black backgrounds blend out. */
+export function PingHeroImage({ src, alt, className = '' }) {
+  return <img src={src} alt={alt} className={`ping-hero-img mx-auto w-full ${className}`} />
 }
