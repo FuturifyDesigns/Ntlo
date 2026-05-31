@@ -35,6 +35,7 @@ export default function Pricing() {
   const { t } = useTranslation()
   const [audience, setAudience] = useState('students')
   const [selectedTier, setSelectedTier] = useState('standard')
+  const [openWhyTier, setOpenWhyTier] = useState(null)
   const [hoveredTier, setHoveredTier] = useState(null)
 
   const activeTier = LANDLORD_TIERS.find((tier) => tier.id === selectedTier)
@@ -59,7 +60,10 @@ export default function Pricing() {
             ].map(({ id, icon: Icon, label }) => (
               <button
                 key={id}
-                onClick={() => setAudience(id)}
+                onClick={() => {
+                  setAudience(id)
+                  setOpenWhyTier(null)
+                }}
                 className={`relative flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition-colors sm:w-auto sm:px-5 ${
                   audience === id ? 'text-primary' : 'text-white/70 hover:text-white'
                 }`}
@@ -403,9 +407,9 @@ export default function Pricing() {
                   <h2 className="font-display text-3xl font-semibold text-primary">{t('pricing.whyTitle')}</h2>
                 </Reveal>
 
-                <div className="mt-6 space-y-3 sm:mt-8">
+                <div className="mt-6 space-y-3 sm:mt-8 [overflow-anchor:none]">
                   {LANDLORD_TIERS.map((tier, i) => {
-                    const isOpen = selectedTier === tier.id
+                    const isOpen = openWhyTier === tier.id
                     return (
                       <motion.div
                         key={tier.id}
@@ -416,8 +420,9 @@ export default function Pricing() {
                       >
                         <button
                           type="button"
-                          onClick={() => setSelectedTier(tier.id)}
-                          className={`w-full rounded-xl border p-5 text-left transition-all ${
+                          aria-expanded={isOpen}
+                          onClick={() => setOpenWhyTier(isOpen ? null : tier.id)}
+                          className={`w-full rounded-xl border p-5 text-left transition-colors ${
                             isOpen
                               ? 'border-accent bg-surface shadow-md'
                               : 'border-border bg-surface hover:border-accent/40'
@@ -431,18 +436,17 @@ export default function Pricing() {
                               <ChevronRight size={20} className="text-accent" />
                             </motion.span>
                           </div>
-                          <AnimatePresence>
-                            {isOpen && (
-                              <motion.p
-                                initial={{ opacity: 0, height: 0 }}
-                                animate={{ opacity: 1, height: 'auto' }}
-                                exit={{ opacity: 0, height: 0 }}
-                                className="mt-3 overflow-hidden text-sm leading-relaxed text-muted"
-                              >
+                          <div
+                            className={`grid transition-[grid-template-rows] duration-200 ease-out ${
+                              isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
+                            }`}
+                          >
+                            <div className="overflow-hidden" aria-hidden={!isOpen}>
+                              <p className="mt-3 text-sm leading-relaxed text-muted">
                                 {t(`pricing.${tier.whyKey}`)}
-                              </motion.p>
-                            )}
-                          </AnimatePresence>
+                              </p>
+                            </div>
+                          </div>
                         </button>
                       </motion.div>
                     )
