@@ -27,6 +27,7 @@ import AdminSubscriptionsPanel from '../components/admin/AdminSubscriptionsPanel
 import AdminApplicationsPanel from '../components/admin/AdminApplicationsPanel'
 import AdminBanModal from '../components/admin/AdminBanModal'
 import AdminDeleteListingModal from '../components/admin/AdminDeleteListingModal'
+import AdminLiveListingCard from '../components/admin/AdminLiveListingCard'
 import AdminReviewsPanel from '../components/admin/AdminReviewsPanel'
 
 const TABS = [
@@ -397,6 +398,8 @@ export default function AdminDashboard() {
     return listingQueue.filter(({ item }) => ['pending', 'changes_requested'].includes(item.verification_status))
   }, [listingQueue, listingFilter])
 
+  const isLiveListingView = listingFilter === 'live'
+
   const filteredUsers = useMemo(() => {
     const q = userSearch.trim().toLowerCase()
     return users.filter((u) => {
@@ -717,29 +720,45 @@ export default function AdminDashboard() {
                   </button>
                 ))}
               </div>
-              <AdminAdvisorPanel
-                summary={summarizeQueue(filteredListingQueue)}
-                sortMode={sortMode}
-                onSortChange={setSortMode}
-              />
+              {!isLiveListingView && (
+                <AdminAdvisorPanel
+                  summary={summarizeQueue(filteredListingQueue)}
+                  sortMode={sortMode}
+                  onSortChange={setSortMode}
+                />
+              )}
+              {isLiveListingView && (
+                <p className="text-sm text-muted">{t('admin.liveListingsHint')}</p>
+              )}
               {filteredListingQueue.length === 0 ? (
                 <Card className="p-8 text-center text-muted">{t('admin.noListingsMatch')}</Card>
               ) : (
-                filteredListingQueue.map(({ item, analysis }) => (
-                  <VerificationCard
-                    key={item.id}
-                    subject={item}
-                    analysis={analysis}
-                    kind="listing"
-                    onOpenDocs={(docs, index, name) => setPreview({ docs, index, name })}
-                    onApprove={() => openReviewListing(item, true)}
-                    onReject={() => openReviewListing(item, false)}
-                    onDelete={() => setListingDeleteTarget(item)}
-                    onRequestChanges={requestDocChanges}
-                    onMarkOk={(docId) => setDocStatus(docId, 'approved')}
-                    onUnmarkOk={(docId) => setDocStatus(docId, 'pending')}
-                  />
-                ))
+                filteredListingQueue.map(({ item, analysis }) => {
+                  const isLive = item.verification_status === 'approved'
+                  if (isLiveListingView || (listingFilter === 'all' && isLive)) {
+                    return (
+                      <AdminLiveListingCard
+                        key={item.id}
+                        listing={item}
+                        onDelete={() => setListingDeleteTarget(item)}
+                      />
+                    )
+                  }
+                  return (
+                    <VerificationCard
+                      key={item.id}
+                      subject={item}
+                      analysis={analysis}
+                      kind="listing"
+                      onOpenDocs={(docs, index, name) => setPreview({ docs, index, name })}
+                      onApprove={() => openReviewListing(item, true)}
+                      onReject={() => openReviewListing(item, false)}
+                      onRequestChanges={requestDocChanges}
+                      onMarkOk={(docId) => setDocStatus(docId, 'approved')}
+                      onUnmarkOk={(docId) => setDocStatus(docId, 'pending')}
+                    />
+                  )
+                })
               )}
             </div>
           )}

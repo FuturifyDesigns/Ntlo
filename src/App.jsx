@@ -42,6 +42,7 @@ import AnalyticsTracker from './components/layout/AnalyticsTracker'
 import UrgentNotificationLayer from './components/layout/UrgentNotificationLayer'
 import BanEnforcementLayer from './components/ban/BanEnforcementLayer'
 import NotificationSoundLayer from './components/layout/NotificationSoundLayer'
+import NotificationSoundUnlockBanner from './components/layout/NotificationSoundUnlockBanner'
 import GoogleMapsProvider from './components/maps/GoogleMapsProvider'
 import { SavedListingsProvider } from './context/SavedListingsContext'
 import { useLocale } from './context/LocaleContext'
@@ -137,6 +138,7 @@ function AppShell() {
         <UrgentNotificationLayer />
         <BanEnforcementLayer />
         <NotificationSoundLayer />
+        <NotificationSoundUnlockBanner />
         <ExitIntentModal />
         <AnalyticsTracker />
       </div>

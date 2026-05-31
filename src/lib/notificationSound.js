@@ -37,6 +37,7 @@ export function unlockNotificationSound() {
       clip.pause()
       clip.currentTime = 0
       clip.volume = 0.85
+      window.dispatchEvent(new Event('ntlo-sound-unlocked'))
     })
     .catch(() => {
       unlocked = false

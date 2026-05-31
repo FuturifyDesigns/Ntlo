@@ -5,6 +5,7 @@ import { X } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../hooks/useAuth'
 import { navigateToNotification, markNotificationRead } from '../../lib/notifications'
+import { playNotificationSound } from '../../lib/notificationSound'
 import { useTranslation } from '../../hooks/useTranslation'
 import { useLocale } from '../../context/LocaleContext'
 import Button from '../ui/Button'
@@ -25,6 +26,7 @@ export const URGENT_NOTIFICATION_TYPES = new Set([
   'listing_rejected',
   'listing_changes_requested',
   'listing_admin_removed',
+  'account_unbanned',
 ])
 
 export function isUrgentNotification(notification) {
@@ -40,6 +42,7 @@ export function useUrgentNotificationToasts() {
     if (notification?.type === 'account_banned') return
     if (!isUrgentNotification(notification)) return
     if (dismissedRef.current.has(notification.id)) return
+    playNotificationSound(notification.id)
     setToasts((prev) => {
       if (prev.some((item) => item.id === notification.id)) return prev
       return [notification, ...prev].slice(0, 3)

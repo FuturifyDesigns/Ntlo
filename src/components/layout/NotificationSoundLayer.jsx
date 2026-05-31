@@ -11,8 +11,8 @@ export default function NotificationSoundLayer() {
     function unlock() {
       unlockNotificationSound()
     }
-    window.addEventListener('pointerdown', unlock, { once: true, passive: true })
-    window.addEventListener('keydown', unlock, { once: true })
+    window.addEventListener('pointerdown', unlock, { passive: true })
+    window.addEventListener('keydown', unlock)
     return () => {
       window.removeEventListener('pointerdown', unlock)
       window.removeEventListener('keydown', unlock)
@@ -33,7 +33,6 @@ export default function NotificationSoundLayer() {
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.id}` },
         (payload) => {
-          if (payload.new?.type === 'account_banned') return
           playNotificationSound(payload.new?.id)
         }
       )
