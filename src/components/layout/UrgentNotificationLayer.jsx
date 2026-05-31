@@ -24,6 +24,7 @@ export const URGENT_NOTIFICATION_TYPES = new Set([
   'listing_approved',
   'listing_rejected',
   'listing_changes_requested',
+  'account_banned',
 ])
 
 export function isUrgentNotification(notification) {

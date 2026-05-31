@@ -1,4 +1,6 @@
 /** Landlord identity documents (sign-up / account verification) */
+import { isBanActive } from './bans'
+
 export const LANDLORD_DOC_TYPES = [
   {
     id: 'national_id',
@@ -79,7 +81,7 @@ export function landlordDocsComplete(uploadedTypes) {
 
 export function getPostAuthPath(profile, fallback = '/') {
   if (!profile) return '/student'
-  if (profile.is_banned) return '/login?banned=1'
+  if (isBanActive(profile)) return '/login?banned=1'
   if (profile.role === 'admin') return '/admin'
   if (profile.role === 'landlord') {
     if (profile.verification_status !== 'approved') return '/landlord/verify'
@@ -89,5 +91,5 @@ export function getPostAuthPath(profile, fallback = '/') {
 }
 
 export function landlordCanList(profile) {
-  return profile?.role === 'landlord' && profile?.verification_status === 'approved' && !profile?.is_banned
+  return profile?.role === 'landlord' && profile?.verification_status === 'approved' && !isBanActive(profile)
 }

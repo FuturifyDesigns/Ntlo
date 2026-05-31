@@ -7,6 +7,7 @@ import {
 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useTranslation } from '../hooks/useTranslation'
+import { isBanActive } from '../lib/bans'
 import {
   analyzeLandlord, analyzeListing, sortSubmissions, summarizeQueue,
 } from '../lib/adminAdvisor'
@@ -24,6 +25,7 @@ import AdminActionModal from '../components/admin/AdminActionModal'
 import AdminToast from '../components/admin/AdminToast'
 import AdminSubscriptionsPanel from '../components/admin/AdminSubscriptionsPanel'
 import AdminApplicationsPanel from '../components/admin/AdminApplicationsPanel'
+import AdminBanModal from '../components/admin/AdminBanModal'
 import AdminReviewsPanel from '../components/admin/AdminReviewsPanel'
 
 const TABS = [
@@ -64,6 +66,7 @@ export default function AdminDashboard() {
   const [roleFilter, setRoleFilter] = useState('all')
   const [dialog, setDialog] = useState(null)
   const [toast, setToast] = useState(null)
+  const [banTarget, setBanTarget] = useState(null)
 
   const selectTab = useCallback((id) => {
     setTab(id)
@@ -87,7 +90,7 @@ export default function AdminDashboard() {
   const fetchUsers = useCallback(async () => {
     const { data } = await supabase
       .from('profiles')
-      .select('id, full_name, phone, role, is_verified, is_banned, banned_reason, verification_status, created_at')
+      .select('id, full_name, phone, role, is_verified, is_banned, banned_reason, banned_until, ban_reason_code, verification_status, created_at')
       .order('created_at', { ascending: false })
     setUsers(data || [])
   }, [])
@@ -218,15 +221,11 @@ export default function AdminDashboard() {
     })
   }
 
-  async function toggleBan(userId, currentlyBanned) {
+  async function toggleBan(user, currentlyBanned) {
     if (currentlyBanned) {
       setActionError('')
       try {
-        const { error } = await supabase.rpc('admin_set_ban', {
-          target_id: userId,
-          banned: false,
-          reason: null,
-        })
+        const { error } = await supabase.rpc('admin_unban_user', { target_id: user.id })
         if (error) throw error
         await fetchUsers()
         setToast({ type: 'success', message: t('admin.dialog.unbanned') })
@@ -235,23 +234,22 @@ export default function AdminDashboard() {
       }
       return
     }
-    setDialog({
-      mode: 'prompt',
-      title: t('admin.dialog.banTitle'),
-      placeholder: t('admin.banReasonPrompt'),
-      confirmLabel: t('admin.ban'),
-      confirmVariant: 'danger',
-      onConfirm: async (reason) => {
-        const { error } = await supabase.rpc('admin_set_ban', {
-          target_id: userId,
-          banned: true,
-          reason: reason || null,
-        })
-        if (error) throw error
-        await fetchUsers()
-        setToast({ type: 'success', message: t('admin.dialog.banned') })
-      },
+    setBanTarget(user)
+  }
+
+  async function confirmBan({ durationType, durationAmount, reasonCode, reasonNote }) {
+    if (!banTarget) return
+    const { error } = await supabase.rpc('admin_ban_user', {
+      target_id: banTarget.id,
+      p_duration_type: durationType,
+      p_duration_amount: durationAmount,
+      p_reason_code: reasonCode,
+      p_reason_note: reasonNote,
     })
+    if (error) throw error
+    await fetchUsers()
+    setToast({ type: 'success', message: t('admin.dialog.banned') })
+    setBanTarget(null)
   }
 
   function openDeleteUser(userId, name) {
@@ -577,8 +575,12 @@ export default function AdminDashboard() {
                           </td>
                           <td className="px-4 py-3 capitalize">{u.role}</td>
                           <td className="px-4 py-3">
-                            {u.is_banned ? (
-                              <Badge variant="error">{t('admin.banned')}</Badge>
+                            {isBanActive(u) ? (
+                              <Badge variant="error">
+                                {u.banned_until
+                                  ? t('admin.bannedUntil', { date: new Date(u.banned_until).toLocaleString() })
+                                  : t('admin.bannedPermanent')}
+                              </Badge>
                             ) : u.role === 'landlord' ? (
                               <Badge variant={u.verification_status === 'approved' ? 'success' : 'warning'}>
                                 {u.verification_status}
@@ -596,8 +598,8 @@ export default function AdminDashboard() {
                                 <Button
                                   size="sm"
                                   variant="outline"
-                                  onClick={() => toggleBan(u.id, u.is_banned)}
-                                  title={u.is_banned ? t('admin.unban') : t('admin.ban')}
+                                  onClick={() => toggleBan(u, isBanActive(u))}
+                                  title={isBanActive(u) ? t('admin.unban') : t('admin.ban')}
                                 >
                                   <Ban size={14} />
                                 </Button>
@@ -712,6 +714,13 @@ export default function AdminDashboard() {
         onClose={() => setPublishDraft(null)}
         onPublished={handleUniversityPublished}
         onUpdated={handleUniversityUpdated}
+      />
+
+      <AdminBanModal
+        open={Boolean(banTarget)}
+        userName={banTarget?.full_name}
+        onClose={() => setBanTarget(null)}
+        onConfirm={confirmBan}
       />
     </motion.div>
   )

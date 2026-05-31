@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { Link, useNavigate, useLocation, useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useAuth } from '../hooks/useAuth'
@@ -11,6 +11,7 @@ import PasswordInput from '../components/ui/PasswordInput'
 import GoogleAuthButton from '../components/auth/GoogleAuthButton'
 import AuthTransitionOverlay from '../components/auth/AuthTransitionOverlay'
 import { getPostAuthPath } from '../lib/verification'
+import { readBanInfoFromLogin } from '../lib/bans'
 
 export default function Login() {
   const [email, setEmail] = useState('')
@@ -24,11 +25,17 @@ export default function Login() {
   const navigate = useNavigate()
   const location = useLocation()
   const [searchParams] = useSearchParams()
+  const [banInfo, setBanInfo] = useState(null)
   const from = location.state?.from?.pathname || '/'
   const verified = searchParams.get('verified') === '1' || location.state?.verified
   const oauthSignup = searchParams.get('oauth') === '1' || location.state?.oauth
   const passwordReset = searchParams.get('reset') === '1'
-  const banned = searchParams.get('banned') === '1'
+  const banned = searchParams.get('banned') === '1' || Boolean(banInfo)
+
+  useEffect(() => {
+    const stored = readBanInfoFromLogin()
+    if (stored) setBanInfo(stored)
+  }, [])
 
   const handleGoogleError = useCallback((message) => {
     setError(message)
@@ -72,6 +79,7 @@ export default function Login() {
       }, 350)
     } catch (err) {
       if (err.code === 'account_banned') {
+        setBanInfo(err.banInfo || null)
         setError(t('auth.accountBanned'))
       } else {
         setError(mapAuthError(err.message, validationMessages))
@@ -100,9 +108,21 @@ export default function Login() {
         </div>
 
         {banned && (
-          <p className="mt-6 rounded-xl border border-error/30 bg-error/10 px-4 py-3 text-center text-sm text-error">
-            {t('auth.accountBanned')}
-          </p>
+          <div className="mt-6 space-y-2 rounded-xl border border-error/30 bg-error/10 px-4 py-3 text-sm text-error">
+            <p className="font-medium">{t('auth.accountBanned')}</p>
+            {banInfo?.reason_code && (
+              <p>{t(`admin.banReason.${banInfo.reason_code}`)}</p>
+            )}
+            {banInfo?.reason_note && <p className="text-error/90">{banInfo.reason_note}</p>}
+            {!banInfo?.reason_code && banInfo?.banned_reason && (
+              <p className="whitespace-pre-wrap text-error/90">{banInfo.banned_reason}</p>
+            )}
+            {banInfo?.permanent ? (
+              <p>{t('ban.permanent')}</p>
+            ) : banInfo?.banned_until ? (
+              <p>{t('ban.until', { date: new Date(banInfo.banned_until).toLocaleString() })}</p>
+            ) : null}
+          </div>
         )}
 
         {verified && oauthSignup && (

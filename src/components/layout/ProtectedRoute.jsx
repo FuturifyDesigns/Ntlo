@@ -1,10 +1,11 @@
 import { Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
+import { isBanActive } from '../../lib/bans'
 import { isEmailVerifiedForAccess, profileNeedsSetup } from '../../lib/oauthStorage'
 import { Skeleton } from '../ui/Skeleton'
 
 export default function ProtectedRoute({ children, role, requireLandlordVerified = false }) {
-  const { user, profile, loading, profileLoading, isBanned } = useAuth()
+  const { user, profile, loading, profileLoading } = useAuth()
   const location = useLocation()
 
   if (loading || (user && !profile && profileLoading)) {
@@ -35,7 +36,7 @@ export default function ProtectedRoute({ children, role, requireLandlordVerified
     )
   }
 
-  if (isBanned || profile?.is_banned) {
+  if (isBanActive(profile) && profile.ban_acknowledged_at) {
     return <Navigate to="/login?banned=1" replace />
   }
 

@@ -192,9 +192,19 @@
 
         const { data: profile } = await supabase
           .from('profiles')
-          .select('role, phone, gender')
+          .select('role, phone, gender, is_banned, banned_until, ban_reason_code, ban_reason_note, banned_reason, ban_acknowledged_at')
           .eq('id', user.id)
           .maybeSingle()
+
+        const { data: access } = await supabase.rpc('check_account_access', { p_user_id: user.id })
+        if (access && access.allowed === false) {
+          try {
+            sessionStorage.setItem('ntlo_ban_info', JSON.stringify(access.ban || {}))
+          } catch (_) {}
+          await supabase.auth.signOut().catch(() => {})
+          window.location.replace('../#/login?banned=1')
+          return
+        }
 
         if (profileNeedsSetup(profile)) {
           const roleQuery = pendingRole ? `?role=${pendingRole}` : from === 'login' ? '?role=student' : ''

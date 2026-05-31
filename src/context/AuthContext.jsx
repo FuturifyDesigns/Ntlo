@@ -3,6 +3,7 @@ import { flushSync } from 'react-dom'
 import { supabase } from '../lib/supabase'
 import { getAuthCallbackUrl, getAuthResetUrl, getAuthVerifyUrl } from '../lib/authUrls'
 import { clearOAuthStorage, markOAuthPending, setOAuthIntent } from '../lib/oauthStorage'
+import { isBanActive, saveBanInfoForLogin } from '../lib/bans'
 
 const AuthContext = createContext(null)
 
@@ -17,7 +18,7 @@ export function AuthProvider({ children }) {
     try {
       const { data } = await supabase
         .from('profiles')
-        .select('id, full_name, phone, role, university_id, gender, avatar_url, is_verified, verification_status, verification_notes, is_banned, banned_reason, subscription_tier, subscription_status, subscription_period_end, last_seen_at')
+        .select('id, full_name, phone, role, university_id, gender, avatar_url, is_verified, verification_status, verification_notes, is_banned, banned_reason, banned_at, banned_until, ban_reason_code, ban_reason_note, ban_acknowledged_at, subscription_tier, subscription_status, subscription_period_end, last_seen_at')
         .eq('id', userId)
         .maybeSingle()
       setProfile(data)
@@ -27,19 +28,36 @@ export function AuthProvider({ children }) {
     }
   }
 
+  async function loadUserProfile(userId) {
+    await supabase.rpc('sync_profile_ban_status', { p_user_id: userId })
+    return fetchProfile(userId, { silent: true })
+  }
+
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       setUser(session?.user ?? null)
       if (session?.user) {
-        await fetchProfile(session.user.id)
+        const prof = await loadUserProfile(session.user.id)
+        if (isBanActive(prof) && prof?.ban_acknowledged_at) {
+          await supabase.auth.signOut()
+          setUser(null)
+          setProfile(null)
+        }
       }
       setLoading(false)
     })
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null)
-      if (session?.user) fetchProfile(session.user.id)
-      else {
+      if (session?.user) {
+        loadUserProfile(session.user.id).then((prof) => {
+          if (isBanActive(prof) && prof?.ban_acknowledged_at) {
+            supabase.auth.signOut()
+            setUser(null)
+            setProfile(null)
+          }
+        })
+      } else {
         setProfile(null)
         setProfileLoading(false)
       }
@@ -58,8 +76,16 @@ export function AuthProvider({ children }) {
         'postgres_changes',
         { event: 'UPDATE', schema: 'public', table: 'profiles', filter: `id=eq.${user.id}` },
         (payload) => {
-          if (payload.new) setProfile((prev) => ({ ...prev, ...payload.new }))
-          else fetchProfile(user.id, { silent: true })
+          if (payload.new) {
+            setProfile((prev) => ({ ...prev, ...payload.new }))
+            if (isBanActive(payload.new) && payload.new.ban_acknowledged_at) {
+              supabase.auth.signOut()
+              setUser(null)
+              setProfile(null)
+            }
+          } else {
+            fetchProfile(user.id, { silent: true })
+          }
         }
       )
       .subscribe()
@@ -99,15 +125,23 @@ export function AuthProvider({ children }) {
 
     if (data?.user) {
       setUser(data.user)
-      const prof = await fetchProfile(data.user.id)
-      if (prof?.is_banned) {
+      const { data: access, error: accessError } = await supabase.rpc('check_account_access', {
+        p_user_id: data.user.id,
+      })
+      if (accessError) throw accessError
+
+      if (!access?.allowed) {
         await supabase.auth.signOut()
         setUser(null)
         setProfile(null)
         const err = new Error('Account suspended')
         err.code = 'account_banned'
+        err.banInfo = access.ban
+        saveBanInfoForLogin(access.ban)
         throw err
       }
+
+      const prof = await fetchProfile(data.user.id)
       return { ...data, profile: prof }
     }
 
@@ -197,7 +231,8 @@ export function AuthProvider({ children }) {
       isStudent: profile?.role === 'student',
       isLandlord: profile?.role === 'landlord',
       isAdmin: profile?.role === 'admin',
-      isBanned: profile?.is_banned === true,
+      isBanned: isBanActive(profile),
+      needsBanAcknowledgment: isBanActive(profile) && !profile?.ban_acknowledged_at,
     }),
     [user, profile, loading, profileLoading, signOut]
   )
