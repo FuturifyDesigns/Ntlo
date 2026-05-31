@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Plus, Edit, Trash2, Eye, ToggleLeft, ToggleRight } from 'lucide-react'
+import { Plus, Edit, Trash2, Eye, ToggleLeft, ToggleRight, AlertCircle, CreditCard } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { useTranslation } from '../hooks/useTranslation'
@@ -18,12 +18,12 @@ import EarlyAccessBanner from '../components/landlord/EarlyAccessBanner'
 import EarlyAccessLandlordNote from '../components/landlord/EarlyAccessLandlordNote'
 import LandlordInquiriesPanel from '../components/housing/LandlordInquiriesPanel'
 import { LandlordMarketOverview } from '../components/advisor/CompetitiveAdvisorPanel'
-import { getListingOccupancy, isListingRented } from '../lib/listingOccupancy'
+import { getListingOccupancy } from '../lib/listingOccupancy'
 import { relistListing } from '../lib/housing'
 import { withdrawListing } from '../lib/listingPublish'
 import { mapListingEditError } from '../lib/listingEditPolicy'
+import { getListingLandlordActions } from '../lib/listingReviewPolicy'
 import { MAPS_ENABLED } from '../lib/googleMaps'
-import { CreditCard } from 'lucide-react'
 
 const PLACEHOLDER = 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400&q=80'
 
@@ -95,14 +95,29 @@ export default function LandlordDashboard() {
     return () => supabase.removeChannel(channel)
   }, [user?.id])
 
-  async function markTaken(id) {
-    await supabase.from('listings').update({ occupancy_status: 'unavailable' }).eq('id', id)
+  async function markTaken(listing) {
+    const actions = getListingLandlordActions(listing)
+    if (!actions.canMarkOccupancy) {
+      alert(t('listingReview.cannotMarkOccupancy'))
+      return
+    }
+    const { error } = await supabase.from('listings').update({ occupancy_status: 'unavailable' }).eq('id', listing.id)
+    if (error) {
+      const key = mapListingEditError(error.message)
+      alert(key ? t(`listingEdit.errors.${key}`) : error.message)
+      return
+    }
     fetchListings({ silent: true })
   }
 
-  async function handleRelist(id) {
+  async function handleRelist(listing) {
+    const actions = getListingLandlordActions(listing)
+    if (!actions.canMarkOccupancy) {
+      alert(t('listingReview.cannotRelistUnderReview'))
+      return
+    }
     try {
-      await relistListing(id)
+      await relistListing(listing.id)
       fetchListings({ silent: true })
     } catch (err) {
       alert(err.message)
@@ -132,12 +147,26 @@ export default function LandlordDashboard() {
   }
 
   const pendingReviewCount = listings.filter((l) => ['pending', 'changes_requested'].includes(l.verification_status || 'pending')).length
+  const changesRequestedCount = listings.filter((l) => l.verification_status === 'changes_requested').length
 
   const filtered = listings.filter((l) => {
     const occupancy = getListingOccupancy(l)
     if (filter === 'active') return occupancy === 'available' || occupancy === 'rented'
     if (filter === 'inactive') return occupancy === 'unavailable'
     return true
+  })
+
+  const sortedFiltered = [...filtered].sort((a, b) => {
+    const priority = (listing) => {
+      const status = listing.verification_status || 'pending'
+      if (status === 'changes_requested') return 0
+      if (status === 'rejected') return 1
+      if (status === 'pending') return 2
+      return 3
+    }
+    const diff = priority(a) - priority(b)
+    if (diff !== 0) return diff
+    return new Date(b.created_at) - new Date(a.created_at)
   })
 
   const totalViews = listings.reduce((sum, l) => sum + (l.views || 0), 0)
@@ -177,7 +206,14 @@ export default function LandlordDashboard() {
         </motion.div>
       )}
 
-      {pendingReviewCount > 0 && !statusBanner && (
+      {changesRequestedCount > 0 && (
+        <div className="mb-6 rounded-xl border border-amber-500/40 bg-amber-500/5 px-4 py-3 text-sm text-primary">
+          <p className="font-medium">{t('listingReview.changesNeededBanner', { count: changesRequestedCount })}</p>
+          <p className="mt-1 text-muted">{t('listingReview.changesNeededHint')}</p>
+        </div>
+      )}
+
+      {pendingReviewCount > 0 && !statusBanner && changesRequestedCount === 0 && (
         <div className="mb-6 rounded-xl border border-border bg-surface px-4 py-3 text-sm text-muted">
           {t('listingReview.pendingCount', { count: pendingReviewCount })}
         </div>
@@ -204,12 +240,144 @@ export default function LandlordDashboard() {
         </Card>
       </motion.div>
 
-      <div className="mb-10">
-        <LandlordMarketOverview />
-      </div>
+      <section className="mb-10">
+        <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h2 className="font-display text-xl font-semibold text-primary">{t('dashboard.yourListingsTitle')}</h2>
+            <p className="mt-1 max-w-2xl text-sm text-muted">{t('dashboard.yourListingsHint')}</p>
+          </div>
+          <div className="flex gap-2">
+            {['all', 'active', 'inactive'].map((f) => (
+              <button
+                key={f}
+                onClick={() => setFilter(f)}
+                className={`rounded-lg px-4 py-2 text-sm font-medium capitalize transition-colors ${
+                  filter === f ? 'bg-primary text-white' : 'bg-surface border border-border text-muted'
+                }`}
+              >
+                {filterLabels[f]}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <AnimatePresence mode="wait">
+          {loading ? (
+            <motion.div key="listings-loading" className="space-y-4" {...motionProps}>
+              {[1, 2, 3].map((i) => <Skeleton key={i} className="h-28 w-full" />)}
+            </motion.div>
+          ) : sortedFiltered.length === 0 ? (
+            <motion.div
+              key="listings-empty"
+              className="rounded-xl border border-border bg-surface p-8 text-center sm:p-10"
+              {...motionProps}
+            >
+              <p className="text-lg font-medium text-primary">
+                {listings.length === 0 ? t('dashboard.noListings') : t('dashboard.noFilterMatch')}
+              </p>
+              {listings.length === 0 && (
+                <Button as={Link} to="/landlord/listings/new" className="mt-4">
+                  {t('dashboard.listFirst')}
+                </Button>
+              )}
+            </motion.div>
+          ) : (
+            <motion.div key="listings-grid" className="space-y-4" {...motionProps}>
+              {sortedFiltered.map((listing) => {
+                const occupancy = getListingOccupancy(listing)
+                const actions = getListingLandlordActions(listing)
+                const needsAttention = actions.needsResubmit || actions.underReview
+                const badgeVariant = occupancy === 'available' ? 'success' : occupancy === 'rented' ? 'warning' : 'error'
+                const badgeLabel = occupancy === 'available'
+                  ? t('listings.available')
+                  : occupancy === 'rented'
+                    ? t('listings.rented')
+                    : t('dashboard.taken')
+                const occupancyDisabledReason = !actions.approved
+                  ? t('listingReview.cannotMarkOccupancy')
+                  : null
+
+                return (
+                  <Card
+                    key={listing.id}
+                    className={`flex flex-col gap-4 p-4 sm:flex-row sm:items-center ${
+                      actions.needsResubmit ? 'border-amber-500/40 bg-amber-500/[0.03]' : ''
+                    }`}
+                  >
+                    <img
+                      src={getCoverPhoto(listing) || PLACEHOLDER}
+                      alt={listing.title}
+                      className="h-20 w-28 shrink-0 rounded-lg object-cover"
+                    />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h3 className="truncate font-semibold text-primary">{listing.title}</h3>
+                        <Badge variant={badgeVariant}>{badgeLabel}</Badge>
+                        {listingReviewBadge(listing)}
+                      </div>
+                      <p className="font-mono text-sm font-semibold">{formatPrice(listing.price)}{t('listings.perMo')}</p>
+                      <p className="text-sm text-muted">{listing.area}, {listing.city}</p>
+                      {actions.needsResubmit && listing.verification_notes && (
+                        <p className="mt-2 flex items-start gap-1.5 text-xs text-amber-800">
+                          <AlertCircle size={14} className="mt-0.5 shrink-0" />
+                          <span>{listing.verification_notes}</span>
+                        </p>
+                      )}
+                      {needsAttention && !actions.needsResubmit && (
+                        <p className="mt-1 text-xs text-muted">{t('listingReview.underReviewHint')}</p>
+                      )}
+                      {actions.approved && (
+                        <p className="mt-1 text-xs text-muted">{t('dashboard.listingActionsHint')}</p>
+                      )}
+                      <p className="mt-1 flex items-center gap-1 text-xs text-muted">
+                        <Eye size={12} />
+                        {listing.views || 0} {t('dashboard.views')}
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        as={Link}
+                        to={`/landlord/listings/${listing.id}/edit`}
+                        variant={actions.needsResubmit ? 'primary' : 'outline'}
+                        size="sm"
+                      >
+                        <Edit size={14} />
+                        {t(actions.editLabelKey)}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={!actions.canMarkOccupancy}
+                        title={occupancyDisabledReason || undefined}
+                        onClick={() => (occupancy === 'available' ? markTaken(listing) : handleRelist(listing))}
+                      >
+                        {occupancy === 'available' ? <ToggleRight size={14} /> : <ToggleLeft size={14} />}
+                        {occupancy === 'available' ? t('dashboard.markTaken') : t('housing.listAgain')}
+                      </Button>
+                      <Button
+                        variant="danger"
+                        size="sm"
+                        disabled={!actions.canWithdraw}
+                        title={!actions.canWithdraw ? t('listingReview.alreadyWithdrawn') : t('dashboard.deleteConfirm')}
+                        onClick={() => deleteListing(listing.id)}
+                      >
+                        <Trash2 size={14} />
+                      </Button>
+                    </div>
+                  </Card>
+                )
+              })}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </section>
 
       <div className="mb-10">
         <LandlordInquiriesPanel />
+      </div>
+
+      <div className="mb-10">
+        <LandlordMarketOverview />
       </div>
 
       {!loading && listings.some((l) => l.lat && l.lng) && (
@@ -220,96 +388,6 @@ export default function LandlordDashboard() {
           <ListingMap listings={listings} height="320px" />
         </motion.div>
       )}
-
-      <div className="mb-6 flex gap-2">
-        {['all', 'active', 'inactive'].map((f) => (
-          <button
-            key={f}
-            onClick={() => setFilter(f)}
-            className={`rounded-lg px-4 py-2 text-sm font-medium capitalize transition-colors ${
-              filter === f ? 'bg-primary text-white' : 'bg-surface border border-border text-muted'
-            }`}
-          >
-            {filterLabels[f]}
-          </button>
-        ))}
-      </div>
-
-      <AnimatePresence mode="wait">
-        {loading ? (
-          <motion.div key="listings-loading" className="space-y-4" {...motionProps}>
-            {[1, 2, 3].map((i) => <Skeleton key={i} className="h-24 w-full" />)}
-          </motion.div>
-        ) : filtered.length === 0 ? (
-          <motion.div
-            key="listings-empty"
-            className="rounded-xl border border-border bg-surface p-8 text-center sm:p-10"
-            {...motionProps}
-          >
-            <p className="text-lg font-medium text-primary">
-              {listings.length === 0 ? t('dashboard.noListings') : t('dashboard.noFilterMatch')}
-            </p>
-            {listings.length === 0 && (
-              <Button as={Link} to="/landlord/listings/new" className="mt-4">
-                {t('dashboard.listFirst')}
-              </Button>
-            )}
-          </motion.div>
-        ) : (
-          <motion.div key="listings-grid" className="space-y-4" {...motionProps}>
-            {filtered.map((listing) => {
-              const occupancy = getListingOccupancy(listing)
-              const badgeVariant = occupancy === 'available' ? 'success' : occupancy === 'rented' ? 'warning' : 'error'
-              const badgeLabel = occupancy === 'available'
-                ? t('listings.available')
-                : occupancy === 'rented'
-                  ? t('listings.rented')
-                  : t('dashboard.taken')
-
-              return (
-              <Card key={listing.id} className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center">
-                <img
-                  src={getCoverPhoto(listing) || PLACEHOLDER}
-                  alt={listing.title}
-                  className="h-20 w-28 shrink-0 rounded-lg object-cover"
-                />
-                <div className="flex-1 min-w-0">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h3 className="font-semibold text-primary truncate">{listing.title}</h3>
-                    <Badge variant={badgeVariant}>
-                      {badgeLabel}
-                    </Badge>
-                    {listingReviewBadge(listing)}
-                  </div>
-                  <p className="font-mono text-sm font-semibold">{formatPrice(listing.price)}{t('listings.perMo')}</p>
-                  <p className="text-sm text-muted">{listing.area}, {listing.city}</p>
-                  {listing.verification_notes && listing.verification_status === 'changes_requested' && (
-                    <p className="mt-1 text-xs text-amber-700">{listing.verification_notes}</p>
-                  )}
-                  <p className="mt-1 flex items-center gap-1 text-xs text-muted">
-                    <Eye size={12} />
-                    {listing.views || 0} {t('dashboard.views')}
-                  </p>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <Button as={Link} to={`/landlord/listings/${listing.id}/edit`} variant="outline" size="sm">
-                    <Edit size={14} />
-                    {t('dashboard.edit')}
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={() => (occupancy === 'available' ? markTaken(listing.id) : handleRelist(listing.id))}>
-                    {occupancy === 'available' ? <ToggleRight size={14} /> : <ToggleLeft size={14} />}
-                    {occupancy === 'available' ? t('dashboard.markTaken') : t('housing.listAgain')}
-                  </Button>
-                  <Button variant="danger" size="sm" onClick={() => deleteListing(listing.id)}>
-                    <Trash2 size={14} />
-                  </Button>
-                </div>
-              </Card>
-              )
-            })}
-          </motion.div>
-        )}
-      </AnimatePresence>
     </PageShell>
   )
 }

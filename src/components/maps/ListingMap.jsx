@@ -22,7 +22,7 @@ import {
 } from '../../lib/googleMaps'
 import { geocodeWithGoogle, resolveAddressCoords, resolveUniversityCampusCoords, reverseGeocodeWithGoogle } from '../../lib/geocodeAddress'
 import { applyMapCameraFocus } from '../../lib/mapCamera'
-import { formatPrice } from '../../lib/utils'
+import { calculateDistance, formatPrice } from '../../lib/utils'
 import { useTranslation } from '../../hooks/useTranslation'
 import Button from '../ui/Button'
 import { MapUnavailable } from './GoogleMapsProvider'
@@ -373,6 +373,21 @@ function CampusReferenceMarker({ position, label }) {
   )
 }
 
+function ListingPinMarker() {
+  return (
+    <div className="flex flex-col items-center">
+      <div
+        className="h-6 w-6 rounded-full border-[3px] border-white shadow-lg"
+        style={{ backgroundColor: '#dc2626' }}
+      />
+      <div
+        className="mt-[-2px] h-0 w-0 border-x-[6px] border-t-[8px] border-x-transparent border-t-[#dc2626]"
+        aria-hidden
+      />
+    </div>
+  )
+}
+
 export function LocationPicker({
   lat,
   lng,
@@ -381,11 +396,13 @@ export function LocationPicker({
   area = '',
   city = '',
   universityId = '',
+  universityReady = false,
   campusCoords = null,
   campusLabel = '',
   campusZoom = CAMPUS_MAP_ZOOM,
   customUniversityName = '',
   customUniversityCity = '',
+  universityCity = '',
   height = '320px',
   hint,
   universityHint,
@@ -402,6 +419,8 @@ export function LocationPicker({
   const [geocodeBusy, setGeocodeBusy] = useState(false)
   const [geoError, setGeoError] = useState('')
   const [geocodeHint, setGeocodeHint] = useState('')
+  const [geocodeFailed, setGeocodeFailed] = useState(false)
+  const [geocodeRetryNonce, setGeocodeRetryNonce] = useState(0)
   const [pinLocked, setPinLocked] = useState(false)
   const [cameraCommand, setCameraCommand] = useState(null)
   const [otherCampus, setOtherCampus] = useState(null)
@@ -409,9 +428,9 @@ export function LocationPicker({
   const geocodeTimerRef = useRef(null)
   const reverseTimerRef = useRef(null)
   const onChangeRef = useRef(onChange)
-  const lastAddressKeyRef = useRef('')
+  const lastGeocodedKeyRef = useRef('')
   const skipForwardGeocodeRef = useRef(false)
-  const prevUniversityIdRef = useRef('')
+  const lastCampusFocusKeyRef = useRef('')
   const cameraIdRef = useRef(0)
   const userMapControlRef = useRef(false)
   const programmaticCameraRef = useRef(false)
@@ -424,6 +443,16 @@ export function LocationPicker({
   onChangeRef.current = onChange
 
   const addressKey = `${address?.trim()}|${area?.trim()}|${city?.trim()}`
+
+  const activeCampus = universityId === 'other' ? otherCampus : campusCoords
+  const activeCampusLabel = universityId === 'other'
+    ? customUniversityName
+    : campusLabel
+
+  const distanceKm = useMemo(() => {
+    if (!position || !activeCampus?.lat) return null
+    return calculateDistance(position.lat, position.lng, activeCampus.lat, activeCampus.lng)
+  }, [position, activeCampus?.lat, activeCampus?.lng])
 
   const allowCamera = useCallback(() => {
     userMapControlRef.current = false
@@ -440,12 +469,55 @@ export function LocationPicker({
     })
   }, [campusZoom])
 
+  const retryGeocode = useCallback(() => {
+    lastGeocodedKeyRef.current = ''
+    setGeocodeFailed(false)
+    setGeocodeHint('')
+    allowCamera()
+    setGeocodeRetryNonce((n) => n + 1)
+  }, [allowCamera])
+
+  // Reset geocode state when campus selection changes
+  useEffect(() => {
+    lastGeocodedKeyRef.current = ''
+    lastCampusFocusKeyRef.current = ''
+    setGeocodeFailed(false)
+    setGeocodeHint('')
+    allowCamera()
+  }, [universityId, customUniversityName, customUniversityCity, allowCamera])
+
+  // Pan map to campus once university is ready
+  useEffect(() => {
+    if (!universityReady) return
+
+    const campus = universityId === 'other' ? otherCampus : campusCoords
+    if (!campus?.lat) return
+
+    const focusKey = `${universityId}|${campus.lat}|${campus.lng}`
+    if (lastCampusFocusKeyRef.current === focusKey) return
+    lastCampusFocusKeyRef.current = focusKey
+
+    allowCamera()
+    pushCamera({ campus })
+  }, [
+    universityReady,
+    universityId,
+    campusCoords?.lat,
+    campusCoords?.lng,
+    otherCampus?.lat,
+    otherCampus?.lng,
+    allowCamera,
+    pushCamera,
+  ])
+
   const applyCoordsFromReverse = useCallback(async (coords, hintKey) => {
     allowCamera()
     setPinLocked(true)
+    setGeocodeFailed(false)
     setGeocodeHint(t(hintKey))
     onChangeRef.current({ lat: coords.lat, lng: coords.lng, source: 'map' })
-    pushCamera({ pin: coords })
+    const campus = universityId === 'other' ? otherCampus : campusCoordsRef.current
+    pushCamera(campus ? { campus, pin: coords } : { pin: coords })
 
     if (!geocoder) return
 
@@ -456,7 +528,8 @@ export function LocationPicker({
     if (parsed) {
       const key = `${parsed.address?.trim()}|${parsed.area?.trim()}|${parsed.city?.trim()}`
       skipForwardGeocodeRef.current = true
-      lastAddressKeyRef.current = key
+      lastGeocodedKeyRef.current = key
+      setGeocodeFailed(false)
       onChangeRef.current({
         lat: coords.lat,
         lng: coords.lng,
@@ -469,35 +542,39 @@ export function LocationPicker({
         setGeocodeHint(t('listingForm.pinFromReverse', { address: parsed.formatted }))
       }
     }
-  }, [allowCamera, pushCamera, geocoder, city, t])
+  }, [allowCamera, pushCamera, geocoder, city, t, universityId, otherCampus])
 
   const handleMapClick = useCallback((event) => {
-    if (!event.detail.latLng) return
+    if (!universityReady || !event.detail.latLng) return
     const coords = {
       lat: event.detail.latLng.lat,
       lng: event.detail.latLng.lng,
     }
-    lastAddressKeyRef.current = ''
+    lastGeocodedKeyRef.current = ''
+    setGeocodeFailed(false)
     if (reverseTimerRef.current) clearTimeout(reverseTimerRef.current)
     reverseTimerRef.current = setTimeout(() => {
       applyCoordsFromReverse(coords, 'listingForm.pinManual')
     }, 200)
-  }, [applyCoordsFromReverse])
+  }, [applyCoordsFromReverse, universityReady])
 
   const handleDragEnd = useCallback((event) => {
+    if (!universityReady) return
     const ll = event.detail?.latLng || event.latLng
     if (!ll) return
     const coords = typeof ll.lat === 'function'
       ? { lat: ll.lat(), lng: ll.lng() }
       : { lat: ll.lat, lng: ll.lng }
-    lastAddressKeyRef.current = ''
+    lastGeocodedKeyRef.current = ''
+    setGeocodeFailed(false)
     if (reverseTimerRef.current) clearTimeout(reverseTimerRef.current)
     reverseTimerRef.current = setTimeout(() => {
       applyCoordsFromReverse(coords, 'listingForm.pinManual')
     }, 200)
-  }, [applyCoordsFromReverse])
+  }, [applyCoordsFromReverse, universityReady])
 
   const useCurrentLocation = useCallback(async () => {
+    if (!universityReady) return
     if (!navigator.geolocation) {
       setGeoError(t('listingForm.geoUnsupported'))
       return
@@ -521,7 +598,8 @@ export function LocationPicker({
         allowCamera()
         setGeoBusy(false)
         const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude }
-        lastAddressKeyRef.current = ''
+        lastGeocodedKeyRef.current = ''
+        setGeocodeFailed(false)
         await applyCoordsFromReverse(coords, 'listingForm.pinFromGps')
       },
       (err) => {
@@ -536,63 +614,56 @@ export function LocationPicker({
       },
       { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 }
     )
-  }, [applyCoordsFromReverse, allowCamera, t])
+  }, [applyCoordsFromReverse, allowCamera, t, universityReady])
 
-  // Forward geocode: address fields → pin (always when address text changes)
+  // Forward geocode: address fields → red pin
   useEffect(() => {
+    if (!universityReady) return undefined
+
     if (skipForwardGeocodeRef.current) {
       skipForwardGeocodeRef.current = false
       return undefined
     }
 
-    const hasText = Boolean((address?.trim() || area?.trim()) && city?.trim())
-    const cityOnly = Boolean(city?.trim() && !address?.trim() && !area?.trim())
+    const hasArea = Boolean(area?.trim().length >= 2)
+    const hasCity = Boolean(city?.trim())
+    if (!hasArea || !hasCity) return undefined
 
-    if (!hasText && !cityOnly) return undefined
-
-    if (addressKey === lastAddressKeyRef.current && lastAddressKeyRef.current !== '') {
-      return undefined
-    }
+    if (addressKey === lastGeocodedKeyRef.current) return undefined
 
     allowCamera()
 
     if (geocodeTimerRef.current) clearTimeout(geocodeTimerRef.current)
     geocodeTimerRef.current = setTimeout(async () => {
-      if (addressKey === lastAddressKeyRef.current && lastAddressKeyRef.current !== '') return
-
-      if (cityOnly && !hasText) {
-        if (geocoder) {
-          const cityResult = await geocodeWithGoogle(geocoder, `${city.trim()}, Botswana`)
-          if (cityResult) {
-            setPinLocked(false)
-            onChangeRef.current({ lat: cityResult.lat, lng: cityResult.lng, source: 'geocode' })
-            pushCamera({ pin: cityResult, pinZoom: DEFAULT_MAP_ZOOM })
-            setGeocodeHint(t('listingForm.pinFromAddress'))
-          }
-        }
-        lastAddressKeyRef.current = addressKey
-        return
-      }
+      if (addressKey === lastGeocodedKeyRef.current) return
 
       setGeocodeBusy(true)
+      setGeocodeFailed(false)
       setGeocodeHint(t('listingForm.geocodeSearching'))
 
-      const result = await resolveAddressCoords({ geocoder, address, area, city })
+      const result = await resolveAddressCoords({
+        geocoder,
+        address,
+        area,
+        city,
+        universityCity: universityCity || customUniversityCity || city,
+      })
 
       setGeocodeBusy(false)
-      lastAddressKeyRef.current = addressKey
 
       if (result) {
+        lastGeocodedKeyRef.current = addressKey
         setPinLocked(false)
+        setGeocodeFailed(false)
         onChangeRef.current({ lat: result.lat, lng: result.lng, source: 'geocode' })
         const coords = { lat: result.lat, lng: result.lng }
-        const campus = campusCoordsRef.current || null
+        const campus = universityId === 'other' ? otherCampus : campusCoordsRef.current
+        allowCamera()
         pushCamera(campus ? { campus, pin: coords } : { pin: coords })
         setGeocodeHint(t('listingForm.pinFromAddress'))
         setGeoError('')
-      } else if (hasText && (address?.trim().length >= 3 || area?.trim().length >= 2)) {
-        setGeocodeHint(t('listingForm.geocodeMiss'))
       } else {
+        setGeocodeFailed(true)
         setGeocodeHint('')
       }
     }, 700)
@@ -600,11 +671,26 @@ export function LocationPicker({
     return () => {
       if (geocodeTimerRef.current) clearTimeout(geocodeTimerRef.current)
     }
-  }, [addressKey, geocoder, allowCamera, pushCamera, t, address, area, city])
+  }, [
+    addressKey,
+    geocoder,
+    universityReady,
+    universityId,
+    geocodeRetryNonce,
+    allowCamera,
+    pushCamera,
+    t,
+    address,
+    area,
+    city,
+    universityCity,
+    customUniversityCity,
+    otherCampus,
+  ])
 
-  // Geocode "other" university for campus reference marker only
+  // Geocode "other" university for campus reference marker
   useEffect(() => {
-    if (universityId !== 'other' || !customUniversityName?.trim()) {
+    if (!universityReady || universityId !== 'other' || !customUniversityName?.trim()) {
       setOtherCampus(null)
       return undefined
     }
@@ -617,35 +703,19 @@ export function LocationPicker({
         city: uniCity,
       })
       if (result) {
-        const campus = { lat: result.lat, lng: result.lng }
-        setOtherCampus(campus)
-        allowCamera()
-        pushCamera({ campus })
+        setOtherCampus({ lat: result.lat, lng: result.lng })
       }
     }, 700)
 
     return () => clearTimeout(timer)
-  }, [universityId, customUniversityName, customUniversityCity, city, geocoder, allowCamera, pushCamera])
-
-  // Pan to campus when university selection changes (does not move the listing pin)
-  useEffect(() => {
-    if (!universityId || universityId === 'other') {
-      prevUniversityIdRef.current = universityId || ''
-      return
-    }
-    const campus = campusCoordsRef.current
-    if (!campus?.lat) return
-    if (prevUniversityIdRef.current === universityId) return
-
-    prevUniversityIdRef.current = universityId
-    allowCamera()
-    pushCamera({ campus })
-  }, [universityId, allowCamera, pushCamera])
-
-  const activeCampus = universityId === 'other' ? otherCampus : campusCoords
-  const activeCampusLabel = universityId === 'other'
-    ? customUniversityName
-    : campusLabel
+  }, [
+    universityReady,
+    universityId,
+    customUniversityName,
+    customUniversityCity,
+    city,
+    geocoder,
+  ])
 
   if (!MAPS_ENABLED) {
     return (
@@ -656,10 +726,18 @@ export function LocationPicker({
     )
   }
 
+  const mapCenter = activeCampus || position || DEFAULT_MAP_CENTER
+  const mapZoom = activeCampus ? (campusZoom ?? CAMPUS_MAP_ZOOM) : (position ? SINGLE_LISTING_ZOOM : DEFAULT_MAP_ZOOM)
+
   return (
     <div className="space-y-3">
-      {hint && <p className="text-sm text-muted">{hint}</p>}
-      {universityHint && (
+      {!universityReady && (
+        <p className="rounded-lg border border-amber-500/30 bg-amber-500/5 px-3 py-2 text-sm text-amber-800">
+          {t('listingForm.selectUniversityFirst')}
+        </p>
+      )}
+      {universityReady && hint && <p className="text-sm text-muted">{hint}</p>}
+      {universityReady && universityHint && (
         <p className="rounded-lg border border-border bg-background px-3 py-2 text-xs text-muted">
           {universityHint}
         </p>
@@ -671,7 +749,7 @@ export function LocationPicker({
           variant="outline"
           size="sm"
           onClick={useCurrentLocation}
-          disabled={geoBusy}
+          disabled={geoBusy || !universityReady}
           className="w-full sm:w-auto"
         >
           {geoBusy ? <Loader2 size={16} className="animate-spin" /> : <Navigation size={16} />}
@@ -683,10 +761,15 @@ export function LocationPicker({
             {t('listingForm.geocodeSearching')}
           </span>
         )}
-        {position && (
+        {position && universityReady && (
           <span className="inline-flex items-center gap-1.5 rounded-lg border border-success/30 bg-success/5 px-3 py-2 text-xs font-medium text-success">
             <MapPin size={14} />
             {pinLocked ? t('listingForm.pinManualShort') : t('listingForm.pinSet')}
+          </span>
+        )}
+        {distanceKm != null && universityReady && (
+          <span className="inline-flex items-center gap-1.5 rounded-lg border border-accent/30 bg-accent/5 px-3 py-2 text-xs font-medium text-primary">
+            {t('listingForm.distanceFromCampus', { km: distanceKm.toFixed(1) })}
           </span>
         )}
       </div>
@@ -697,36 +780,61 @@ export function LocationPicker({
           {geoError}
         </p>
       )}
-      {geocodeHint && !geoError && (
+      {geocodeFailed && universityReady && (
+        <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 px-3 py-3 text-sm">
+          <p className="font-medium text-amber-800">{t('listingForm.geocodeMissTitle')}</p>
+          <p className="mt-1 text-xs text-amber-800/90">{t('listingForm.geocodeMissActions')}</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Button type="button" size="sm" variant="outline" onClick={retryGeocode}>
+              {t('listingForm.geocodeRetry')}
+            </Button>
+            <Button type="button" size="sm" variant="outline" onClick={useCurrentLocation} disabled={geoBusy}>
+              {t('listingForm.useMyLocation')}
+            </Button>
+          </div>
+        </div>
+      )}
+      {geocodeHint && !geoError && !geocodeFailed && (
         <p className="text-xs text-muted">{geocodeHint}</p>
       )}
 
-      <div className="overflow-hidden rounded-xl border border-border" style={{ height }}>
+      <div
+        className={`overflow-hidden rounded-xl border border-border ${!universityReady ? 'opacity-60' : ''}`}
+        style={{ height }}
+      >
         <Map
           mapId={GOOGLE_MAPS_MAP_ID}
-          defaultCenter={DEFAULT_MAP_CENTER}
-          defaultZoom={DEFAULT_MAP_ZOOM}
-          gestureHandling="greedy"
+          defaultCenter={mapCenter}
+          defaultZoom={mapZoom}
+          gestureHandling={universityReady ? 'greedy' : 'none'}
           disableDefaultUI={false}
-          onClick={handleMapClick}
+          onClick={universityReady ? handleMapClick : undefined}
           style={{ width: '100%', height: '100%' }}
         >
-          <MapUserInteractionGuard disabledRef={userMapControlRef} programmaticRef={programmaticCameraRef} />
-          <MapCameraController command={cameraCommand} disabledRef={userMapControlRef} programmaticRef={programmaticCameraRef} />
+          {universityReady && (
+            <>
+              <MapUserInteractionGuard disabledRef={userMapControlRef} programmaticRef={programmaticCameraRef} />
+              <MapCameraController command={cameraCommand} disabledRef={userMapControlRef} programmaticRef={programmaticCameraRef} />
+            </>
+          )}
           {activeCampus && activeCampusLabel && (
             <CampusReferenceMarker position={activeCampus} label={activeCampusLabel} />
           )}
-          {position && (
+          {position && universityReady && (
             <AdvancedMarker
               position={position}
               draggable
               onDragEnd={handleDragEnd}
-            />
+            >
+              <ListingPinMarker />
+            </AdvancedMarker>
           )}
         </Map>
       </div>
 
-      <p className="text-xs leading-relaxed text-muted">{t('listingForm.mapHelp')}</p>
+      <p className="text-xs leading-relaxed text-muted">
+        {universityReady ? t('listingForm.mapHelp') : t('listingForm.mapLockedHelp')}
+      </p>
     </div>
   )
 }

@@ -23,6 +23,7 @@ import { Skeleton } from '../components/ui/Skeleton'
 import DocumentUpload from '../components/verification/DocumentUpload'
 import { LISTING_DOC_TYPES } from '../lib/verification'
 import { fetchListingVerificationDocs, uploadVerificationDoc } from '../lib/verificationStorage'
+import { isListingUniversityReady } from '../lib/listingLocation'
 
 export default function EditListing() {
   const { id } = useParams()
@@ -125,9 +126,33 @@ export default function EditListing() {
     { enabled: Boolean(user?.id && form), debounceMs: 450, onClear: handleDraftClear }
   )
 
+  const previewListing = useMemo(() => (form ? { ...form, id } : null), [form, id])
+  const materialLocked = editPolicy?.lockedFields?.length > 0
+  const { marketListings } = useCompetitiveMarket(previewListing)
+  const liveCompetition = useMemo(() => {
+    if (!previewListing || materialLocked) return null
+    return analyzeCompetitivePosition(previewListing, marketListings, { landlordId: user?.id })
+  }, [previewListing, marketListings, user?.id, materialLocked])
+
   function update(field, value) {
     setForm((f) => ({ ...f, [field]: value }))
     if (fieldErrors[field]) setFieldErrors((prev) => ({ ...prev, [field]: '' }))
+  }
+
+  function updateUniversityField(field, value) {
+    setForm((f) => {
+      const campusChanged = field === 'nearest_university_id' && f.nearest_university_id !== value
+      const otherChanged = (field === 'custom_university_name' || field === 'custom_university_city')
+        && f[field] !== value
+      const clearPin = !editPolicy?.lockedFields?.length && (campusChanged || otherChanged)
+      return {
+        ...f,
+        [field]: value,
+        ...(clearPin ? { lat: '', lng: '' } : {}),
+      }
+    })
+    if (fieldErrors[field]) setFieldErrors((prev) => ({ ...prev, [field]: '' }))
+    if (fieldErrors.pin) setFieldErrors((prev) => ({ ...prev, pin: '' }))
   }
 
   function handleLocationChange({ lat, lng, address, area, city }) {
@@ -167,6 +192,15 @@ export default function EditListing() {
       setFieldErrors(errors)
       setError(t('listingForm.validation.fixErrors'))
       return
+    }
+
+    const needsResubmit = ['changes_requested', 'rejected'].includes(form.verification_status)
+    if (needsResubmit) {
+      const flaggedDocs = Object.values(listingDocs).filter((doc) => doc?.status === 'changes_requested')
+      if (flaggedDocs.length > 0) {
+        setError(t('listingReview.uploadFlaggedDocs'))
+        return
+      }
     }
 
     setSaving(true)
@@ -247,15 +281,12 @@ export default function EditListing() {
     ? { lat: uni.lat, lng: uni.lng }
     : null
   const campusZoom = uni?.map_zoom ?? undefined
-  const materialLocked = editPolicy?.lockedFields?.length > 0
+  const universityReady = isListingUniversityReady({
+    universityId: isOtherUni ? 'other' : String(form.nearest_university_id || ''),
+    customUniversityName: form.custom_university_name,
+    customUniversityCity: form.custom_university_city,
+  })
   const locked = (field) => isFieldLocked(field, editPolicy)
-
-  const previewListing = useMemo(() => (form ? { ...form, id } : null), [form, id])
-  const { marketListings } = useCompetitiveMarket(previewListing)
-  const liveCompetition = useMemo(() => {
-    if (!previewListing || materialLocked) return null
-    return analyzeCompetitivePosition(previewListing, marketListings, { landlordId: user?.id })
-  }, [previewListing, marketListings, user?.id, materialLocked])
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-5 sm:px-6 sm:py-8">
@@ -394,21 +425,21 @@ export default function EditListing() {
             {t(`listingForm.utilitiesDesc.${form.utilities_included}`)}
           </p>
         )}
-        <Input label="Address" value={form.address || ''} onChange={(e) => update('address', e.target.value)} hint={t('listingForm.validation.addressHint')} disabled={locked('address')} />
-        <Input label="Area" value={form.area || ''} onChange={(e) => update('area', e.target.value)} error={fieldErrors.area} required disabled={locked('area')} />
-        <Input label="City" value={form.city} onChange={(e) => update('city', e.target.value)} error={fieldErrors.city} required disabled={locked('city')} />
         <UniversitySelect
           value={isOtherUni ? 'other' : String(form.nearest_university_id || '')}
-          onChange={(v) => update('nearest_university_id', v === 'other' ? 'other' : v)}
+          onChange={(v) => updateUniversityField('nearest_university_id', v === 'other' ? 'other' : v)}
           otherValue={form.custom_university_name || ''}
-          onOtherChange={(v) => update('custom_university_name', v)}
+          onOtherChange={(v) => updateUniversityField('custom_university_name', v)}
           otherCityValue={form.custom_university_city || ''}
-          onOtherCityChange={(v) => update('custom_university_city', v)}
+          onOtherCityChange={(v) => updateUniversityField('custom_university_city', v)}
           error={fieldErrors.nearest_university_id}
           otherNameError={fieldErrors.custom_university_name}
           otherCityError={fieldErrors.custom_university_city}
           required
         />
+        <Input label="Address" value={form.address || ''} onChange={(e) => update('address', e.target.value)} hint={!universityReady ? t('listingForm.selectUniversityFirst') : t('listingForm.validation.addressHint')} disabled={locked('address') || !universityReady} />
+        <Input label="Area" value={form.area || ''} onChange={(e) => update('area', e.target.value)} error={fieldErrors.area} required disabled={locked('area') || !universityReady} />
+        <Input label="City" value={form.city} onChange={(e) => update('city', e.target.value)} error={fieldErrors.city} required disabled={locked('city') || !universityReady} />
         {fieldErrors.pin && <p className="text-xs text-error">{fieldErrors.pin}</p>}
         {!locked('lat') && (
         <LocationPicker
@@ -418,9 +449,11 @@ export default function EditListing() {
           area={form.area}
           city={form.city}
           universityId={isOtherUni ? 'other' : String(form.nearest_university_id || '')}
+          universityReady={universityReady}
           campusCoords={campusCoords}
           campusLabel={uni ? getUniversityDisplayName(uni) : ''}
           campusZoom={campusZoom}
+          universityCity={uni?.city || form.custom_university_city}
           customUniversityName={form.custom_university_name || ''}
           customUniversityCity={form.custom_university_city || ''}
           onChange={handleLocationChange}
@@ -462,7 +495,13 @@ export default function EditListing() {
         </div>
         {error && <p className="text-sm text-error">{error}</p>}
         <div className="flex flex-col gap-3 sm:flex-row">
-          <Button type="submit" disabled={saving} className="w-full sm:w-auto">{saving ? t('listingEdit.saving') : t('listingEdit.save')}</Button>
+          <Button type="submit" disabled={saving} className="w-full sm:w-auto">
+            {saving
+              ? t('listingEdit.saving')
+              : ['changes_requested', 'rejected'].includes(form.verification_status)
+                ? t('listingReview.fixAndResubmit')
+                : t('listingEdit.save')}
+          </Button>
           <Button type="button" variant="outline" onClick={() => navigate('/landlord')} className="w-full sm:w-auto">Cancel</Button>
         </div>
       </form>

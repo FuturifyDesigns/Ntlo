@@ -24,6 +24,7 @@ import { getDraftKey } from '../lib/formDrafts'
 import { useFormDraft } from '../hooks/useFormDraft'
 import { getMaxPhotosPerListing, isEarlyAccessMode } from '../lib/subscriptions'
 import EarlyAccessLandlordNote from '../components/landlord/EarlyAccessLandlordNote'
+import { isListingUniversityReady } from '../lib/listingLocation'
 
 const STEPS = ['Basics', 'Location', 'Photos', 'Amenities', 'Contact', 'Documents', 'Review']
 
@@ -179,6 +180,21 @@ export default function CreateListing() {
     }
   }
 
+  function updateUniversityField(field, value) {
+    setForm((f) => {
+      const campusChanged = field === 'nearest_university_id' && f.nearest_university_id !== value
+      const otherChanged = (field === 'custom_university_name' || field === 'custom_university_city')
+        && f[field] !== value
+      return {
+        ...f,
+        [field]: value,
+        ...(campusChanged || otherChanged ? { lat: '', lng: '' } : {}),
+      }
+    })
+    if (fieldErrors[field]) setFieldErrors((prev) => ({ ...prev, [field]: '' }))
+    if (fieldErrors.pin) setFieldErrors((prev) => ({ ...prev, pin: '' }))
+  }
+
   function handleLocationChange({ lat, lng, address, area, city }) {
     setForm((f) => ({
       ...f,
@@ -293,6 +309,11 @@ export default function CreateListing() {
     ? { lat: uni.lat, lng: uni.lng }
     : null
   const campusZoom = uni?.map_zoom ?? undefined
+  const universityReady = isListingUniversityReady({
+    universityId: form.nearest_university_id,
+    customUniversityName: form.custom_university_name,
+    customUniversityCity: form.custom_university_city,
+  })
 
   return (
     <motion.div
@@ -415,20 +436,42 @@ export default function CreateListing() {
 
             {step === 1 && (
               <div className="space-y-4">
-                <Input label="Street address (optional)" value={form.address} onChange={(e) => update('address', e.target.value)} placeholder="Plot 123, Sbrana" hint={t('listingForm.validation.addressHint')} />
-                <Input label="Area / suburb" value={form.area} onChange={(e) => update('area', e.target.value)} placeholder="Block 8" error={fieldErrors.area} required />
-                <Input label="City" value={form.city} onChange={(e) => update('city', e.target.value)} error={fieldErrors.city} required />
                 <UniversitySelect
                   value={form.nearest_university_id}
-                  onChange={(v) => update('nearest_university_id', v)}
+                  onChange={(v) => updateUniversityField('nearest_university_id', v)}
                   otherValue={form.custom_university_name}
-                  onOtherChange={(v) => update('custom_university_name', v)}
+                  onOtherChange={(v) => updateUniversityField('custom_university_name', v)}
                   otherCityValue={form.custom_university_city}
-                  onOtherCityChange={(v) => update('custom_university_city', v)}
+                  onOtherCityChange={(v) => updateUniversityField('custom_university_city', v)}
                   error={fieldErrors.nearest_university_id}
                   otherNameError={fieldErrors.custom_university_name}
                   otherCityError={fieldErrors.custom_university_city}
                   required
+                />
+                <Input
+                  label="Street address (optional)"
+                  value={form.address}
+                  onChange={(e) => update('address', e.target.value)}
+                  placeholder="Plot 123, Sbrana"
+                  hint={!universityReady ? t('listingForm.selectUniversityFirst') : t('listingForm.validation.addressHint')}
+                  disabled={!universityReady}
+                />
+                <Input
+                  label="Area / suburb"
+                  value={form.area}
+                  onChange={(e) => update('area', e.target.value)}
+                  placeholder="Block 8"
+                  error={fieldErrors.area}
+                  required
+                  disabled={!universityReady}
+                />
+                <Input
+                  label="City"
+                  value={form.city}
+                  onChange={(e) => update('city', e.target.value)}
+                  error={fieldErrors.city}
+                  required
+                  disabled={!universityReady}
                 />
                 {fieldErrors.pin && (
                   <p className="text-xs text-error">{fieldErrors.pin}</p>
@@ -440,9 +483,11 @@ export default function CreateListing() {
                   area={form.area}
                   city={form.city}
                   universityId={form.nearest_university_id}
+                  universityReady={universityReady}
                   campusCoords={campusCoords}
                   campusLabel={uni ? getUniversityDisplayName(uni) : ''}
                   campusZoom={campusZoom}
+                  universityCity={uni?.city || form.custom_university_city}
                   customUniversityName={form.custom_university_name}
                   customUniversityCity={form.custom_university_city}
                   onChange={handleLocationChange}

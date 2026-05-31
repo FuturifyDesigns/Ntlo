@@ -115,5 +115,6 @@ export function mapListingEditError(message) {
   if (message.includes('LISTING_RENTED_LOCKED')) return 'rentedLocked'
   if (message.includes('LISTING_APPLICATION_LOCKED')) return 'pendingLocked'
   if (message.includes('LISTING_DELETE_RENTED')) return 'deleteRented'
+  if (message.includes('LISTING_REVIEW_LOCKED')) return 'reviewLocked'
   return null
 }
