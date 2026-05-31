@@ -2,12 +2,12 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import {
-  Users, GraduationCap, Shield, Home, Ban, Trash2, Check, X,
+  Users, GraduationCap, Shield, Home, Ban, Trash2, Check, X, UserCheck,
   RefreshCw, Radio, Search, MapPin, CreditCard, ClipboardList, Star, Building2,
 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useTranslation } from '../hooks/useTranslation'
-import { isBanActive } from '../lib/bans'
+import { isBanActive, isUserBanned } from '../lib/bans'
 import {
   analyzeLandlord, analyzeListing, sortSubmissions, summarizeQueue,
 } from '../lib/adminAdvisor'
@@ -575,11 +575,13 @@ export default function AdminDashboard() {
                           </td>
                           <td className="px-4 py-3 capitalize">{u.role}</td>
                           <td className="px-4 py-3">
-                            {isBanActive(u) ? (
+                            {isUserBanned(u) ? (
                               <Badge variant="error">
-                                {u.banned_until
-                                  ? t('admin.bannedUntil', { date: new Date(u.banned_until).toLocaleString() })
-                                  : t('admin.bannedPermanent')}
+                                {isBanActive(u)
+                                  ? u.banned_until
+                                    ? t('admin.bannedUntil', { date: new Date(u.banned_until).toLocaleString() })
+                                    : t('admin.bannedPermanent')
+                                  : t('admin.bannedExpired')}
                               </Badge>
                             ) : u.role === 'landlord' ? (
                               <Badge variant={u.verification_status === 'approved' ? 'success' : 'warning'}>
@@ -594,15 +596,28 @@ export default function AdminDashboard() {
                           </td>
                           <td className="px-4 py-3">
                             {u.role !== 'admin' && (
-                              <div className="flex gap-1">
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => toggleBan(u, isBanActive(u))}
-                                  title={isBanActive(u) ? t('admin.unban') : t('admin.ban')}
-                                >
-                                  <Ban size={14} />
-                                </Button>
+                              <div className="flex flex-wrap gap-1">
+                                {isUserBanned(u) ? (
+                                  <Button
+                                    size="sm"
+                                    variant="accent"
+                                    onClick={() => toggleBan(u, true)}
+                                    title={t('admin.unban')}
+                                  >
+                                    <UserCheck size={14} />
+                                    <span className="hidden sm:inline">{t('admin.unban')}</span>
+                                  </Button>
+                                ) : (
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => toggleBan(u, false)}
+                                    title={t('admin.ban')}
+                                  >
+                                    <Ban size={14} />
+                                    <span className="hidden sm:inline">{t('admin.ban')}</span>
+                                  </Button>
+                                )}
                                 <Button
                                   size="sm"
                                   variant="danger"

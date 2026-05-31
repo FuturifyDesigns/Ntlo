@@ -17,6 +17,11 @@ export function isBanActive(profile) {
   return new Date(profile.banned_until).getTime() > Date.now()
 }
 
+/** True when profile still carries a ban flag (admin can unban). */
+export function isUserBanned(profile) {
+  return Boolean(profile?.is_banned)
+}
+
 export function formatBanEndsAt(profile) {
   if (!profile?.banned_until) return null
   const date = new Date(profile.banned_until)
