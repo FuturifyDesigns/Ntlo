@@ -12,7 +12,7 @@ import AuthTransitionOverlay from '../components/auth/AuthTransitionOverlay'
 import { UniversitySelect } from '../components/universities/OtherUniversityModal'
 import GenderSelect from '../components/auth/GenderSelect'
 import { getPostAuthPath } from '../lib/verification'
-import { consumeOAuthNewSignup, hasOAuthNewSignupPending } from '../lib/oauthStorage'
+import { consumeOAuthNewSignup, hasOAuthNewSignupPending, profileNeedsSetup } from '../lib/oauthStorage'
 import { getDraftKey } from '../lib/formDrafts'
 import { useFormDraft } from '../hooks/useFormDraft'
 
@@ -144,15 +144,16 @@ export default function CompleteProfile() {
         return
       }
 
-      await refreshProfile()
+      const updated = await refreshProfile()
+      if (!updated || profileNeedsSetup(updated)) {
+        setError(t('auth.profileSaveFailed'))
+        setTransitioning(false)
+        setLoading(false)
+        return
+      }
 
-      const destination = getPostAuthPath({
-        role,
-        verification_status: role === 'landlord' ? 'none' : 'approved',
-      })
-      window.setTimeout(() => {
-        navigate(destination, { replace: true })
-      }, 350)
+      const destination = getPostAuthPath(updated)
+      navigate(destination, { replace: true })
     } catch (err) {
       setError(err.message || validationMessages.authFailed)
       setLoading(false)

@@ -5,9 +5,9 @@ import { getPostAuthPath } from '../../lib/verification'
 import { Skeleton } from '../ui/Skeleton'
 
 export default function OAuthSetupRoute({ children }) {
-  const { user, profile, loading } = useAuth()
+  const { user, profile, loading, profileLoading } = useAuth()
 
-  if (loading) {
+  if (loading || (user && profileLoading && !profile)) {
     return (
       <div className="mx-auto max-w-md px-4 py-12">
         <Skeleton className="mx-auto mb-4 h-16 w-48" />

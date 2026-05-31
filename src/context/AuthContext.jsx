@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import { flushSync } from 'react-dom'
 import { supabase } from '../lib/supabase'
 import { getAuthCallbackUrl, getAuthResetUrl, getAuthVerifyUrl } from '../lib/authUrls'
 import { clearOAuthStorage, markOAuthPending, setOAuthIntent } from '../lib/oauthStorage'
@@ -187,7 +188,12 @@ export function AuthProvider({ children }) {
       signOut,
       resetPassword,
       updateProfile,
-      refreshProfile: () => user && fetchProfile(user.id, { silent: true }),
+      refreshProfile: async () => {
+        if (!user) return null
+        const data = await fetchProfile(user.id, { silent: true })
+        flushSync(() => setProfile(data))
+        return data
+      },
       isStudent: profile?.role === 'student',
       isLandlord: profile?.role === 'landlord',
       isAdmin: profile?.role === 'admin',
