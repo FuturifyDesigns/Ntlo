@@ -93,7 +93,7 @@ export default function PingPromo() {
         <section className="mx-auto max-w-6xl px-4 pb-14 pt-2 sm:px-6 sm:pb-20 sm:pt-4 lg:px-8">
           <div className="flex flex-col items-center text-center">
             <PingScrollReveal className="flex flex-col items-center">
-              <PingIcon size="hero" />
+              <PingIcon size="hero" glow />
               <h1 className="mt-5 font-display text-5xl font-bold tracking-tight sm:text-6xl">Ping</h1>
               <p className="mt-2 text-xl font-medium sm:text-2xl">
                 {t('ping.tagline')}{' '}
@@ -136,7 +136,7 @@ export default function PingPromo() {
                 <div className="flex shrink-0 items-center gap-4">
                   <img src={NTLO_LOGO} alt="Ntlo" className="h-14 w-auto object-contain brightness-0 invert sm:h-16" />
                   <Handshake className="text-sky-400/80" size={28} />
-                  <PingIcon size="lg" />
+                  <PingIcon size="lg" glow />
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-400/90">

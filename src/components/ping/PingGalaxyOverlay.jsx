@@ -43,7 +43,7 @@ export default function PingGalaxyOverlay() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
           >
-            <PingIcon size="xl" />
+            <PingIcon size="xl" glow />
             <p className="mt-4 font-display text-4xl font-bold text-white sm:text-5xl">Ping</p>
             <p className="mt-2 text-lg text-white/80 sm:text-xl">
               {t('ping.tagline')}{' '}
