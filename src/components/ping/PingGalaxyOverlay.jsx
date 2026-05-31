@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { usePingTransition } from '../../context/PingTransitionContext'
 import { useTranslation } from '../../hooks/useTranslation'
-import { PING_ICON } from './PingNavButton'
+import PingIcon from './PingIcon'
 
 export default function PingGalaxyOverlay() {
   const { transitionActive } = usePingTransition()
@@ -43,11 +43,7 @@ export default function PingGalaxyOverlay() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
           >
-            <img
-              src={PING_ICON}
-              alt=""
-              className="h-24 w-24 object-contain sm:h-28 sm:w-28"
-            />
+            <PingIcon size="xl" />
             <p className="mt-4 font-display text-4xl font-bold text-white sm:text-5xl">Ping</p>
             <p className="mt-2 text-lg text-white/80 sm:text-xl">
               {t('ping.tagline')}{' '}

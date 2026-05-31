@@ -8,6 +8,7 @@ import Button from '../ui/Button'
 import NotificationBell from './NotificationBell'
 import UserMenu from './UserMenu'
 import PingNavButton from '../ping/PingNavButton'
+import { usePingTransition } from '../../context/PingTransitionContext'
 import { usePresenceHeartbeat } from '../../hooks/usePresence'
 
 export default function Navbar() {
@@ -23,11 +24,13 @@ export default function Navbar() {
     return location.pathname === path || location.pathname.startsWith(`${path}/`)
   }
 
+  const { transitionActive } = usePingTransition()
   const onPingPage = location.pathname === '/ping'
+  const darkNav = onPingPage || transitionActive
 
   return (
     <header className={`sticky top-0 z-40 border-b ${
-      onPingPage
+      darkNav
         ? 'border-white/10 bg-black'
         : 'border-border/60 bg-surface/85 backdrop-blur-xl'
     }`}>
@@ -46,7 +49,7 @@ export default function Navbar() {
               key={link.to}
               to={link.to}
               className={`relative rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
-                onPingPage
+                darkNav
                   ? isActive(link.to) ? 'text-white' : 'text-white/60 hover:text-white'
                   : isActive(link.to) ? 'text-primary' : 'text-muted hover:text-primary'
               }`}
@@ -57,7 +60,7 @@ export default function Navbar() {
               )}
             </Link>
           ))}
-          <div className={`ml-2 pl-2 border-l ${onPingPage ? 'border-white/15' : 'border-border/60'}`}>
+          <div className={`ml-2 pl-2 border-l ${darkNav ? 'border-white/15' : 'border-border/60'}`}>
             <PingNavButton />
           </div>
         </nav>
@@ -73,7 +76,7 @@ export default function Navbar() {
               <UserMenu />
             ) : (
               <Link to="/login" className={`text-sm font-medium transition-colors ${
-                onPingPage ? 'text-white/70 hover:text-white' : 'text-muted hover:text-primary'
+                darkNav ? 'text-white/70 hover:text-white' : 'text-muted hover:text-primary'
               }`}>
                 {t('nav.signIn')}
               </Link>
@@ -86,7 +89,7 @@ export default function Navbar() {
           <div className="flex items-center gap-1 md:hidden">
             {user && <UserMenu onNavigate={() => setOpen(false)} />}
             <button
-              className={`rounded-lg p-2 ${onPingPage ? 'text-white' : 'text-primary'}`}
+              className={`rounded-lg p-2 ${darkNav ? 'text-white' : 'text-primary'}`}
               onClick={() => setOpen(!open)}
               aria-label="Toggle menu"
               aria-expanded={open}
@@ -99,7 +102,7 @@ export default function Navbar() {
 
       {open && (
         <div className={`border-t px-4 py-4 md:hidden ${
-          onPingPage ? 'border-white/10 bg-black' : 'border-border bg-surface'
+          darkNav ? 'border-white/10 bg-black' : 'border-border bg-surface'
         }`}>
           <nav className="flex flex-col gap-1">
             {navLinks.map((link) => (
@@ -108,7 +111,7 @@ export default function Navbar() {
                 to={link.to}
                 onClick={() => setOpen(false)}
                 className={`rounded-lg px-3 py-2.5 text-sm font-medium ${
-                  onPingPage
+                  darkNav
                     ? isActive(link.to) ? 'bg-white/10 text-white' : 'text-white/65 hover:bg-white/5 hover:text-white'
                     : isActive(link.to) ? 'bg-primary/5 text-primary' : 'text-muted hover:bg-background'
                 }`}
@@ -124,7 +127,7 @@ export default function Navbar() {
                 to="/login"
                 onClick={() => setOpen(false)}
                 className={`rounded-lg px-3 py-2.5 text-sm font-medium ${
-                  onPingPage ? 'text-white/70 hover:bg-white/5 hover:text-white' : 'text-primary hover:bg-background'
+                  darkNav ? 'text-white/70 hover:bg-white/5 hover:text-white' : 'text-primary hover:bg-background'
                 }`}
               >
                 {t('nav.signIn')}

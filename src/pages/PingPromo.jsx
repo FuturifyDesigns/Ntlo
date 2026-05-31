@@ -21,7 +21,8 @@ import {
   PingScrollStaggerItem,
   PingFeatureImage,
 } from '../components/ping/PingScrollReveal'
-import { PLAY_URL, PING_ICON } from '../components/ping/PingNavButton'
+import { PLAY_URL } from '../components/ping/PingNavButton'
+import PingIcon from '../components/ping/PingIcon'
 import { useTranslation } from '../hooks/useTranslation'
 
 const BASE = import.meta.env.BASE_URL
@@ -92,11 +93,7 @@ export default function PingPromo() {
         <section className="mx-auto max-w-6xl px-4 pb-14 pt-2 sm:px-6 sm:pb-20 sm:pt-4 lg:px-8">
           <div className="flex flex-col items-center text-center">
             <PingScrollReveal className="flex flex-col items-center">
-              <img
-                src={PING_ICON}
-                alt=""
-                className="h-28 w-28 object-contain sm:h-36 sm:w-36"
-              />
+              <PingIcon size="hero" />
               <h1 className="mt-5 font-display text-5xl font-bold tracking-tight sm:text-6xl">Ping</h1>
               <p className="mt-2 text-xl font-medium sm:text-2xl">
                 {t('ping.tagline')}{' '}
@@ -139,7 +136,7 @@ export default function PingPromo() {
                 <div className="flex shrink-0 items-center gap-4">
                   <img src={NTLO_LOGO} alt="Ntlo" className="h-14 w-auto object-contain brightness-0 invert sm:h-16" />
                   <Handshake className="text-sky-400/80" size={28} />
-                  <img src={PING_ICON} alt="Ping" className="h-14 w-14 object-contain sm:h-16 sm:w-16" />
+                  <PingIcon size="lg" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-400/90">
