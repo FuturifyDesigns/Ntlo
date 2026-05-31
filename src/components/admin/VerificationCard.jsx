@@ -4,7 +4,7 @@ import {
   Check, X, Sparkles, ThumbsUp, AlertTriangle, Lightbulb, Clock,
   CreditCard, Camera, Home, FileSignature, MapPin, Building2,
   Receipt, Zap, ScrollText, FileText, ScanSearch, Loader2,
-  CheckCircle2, XCircle, Info, ChevronDown, MessageSquare, RotateCcw, Clock3, Eye, ShieldAlert,
+  CheckCircle2, XCircle, Info, ChevronDown, MessageSquare, RotateCcw, Clock3, Eye, ShieldAlert, Trash2,
 } from 'lucide-react'
 import { useTranslation } from '../../hooks/useTranslation'
 import { useNow } from '../../hooks/useNow'
@@ -58,7 +58,7 @@ function initials(name = '?') {
 }
 
 export default function VerificationCard({
-  subject, analysis, kind, onOpenDocs, onApprove, onReject, onRequestChanges, onMarkOk, onUnmarkOk,
+  subject, analysis, kind, onOpenDocs, onApprove, onReject, onRequestChanges, onMarkOk, onUnmarkOk, onDelete,
 }) {
   const { t } = useTranslation()
   useNow()
@@ -541,6 +541,12 @@ export default function VerificationCard({
             <X size={14} />
             {t('admin.reject')}
           </Button>
+          {kind === 'listing' && onDelete && (
+            <Button size="sm" variant="outline" className="flex-1 sm:flex-none" onClick={onDelete}>
+              <Trash2 size={14} />
+              {t('admin.deleteListing')}
+            </Button>
+          )}
         </div>
       </div>
 

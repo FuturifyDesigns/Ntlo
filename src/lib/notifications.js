@@ -70,6 +70,7 @@ export function notificationHref(notification, role) {
     case 'listing_approved':
     case 'listing_rejected':
     case 'listing_changes_requested':
+    case 'listing_admin_removed':
       return isLandlord ? '/landlord' : '/'
 
     case 'admin_listing_review':
@@ -84,6 +85,9 @@ export function notificationHref(notification, role) {
 
     case 'admin_verification':
       return isAdmin ? '/admin?tab=landlords' : '/admin'
+
+    case 'account_unbanned':
+      return isLandlord ? '/landlord' : '/student'
 
     case 'review_posted':
       if (link?.startsWith('/listings/')) return link

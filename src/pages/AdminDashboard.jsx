@@ -26,6 +26,7 @@ import AdminToast from '../components/admin/AdminToast'
 import AdminSubscriptionsPanel from '../components/admin/AdminSubscriptionsPanel'
 import AdminApplicationsPanel from '../components/admin/AdminApplicationsPanel'
 import AdminBanModal from '../components/admin/AdminBanModal'
+import AdminDeleteListingModal from '../components/admin/AdminDeleteListingModal'
 import AdminReviewsPanel from '../components/admin/AdminReviewsPanel'
 
 const TABS = [
@@ -67,6 +68,8 @@ export default function AdminDashboard() {
   const [dialog, setDialog] = useState(null)
   const [toast, setToast] = useState(null)
   const [banTarget, setBanTarget] = useState(null)
+  const [listingDeleteTarget, setListingDeleteTarget] = useState(null)
+  const [listingFilter, setListingFilter] = useState('pending')
 
   const selectTab = useCallback((id) => {
     setTab(id)
@@ -114,10 +117,11 @@ export default function AdminDashboard() {
       .from('listings')
       .select(`
         id, title, city, price, verification_status, verification_notes, is_verified, created_at,
+        occupancy_status, available,
         landlord:profiles!listings_landlord_id_fkey(id, full_name),
         docs:verification_documents!verification_documents_listing_id_fkey(id, doc_type, file_name, storage_path, status, created_at)
       `)
-      .in('verification_status', ['pending', 'changes_requested'])
+      .neq('verification_status', 'withdrawn')
       .order('created_at', { ascending: false })
     if (error) setActionError(error.message)
     setListings(data || [])
@@ -329,6 +333,20 @@ export default function AdminDashboard() {
     })
   }
 
+  async function confirmDeleteListing({ reasonCode, reasonNote }) {
+    if (!listingDeleteTarget) return
+    const { error } = await supabase.rpc('admin_delete_listing', {
+      p_listing_id: listingDeleteTarget.id,
+      p_reason_code: reasonCode,
+      p_reason_note: reasonNote,
+    })
+    if (error) throw error
+    setListings((prev) => prev.filter((l) => l.id !== listingDeleteTarget.id))
+    await fetchListings()
+    setToast({ type: 'success', message: t('admin.dialog.listingDeleted') })
+    setListingDeleteTarget(null)
+  }
+
   async function requestDocChanges(docId, note) {
     const { error } = await supabase.rpc('admin_review_document', {
       target_doc_id: docId,
@@ -367,6 +385,17 @@ export default function AdminDashboard() {
     () => sortSubmissions(listings, analyzeListing, sortMode),
     [listings, sortMode]
   )
+
+  const filteredListingQueue = useMemo(() => {
+    if (listingFilter === 'all') return listingQueue
+    if (listingFilter === 'live') {
+      return listingQueue.filter(({ item }) => item.verification_status === 'approved')
+    }
+    if (listingFilter === 'rejected') {
+      return listingQueue.filter(({ item }) => item.verification_status === 'rejected')
+    }
+    return listingQueue.filter(({ item }) => ['pending', 'changes_requested'].includes(item.verification_status))
+  }, [listingQueue, listingFilter])
 
   const filteredUsers = useMemo(() => {
     const q = userSearch.trim().toLowerCase()
@@ -667,15 +696,36 @@ export default function AdminDashboard() {
 
           {tab === 'listings' && (
             <div className="space-y-4">
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { id: 'pending', label: t('admin.listingFilterPending') },
+                  { id: 'live', label: t('admin.listingFilterLive') },
+                  { id: 'rejected', label: t('admin.listingFilterRejected') },
+                  { id: 'all', label: t('admin.listingFilterAll') },
+                ].map(({ id, label }) => (
+                  <button
+                    key={id}
+                    type="button"
+                    onClick={() => setListingFilter(id)}
+                    className={`rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
+                      listingFilter === id
+                        ? 'bg-primary text-white'
+                        : 'border border-border bg-background text-muted hover:text-primary'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
               <AdminAdvisorPanel
-                summary={summarizeQueue(listingQueue)}
+                summary={summarizeQueue(filteredListingQueue)}
                 sortMode={sortMode}
                 onSortChange={setSortMode}
               />
-              {listingQueue.length === 0 ? (
-                <Card className="p-8 text-center text-muted">{t('admin.noPendingListings')}</Card>
+              {filteredListingQueue.length === 0 ? (
+                <Card className="p-8 text-center text-muted">{t('admin.noListingsMatch')}</Card>
               ) : (
-                listingQueue.map(({ item, analysis }) => (
+                filteredListingQueue.map(({ item, analysis }) => (
                   <VerificationCard
                     key={item.id}
                     subject={item}
@@ -684,6 +734,7 @@ export default function AdminDashboard() {
                     onOpenDocs={(docs, index, name) => setPreview({ docs, index, name })}
                     onApprove={() => openReviewListing(item, true)}
                     onReject={() => openReviewListing(item, false)}
+                    onDelete={() => setListingDeleteTarget(item)}
                     onRequestChanges={requestDocChanges}
                     onMarkOk={(docId) => setDocStatus(docId, 'approved')}
                     onUnmarkOk={(docId) => setDocStatus(docId, 'pending')}
@@ -736,6 +787,13 @@ export default function AdminDashboard() {
         userName={banTarget?.full_name}
         onClose={() => setBanTarget(null)}
         onConfirm={confirmBan}
+      />
+
+      <AdminDeleteListingModal
+        open={Boolean(listingDeleteTarget)}
+        listingTitle={listingDeleteTarget?.title}
+        onClose={() => setListingDeleteTarget(null)}
+        onConfirm={confirmDeleteListing}
       />
     </motion.div>
   )

@@ -24,6 +24,7 @@ export const URGENT_NOTIFICATION_TYPES = new Set([
   'listing_approved',
   'listing_rejected',
   'listing_changes_requested',
+  'listing_admin_removed',
 ])
 
 export function isUrgentNotification(notification) {
