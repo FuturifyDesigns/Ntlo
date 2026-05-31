@@ -49,7 +49,7 @@ export function enrichUniversity(row) {
     ...row,
     nearby_areas: nearby,
     map_zoom: row.map_zoom ?? meta.map_zoom ?? 15,
-    image: meta.image || `${base}hero/bg.jpg`,
+    image: row.image_url || meta.image || `${base}hero/bg.jpg`,
   }
 }
 

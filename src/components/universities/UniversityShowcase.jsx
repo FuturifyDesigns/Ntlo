@@ -147,7 +147,13 @@ export default function UniversityShowcase({ counts = {} }) {
 
                         <div className="p-4">
                           <p className="line-clamp-1 text-sm text-muted">
-                            {t('listings.nearPrefix')} {uni.nearby_areas.slice(0, 3).join(' · ')}
+                            {(uni.nearby_areas || []).length > 0 ? (
+                              <>
+                                {t('listings.nearPrefix')} {uni.nearby_areas.slice(0, 3).join(' · ')}
+                              </>
+                            ) : (
+                              t('universities.nearAreasLoading')
+                            )}
                           </p>
                           <div className="mt-3 flex items-center justify-between">
                             <span className="text-sm font-semibold text-accent transition-transform group-hover:translate-x-1">

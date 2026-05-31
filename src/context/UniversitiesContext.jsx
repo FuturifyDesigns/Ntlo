@@ -1,6 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { geocodeCampus, getGeocodeCampusName, hasValidCampusCoords } from '../lib/geocodeUniversity'
+import { getGoogleGeocoder } from '../lib/googleGeocoder'
+import { fetchCampusNearbyAreas } from '../lib/campusNearbyAreas'
 import { enrichUniversity } from '../lib/universityMeta'
 import { setUniversitiesCache } from '../lib/universities'
 import { useAuth } from '../hooks/useAuth'
@@ -10,52 +12,75 @@ const UniversitiesContext = createContext(null)
 async function fetchUniversitiesFromDb() {
   const { data, error } = await supabase
     .from('universities')
-    .select('id, name, slug, short_name, city, lat, lng, map_zoom, nearby_areas')
+    .select('id, name, slug, short_name, city, lat, lng, map_zoom, nearby_areas, image_url')
     .order('name')
 
   if (error) throw error
   return (data || []).map(enrichUniversity)
 }
 
-async function persistUniversityCoords(id, lat, lng, mapZoom) {
-  const { error } = await supabase.rpc('admin_update_university_coords', {
+async function persistUniversityCoords(id, lat, lng, mapZoom, nearbyAreas) {
+  const payload = {
     p_university_id: id,
     p_lat: lat,
     p_lng: lng,
     p_map_zoom: mapZoom ?? 15,
-  })
+  }
+  const { error } = await supabase.rpc('admin_update_university_coords', payload)
   if (error) throw error
+
+  if (nearbyAreas?.length) {
+    await supabase.from('universities').update({ nearby_areas: nearbyAreas }).eq('id', id)
+  }
 }
 
 async function fillMissingCoordinates(list, isAdmin) {
   const next = [...list]
   let changed = false
+  const geocoder = isAdmin ? await getGoogleGeocoder() : null
 
   for (let i = 0; i < next.length; i += 1) {
     const uni = next[i]
-    if (hasValidCampusCoords(uni.lat, uni.lng)) continue
+    const needsCoords = !hasValidCampusCoords(uni.lat, uni.lng)
+    const needsNearby = !(uni.nearby_areas || []).length && hasValidCampusCoords(uni.lat, uni.lng)
 
-    const coords = await geocodeCampus({
-      name: getGeocodeCampusName(uni),
-      city: uni.city,
-      slug: uni.slug,
-    })
-    if (!coords) continue
+    if (!needsCoords && !needsNearby) continue
+
+    let lat = uni.lat
+    let lng = uni.lng
+    let nearbyAreas = uni.nearby_areas || []
+
+    if (needsCoords) {
+      const coords = await geocodeCampus({
+        name: getGeocodeCampusName(uni),
+        city: uni.city,
+        slug: uni.slug,
+      })
+      if (!coords) continue
+      lat = coords.lat
+      lng = coords.lng
+    }
+
+    if ((needsNearby || needsCoords) && geocoder && hasValidCampusCoords(lat, lng)) {
+      const fetched = await fetchCampusNearbyAreas(geocoder, lat, lng)
+      if (fetched.length) nearbyAreas = fetched
+    }
 
     const updated = {
       ...uni,
-      lat: coords.lat,
-      lng: coords.lng,
+      lat,
+      lng,
       map_zoom: uni.map_zoom ?? 15,
+      nearby_areas: nearbyAreas,
     }
     next[i] = updated
     changed = true
 
     if (isAdmin) {
       try {
-        await persistUniversityCoords(updated.id, coords.lat, coords.lng, updated.map_zoom)
+        await persistUniversityCoords(updated.id, lat, lng, updated.map_zoom, nearbyAreas)
       } catch {
-        // Still use geocoded coords in the client even if persist fails.
+        // Still use geocoded values in the client even if persist fails.
       }
     }
   }

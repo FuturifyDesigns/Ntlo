@@ -14,7 +14,8 @@ import Button from '../components/ui/Button'
 import Badge from '../components/ui/Badge'
 import Card from '../components/ui/Card'
 import { Skeleton } from '../components/ui/Skeleton'
-import { createUniversityFromRequest } from '../lib/adminUniversities'
+import { prepareUniversityDraft } from '../lib/adminUniversities'
+import UniversityPublishModal from '../components/admin/UniversityPublishModal'
 import AdminAdvisorPanel from '../components/admin/AdminAdvisorPanel'
 import VerificationCard from '../components/admin/VerificationCard'
 import DocumentPreviewModal from '../components/admin/DocumentPreviewModal'
@@ -53,6 +54,7 @@ export default function AdminDashboard() {
   const [listings, setListings] = useState([])
   const [actionError, setActionError] = useState('')
   const [geocodingRequestId, setGeocodingRequestId] = useState(null)
+  const [publishDraft, setPublishDraft] = useState(null)
   const [sortMode, setSortMode] = useState('smart')
   const [preview, setPreview] = useState(null)
   const [userSearch, setUserSearch] = useState('')
@@ -154,14 +156,21 @@ export default function AdminDashboard() {
 
   async function approveRequest(req) {
     setGeocodingRequestId(req.id)
+    setActionError('')
     try {
-      await runAction(async () => {
-        await createUniversityFromRequest(req)
-        await fetchRequests()
-      })
+      const draft = await prepareUniversityDraft(req)
+      setPublishDraft(draft)
+    } catch (err) {
+      setActionError(err.message || t('admin.actionFailed'))
     } finally {
       setGeocodingRequestId(null)
     }
+  }
+
+  function handleUniversityPublished() {
+    setPublishDraft(null)
+    fetchRequests()
+    setToast({ type: 'success', message: t('admin.universityPublishedToast') })
   }
 
   async function reviewRequest(id, status) {
@@ -658,6 +667,13 @@ export default function AdminDashboard() {
           onClose={() => setToast(null)}
         />
       )}
+
+      <UniversityPublishModal
+        open={Boolean(publishDraft)}
+        draft={publishDraft}
+        onClose={() => setPublishDraft(null)}
+        onPublished={handleUniversityPublished}
+      />
     </motion.div>
   )
 }

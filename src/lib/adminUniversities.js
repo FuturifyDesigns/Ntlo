@@ -1,3 +1,4 @@
+import imageCompression from 'browser-image-compression'
 import { supabase } from './supabase'
 import {
   geocodeCampus,
@@ -5,8 +6,29 @@ import {
   normalizeUniversityName,
 } from './geocodeUniversity'
 import { validateFullUniversityName } from './universityNames'
+import { getGoogleGeocoder } from './googleGeocoder'
+import { fetchCampusNearbyAreas } from './campusNearbyAreas'
 
-export async function createUniversityFromRequest(request) {
+async function resolveCampusCoords(name, city) {
+  const coords = await geocodeCampus({ name, city })
+  if (!coords) return null
+
+  const geocoder = await getGoogleGeocoder()
+  const nearbyAreas = geocoder
+    ? await fetchCampusNearbyAreas(geocoder, coords.lat, coords.lng)
+    : []
+
+  return {
+    lat: coords.lat,
+    lng: coords.lng,
+    formattedAddress: coords.formatted || '',
+    geocodeSource: coords.source || 'google',
+    nearbyAreas,
+  }
+}
+
+/** Geocode a request and return an editable draft — does not publish yet. */
+export async function prepareUniversityDraft(request) {
   const fullName = normalizeUniversityName(request.name)
   const city = normalizeUniversityName(request.city)
   const validationError = validateFullUniversityName(fullName)
@@ -14,22 +36,116 @@ export async function createUniversityFromRequest(request) {
     throw new Error('University name must be the full official name as shown on Google Maps (include University or College).')
   }
 
-  const coords = await geocodeCampus({ name: fullName, city })
-  if (!coords) {
-    throw new Error('Could not locate this campus on Google Maps after searching across Botswana. The name looks valid — try approving again in a moment, or check the spelling matches Google Maps.')
+  const resolved = await resolveCampusCoords(fullName, city)
+  if (!resolved) {
+    throw new Error('Could not locate this campus on Google Maps after searching across Botswana. Try again — we search many name and city variants automatically.')
   }
 
-  const slug = slugifyUniversity(fullName)
+  return {
+    requestId: request.id,
+    contactEmail: request.contact_email || '',
+    name: fullName,
+    shortName: fullName,
+    city,
+    slug: slugifyUniversity(fullName),
+    lat: resolved.lat,
+    lng: resolved.lng,
+    mapZoom: 15,
+    nearbyAreas: resolved.nearbyAreas,
+    formattedAddress: resolved.formattedAddress,
+    geocodeSource: resolved.geocodeSource,
+    imageFile: null,
+    imagePreviewUrl: null,
+  }
+}
+
+/** Re-run geocoding when admin edits name or city in the preview modal. */
+export async function refreshUniversityDraftCoords(draft) {
+  const name = normalizeUniversityName(draft.name)
+  const city = normalizeUniversityName(draft.city)
+  const validationError = validateFullUniversityName(name)
+  if (validationError) {
+    throw new Error('University name must be the full official name as shown on Google Maps (include University or College).')
+  }
+
+  const resolved = await resolveCampusCoords(name, city)
+  if (!resolved) {
+    throw new Error('Could not locate this campus on Google Maps. Adjust the name or city and try again.')
+  }
+
+  return {
+    ...draft,
+    name,
+    city,
+    slug: slugifyUniversity(name),
+    lat: resolved.lat,
+    lng: resolved.lng,
+    nearbyAreas: resolved.nearbyAreas,
+    formattedAddress: resolved.formattedAddress,
+    geocodeSource: resolved.geocodeSource,
+  }
+}
+
+/** Refresh nearby suburb names when the admin drags the map pin. */
+export async function refreshNearbyAreasForPin(draft, lat, lng) {
+  const geocoder = await getGoogleGeocoder()
+  const nearbyAreas = geocoder ? await fetchCampusNearbyAreas(geocoder, lat, lng) : draft.nearbyAreas
+  return {
+    ...draft,
+    lat,
+    lng,
+    nearbyAreas: nearbyAreas.length ? nearbyAreas : draft.nearbyAreas,
+  }
+}
+
+async function uploadUniversityPhoto(slug, file) {
+  const compressed = await imageCompression(file, {
+    maxSizeMB: 0.35,
+    maxWidthOrHeight: 1400,
+    useWebWorker: true,
+  })
+  const fileName = `universities/${slug}/cover-${Date.now()}.jpg`
+  const { error: uploadError } = await supabase.storage
+    .from('listing-photos')
+    .upload(fileName, compressed, { upsert: true })
+  if (uploadError) throw uploadError
+
+  const { data: { publicUrl } } = supabase.storage.from('listing-photos').getPublicUrl(fileName)
+  return publicUrl
+}
+
+/** Save the reviewed draft — goes live for everyone (realtime). */
+export async function publishUniversityDraft(draft) {
+  const name = normalizeUniversityName(draft.name)
+  const city = normalizeUniversityName(draft.city)
+  const validationError = validateFullUniversityName(name)
+  if (validationError) {
+    throw new Error('University name must be the full official name as shown on Google Maps (include University or College).')
+  }
+
+  let imageUrl = draft.imagePreviewUrl?.startsWith('http') && !draft.imageFile
+    ? draft.imagePreviewUrl
+    : null
+
+  if (draft.imageFile) {
+    imageUrl = await uploadUniversityPhoto(draft.slug || slugifyUniversity(name), draft.imageFile)
+  }
+
+  const nearbyAreas = (draft.nearbyAreas || [])
+    .map((a) => a.trim())
+    .filter(Boolean)
 
   const { data, error } = await supabase.rpc('admin_create_university', {
-    p_name: fullName,
+    p_name: name,
     p_city: city,
-    p_slug: slug,
-    p_short_name: fullName,
-    p_lat: coords.lat,
-    p_lng: coords.lng,
-    p_map_zoom: 15,
-    p_request_id: request.id,
+    p_slug: draft.slug || slugifyUniversity(name),
+    p_short_name: normalizeUniversityName(draft.shortName || name),
+    p_lat: draft.lat,
+    p_lng: draft.lng,
+    p_map_zoom: draft.mapZoom ?? 15,
+    p_request_id: draft.requestId,
+    p_nearby_areas: nearbyAreas,
+    p_image_url: imageUrl,
   })
 
   if (error) throw error
