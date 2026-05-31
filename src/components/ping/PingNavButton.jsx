@@ -25,14 +25,14 @@ export default function PingNavButton({ compact = false, onNavigate }) {
       onClick={handleClick}
       aria-current={active ? 'page' : undefined}
       aria-label={t('nav.ping')}
-      className={`flex items-center gap-2 rounded-full border border-border/80 bg-background/80 text-sm font-medium text-primary transition-colors hover:border-sky-400/40 hover:bg-sky-50/80 ${
-        compact ? 'px-2 py-1' : 'px-2.5 py-1.5'
+      className={`flex items-center gap-2 rounded-full border border-border/80 bg-background/80 font-medium text-primary transition-colors hover:border-sky-400/40 hover:bg-sky-50/80 ${
+        compact ? 'px-2 py-1' : 'px-2.5 py-1.5 text-sm'
       } ${active ? 'border-sky-400/50 bg-sky-50 ring-1 ring-sky-400/30' : ''}`}
     >
       <img
         src={ICON}
         alt=""
-        className={`ping-img-blend rounded-lg object-contain ${compact ? 'h-7 w-7' : 'h-8 w-8'}`}
+        className={`rounded-lg object-contain ${compact ? 'h-8 w-8' : 'h-9 w-9'}`}
       />
       {!compact && <span>{t('nav.ping')}</span>}
     </button>

@@ -1,14 +1,17 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { usePingTransition } from '../../context/PingTransitionContext'
+import { useTranslation } from '../../hooks/useTranslation'
+import { PING_ICON } from './PingNavButton'
 
 export default function PingGalaxyOverlay() {
   const { transitionActive } = usePingTransition()
+  const { t } = useTranslation()
 
   return (
     <AnimatePresence>
       {transitionActive && (
         <motion.div
-          className="pointer-events-none fixed inset-0 z-[200] overflow-hidden bg-[#010104]"
+          className="pointer-events-none fixed inset-0 z-[200] flex items-center justify-center overflow-hidden bg-[#010104]"
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
@@ -35,22 +38,22 @@ export default function PingGalaxyOverlay() {
           />
 
           <motion.div
-            className="absolute inset-0"
-            style={{
-              background:
-                'radial-gradient(ellipse 80% 55% at 65% 50%, rgba(14, 165, 233, 0.28) 0%, transparent 55%), radial-gradient(ellipse 50% 40% at 25% 65%, rgba(37, 99, 235, 0.2) 0%, transparent 50%)',
-            }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.7, delay: 0.2 }}
-          />
-
-          <motion.div
-            className="absolute inset-0 bg-gradient-to-r from-transparent via-black/20 to-black/60"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.35 }}
-          />
+            className="relative z-10 flex flex-col items-center px-6 text-center"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <img
+              src={PING_ICON}
+              alt=""
+              className="h-24 w-24 object-contain sm:h-28 sm:w-28"
+            />
+            <p className="mt-4 font-display text-4xl font-bold text-white sm:text-5xl">Ping</p>
+            <p className="mt-2 text-lg text-white/80 sm:text-xl">
+              {t('ping.tagline')}{' '}
+              <span className="font-semibold text-sky-400">{t('ping.taglineHighlight')}</span>
+            </p>
+          </motion.div>
         </motion.div>
       )}
     </AnimatePresence>

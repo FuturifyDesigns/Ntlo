@@ -12,17 +12,14 @@ import {
   Trophy,
   Users,
   Navigation,
-  Sparkles,
   Handshake,
+  Globe,
 } from 'lucide-react'
 import PingStrandBackground from '../components/ping/PingStrandBackground'
 import {
   PingScrollReveal,
   PingScrollStagger,
   PingScrollStaggerItem,
-  PingScrollLines,
-  PingHeroImage,
-  PingFeatureImage,
 } from '../components/ping/PingScrollReveal'
 import { PLAY_URL, PING_ICON } from '../components/ping/PingNavButton'
 import { useTranslation } from '../hooks/useTranslation'
@@ -30,14 +27,13 @@ import { useLocale } from '../context/LocaleContext'
 
 const BASE = import.meta.env.BASE_URL
 const NTLO_LOGO = `${BASE}logo-brand.png`
-const HERO_BANNER = `${BASE}ping/hero-banner.png`
 
 const features = [
-  { key: 'stops', icon: MapPin, image: `${BASE}ping/feature-stops.png` },
-  { key: 'routes', icon: Route, image: `${BASE}ping/feature-routes.png` },
-  { key: 'details', icon: Bus, image: `${BASE}ping/feature-details.png` },
-  { key: 'community', icon: Users, image: `${BASE}ping/feature-community.png` },
-  { key: 'karma', icon: Trophy, image: `${BASE}ping/feature-karma.png` },
+  { key: 'stops', icon: MapPin },
+  { key: 'routes', icon: Route },
+  { key: 'details', icon: Bus },
+  { key: 'community', icon: Users },
+  { key: 'karma', icon: Trophy },
 ]
 
 function GooglePlayBadge({ className = '' }) {
@@ -100,12 +96,17 @@ export default function PingPromo() {
         {/* Hero */}
         <section className="mx-auto max-w-6xl px-4 pb-14 pt-2 sm:px-6 sm:pb-20 sm:pt-4 lg:px-8">
           <div className="flex flex-col items-center text-center">
-            <PingScrollReveal className="w-full max-w-3xl">
-              <PingHeroImage
-                src={HERO_BANNER}
-                alt="Ping — Find your stop, faster"
-                className="max-w-2xl drop-shadow-[0_20px_60px_rgba(37,99,235,0.25)]"
+            <PingScrollReveal className="flex flex-col items-center">
+              <img
+                src={PING_ICON}
+                alt=""
+                className="h-28 w-28 object-contain sm:h-36 sm:w-36"
               />
+              <h1 className="mt-5 font-display text-5xl font-bold tracking-tight sm:text-6xl">Ping</h1>
+              <p className="mt-2 text-xl font-medium sm:text-2xl">
+                {t('ping.tagline')}{' '}
+                <span className="text-sky-400">{t('ping.taglineHighlight')}</span>
+              </p>
             </PingScrollReveal>
 
             <PingScrollReveal delay={0.08} className="mt-8 max-w-2xl">
@@ -122,7 +123,7 @@ export default function PingPromo() {
                 { icon: MapPin, label: t('ping.stats.stops') },
                 { icon: Route, label: t('ping.stats.routes') },
                 { icon: Navigation, label: t('ping.stats.directions') },
-                { icon: Sparkles, label: t('ping.stats.community') },
+                { icon: Globe, label: t('ping.stats.community') },
               ].map(({ icon: Icon, label }) => (
                 <PingScrollStaggerItem key={label}>
                   <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-3 py-4 backdrop-blur-sm">
@@ -143,7 +144,7 @@ export default function PingPromo() {
                 <div className="flex shrink-0 items-center gap-4">
                   <img src={NTLO_LOGO} alt="Ntlo" className="h-14 w-auto object-contain brightness-0 invert sm:h-16" />
                   <Handshake className="text-sky-400/80" size={28} />
-                  <img src={PING_ICON} alt="Ping" className="ping-img-blend h-14 w-14 rounded-2xl object-contain sm:h-16 sm:w-16" />
+                  <img src={PING_ICON} alt="Ping" className="h-14 w-14 object-contain sm:h-16 sm:w-16" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-400/90">
@@ -173,8 +174,8 @@ export default function PingPromo() {
           </PingScrollReveal>
         </section>
 
-        {/* Feature explorer */}
-        <section className="mx-auto max-w-6xl px-4 pb-20 pt-4 sm:px-6 lg:px-8">
+        {/* Features — text only, switch tabs */}
+        <section className="mx-auto max-w-3xl px-4 pb-24 pt-4 sm:px-6 lg:px-8">
           <PingScrollReveal className="mb-10 text-center">
             <h2 className="font-display text-2xl font-bold sm:text-3xl">{t('ping.exploreTitle')}</h2>
             <p className="mt-2 text-white/55">{t('ping.exploreSubtitle')}</p>
@@ -207,65 +208,32 @@ export default function PingPromo() {
               animate={{ opacity: 1, y: 0 }}
               exit={prefs.reduceMotion ? undefined : { opacity: 0, y: -8 }}
               transition={{ duration: 0.25 }}
-              className="overflow-hidden rounded-3xl border border-white/10 bg-white/[0.02] p-6 lg:p-10"
+              className="rounded-3xl border border-white/10 bg-white/[0.02] p-6 sm:p-8"
             >
-              <div className="grid items-center gap-8 lg:grid-cols-2 lg:gap-10">
-                <div>
-                  <span className="inline-flex items-center gap-2 rounded-full border border-sky-400/20 bg-sky-400/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-sky-300">
-                    {(() => {
-                      const Icon = activeFeatureData.icon
-                      return <Icon size={14} />
-                    })()}
-                    {t(`ping.features.${activeFeature}.eyebrow`)}
-                  </span>
-                  <h3 className="mt-4 font-display text-2xl font-bold sm:text-3xl">
-                    {t(`ping.features.${activeFeature}.title`)}
-                  </h3>
-                  <p className="mt-4 text-base leading-relaxed text-white/65 sm:text-lg">
-                    {t(`ping.features.${activeFeature}.body`)}
-                  </p>
-                  <a
-                    href={PLAY_URL}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-6 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-sky-500 to-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition-transform hover:scale-[1.02] active:scale-[0.98]"
-                  >
-                    {t('ping.tryPing')}
-                    <ArrowRight size={16} />
-                  </a>
-                </div>
-                <PingFeatureImage src={activeFeatureData.image} />
-              </div>
+              <span className="inline-flex items-center gap-2 rounded-full border border-sky-400/20 bg-sky-400/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-sky-300">
+                {(() => {
+                  const Icon = activeFeatureData.icon
+                  return <Icon size={14} />
+                })()}
+                {t(`ping.features.${activeFeature}.eyebrow`)}
+              </span>
+              <h3 className="mt-4 font-display text-2xl font-bold sm:text-3xl">
+                {t(`ping.features.${activeFeature}.title`)}
+              </h3>
+              <p className="mt-4 text-base leading-relaxed text-white/65 sm:text-lg">
+                {t(`ping.features.${activeFeature}.body`)}
+              </p>
+              <a
+                href={PLAY_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-6 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-sky-500 to-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition-transform hover:scale-[1.02] active:scale-[0.98]"
+              >
+                {t('ping.tryPing')}
+                <ArrowRight size={16} />
+              </a>
             </motion.div>
           </AnimatePresence>
-        </section>
-
-        {/* Feature rows */}
-        <section className="mx-auto max-w-6xl space-y-20 px-4 pb-24 sm:px-6 lg:px-8">
-          {features.map(({ key, icon: Icon, image }, index) => (
-            <article
-              key={key}
-              className={`grid items-center gap-8 lg:grid-cols-2 lg:gap-12 ${
-                index % 2 === 1 ? 'lg:[&>*:first-child]:order-2' : ''
-              }`}
-            >
-              <PingScrollReveal delay={index * 0.03}>
-                <span className="inline-flex items-center gap-2 rounded-full border border-sky-400/20 bg-sky-400/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-sky-300">
-                  <Icon size={14} />
-                  {t(`ping.features.${key}.eyebrow`)}
-                </span>
-                <h2 className="mt-4 font-display text-2xl font-bold sm:text-3xl lg:text-4xl">
-                  {t(`ping.features.${key}.title`)}
-                </h2>
-                <p className="mt-4 text-base leading-relaxed text-white/65 sm:text-lg">
-                  {t(`ping.features.${key}.body`)}
-                </p>
-              </PingScrollReveal>
-              <PingScrollReveal delay={0.05 + index * 0.03}>
-                <PingFeatureImage src={image} />
-              </PingScrollReveal>
-            </article>
-          ))}
         </section>
 
         <section className="border-t border-white/10 px-4 py-16 sm:px-6 lg:px-8">
