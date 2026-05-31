@@ -1,4 +1,4 @@
-const ICON = `${import.meta.env.BASE_URL}ping/app-icon.png?v=5`
+const ICON = `${import.meta.env.BASE_URL}ping/app-icon.png?v=6`
 
 export { ICON as PING_ICON }
 
