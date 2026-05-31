@@ -67,11 +67,19 @@ export function notificationHref(notification, role) {
       return '/student?tab=applications'
 
     case 'listing_submitted':
+      return isLandlord ? '/landlord' : '/'
+
     case 'listing_approved':
+      if (entityId) return `/listings/${entityId}`
+      return isLandlord ? '/landlord' : '/'
+
     case 'listing_rejected':
     case 'listing_changes_requested':
-    case 'listing_admin_removed':
+      if (entityId && isLandlord) return `/landlord/listings/${entityId}/edit`
       return isLandlord ? '/landlord' : '/'
+
+    case 'listing_admin_removed':
+      return isLandlord ? '/guidelines' : '/'
 
     case 'admin_listing_review':
     case 'admin_listing_removed':
@@ -87,10 +95,12 @@ export function notificationHref(notification, role) {
       return isAdmin ? '/admin?tab=landlords' : '/admin'
 
     case 'account_unbanned':
-      return isLandlord ? '/landlord' : '/student'
+    case 'account_banned':
+      return '/guidelines'
 
     case 'review_posted':
       if (link?.startsWith('/listings/')) return link
+      if (entityId) return `/listings/${entityId}`
       return '/'
 
     default:
@@ -113,10 +123,18 @@ export function notificationHref(notification, role) {
 /** HashRouter-safe navigation to a notification target. */
 export function navigateToNotification(navigate, notification, role) {
   const href = notificationHref(notification, role)
-  const qIndex = href.indexOf('?')
-  if (qIndex === -1) {
-    navigate(href)
+  if (href.startsWith('http')) {
+    window.open(href, '_blank', 'noopener,noreferrer')
     return
   }
-  navigate({ pathname: href.slice(0, qIndex), search: href.slice(qIndex) })
+  const qIndex = href.indexOf('?')
+  const navOptions = { state: { fromNotification: notification?.id } }
+  if (qIndex === -1) {
+    navigate(href, navOptions)
+    return
+  }
+  navigate(
+    { pathname: href.slice(0, qIndex), search: href.slice(qIndex) },
+    navOptions
+  )
 }

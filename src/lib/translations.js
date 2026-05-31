@@ -265,6 +265,8 @@ export const translations = {
       markAllRead: 'Mark all read',
       empty: 'No notifications yet.',
       urgent: 'Urgent',
+      view: 'View',
+      cancel: 'Cancel',
       viewNow: 'View now',
       dismiss: 'Dismiss',
       soundPromptTitle: 'Enable notification sounds',
@@ -1213,6 +1215,7 @@ export const translations = {
       cookieSettings: 'Cookie settings',
       legal: 'Legal',
       privacy: 'Privacy Policy',
+      guidelines: 'Community Guidelines',
       terms: 'Terms of Service',
     },
     cookies: {
@@ -1669,6 +1672,8 @@ export const translations = {
       markAllRead: 'Supa tsotlhe di badilwe',
       empty: 'Ga go na ditsebiso go fitlha jaanong.',
       urgent: 'E botlhokwa',
+      view: 'Bona',
+      cancel: 'Khansela',
       viewNow: 'Bona jaanong',
       dismiss: 'Tswala',
       soundPromptTitle: 'Tsenya modumo wa ditsebiso',
@@ -2394,6 +2399,7 @@ export const translations = {
       legal: 'Molao',
       privacy: 'Pholisi ya Sephiri',
       terms: 'Melao ya Tiriso',
+      guidelines: 'Ditlhopha tsa Setšhaba',
     },
     cookies: {
       bannerTitle: 'Re dirisa di-cookie',

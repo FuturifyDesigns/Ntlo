@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ArrowRight, Mail, Globe, Search, GraduationCap, Tag, Home, ShieldCheck, FileText } from 'lucide-react'
+import { ArrowRight, Mail, Globe, Search, GraduationCap, Tag, Home, ShieldCheck, FileText, Users } from 'lucide-react'
 import { useTranslation } from '../../hooks/useTranslation'
 import { useCookieConsent } from '../../context/CookieConsentContext'
 import { PatternBotswana } from '../ui/Icons'
@@ -155,6 +155,11 @@ export default function Footer() {
               <li>
                 <FooterLink to="/terms" icon={FileText}>
                   {t('footer.terms')}
+                </FooterLink>
+              </li>
+              <li>
+                <FooterLink to="/guidelines" icon={Users}>
+                  {t('footer.guidelines')}
                 </FooterLink>
               </li>
             </ul>
