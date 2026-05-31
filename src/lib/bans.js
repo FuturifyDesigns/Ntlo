@@ -17,6 +17,11 @@ export function isBanActive(profile) {
   return new Date(profile.banned_until).getTime() > Date.now()
 }
 
+/** Block login / session only after the user has confirmed the ban modal. */
+export function shouldBlockLogin(profile) {
+  return isBanActive(profile) && Boolean(profile?.ban_acknowledged_at)
+}
+
 /** True when profile still carries a ban flag (admin can unban). */
 export function isUserBanned(profile) {
   return Boolean(profile?.is_banned)

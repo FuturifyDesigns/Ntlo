@@ -1,6 +1,6 @@
 import { Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
-import { isBanActive } from '../../lib/bans'
+import { isBanActive, shouldBlockLogin } from '../../lib/bans'
 import { isEmailVerifiedForAccess, profileNeedsSetup } from '../../lib/oauthStorage'
 import { Skeleton } from '../ui/Skeleton'
 
@@ -36,7 +36,7 @@ export default function ProtectedRoute({ children, role, requireLandlordVerified
     )
   }
 
-  if (isBanActive(profile) && profile.ban_acknowledged_at) {
+  if (shouldBlockLogin(profile)) {
     return <Navigate to="/login?banned=1" replace />
   }
 

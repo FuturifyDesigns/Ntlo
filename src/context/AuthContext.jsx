@@ -3,7 +3,7 @@ import { flushSync } from 'react-dom'
 import { supabase } from '../lib/supabase'
 import { getAuthCallbackUrl, getAuthResetUrl, getAuthVerifyUrl } from '../lib/authUrls'
 import { clearOAuthStorage, markOAuthPending, setOAuthIntent } from '../lib/oauthStorage'
-import { isBanActive, saveBanInfoForLogin } from '../lib/bans'
+import { isBanActive, saveBanInfoForLogin, shouldBlockLogin } from '../lib/bans'
 
 const AuthContext = createContext(null)
 
@@ -38,7 +38,7 @@ export function AuthProvider({ children }) {
       setUser(session?.user ?? null)
       if (session?.user) {
         const prof = await loadUserProfile(session.user.id)
-        if (isBanActive(prof) && prof?.ban_acknowledged_at) {
+        if (shouldBlockLogin(prof)) {
           await supabase.auth.signOut()
           setUser(null)
           setProfile(null)
@@ -51,7 +51,7 @@ export function AuthProvider({ children }) {
       setUser(session?.user ?? null)
       if (session?.user) {
         loadUserProfile(session.user.id).then((prof) => {
-          if (isBanActive(prof) && prof?.ban_acknowledged_at) {
+          if (shouldBlockLogin(prof)) {
             supabase.auth.signOut()
             setUser(null)
             setProfile(null)
@@ -78,7 +78,7 @@ export function AuthProvider({ children }) {
         (payload) => {
           if (payload.new) {
             setProfile((prev) => ({ ...prev, ...payload.new }))
-            if (isBanActive(payload.new) && payload.new.ban_acknowledged_at) {
+            if (shouldBlockLogin(payload.new)) {
               supabase.auth.signOut()
               setUser(null)
               setProfile(null)
@@ -131,6 +131,12 @@ export function AuthProvider({ children }) {
       if (accessError) throw accessError
 
       if (!access?.allowed) {
+        const prof = await loadUserProfile(data.user.id)
+        // Pending acknowledgment: let them in so BanEnforcementLayer can show the modal.
+        if (isBanActive(prof) && !prof?.ban_acknowledged_at) {
+          return { ...data, profile: prof }
+        }
+
         await supabase.auth.signOut()
         setUser(null)
         setProfile(null)
@@ -141,7 +147,7 @@ export function AuthProvider({ children }) {
         throw err
       }
 
-      const prof = await fetchProfile(data.user.id)
+      const prof = await loadUserProfile(data.user.id)
       return { ...data, profile: prof }
     }
 
@@ -231,7 +237,7 @@ export function AuthProvider({ children }) {
       isStudent: profile?.role === 'student',
       isLandlord: profile?.role === 'landlord',
       isAdmin: profile?.role === 'admin',
-      isBanned: isBanActive(profile),
+      isBanned: shouldBlockLogin(profile),
       needsBanAcknowledgment: isBanActive(profile) && !profile?.ban_acknowledged_at,
     }),
     [user, profile, loading, profileLoading, signOut]

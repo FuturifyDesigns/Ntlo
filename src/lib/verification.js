@@ -1,5 +1,5 @@
 /** Landlord identity documents (sign-up / account verification) */
-import { isBanActive } from './bans'
+import { isBanActive, shouldBlockLogin } from './bans'
 
 export const LANDLORD_DOC_TYPES = [
   {
@@ -81,7 +81,7 @@ export function landlordDocsComplete(uploadedTypes) {
 
 export function getPostAuthPath(profile, fallback = '/') {
   if (!profile) return '/student'
-  if (isBanActive(profile)) return '/login?banned=1'
+  if (shouldBlockLogin(profile)) return '/login?banned=1'
   if (profile.role === 'admin') return '/admin'
   if (profile.role === 'landlord') {
     if (profile.verification_status !== 'approved') return '/landlord/verify'

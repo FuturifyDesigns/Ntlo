@@ -197,7 +197,10 @@
           .maybeSingle()
 
         const { data: access } = await supabase.rpc('check_account_access', { p_user_id: user.id })
-        if (access && access.allowed === false) {
+        const banPendingAck = profile?.is_banned
+          && (!profile.banned_until || new Date(profile.banned_until) > Date.now())
+          && !profile.ban_acknowledged_at
+        if (access && access.allowed === false && !banPendingAck) {
           try {
             sessionStorage.setItem('ntlo_ban_info', JSON.stringify(access.ban || {}))
           } catch (_) {}
