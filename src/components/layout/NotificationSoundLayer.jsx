@@ -1,26 +1,30 @@
 import { useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../hooks/useAuth'
-import { playNotificationSound, unlockNotificationSound } from '../../lib/notificationSound'
+import {
+  isNotificationSoundEnabled,
+  playNotificationSound,
+  warmNotificationSoundOnInteraction,
+} from '../../lib/notificationSound'
 
 /** Plays ntlo-sound.mp3 whenever a new in-app notification arrives (realtime). */
 export default function NotificationSoundLayer() {
   const { user } = useAuth()
 
   useEffect(() => {
-    function unlock() {
-      unlockNotificationSound()
+    function onInteract() {
+      warmNotificationSoundOnInteraction()
     }
-    window.addEventListener('pointerdown', unlock, { passive: true })
-    window.addEventListener('keydown', unlock)
+    window.addEventListener('pointerdown', onInteract, { passive: true })
+    window.addEventListener('keydown', onInteract)
     return () => {
-      window.removeEventListener('pointerdown', unlock)
-      window.removeEventListener('keydown', unlock)
+      window.removeEventListener('pointerdown', onInteract)
+      window.removeEventListener('keydown', onInteract)
     }
   }, [])
 
   useEffect(() => {
-    if (!user?.id) return undefined
+    if (!user?.id || !isNotificationSoundEnabled()) return undefined
 
     const channelName = `notification-sound-${user.id}`
     supabase.getChannels().forEach((ch) => {
