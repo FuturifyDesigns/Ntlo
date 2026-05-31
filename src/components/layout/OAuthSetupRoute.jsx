@@ -1,6 +1,6 @@
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
-import { hasOAuthNewSignupPending, profileNeedsSetup } from '../../lib/oauthStorage'
+import { profileNeedsSetup } from '../../lib/oauthStorage'
 import { getPostAuthPath } from '../../lib/verification'
 import { Skeleton } from '../ui/Skeleton'
 
@@ -20,7 +20,7 @@ export default function OAuthSetupRoute({ children }) {
     return <Navigate to="/register" replace />
   }
 
-  if (!profileNeedsSetup(profile) && !hasOAuthNewSignupPending()) {
+  if (!profileNeedsSetup(profile)) {
     return <Navigate to={getPostAuthPath(profile)} replace />
   }
 

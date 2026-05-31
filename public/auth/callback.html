@@ -88,8 +88,16 @@
       clearOAuthStorage()
     }
 
+    function isSocialAuthUser(user) {
+      if (!user) return false
+      const providers = (user.identities || []).map((i) => i.provider).filter(Boolean)
+      if (providers.some((p) => p !== 'email')) return true
+      const provider = user.app_metadata?.provider
+      return Boolean(provider && provider !== 'email')
+    }
+
     function isConfirmed(user) {
-      return Boolean(user?.email_confirmed_at || user?.confirmed_at)
+      return Boolean(user?.email_confirmed_at || user?.confirmed_at) || isSocialAuthUser(user)
     }
 
     async function abandonIncompleteSignup(client) {
@@ -169,10 +177,6 @@
           return
         }
 
-        if (from === 'register' && isNewUser) {
-          sessionStorage.setItem('ntlo_oauth_new_signup', '1')
-        }
-
         if (pendingRole === 'student' || pendingRole === 'landlord') {
           await supabase.auth.updateUser({ data: { role: pendingRole } })
           const { error: roleError } = await supabase
@@ -195,13 +199,6 @@
         if (profileNeedsSetup(profile)) {
           const roleQuery = pendingRole ? `?role=${pendingRole}` : from === 'login' ? '?role=student' : ''
           window.location.replace(`../#/complete-profile${roleQuery}`)
-          return
-        }
-
-        if (from === 'register' && isNewUser) {
-          await supabase.auth.signOut()
-          const email = encodeURIComponent(user.email || '')
-          window.location.replace(`../#/check-email?oauth=1&email=${email}`)
           return
         }
 

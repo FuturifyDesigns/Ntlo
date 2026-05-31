@@ -48,6 +48,21 @@ export function profileNeedsSetup(profile) {
   return false
 }
 
+/** Google / social accounts are verified by the provider — no email link step. */
+export function isSocialAuthUser(user) {
+  if (!user) return false
+  const providers = (user.identities || []).map((i) => i.provider).filter(Boolean)
+  if (providers.some((p) => p !== 'email')) return true
+  const provider = user.app_metadata?.provider
+  return Boolean(provider && provider !== 'email')
+}
+
+export function isEmailVerifiedForAccess(user) {
+  if (!user) return false
+  if (user.email_confirmed_at || user.confirmed_at) return true
+  return isSocialAuthUser(user)
+}
+
 export function isNewOAuthUser(user) {
   if (!user?.created_at) return false
   const created = new Date(user.created_at).getTime()

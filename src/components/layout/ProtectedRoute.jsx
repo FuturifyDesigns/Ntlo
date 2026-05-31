@@ -1,6 +1,6 @@
 import { Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
-import { profileNeedsSetup } from '../../lib/oauthStorage'
+import { isEmailVerifiedForAccess, profileNeedsSetup } from '../../lib/oauthStorage'
 import { Skeleton } from '../ui/Skeleton'
 
 export default function ProtectedRoute({ children, role, requireLandlordVerified = false }) {
@@ -25,8 +25,7 @@ export default function ProtectedRoute({ children, role, requireLandlordVerified
     return <Navigate to="/login" state={{ from: location }} replace />
   }
 
-  const emailConfirmed = user.email_confirmed_at || user.confirmed_at
-  if (!emailConfirmed) {
+  if (!isEmailVerifiedForAccess(user)) {
     return (
       <Navigate
         to="/check-email"

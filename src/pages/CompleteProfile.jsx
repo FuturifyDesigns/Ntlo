@@ -12,7 +12,7 @@ import AuthTransitionOverlay from '../components/auth/AuthTransitionOverlay'
 import { UniversitySelect } from '../components/universities/OtherUniversityModal'
 import GenderSelect from '../components/auth/GenderSelect'
 import { getPostAuthPath } from '../lib/verification'
-import { consumeOAuthNewSignup, hasOAuthNewSignupPending, profileNeedsSetup } from '../lib/oauthStorage'
+import { clearOAuthStorage, profileNeedsSetup } from '../lib/oauthStorage'
 import { getDraftKey } from '../lib/formDrafts'
 import { useFormDraft } from '../hooks/useFormDraft'
 
@@ -133,16 +133,9 @@ export default function CompleteProfile() {
         },
       })
 
-      const finishingOAuthSignup = hasOAuthNewSignupPending()
       clearDraft()
+      clearOAuthStorage()
       setTransitioning(true)
-
-      if (finishingOAuthSignup) {
-        consumeOAuthNewSignup()
-        await supabase.auth.signOut()
-        navigate(`/check-email?oauth=1&email=${encodeURIComponent(user.email || '')}`, { replace: true })
-        return
-      }
 
       const updated = await refreshProfile()
       if (!updated || profileNeedsSetup(updated)) {
