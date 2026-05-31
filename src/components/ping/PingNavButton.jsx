@@ -12,6 +12,7 @@ export default function PingNavButton({ compact = false, onNavigate }) {
   const { t } = useTranslation()
   const location = useLocation()
   const active = location.pathname === '/ping'
+  const onPingPage = active
 
   function handleClick() {
     onNavigate?.()
@@ -25,9 +26,15 @@ export default function PingNavButton({ compact = false, onNavigate }) {
       onClick={handleClick}
       aria-current={active ? 'page' : undefined}
       aria-label={t('nav.ping')}
-      className={`flex items-center gap-2 rounded-full border border-border/80 bg-background/80 font-medium text-primary transition-colors hover:border-sky-400/40 hover:bg-sky-50/80 ${
-        compact ? 'px-2 py-1' : 'px-2.5 py-1.5 text-sm'
-      } ${active ? 'border-sky-400/50 bg-sky-50 ring-1 ring-sky-400/30' : ''}`}
+      className={`flex items-center gap-2 rounded-full border font-medium transition-colors ${
+        onPingPage
+          ? `border-white/15 bg-white/5 text-white hover:border-sky-400/40 hover:bg-white/10 ${
+              active ? 'border-sky-400/50 bg-sky-400/10 ring-1 ring-sky-400/30' : ''
+            }`
+          : `border-border/80 bg-background/80 text-primary hover:border-sky-400/40 hover:bg-sky-50/80 ${
+              active ? 'border-sky-400/50 bg-sky-50 ring-1 ring-sky-400/30' : ''
+            }`
+      } ${compact ? 'px-2 py-1' : 'px-2.5 py-1.5 text-sm'}`}
     >
       <img
         src={ICON}

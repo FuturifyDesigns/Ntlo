@@ -1,6 +1,5 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { motion, AnimatePresence } from 'framer-motion'
 import {
   ArrowLeft,
   ArrowRight,
@@ -20,20 +19,20 @@ import {
   PingScrollReveal,
   PingScrollStagger,
   PingScrollStaggerItem,
+  PingFeatureImage,
 } from '../components/ping/PingScrollReveal'
 import { PLAY_URL, PING_ICON } from '../components/ping/PingNavButton'
 import { useTranslation } from '../hooks/useTranslation'
-import { useLocale } from '../context/LocaleContext'
 
 const BASE = import.meta.env.BASE_URL
 const NTLO_LOGO = `${BASE}logo-brand.png`
 
 const features = [
-  { key: 'stops', icon: MapPin },
-  { key: 'routes', icon: Route },
-  { key: 'details', icon: Bus },
-  { key: 'community', icon: Users },
-  { key: 'karma', icon: Trophy },
+  { key: 'stops', icon: MapPin, image: `${BASE}ping/feature-stops.png` },
+  { key: 'routes', icon: Route, image: `${BASE}ping/feature-routes.png` },
+  { key: 'details', icon: Bus, image: `${BASE}ping/feature-details.png` },
+  { key: 'community', icon: Users, image: `${BASE}ping/feature-community.png` },
+  { key: 'karma', icon: Trophy, image: `${BASE}ping/feature-karma.png` },
 ]
 
 function GooglePlayBadge({ className = '' }) {
@@ -56,14 +55,10 @@ function GooglePlayBadge({ className = '' }) {
 
 export default function PingPromo() {
   const { t } = useTranslation()
-  const { prefs } = useLocale()
-  const [activeFeature, setActiveFeature] = useState('stops')
 
   useEffect(() => {
     window.scrollTo(0, 0)
   }, [])
-
-  const activeFeatureData = features.find((f) => f.key === activeFeature) || features[0]
 
   return (
     <div className="relative min-h-screen overflow-x-hidden bg-[#010104] text-white">
@@ -174,66 +169,52 @@ export default function PingPromo() {
           </PingScrollReveal>
         </section>
 
-        {/* Features — text only, switch tabs */}
-        <section className="mx-auto max-w-3xl px-4 pb-24 pt-4 sm:px-6 lg:px-8">
-          <PingScrollReveal className="mb-10 text-center">
+        {/* Features — scroll reveal with screenshots */}
+        <section className="mx-auto max-w-6xl px-4 pb-24 pt-4 sm:px-6 lg:px-8">
+          <PingScrollReveal className="mb-16 text-center">
             <h2 className="font-display text-2xl font-bold sm:text-3xl">{t('ping.exploreTitle')}</h2>
             <p className="mt-2 text-white/55">{t('ping.exploreSubtitle')}</p>
           </PingScrollReveal>
 
-          <PingScrollReveal delay={0.05}>
-            <div className="mb-8 flex flex-wrap justify-center gap-2">
-              {features.map(({ key, icon: Icon }) => (
-                <button
-                  key={key}
-                  type="button"
-                  onClick={() => setActiveFeature(key)}
-                  className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
-                    activeFeature === key
-                      ? 'border-sky-400/50 bg-sky-400/15 text-sky-200'
-                      : 'border-white/10 bg-white/5 text-white/60 hover:border-white/20 hover:text-white'
-                  }`}
-                >
-                  <Icon size={16} />
-                  {t(`ping.features.${key}.eyebrow`)}
-                </button>
-              ))}
-            </div>
-          </PingScrollReveal>
-
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={activeFeature}
-              initial={prefs.reduceMotion ? false : { opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={prefs.reduceMotion ? undefined : { opacity: 0, y: -8 }}
-              transition={{ duration: 0.25 }}
-              className="rounded-3xl border border-white/10 bg-white/[0.02] p-6 sm:p-8"
-            >
-              <span className="inline-flex items-center gap-2 rounded-full border border-sky-400/20 bg-sky-400/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-sky-300">
-                {(() => {
-                  const Icon = activeFeatureData.icon
-                  return <Icon size={14} />
-                })()}
-                {t(`ping.features.${activeFeature}.eyebrow`)}
-              </span>
-              <h3 className="mt-4 font-display text-2xl font-bold sm:text-3xl">
-                {t(`ping.features.${activeFeature}.title`)}
-              </h3>
-              <p className="mt-4 text-base leading-relaxed text-white/65 sm:text-lg">
-                {t(`ping.features.${activeFeature}.body`)}
-              </p>
-              <a
-                href={PLAY_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-6 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-sky-500 to-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition-transform hover:scale-[1.02] active:scale-[0.98]"
+          <div className="space-y-24 sm:space-y-28">
+            {features.map(({ key, icon: Icon, image }, index) => (
+              <article
+                key={key}
+                className={`grid items-center gap-8 lg:grid-cols-2 lg:gap-12 ${
+                  index % 2 === 1 ? 'lg:[&>*:first-child]:order-2' : ''
+                }`}
               >
-                {t('ping.tryPing')}
-                <ArrowRight size={16} />
-              </a>
-            </motion.div>
-          </AnimatePresence>
+                <PingScrollReveal delay={index * 0.04}>
+                  <span className="inline-flex items-center gap-2 rounded-full border border-sky-400/20 bg-sky-400/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-sky-300">
+                    <Icon size={14} />
+                    {t(`ping.features.${key}.eyebrow`)}
+                  </span>
+                  <h3 className="mt-4 font-display text-2xl font-bold sm:text-3xl lg:text-4xl">
+                    {t(`ping.features.${key}.title`)}
+                  </h3>
+                  <p className="mt-4 text-base leading-relaxed text-white/65 sm:text-lg">
+                    {t(`ping.features.${key}.body`)}
+                  </p>
+                  <a
+                    href={PLAY_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-6 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-sky-500 to-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition-transform hover:scale-[1.02] active:scale-[0.98]"
+                  >
+                    {t('ping.tryPing')}
+                    <ArrowRight size={16} />
+                  </a>
+                </PingScrollReveal>
+
+                <PingScrollReveal delay={0.06 + index * 0.04}>
+                  <PingFeatureImage
+                    src={image}
+                    alt={t(`ping.features.${key}.title`)}
+                  />
+                </PingScrollReveal>
+              </article>
+            ))}
+          </div>
         </section>
 
         <section className="border-t border-white/10 px-4 py-16 sm:px-6 lg:px-8">

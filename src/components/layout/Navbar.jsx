@@ -26,10 +26,10 @@ export default function Navbar() {
   const onPingPage = location.pathname === '/ping'
 
   return (
-    <header className={`sticky top-0 z-40 border-b backdrop-blur-xl ${
+    <header className={`sticky top-0 z-40 border-b ${
       onPingPage
-        ? 'border-white/10 bg-[#030308]/80'
-        : 'border-border/60 bg-surface/85'
+        ? 'border-white/10 bg-black'
+        : 'border-border/60 bg-surface/85 backdrop-blur-xl'
     }`}>
       <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-3 sm:h-16 sm:px-6 lg:h-[4.25rem] lg:px-8">
         <Link to="/" className="flex shrink-0 items-center py-1">
@@ -86,7 +86,7 @@ export default function Navbar() {
           <div className="flex items-center gap-1 md:hidden">
             {user && <UserMenu onNavigate={() => setOpen(false)} />}
             <button
-              className="rounded-lg p-2 text-primary"
+              className={`rounded-lg p-2 ${onPingPage ? 'text-white' : 'text-primary'}`}
               onClick={() => setOpen(!open)}
               aria-label="Toggle menu"
               aria-expanded={open}
@@ -98,7 +98,9 @@ export default function Navbar() {
       </div>
 
       {open && (
-        <div className="border-t border-border bg-surface px-4 py-4 md:hidden">
+        <div className={`border-t px-4 py-4 md:hidden ${
+          onPingPage ? 'border-white/10 bg-black' : 'border-border bg-surface'
+        }`}>
           <nav className="flex flex-col gap-1">
             {navLinks.map((link) => (
               <Link
@@ -106,7 +108,9 @@ export default function Navbar() {
                 to={link.to}
                 onClick={() => setOpen(false)}
                 className={`rounded-lg px-3 py-2.5 text-sm font-medium ${
-                  isActive(link.to) ? 'bg-primary/5 text-primary' : 'text-muted hover:bg-background'
+                  onPingPage
+                    ? isActive(link.to) ? 'bg-white/10 text-white' : 'text-white/65 hover:bg-white/5 hover:text-white'
+                    : isActive(link.to) ? 'bg-primary/5 text-primary' : 'text-muted hover:bg-background'
                 }`}
               >
                 {link.label}
@@ -119,7 +123,9 @@ export default function Navbar() {
               <Link
                 to="/login"
                 onClick={() => setOpen(false)}
-                className="rounded-lg px-3 py-2.5 text-sm font-medium text-primary hover:bg-background"
+                className={`rounded-lg px-3 py-2.5 text-sm font-medium ${
+                  onPingPage ? 'text-white/70 hover:bg-white/5 hover:text-white' : 'text-primary hover:bg-background'
+                }`}
               >
                 {t('nav.signIn')}
               </Link>
