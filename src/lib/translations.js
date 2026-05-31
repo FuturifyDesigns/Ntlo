@@ -277,14 +277,38 @@ export const translations = {
     ping: {
       backToNtlo: 'Back to Ntlo',
       collabBadge: 'Ntlo × Ping',
+      tagline: 'Find your',
+      taglineHighlight: 'stop, faster',
       heroSubtitle: 'Community-powered transit for Botswana. Find bus stops near you, browse routes, get directions, and help fellow commuters — all in one app.',
       freeOnAndroid: 'Free on Android · Built by Futurify Designs',
       builtBy: 'Built by Futurify Designs',
+      exploreTitle: 'Explore Ping',
+      exploreSubtitle: 'Tap a feature to preview what the app can do.',
+      tryPing: 'Try Ping free',
       stats: {
         stops: 'Nearby stops',
         routes: 'Route browsing',
         directions: 'One-tap directions',
         community: 'Community powered',
+      },
+      partnership: {
+        eyebrow: 'Partnership',
+        title: 'Ntlo & Ping — better together for students',
+        body: 'Ntlo and Ping are both built by Futurify Designs to solve different parts of the same student journey. Ntlo helps you find verified accommodation near campus. Ping helps you get there — with live bus stops, routes, and directions powered by the community.',
+        benefits: {
+          home: {
+            title: 'Find where to live',
+            body: 'Browse verified rooms near UB, BIUST, Botho and more on Ntlo — then plan how you will commute each day.',
+          },
+          commute: {
+            title: 'Get to campus',
+            body: 'Use Ping to find nearby bus stops, check routes, and get one-tap directions so you are never guessing where to catch your ride.',
+          },
+          campus: {
+            title: 'Built for student life',
+            body: 'From moving in to making it to class on time, the partnership covers housing and transit — two essentials every student in Botswana needs.',
+          },
+        },
       },
       features: {
         stops: {
@@ -1731,14 +1755,38 @@ export const translations = {
     ping: {
       backToNtlo: 'Boela kwa Ntlo',
       collabBadge: 'Ntlo × Ping',
+      tagline: 'Bona',
+      taglineHighlight: 'lefelo la gago ka bonako',
       heroSubtitle: 'Ditsela tsa dipalangwang tse di tshegetseng ke setšhaba mo Botswana. Bona mafelo a dibese a a gaufi, lebelela ditsela, bona ditsela tsa go ya, mme o thusa baeti ba bangwe — tsotlhe mo app e le nngwe.',
       freeOnAndroid: 'Mahala mo Android · E agilwe ke Futurify Designs',
       builtBy: 'E agilwe ke Futurify Designs',
+      exploreTitle: 'Sekaseka Ping',
+      exploreSubtitle: 'Tobetsa karolo go bona gore app e kgona go dira eng.',
+      tryPing: 'Leka Ping mahala',
       stats: {
         stops: 'Mafelo a a gaufi',
         routes: 'Go lebelela ditsela',
         directions: 'Ditsela ka go tobetsa gangwe',
         community: 'E tshegeditswe ke setšhaba',
+      },
+      partnership: {
+        eyebrow: 'Tiragano',
+        title: 'Ntlo & Ping — go siama mmogo mo baithuting',
+        body: 'Ntlo le Ping di agilwe ke Futurify Designs go rarabolola dikarolo tse di farologaneng tsa leeto la moithuti. Ntlo e go thusa go bona diphaposi tse di netefaditsweng kgaufi le khamposi. Ping e go thusa go ya teng — ka mafelo a dibese, ditsela, le ditsela tsa go ya tse di tshegetseng ke setšhaba.',
+        benefits: {
+          home: {
+            title: 'Bona gae ga gago',
+            body: 'Batla dilong tse di netefaditsweng kgaufi le UB, BIUST, Botho mo Ntlo — mme o rale gore o tla tsamaya jang letsatsi le letsatsi.',
+          },
+          commute: {
+            title: 'Ya khamposeng',
+            body: 'Dirisa Ping go bona mafelo a dibese a a gaufi, lebelela ditsela, mme o bone ditsela ka go tobetsa gangwe gore o seka wa ipotsa gore o tshame ka kae.',
+          },
+          campus: {
+            title: 'E agilwe mo botshelong jwa moithuti',
+            body: 'Go tswa mo go tseneng go ya go fitlha mo klase ka nako, tiragano e kgaogana phaposi le dipalangwang — dilo tse pedi tse di botlhokwa mo baithuting mo Botswana.',
+          },
+        },
       },
       features: {
         stops: {
