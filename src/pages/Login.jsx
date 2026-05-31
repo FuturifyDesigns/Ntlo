@@ -30,12 +30,18 @@ export default function Login() {
   const verified = searchParams.get('verified') === '1' || location.state?.verified
   const oauthSignup = searchParams.get('oauth') === '1' || location.state?.oauth
   const passwordReset = searchParams.get('reset') === '1'
-  const banned = searchParams.get('banned') === '1' || Boolean(banInfo)
 
   useEffect(() => {
     const stored = readBanInfoFromLogin()
     if (stored) setBanInfo(stored)
-  }, [])
+
+    if (searchParams.get('banned') === '1') {
+      const next = new URLSearchParams(searchParams)
+      next.delete('banned')
+      const q = next.toString()
+      navigate({ pathname: '/login', search: q ? `?${q}` : '' }, { replace: true })
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps -- run once on mount
 
   const handleGoogleError = useCallback((message) => {
     setError(message)
@@ -80,7 +86,7 @@ export default function Login() {
     } catch (err) {
       if (err.code === 'account_banned') {
         setBanInfo(err.banInfo || null)
-        setError(t('auth.accountBanned'))
+        if (!err.banInfo) setError(t('auth.accountBanned'))
       } else {
         setError(mapAuthError(err.message, validationMessages))
       }
@@ -107,7 +113,7 @@ export default function Login() {
           <p className="mt-2 text-muted">{t('auth.signInSubtitle')}</p>
         </div>
 
-        {banned && (
+        {banInfo && (
           <div className="mt-6 space-y-2 rounded-xl border border-error/30 bg-error/10 px-4 py-3 text-sm text-error">
             <p className="font-medium">{t('auth.accountBanned')}</p>
             {banInfo?.reason_code && (

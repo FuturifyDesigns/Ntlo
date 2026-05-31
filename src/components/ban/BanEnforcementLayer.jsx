@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { ShieldAlert, Loader2 } from 'lucide-react'
@@ -17,6 +17,17 @@ export default function BanEnforcementLayer() {
   const activeBan = user && profile && isBanActive(profile)
   const needsAcknowledgment = activeBan && !profile.ban_acknowledged_at
 
+  useEffect(() => {
+    if (!needsAcknowledgment || !user?.id) return
+    supabase
+      .from('notifications')
+      .update({ read_at: new Date().toISOString() })
+      .eq('user_id', user.id)
+      .eq('type', 'account_banned')
+      .is('read_at', null)
+      .then(() => {})
+  }, [needsAcknowledgment, user?.id])
+
   if (!needsAcknowledgment) return null
 
   const endsAt = formatBanEndsAt(profile)
@@ -25,15 +36,23 @@ export default function BanEnforcementLayer() {
   async function handleConfirm() {
     setBusy(true)
     try {
+      if (user?.id) {
+        await supabase
+          .from('notifications')
+          .update({ read_at: new Date().toISOString() })
+          .eq('user_id', user.id)
+          .eq('type', 'account_banned')
+          .is('read_at', null)
+      }
       const { error } = await supabase.rpc('acknowledge_account_ban')
       if (error) throw error
       saveBanInfoForLogin(buildBanInfoFromProfile(profile))
       await signOut()
-      navigate('/login?banned=1', { replace: true })
+      navigate('/login', { replace: true })
     } catch {
       saveBanInfoForLogin(buildBanInfoFromProfile(profile))
       await signOut().catch(() => {})
-      navigate('/login?banned=1', { replace: true })
+      navigate('/login', { replace: true })
     } finally {
       setBusy(false)
     }

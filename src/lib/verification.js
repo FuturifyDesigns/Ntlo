@@ -81,7 +81,7 @@ export function landlordDocsComplete(uploadedTypes) {
 
 export function getPostAuthPath(profile, fallback = '/') {
   if (!profile) return '/student'
-  if (shouldBlockLogin(profile)) return '/login?banned=1'
+  if (shouldBlockLogin(profile)) return '/login'
   if (profile.role === 'admin') return '/admin'
   if (profile.role === 'landlord') {
     if (profile.verification_status !== 'approved') return '/landlord/verify'

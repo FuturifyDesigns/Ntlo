@@ -205,7 +205,7 @@
             sessionStorage.setItem('ntlo_ban_info', JSON.stringify(access.ban || {}))
           } catch (_) {}
           await supabase.auth.signOut().catch(() => {})
-          window.location.replace('../#/login?banned=1')
+          window.location.replace('../#/login')
           return
         }
 

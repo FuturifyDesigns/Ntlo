@@ -33,6 +33,7 @@ export default function NotificationSoundLayer() {
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.id}` },
         (payload) => {
+          if (payload.new?.type === 'account_banned') return
           playNotificationSound(payload.new?.id)
         }
       )

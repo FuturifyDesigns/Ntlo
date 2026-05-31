@@ -24,7 +24,6 @@ export const URGENT_NOTIFICATION_TYPES = new Set([
   'listing_approved',
   'listing_rejected',
   'listing_changes_requested',
-  'account_banned',
 ])
 
 export function isUrgentNotification(notification) {
@@ -37,6 +36,7 @@ export function useUrgentNotificationToasts() {
   const dismissedRef = useRef(new Set())
 
   const pushToast = useCallback((notification) => {
+    if (notification?.type === 'account_banned') return
     if (!isUrgentNotification(notification)) return
     if (dismissedRef.current.has(notification.id)) return
     setToasts((prev) => {
