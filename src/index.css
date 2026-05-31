@@ -313,12 +313,18 @@ html[data-reduce-motion="true"] .skeleton {
 .ping-feature-frame {
   isolation: isolate;
   overflow: hidden;
-  border-radius: 1rem;
+  border-radius: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .ping-feature-frame {
+    border-radius: 1rem;
+  }
 }
 
 .ping-feature-img {
   mix-blend-mode: lighten;
-  opacity: 0.96;
+  opacity: 0.92;
 }
 
 html[data-reduce-motion="true"] .ping-aurora-ribbon,

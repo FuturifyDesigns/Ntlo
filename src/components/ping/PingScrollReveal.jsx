@@ -133,8 +133,15 @@ export function PingScrollMedia({ children, className = '', delay = 0 }) {
 /** Feature screenshots — light backgrounds blend into the dark page. */
 export function PingFeatureImage({ src, alt = '', className = '' }) {
   return (
-    <div className={`ping-feature-frame ${className}`}>
-      <img src={src} alt={alt} className="ping-feature-img w-full object-contain" loading="lazy" />
+    <div
+      className={`ping-feature-frame mx-auto w-full max-h-[220px] sm:max-h-[300px] md:max-h-[380px] lg:max-h-[440px] xl:max-h-none ${className}`}
+    >
+      <img
+        src={src}
+        alt={alt}
+        className="ping-feature-img mx-auto h-full max-h-[inherit] w-full object-contain object-center"
+        loading="lazy"
+      />
     </div>
   )
 }

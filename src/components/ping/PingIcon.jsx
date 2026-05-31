@@ -4,11 +4,11 @@ export { ICON as PING_ICON }
 
 const SIZES = {
   xs: 'h-7 w-7',
-  sm: 'h-9 w-9',
-  md: 'h-10 w-10',
-  lg: 'h-16 w-16 sm:h-[4.5rem] sm:w-[4.5rem]',
-  xl: 'h-28 w-28 sm:h-32 sm:w-32',
-  hero: 'h-32 w-32 sm:h-40 sm:w-40',
+  sm: 'h-8 w-8 sm:h-9 sm:w-9',
+  md: 'h-9 w-9 sm:h-10 sm:w-10',
+  lg: 'h-12 w-12 sm:h-16 sm:w-16 md:h-[4.5rem] md:w-[4.5rem]',
+  xl: 'h-20 w-20 sm:h-28 sm:w-28 md:h-32 md:w-32',
+  hero: 'h-[6.5rem] w-[6.5rem] sm:h-32 sm:w-32 md:h-40 md:w-40',
 }
 
 export default function PingIcon({ size = 'md', className = '', glow = false }) {

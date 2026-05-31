@@ -3,9 +3,10 @@ import PingIcon from './PingIcon'
 const NTLO_ICON = `${import.meta.env.BASE_URL}ntlo-icon.png`
 
 const SIZES = {
-  sm: { ping: 'sm', ntlo: 'h-8 w-8', x: 'text-sm' },
-  md: { ping: 'md', ntlo: 'h-10 w-10', x: 'text-base' },
-  lg: { ping: 'lg', ntlo: 'h-14 w-14 sm:h-16 sm:w-16', x: 'text-xl' },
+  xs: { ping: 'xs', ntlo: 'h-6 w-6', x: 'text-xs' },
+  sm: { ping: 'sm', ntlo: 'h-7 w-7 sm:h-8 sm:w-8', x: 'text-sm' },
+  md: { ping: 'md', ntlo: 'h-9 w-9 sm:h-10 sm:w-10', x: 'text-base' },
+  lg: { ping: 'lg', ntlo: 'h-12 w-12 sm:h-14 sm:w-14 md:h-16 md:w-16', x: 'text-lg sm:text-xl' },
 }
 
 export default function PingCollabMark({ size = 'md', className = '', glow = false }) {
