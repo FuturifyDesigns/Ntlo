@@ -1,10 +1,11 @@
+import { Link } from 'react-router-dom'
 import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Check, X, Sparkles, ThumbsUp, AlertTriangle, Lightbulb, Clock,
   CreditCard, Camera, Home, FileSignature, MapPin, Building2,
   Receipt, Zap, ScrollText, FileText, ScanSearch, Loader2,
-  CheckCircle2, XCircle, Info, ChevronDown, MessageSquare, RotateCcw, Clock3, Eye, ShieldAlert, Trash2,
+  CheckCircle2, XCircle, Info, ChevronDown, MessageSquare, RotateCcw, Clock3, Eye, ShieldAlert, Trash2, ExternalLink,
 } from 'lucide-react'
 import { useTranslation } from '../../hooks/useTranslation'
 import { useNow } from '../../hooks/useNow'
@@ -527,7 +528,21 @@ export default function VerificationCard({
             {t('admin.adv.markProgress', { ok: okCount, total: currentDocs.length })}
           </p>
         )}
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
+          {kind === 'listing' && (
+            <Button
+              size="sm"
+              variant="outline"
+              as={Link}
+              to={`/listings/${subject.id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 sm:flex-none"
+            >
+              <ExternalLink size={14} />
+              {t('admin.viewListing')}
+            </Button>
+          )}
           <Button
             size="sm"
             className="flex-1 sm:flex-none"

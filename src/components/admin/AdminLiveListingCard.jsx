@@ -1,5 +1,6 @@
+import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Home, Trash2, MapPin, User } from 'lucide-react'
+import { Home, Trash2, MapPin, User, ExternalLink } from 'lucide-react'
 import { useTranslation } from '../../hooks/useTranslation'
 import Button from '../ui/Button'
 import Badge from '../ui/Badge'
@@ -45,10 +46,16 @@ export default function AdminLiveListingCard({ listing, onDelete }) {
         </div>
       </div>
 
-      <Button size="sm" variant="danger" onClick={onDelete}>
-        <Trash2 size={14} />
-        {t('admin.deleteListing')}
-      </Button>
+      <div className="flex flex-wrap gap-2">
+        <Button size="sm" variant="outline" as={Link} to={`/listings/${listing.id}`} target="_blank" rel="noopener noreferrer">
+          <ExternalLink size={14} />
+          {t('admin.viewListing')}
+        </Button>
+        <Button size="sm" variant="danger" onClick={onDelete}>
+          <Trash2 size={14} />
+          {t('admin.deleteListing')}
+        </Button>
+      </div>
     </motion.div>
   )
 }
