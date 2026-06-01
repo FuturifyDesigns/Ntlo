@@ -13,21 +13,30 @@ export default function OnboardingContinueBanner() {
   const { t } = useTranslation()
   const { user, profile, loading: authLoading } = useAuth()
   const location = useLocation()
-  const { tourOpen, completionOptions, startPageTour } = useOnboarding()
+  const {
+    tourOpen,
+    completionOptions,
+    startPageTour,
+    actionOnboardingPage,
+    remainingOnboardingPages,
+    onboardingProfile,
+  } = useOnboarding()
 
   if (authLoading || !isOnboardingEligible(profile, user, location.pathname)) return null
-  if (tourOpen || !profile?.role) return null
+  if (tourOpen || !onboardingProfile?.role) return null
 
-  const remainingOnboardingPages = getRemainingOnboardingPages(profile, completionOptions)
-  if (remainingOnboardingPages.length === 0) return null
+  const remaining = remainingOnboardingPages.length > 0
+    ? remainingOnboardingPages
+    : getRemainingOnboardingPages(onboardingProfile, completionOptions)
+  if (remaining.length === 0) return null
 
-  const actionOnboardingPage = getOnboardingActionPage(
-    profile,
+  const action = actionOnboardingPage || getOnboardingActionPage(
+    onboardingProfile,
     location.pathname,
-    profile.role,
+    onboardingProfile.role,
     completionOptions,
   )
-  if (!actionOnboardingPage) return null
+  if (!action) return null
 
   return (
     <div className="relative z-30 border-b border-accent/40 bg-accent/10 px-4 py-3.5">
@@ -38,7 +47,7 @@ export default function OnboardingContinueBanner() {
             <p className="text-sm font-bold text-primary">{t('onboarding.continueTitle')}</p>
             <p className="text-sm text-muted">
               {t('onboarding.continueRemaining')}{' '}
-              {remainingOnboardingPages.map((page, index) => (
+              {remaining.map((page, index) => (
                 <span key={page.pageKey}>
                   {index > 0 && ', '}
                   <button
@@ -51,15 +60,15 @@ export default function OnboardingContinueBanner() {
                 </span>
               ))}
             </p>
-            <p className="text-xs text-muted">{t(actionOnboardingPage.descriptionKey)}</p>
+            <p className="text-xs text-muted">{t(action.descriptionKey)}</p>
           </div>
         </div>
         <button
           type="button"
-          onClick={() => startPageTour(actionOnboardingPage.pageKey)}
+          onClick={() => startPageTour(action.pageKey)}
           className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-primary px-4 py-2.5 text-sm font-bold text-white shadow-sm transition-opacity hover:opacity-90"
         >
-          {t(actionOnboardingPage.actionKey)}
+          {t(action.actionKey)}
           <ArrowRight size={14} />
         </button>
       </div>

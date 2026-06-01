@@ -17,6 +17,7 @@ import {
   saveLocalOnboardingProgress,
   shouldBlockAutoStart,
   isOnboardingFullyComplete,
+  isPageOnboardingDone,
   allRequiredPagesDone,
   isOnboardingEligible,
   mergeOnboardingProgress,
@@ -43,7 +44,11 @@ export function OnboardingProvider({ children }) {
   const pageHandlersRef = useRef({})
   const pageStateRef = useRef({})
   const activeTourRef = useRef({ open: false, forced: false, pageKey: null })
+  const activeTourPageKeyRef = useRef(null)
   const finalizePageRef = useRef(null)
+  const suppressAutoStartUntilRef = useRef(0)
+  const [progressEpoch, setProgressEpoch] = useState(0)
+  const [progressOverride, setProgressOverride] = useState(null)
 
   const pageKey = profile?.role
     ? (replayPageKey || getOnboardingPageKey(location.pathname, profile.role))
@@ -82,6 +87,12 @@ export function OnboardingProvider({ children }) {
 
   const onboardingActive = isOnboardingEligible(profile, user, location.pathname)
 
+  const onboardingProfile = useMemo(() => {
+    if (!profile?.id) return profile
+    const mergedProgress = progressOverride || getProfileOnboardingProgress(profile)
+    return { ...profile, onboarding_progress: mergedProgress }
+  }, [profile, progressOverride, progressEpoch])
+
   useEffect(() => {
     if (!profile?.id || profileLoading) return
     const finishOptions = {
@@ -109,17 +120,22 @@ export function OnboardingProvider({ children }) {
   }, [profile, profileLoading, pageStateVersion, patchProfile])
 
   const actionOnboardingPage = useMemo(
-    () => (onboardingActive && !tourOpen
-      ? getOnboardingActionPage(profile, location.pathname, profile.role, completionOptions)
+    () => (onboardingActive && !tourOpen && onboardingProfile?.role
+      ? getOnboardingActionPage(
+        onboardingProfile,
+        location.pathname,
+        onboardingProfile.role,
+        completionOptions,
+      )
       : null),
-    [onboardingActive, profile, location.pathname, completionOptions, tourOpen]
+    [onboardingActive, onboardingProfile, location.pathname, completionOptions, tourOpen]
   )
 
   const remainingOnboardingPages = useMemo(
-    () => (onboardingActive
-      ? getRemainingOnboardingPages(profile, completionOptions)
+    () => (onboardingActive && onboardingProfile
+      ? getRemainingOnboardingPages(onboardingProfile, completionOptions)
       : []),
-    [onboardingActive, profile, completionOptions]
+    [onboardingActive, onboardingProfile, completionOptions, progressEpoch]
   )
 
   const registerPageState = useCallback((key, partial) => {
@@ -145,6 +161,7 @@ export function OnboardingProvider({ children }) {
 
   const beginTour = useCallback((targetKey, { isForced = false } = {}) => {
     if (!targetKey || !ONBOARDING_STEPS_BY_PAGE[targetKey]) return
+    activeTourPageKeyRef.current = targetKey
     setReplayPageKey(targetKey)
     setForced(isForced)
     setTourOpen(true)
@@ -154,7 +171,7 @@ export function OnboardingProvider({ children }) {
     const target = key || getOnboardingPageKey(location.pathname, profile?.role)
     if (!target) return
     const progress = getProfileOnboardingProgress(profile)
-    beginTour(target, { isForced: !progress[target] })
+    beginTour(target, { isForced: !isPageOnboardingDone(profile, target) })
   }, [location.pathname, profile, beginTour])
 
   const startPageTour = useCallback((targetKey) => {
@@ -165,7 +182,7 @@ export function OnboardingProvider({ children }) {
       : null
 
     if (currentKey === targetKey) {
-      beginTour(targetKey, { isForced: false })
+      beginTour(targetKey, { isForced: !isPageOnboardingDone(profile, targetKey) })
       return
     }
 
@@ -185,7 +202,7 @@ export function OnboardingProvider({ children }) {
     if (!path) return
 
     if (path === location.pathname && targetKey !== 'student_listing') {
-      beginTour(targetKey, { isForced: false })
+      beginTour(targetKey, { isForced: !isPageOnboardingDone(profile, targetKey) })
       return
     }
 
@@ -196,7 +213,7 @@ export function OnboardingProvider({ children }) {
   useEffect(() => {
     const { open, forced: wasForced, pageKey: closingKey } = activeTourRef.current
     if (open && wasForced && closingKey) {
-      finalizePageRef.current?.(true)
+      finalizePageRef.current?.(true, closingKey)
     }
     setTourOpen(false)
     setForced(false)
@@ -208,8 +225,9 @@ export function OnboardingProvider({ children }) {
       return undefined
     }
     if (replayPageKey || pendingTourKey) return undefined
-    if (isOnboardingFullyComplete(profile, completionOptions)) return undefined
-    if (shouldBlockAutoStart(profile, profile.id, pageKey, completionOptions)) return undefined
+    if (isOnboardingFullyComplete(onboardingProfile, completionOptions)) return undefined
+    if (Date.now() < suppressAutoStartUntilRef.current) return undefined
+    if (shouldBlockAutoStart(onboardingProfile, profile.id, pageKey, completionOptions)) return undefined
 
     const liveState = pageStateRef.current[pageKey]
     if (!liveState || liveState.ready === false) return undefined
@@ -217,7 +235,7 @@ export function OnboardingProvider({ children }) {
     setForced(true)
     const timer = window.setTimeout(() => setTourOpen(true), 600)
     return () => clearTimeout(timer)
-  }, [onboardingActive, profile, profileLoading, pageKey, baseSteps, replayPageKey, pendingTourKey, pageStateVersion, location.pathname, completionOptions])
+  }, [onboardingActive, onboardingProfile, profile, profileLoading, pageKey, baseSteps, replayPageKey, pendingTourKey, pageStateVersion, location.pathname, completionOptions])
 
   useEffect(() => {
     if (!pendingTourKey || !profile?.role) return undefined
@@ -242,11 +260,12 @@ export function OnboardingProvider({ children }) {
     pageHandlersRef.current[pageKey]?.(step)
   }, [pageKey])
 
-  const finalizePage = useCallback(async (markForced) => {
-    if (!profile?.id || !pageKey || completingRef.current) return
+  const finalizePage = useCallback(async (markForced, explicitPageKey) => {
+    const completingKey = explicitPageKey || activeTourPageKeyRef.current || pageKey
+    if (!profile?.id || !completingKey || completingRef.current) return
     completingRef.current = true
     try {
-      markSessionPageDone(profile.id, pageKey)
+      markSessionPageDone(profile.id, completingKey)
 
       const finishOptions = {
         marketListingCount: getMarketListingCountFromState(pageStateRef.current),
@@ -254,16 +273,16 @@ export function OnboardingProvider({ children }) {
 
       let progress = syncSessionPagesIntoProgress(profile, finishOptions)
       try {
-        const serverProgress = await completeOnboardingPage(pageKey)
-        progress = mergeOnboardingProgress(progress, serverProgress, pageKey)
+        const serverProgress = await completeOnboardingPage(completingKey)
+        progress = mergeOnboardingProgress(progress, serverProgress, completingKey)
       } catch {
-        progress = mergeOnboardingProgress(progress, null, pageKey)
+        progress = mergeOnboardingProgress(progress, null, completingKey)
       }
 
       saveLocalOnboardingProgress(profile.id, progress)
 
       if (
-        pageKey === 'student_browse'
+        completingKey === 'student_browse'
         && finishOptions.marketListingCount === 0
         && !progress.student_listing
       ) {
@@ -290,6 +309,9 @@ export function OnboardingProvider({ children }) {
         }
       }
 
+      setProgressOverride(progress)
+      setProgressEpoch((n) => n + 1)
+
       patchProfile?.({
         onboarding_progress: progress,
         ...(mergedProfile.onboarding_completed_at
@@ -305,6 +327,8 @@ export function OnboardingProvider({ children }) {
             ...progress,
           }
           saveLocalOnboardingProgress(profile.id, merged)
+          setProgressOverride(merged)
+          setProgressEpoch((n) => n + 1)
           patchProfile?.({
             onboarding_progress: merged,
             ...(mergedProfile.onboarding_completed_at
@@ -313,6 +337,8 @@ export function OnboardingProvider({ children }) {
           })
         }
       } catch {
+        setProgressOverride(progress)
+        setProgressEpoch((n) => n + 1)
         patchProfile?.({
           onboarding_progress: progress,
           ...(mergedProfile.onboarding_completed_at
@@ -322,26 +348,28 @@ export function OnboardingProvider({ children }) {
       }
     } finally {
       completingRef.current = false
+      activeTourPageKeyRef.current = null
     }
   }, [profile, pageKey, refreshProfile, patchProfile])
 
   finalizePageRef.current = finalizePage
 
   const handleClose = useCallback(() => {
+    suppressAutoStartUntilRef.current = Date.now() + 2500
     setTourOpen(false)
     setForced(false)
     setReplayPageKey(null)
     setPendingTourKey(null)
+    activeTourPageKeyRef.current = null
   }, [])
 
   const handleComplete = useCallback(async () => {
-    const progress = getProfileOnboardingProgress(profile)
-    const pageIncomplete = pageKey && !progress[pageKey]
-    if (forced || pageIncomplete) {
-      await finalizePage(forced)
+    const completingKey = activeTourPageKeyRef.current || replayPageKey || pageKey
+    if (completingKey) {
+      await finalizePage(forced, completingKey)
     }
     handleClose()
-  }, [finalizePage, forced, handleClose, profile, pageKey])
+  }, [finalizePage, forced, handleClose, replayPageKey, pageKey])
 
   const value = useMemo(
     () => ({
@@ -355,8 +383,10 @@ export function OnboardingProvider({ children }) {
       completionOptions,
       actionOnboardingPage,
       remainingOnboardingPages,
+      onboardingProfile,
+      progressEpoch,
     }),
-    [openReplay, startPageTour, registerPageHandler, registerPageState, clearPageState, pageKey, tourOpen, completionOptions, actionOnboardingPage, remainingOnboardingPages]
+    [openReplay, startPageTour, registerPageHandler, registerPageState, clearPageState, pageKey, tourOpen, completionOptions, actionOnboardingPage, remainingOnboardingPages, onboardingProfile, progressEpoch]
   )
 
   return (

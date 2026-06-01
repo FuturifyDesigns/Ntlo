@@ -394,7 +394,7 @@ export default function OnboardingTour({
 
   const goNext = useCallback(() => {
     if (stepIndex >= steps.length - 1) {
-      finish(forced)
+      finish(true)
       return
     }
     const nextIndex = stepIndex + 1

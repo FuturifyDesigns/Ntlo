@@ -76,6 +76,12 @@ export function getOnboardingPageKey(pathname, role) {
   return null
 }
 
+/** Only ISO timestamps / RPC strings count as done (ignore truthy garbage in JSON). */
+export function isPageProgressDone(value) {
+  if (typeof value !== 'string' || value.length < 8) return false
+  return !Number.isNaN(Date.parse(value))
+}
+
 export function getProfileOnboardingProgress(profile) {
   if (!profile?.id) return {}
   let progress = profile.onboarding_progress || {}
@@ -85,7 +91,11 @@ export function getProfileOnboardingProgress(profile) {
   } catch {
     // ignore
   }
-  return progress
+  const cleaned = {}
+  for (const [key, val] of Object.entries(progress)) {
+    if (isPageProgressDone(val)) cleaned[key] = val
+  }
+  return cleaned
 }
 
 /** Merge server RPC result without dropping pages only stored locally. */
@@ -103,7 +113,7 @@ export function syncSessionPagesIntoProgress(profile, options = {}) {
   const required = getEffectiveRequiredPages(profile.role, options)
   const progress = { ...getProfileOnboardingProgress(profile) }
   for (const key of required) {
-    if (sessionPageDone(profile.id, key) && !progress[key]) {
+    if (sessionPageDone(profile.id, key) && !isPageProgressDone(progress[key])) {
       progress[key] = new Date().toISOString()
     }
   }
@@ -129,14 +139,14 @@ export function saveLocalOnboardingProgress(userId, progress) {
 
 export function isPageOnboardingDone(profile, pageKey) {
   if (!profile || !pageKey) return true
-  return Boolean(getProfileOnboardingProgress(profile)[pageKey])
+  return isPageProgressDone(getProfileOnboardingProgress(profile)[pageKey])
 }
 
 export function allRequiredPagesDone(profile, options = {}) {
   if (!profile?.role) return false
   const required = getEffectiveRequiredPages(profile.role, options)
   const progress = getProfileOnboardingProgress(profile)
-  return required.every((key) => Boolean(progress[key]))
+  return required.every((key) => isPageProgressDone(progress[key]))
 }
 
 export function isOnboardingFullyComplete(profile, options = {}) {
@@ -177,7 +187,7 @@ export function shouldBlockAutoStart(profile, userId, pageKey, options = {}) {
   if (isOnboardingFullyComplete(profile, options)) return true
 
   const progress = getProfileOnboardingProgress(profile)
-  if (progress[pageKey]) return true
+  if (isPageProgressDone(progress[pageKey])) return true
 
   if (sessionPageDone(userId, pageKey)) {
     saveLocalOnboardingProgress(userId, {
@@ -196,7 +206,7 @@ export function getRemainingOnboardingPages(profile, options = {}) {
   const required = getEffectiveRequiredPages(profile.role, options)
   const progress = getProfileOnboardingProgress(profile)
   return required
-    .filter((key) => !progress[key])
+    .filter((key) => !isPageProgressDone(progress[key]))
     .map((key) => ({ pageKey: key, ...ONBOARDING_PAGE_META[key] }))
 }
 
