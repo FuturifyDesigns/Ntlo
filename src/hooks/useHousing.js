@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from './useAuth'
 import { getOrCreateConversation, sendMessage, markMessagesRead, fetchStudentListingStatus } from '../lib/housing'
@@ -15,6 +15,7 @@ export function useConversations() {
   const { user, profile } = useAuth()
   const [conversations, setConversations] = useState([])
   const [loading, setLoading] = useState(true)
+  const fetchRef = useRef(null)
 
   const fetchConversations = useCallback(async ({ silent = false } = {}) => {
     if (!user) {
@@ -42,6 +43,8 @@ export function useConversations() {
     if (!silent) setLoading(false)
   }, [user, profile?.role])
 
+  fetchRef.current = fetchConversations
+
   useEffect(() => {
     fetchConversations()
   }, [fetchConversations])
@@ -52,12 +55,14 @@ export function useConversations() {
     const channel = supabase
       .channel(`conversations-${user.id}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'conversations' }, () => {
-        fetchConversations({ silent: true })
+        fetchRef.current?.({ silent: true })
       })
       .subscribe()
 
-    return () => supabase.removeChannel(channel)
-  }, [user?.id, fetchConversations])
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [user?.id])
 
   return { conversations, loading, refetch: fetchConversations }
 }
@@ -66,6 +71,7 @@ export function useStudentListingStatus(listingId) {
   const { user } = useAuth()
   const [status, setStatus] = useState({ viewing: null, application: null })
   const [loading, setLoading] = useState(true)
+  const fetchRef = useRef(null)
 
   const refetch = useCallback(async ({ silent = false } = {}) => {
     if (!user || !listingId) {
@@ -79,6 +85,8 @@ export function useStudentListingStatus(listingId) {
     if (!silent) setLoading(false)
   }, [user, listingId])
 
+  fetchRef.current = refetch
+
   useEffect(() => {
     refetch()
   }, [refetch])
@@ -88,12 +96,14 @@ export function useStudentListingStatus(listingId) {
 
     const channel = supabase
       .channel(`listing-status-${listingId}-${user.id}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'viewing_requests' }, () => refetch({ silent: true }))
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'listing_applications' }, () => refetch({ silent: true }))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'viewing_requests' }, () => fetchRef.current?.({ silent: true }))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'listing_applications' }, () => fetchRef.current?.({ silent: true }))
       .subscribe()
 
-    return () => supabase.removeChannel(channel)
-  }, [user?.id, listingId, refetch])
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [user?.id, listingId])
 
   return { ...status, loading, refetch }
 }
@@ -149,7 +159,9 @@ export function useMessages(conversationId) {
       )
       .subscribe()
 
-    return () => supabase.removeChannel(channel)
+    return () => {
+      supabase.removeChannel(channel)
+    }
   }, [conversationId])
 
   const send = useCallback(async (body) => {
@@ -171,6 +183,7 @@ export function useStudentHousing() {
   const [viewings, setViewings] = useState([])
   const [applications, setApplications] = useState([])
   const [loading, setLoading] = useState(true)
+  const fetchRef = useRef(null)
 
   const fetchAll = useCallback(async ({ silent = false } = {}) => {
     if (!user) {
@@ -199,6 +212,8 @@ export function useStudentHousing() {
     if (!silent) setLoading(false)
   }, [user])
 
+  fetchRef.current = fetchAll
+
   useEffect(() => {
     fetchAll()
   }, [fetchAll])
@@ -208,13 +223,15 @@ export function useStudentHousing() {
 
     const channel = supabase
       .channel(`student-housing-${user.id}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'viewing_requests' }, () => fetchAll({ silent: true }))
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'listing_applications' }, () => fetchAll({ silent: true }))
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'application_documents' }, () => fetchAll({ silent: true }))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'viewing_requests' }, () => fetchRef.current?.({ silent: true }))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'listing_applications' }, () => fetchRef.current?.({ silent: true }))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'application_documents' }, () => fetchRef.current?.({ silent: true }))
       .subscribe()
 
-    return () => supabase.removeChannel(channel)
-  }, [user?.id, fetchAll])
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [user?.id])
 
   return { viewings, applications, loading, refetch: fetchAll }
 }
@@ -225,6 +242,7 @@ export function useLandlordInquiries() {
   const [applications, setApplications] = useState([])
   const [conversations, setConversations] = useState([])
   const [loading, setLoading] = useState(true)
+  const fetchRef = useRef(null)
 
   const fetchAll = useCallback(async ({ silent = false } = {}) => {
     if (!user) {
@@ -260,6 +278,8 @@ export function useLandlordInquiries() {
     if (!silent) setLoading(false)
   }, [user])
 
+  fetchRef.current = fetchAll
+
   useEffect(() => {
     fetchAll()
   }, [fetchAll])
@@ -269,14 +289,16 @@ export function useLandlordInquiries() {
 
     const channel = supabase
       .channel(`landlord-inquiries-${user.id}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'viewing_requests' }, () => fetchAll({ silent: true }))
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'listing_applications' }, () => fetchAll({ silent: true }))
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'application_documents' }, () => fetchAll({ silent: true }))
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'conversations' }, () => fetchAll({ silent: true }))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'viewing_requests' }, () => fetchRef.current?.({ silent: true }))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'listing_applications' }, () => fetchRef.current?.({ silent: true }))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'application_documents' }, () => fetchRef.current?.({ silent: true }))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'conversations' }, () => fetchRef.current?.({ silent: true }))
       .subscribe()
 
-    return () => supabase.removeChannel(channel)
-  }, [user?.id, fetchAll])
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [user?.id])
 
   return { viewings, applications, conversations, loading, refetch: fetchAll }
 }
@@ -284,6 +306,7 @@ export function useLandlordInquiries() {
 export function useAdminApplications() {
   const [applications, setApplications] = useState([])
   const [loading, setLoading] = useState(true)
+  const fetchRef = useRef(null)
 
   const fetchAll = useCallback(async ({ silent = false } = {}) => {
     if (!silent) setLoading(true)
@@ -300,6 +323,8 @@ export function useAdminApplications() {
     if (!silent) setLoading(false)
   }, [])
 
+  fetchRef.current = fetchAll
+
   useEffect(() => {
     fetchAll()
   }, [fetchAll])
@@ -307,12 +332,14 @@ export function useAdminApplications() {
   useEffect(() => {
     const channel = supabase
       .channel('admin-applications')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'listing_applications' }, () => fetchAll({ silent: true }))
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'application_documents' }, () => fetchAll({ silent: true }))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'listing_applications' }, () => fetchRef.current?.({ silent: true }))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'application_documents' }, () => fetchRef.current?.({ silent: true }))
       .subscribe()
 
-    return () => supabase.removeChannel(channel)
-  }, [fetchAll])
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [])
 
   return { applications, loading, refetch: fetchAll }
 }

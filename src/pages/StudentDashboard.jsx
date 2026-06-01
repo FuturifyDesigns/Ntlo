@@ -29,8 +29,8 @@ const fade = {
 export default function StudentDashboard() {
   const { profile, profileLoading } = useAuth()
   const { savedListings, loading } = useSavedListingsContext()
-  const { applications, viewings, loading: housingLoading } = useStudentHousing()
-  const { conversations, loading: convLoading } = useConversations()
+  const { applications, viewings, loading: housingLoading, refetch: refetchHousing } = useStudentHousing()
+  const { conversations, loading: convLoading, refetch: refetchConversations } = useConversations()
   const { count: marketListingCount, loading: marketLoading } = useListings({})
   const { t } = useTranslation()
   const { prefs } = useLocale()
@@ -134,7 +134,17 @@ export default function StudentDashboard() {
       <AnimatePresence mode="wait">
         {section === 'housing' ? (
           <motion.div key="housing" {...motionProps}>
-            <StudentHousingPanel tourTab={housingTab} />
+            <StudentHousingPanel
+              tourTab={housingTab}
+              applications={applications}
+              viewings={viewings}
+              conversations={conversations}
+              loading={housingLoading}
+              convLoading={convLoading}
+              refetch={async () => {
+                await Promise.all([refetchHousing(), refetchConversations()])
+              }}
+            />
           </motion.div>
         ) : (
           <motion.div key="saved" className="min-h-[20rem]" {...motionProps}>

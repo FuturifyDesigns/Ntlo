@@ -16,6 +16,7 @@ import { ONBOARDING_STEPS_BY_PAGE } from '../lib/onboardingSteps'
 import { mergePageState, resolveOnboardingSteps } from '../lib/onboardingAdapt'
 import OnboardingTour from '../components/onboarding/OnboardingTour'
 import OnboardingHelpButton from '../components/onboarding/OnboardingHelpButton'
+import OnboardingContinueBanner from '../components/onboarding/OnboardingContinueBanner'
 
 const OnboardingContext = createContext(null)
 
@@ -41,6 +42,13 @@ export function OnboardingProvider({ children }) {
     return resolveOnboardingSteps(baseSteps, pageStateRef.current[pageKey] || {})
     // eslint-disable-next-line react-hooks/exhaustive-deps -- pageStateVersion triggers re-resolve
   }, [pageKey, baseSteps, pageStateVersion])
+
+  const completionOptions = useMemo(() => ({
+    marketListingCount: pageStateRef.current.student_dashboard?.marketListingCount
+      ?? pageStateRef.current.student_browse?.listingCount
+      ?? 0,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }), [pageStateVersion])
 
   const registerPageState = useCallback((key, partial) => {
     if (!key) return
@@ -107,12 +115,29 @@ export function OnboardingProvider({ children }) {
         progress = { ...progress, [pageKey]: new Date().toISOString() }
       }
 
+      const marketCount = pageStateRef.current.student_dashboard?.marketListingCount
+        ?? pageStateRef.current.student_browse?.listingCount
+        ?? 0
+      const finishOptions = { marketListingCount: marketCount }
+
+      if (
+        pageKey === 'student_browse'
+        && marketCount === 0
+        && !progress.student_listing
+      ) {
+        try {
+          progress = await completeOnboardingPage('student_listing')
+        } catch {
+          progress = { ...progress, student_listing: new Date().toISOString() }
+        }
+      }
+
       const mergedProfile = {
         ...profile,
         onboarding_progress: progress,
       }
 
-      if (markForced && allRequiredPagesDone(mergedProfile)) {
+      if (markForced && allRequiredPagesDone(mergedProfile, finishOptions)) {
         try {
           await completeOnboarding()
           mergedProfile.onboarding_completed_at = new Date().toISOString()
@@ -164,13 +189,15 @@ export function OnboardingProvider({ children }) {
       clearPageState,
       currentPageKey: pageKey,
       tourOpen,
+      completionOptions,
     }),
-    [openReplay, registerPageHandler, registerPageState, clearPageState, pageKey, tourOpen]
+    [openReplay, registerPageHandler, registerPageState, clearPageState, pageKey, tourOpen, completionOptions]
   )
 
   return (
     <OnboardingContext.Provider value={value}>
       {children}
+      <OnboardingContinueBanner />
       {steps && steps.length > 0 && (
         <OnboardingTour
           steps={steps}

@@ -5,6 +5,42 @@ export const REQUIRED_ONBOARDING_PAGES = {
   landlord: ['landlord_dashboard', 'landlord_browse'],
 }
 
+export const ONBOARDING_PAGE_META = {
+  student_dashboard: {
+    path: '/student',
+    actionKey: 'onboarding.continueDashboard',
+    descriptionKey: 'onboarding.continueDashboardDesc',
+  },
+  student_browse: {
+    path: '/listings',
+    actionKey: 'onboarding.continueBrowse',
+    descriptionKey: 'onboarding.continueBrowseDesc',
+  },
+  student_listing: {
+    path: '/listings',
+    actionKey: 'onboarding.continueListing',
+    descriptionKey: 'onboarding.continueListingDesc',
+  },
+  landlord_dashboard: {
+    path: '/landlord',
+    actionKey: 'onboarding.continueLandlordDashboard',
+    descriptionKey: 'onboarding.continueLandlordDashboardDesc',
+  },
+  landlord_browse: {
+    path: '/listings',
+    actionKey: 'onboarding.continueLandlordBrowse',
+    descriptionKey: 'onboarding.continueLandlordBrowseDesc',
+  },
+}
+
+export function getEffectiveRequiredPages(role, { marketListingCount } = {}) {
+  const base = REQUIRED_ONBOARDING_PAGES[role] || []
+  if (role === 'student' && (marketListingCount ?? 0) === 0) {
+    return base.filter((key) => key !== 'student_listing')
+  }
+  return base
+}
+
 export function getOnboardingPageKey(pathname, role) {
   if (role === 'student') {
     if (pathname === '/student') return 'student_dashboard'
@@ -25,12 +61,21 @@ export function isPageOnboardingDone(profile, pageKey) {
   return Boolean(progress[pageKey])
 }
 
-export function allRequiredPagesDone(profile) {
+export function allRequiredPagesDone(profile, options = {}) {
   if (!profile?.role) return false
   if (profile.onboarding_completed_at) return true
-  const required = REQUIRED_ONBOARDING_PAGES[profile.role] || []
+  const required = getEffectiveRequiredPages(profile.role, options)
   const progress = profile.onboarding_progress || {}
   return required.every((key) => Boolean(progress[key]))
+}
+
+export function getNextOnboardingPage(profile, options = {}) {
+  if (!profile?.role || profile.onboarding_completed_at) return null
+  const required = getEffectiveRequiredPages(profile.role, options)
+  const progress = profile.onboarding_progress || {}
+  const nextKey = required.find((key) => !progress[key])
+  if (!nextKey) return null
+  return { pageKey: nextKey, ...ONBOARDING_PAGE_META[nextKey] }
 }
 
 export function sessionPageDone(userId, pageKey) {

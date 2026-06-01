@@ -52,7 +52,7 @@ export default function LandlordDashboard() {
   const cached = user?.id && listingsCache.userId === user.id ? listingsCache.items : []
   const [listings, setListings] = useState(cached)
   const [loading, setLoading] = useState(!cached.length)
-  const { applications, viewings, conversations, loading: inquiriesLoading } = useLandlordInquiries()
+  const { applications, viewings, conversations, loading: inquiriesLoading, refetch: refetchInquiries } = useLandlordInquiries()
   const [filter, setFilter] = useState('all')
   const motionProps = prefs.reduceMotion ? {} : fade
 
@@ -393,7 +393,13 @@ export default function LandlordDashboard() {
       </section>
 
       <div className="mb-10" data-onboarding="landlord-inquiries">
-        <LandlordInquiriesPanel />
+        <LandlordInquiriesPanel
+          viewings={viewings}
+          applications={applications}
+          conversations={conversations}
+          loading={inquiriesLoading}
+          refetch={refetchInquiries}
+        />
       </div>
 
       <div className="mb-10">

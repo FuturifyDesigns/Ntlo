@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Calendar, CheckCircle2, Home, XCircle, Loader2 } from 'lucide-react'
 import { useTranslation } from '../../hooks/useTranslation'
-import { useLandlordInquiries } from '../../hooks/useHousing'
 import { respondToApplication, markApplicationRented, relistListing, updateViewingRequest, cancelViewingRequest, requestApplicationChanges } from '../../lib/housing'
 import WithdrawReasonModal, { VIEWING_CANCEL_REASONS } from './WithdrawReasonModal'
 import RequestChangesModal from './RequestChangesModal'
@@ -26,10 +25,15 @@ function statusLabel(status, t) {
   return t(`housing.status.${status}`, { defaultValue: status.replace(/_/g, ' ') })
 }
 
-export default function LandlordInquiriesPanel() {
+export default function LandlordInquiriesPanel({
+  viewings,
+  applications,
+  conversations,
+  loading,
+  refetch,
+}) {
   const { t } = useTranslation()
   const [searchParams, setSearchParams] = useSearchParams()
-  const { viewings, applications, conversations, loading, refetch } = useLandlordInquiries()
   const [tab, setTab] = useState('applications')
   const [busyId, setBusyId] = useState(null)
   const [activeChat, setActiveChat] = useState(null)

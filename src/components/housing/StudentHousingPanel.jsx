@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import { useSearchParams, Link } from 'react-router-dom'
 import { Loader2 } from 'lucide-react'
 import { useTranslation } from '../../hooks/useTranslation'
-import { useConversations, useStudentHousing } from '../../hooks/useHousing'
 import { withdrawApplication, cancelViewingRequest } from '../../lib/housing'
 import { getActiveRental } from '../../lib/applicationRules'
 import Card from '../ui/Card'
@@ -24,11 +23,17 @@ function statusLabel(status, t) {
   return t(`housing.status.${status}`, { defaultValue: status.replace(/_/g, ' ') })
 }
 
-export default function StudentHousingPanel({ tourTab }) {
+export default function StudentHousingPanel({
+  tourTab,
+  applications,
+  viewings,
+  conversations,
+  loading,
+  convLoading,
+  refetch,
+}) {
   const { t } = useTranslation()
   const [searchParams] = useSearchParams()
-  const { conversations, loading: convLoading } = useConversations()
-  const { viewings, applications, loading, refetch } = useStudentHousing()
   const [tab, setTab] = useState('applications')
   const [activeChat, setActiveChat] = useState(null)
   const [activeChatLandlord, setActiveChatLandlord] = useState(null)
