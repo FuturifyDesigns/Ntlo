@@ -110,35 +110,35 @@ function TooltipCard({
 
   if (hasTarget && rect) {
     const cardW = Math.min(window.innerWidth - 32, 384)
-    const cardH = 280
-    const gap = 16
-    const below = rect.top + rect.height + gap
-    const above = rect.top - gap
+    const cardH = 300
+    const gap = 20
     const targetCenterX = rect.left + rect.width / 2
-    const onRightSide = targetCenterX > window.innerWidth * 0.52
+    const clampLeft = (left) => Math.max(16, Math.min(window.innerWidth - cardW - 16, left))
 
-    if (onRightSide) {
-      positionClass = 'fixed z-[230] w-[min(calc(100vw-2rem),24rem)]'
+    positionClass = 'fixed z-[230] w-[min(calc(100vw-2rem),24rem)]'
+
+    const aboveTop = rect.top - gap - cardH
+    if (aboveTop >= 16) {
+      style = {
+        top: aboveTop,
+        left: clampLeft(targetCenterX - cardW / 2),
+      }
+    } else if (rect.left - cardW - gap >= 16) {
       style = {
         top: Math.max(16, Math.min(rect.top, window.innerHeight - cardH - 16)),
-        left: Math.max(16, rect.left - cardW - gap),
+        left: rect.left - cardW - gap,
         maxWidth: Math.min(cardW, rect.left - gap - 16),
       }
+    } else if (rect.left + rect.width + gap + cardW <= window.innerWidth - 16) {
+      style = {
+        top: Math.max(16, Math.min(rect.top, window.innerHeight - cardH - 16)),
+        left: rect.left + rect.width + gap,
+      }
     } else {
-      const preferBelow = below + cardH < window.innerHeight || above < cardH
-
-      if (preferBelow && below + cardH < window.innerHeight) {
-        positionClass = 'fixed z-[230] w-[min(calc(100vw-2rem),24rem)]'
-        style = {
-          top: below,
-          left: Math.max(16, Math.min(window.innerWidth - cardW - 16, targetCenterX - cardW / 2)),
-        }
-      } else if (above > cardH) {
-        positionClass = 'fixed z-[230] w-[min(calc(100vw-2rem),24rem)]'
-        style = {
-          bottom: window.innerHeight - above,
-          left: Math.max(16, Math.min(window.innerWidth - cardW - 16, targetCenterX - cardW / 2)),
-        }
+      const belowTop = rect.top + rect.height + gap
+      style = {
+        top: Math.min(belowTop, window.innerHeight - cardH - 16),
+        left: clampLeft(targetCenterX - cardW / 2),
       }
     }
   }

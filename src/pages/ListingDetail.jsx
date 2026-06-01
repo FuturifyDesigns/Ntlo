@@ -18,7 +18,7 @@ import ListingContactPanel from '../components/housing/ListingContactPanel'
 import TrustedBadge from '../components/trust/TrustedBadge'
 import { resolveListingTrustBadge } from '../lib/tierBenefits'
 import { useAuth } from '../hooks/useAuth'
-import { useOnboardingPageState } from '../context/OnboardingContext'
+import { OnboardingReplayButton, useOnboardingPageState } from '../context/OnboardingContext'
 import { getUniversityDisplayName } from '../lib/universityNames'
 import { getListingOccupancy, isListingRented } from '../lib/listingOccupancy'
 import { isListingRecentlyUpdated } from '../lib/listingFreshness'
@@ -36,7 +36,7 @@ import {
 export default function ListingDetail() {
   const { id } = useParams()
   const { t } = useTranslation()
-  const { profile, isLandlord } = useAuth()
+  const { profile, isLandlord, user } = useAuth()
   const { listing, loading, error } = useListing(id)
   const listingOnboardingState = useMemo(() => ({
     ready: !loading,
@@ -76,10 +76,15 @@ export default function ListingDetail() {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-        <Link to="/listings" className="mb-4 inline-flex items-center gap-1 text-sm text-muted hover:text-primary">
-          <ArrowLeft size={16} />
-          {t('listings.backToListings')}
-        </Link>
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <Link to="/listings" className="inline-flex items-center gap-1 text-sm text-muted hover:text-primary">
+            <ArrowLeft size={16} />
+            {t('listings.backToListings')}
+          </Link>
+          {user && profile?.role === 'student' && (
+            <OnboardingReplayButton />
+          )}
+        </div>
 
         <div className="grid gap-8 lg:grid-cols-3">
           <div className="lg:col-span-2 space-y-6">

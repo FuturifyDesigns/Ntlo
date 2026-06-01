@@ -14,11 +14,8 @@ export function useOnboardingNavHighlight(path) {
     return false
   }
 
+  if (actionOnboardingPage.highlightNav === false) return false
   if (path !== actionOnboardingPage.path) return false
-
-  if (actionOnboardingPage.pageKey === 'student_listing') {
-    return !/^\/listings\/[^/]+$/.test(location.pathname)
-  }
 
   return true
 }

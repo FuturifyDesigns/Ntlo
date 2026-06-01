@@ -36,6 +36,7 @@ export const ONBOARDING_PAGE_META = {
   },
   student_listing: {
     path: '/listings',
+    highlightNav: false,
     pageLabelKey: 'onboarding.pageLabels.listing',
     actionKey: 'onboarding.continueListing',
     descriptionKey: 'onboarding.continueListingDesc',

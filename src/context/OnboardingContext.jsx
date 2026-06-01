@@ -170,7 +170,6 @@ export function OnboardingProvider({ children }) {
     setTourOpen(false)
     setForced(false)
     setReplayPageKey(null)
-    setPendingTourKey(null)
   }, [location.pathname])
 
   useEffect(() => {
@@ -187,7 +186,7 @@ export function OnboardingProvider({ children }) {
     setForced(true)
     const timer = window.setTimeout(() => setTourOpen(true), 600)
     return () => clearTimeout(timer)
-  }, [onboardingActive, profile, profileLoading, pageKey, baseSteps, replayPageKey, pendingTourKey, pageStateVersion, location.pathname])
+  }, [onboardingActive, profile, profileLoading, pageKey, baseSteps, replayPageKey, pendingTourKey, pageStateVersion, location.pathname, completionOptions])
 
   useEffect(() => {
     if (!pendingTourKey || !profile?.role) return undefined
@@ -202,8 +201,8 @@ export function OnboardingProvider({ children }) {
 
     const timer = window.setTimeout(() => {
       setPendingTourKey(null)
-      beginTour(pendingTourKey, { isForced: false })
-    }, 400)
+      beginTour(pendingTourKey, { isForced: true })
+    }, 500)
     return () => clearTimeout(timer)
   }, [pendingTourKey, profile, location.pathname, pageStateVersion, beginTour])
 
