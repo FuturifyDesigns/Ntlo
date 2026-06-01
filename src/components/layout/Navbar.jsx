@@ -10,6 +10,25 @@ import UserMenu from './UserMenu'
 import PingNavButton from '../ping/PingNavButton'
 import { usePingTransition } from '../../context/PingTransitionContext'
 import { usePresenceHeartbeat } from '../../hooks/usePresence'
+import { onboardingNavClass, useOnboardingNavHighlight } from '../../hooks/useOnboardingNavHighlight'
+
+function NavbarLink({
+  to, label, darkNav, active, onClick, className = '',
+}) {
+  const highlighted = useOnboardingNavHighlight(to)
+  return (
+    <Link
+      to={to}
+      onClick={onClick}
+      className={`${className} ${onboardingNavClass(highlighted, { active, darkNav })}`}
+    >
+      {label}
+      {active && (
+        <span className="absolute inset-x-3 -bottom-px h-px bg-accent" />
+      )}
+    </Link>
+  )
+}
 
 export default function Navbar() {
   const [open, setOpen] = useState(false)
@@ -45,20 +64,18 @@ export default function Navbar() {
 
         <nav className="hidden items-center gap-0.5 md:flex" aria-label="Main navigation">
           {navLinks.map((link) => (
-            <Link
+            <NavbarLink
               key={link.to}
               to={link.to}
+              label={link.label}
+              darkNav={darkNav}
+              active={isActive(link.to)}
               className={`relative rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
                 darkNav
                   ? isActive(link.to) ? 'text-white' : 'text-white/60 hover:text-white'
                   : isActive(link.to) ? 'text-primary' : 'text-muted hover:text-primary'
               }`}
-            >
-              {link.label}
-              {isActive(link.to) && (
-                <span className="absolute inset-x-3 -bottom-px h-px bg-accent" />
-              )}
-            </Link>
+            />
           ))}
           <div className={`ml-2 pl-2 border-l ${darkNav ? 'border-white/15' : 'border-border/60'}`}>
             <PingNavButton />
@@ -106,18 +123,19 @@ export default function Navbar() {
         }`}>
           <nav className="flex flex-col gap-1">
             {navLinks.map((link) => (
-              <Link
+              <NavbarLink
                 key={link.to}
                 to={link.to}
+                label={link.label}
+                darkNav={darkNav}
+                active={isActive(link.to)}
                 onClick={() => setOpen(false)}
                 className={`rounded-lg px-3 py-2.5 text-sm font-medium ${
                   darkNav
                     ? isActive(link.to) ? 'bg-white/10 text-white' : 'text-white/65 hover:bg-white/5 hover:text-white'
                     : isActive(link.to) ? 'bg-primary/5 text-primary' : 'text-muted hover:bg-background'
                 }`}
-              >
-                {link.label}
-              </Link>
+              />
             ))}
             <div className="px-3 py-2">
               <PingNavButton compact onNavigate={() => setOpen(false)} />

@@ -52,6 +52,7 @@ import GoogleMapsProvider from './components/maps/GoogleMapsProvider'
 import { SavedListingsProvider } from './context/SavedListingsContext'
 import { OnboardingProvider } from './context/OnboardingContext'
 import WelcomeGuestModal from './components/onboarding/WelcomeGuestModal'
+import OnboardingContinueBanner from './components/onboarding/OnboardingContinueBanner'
 import { useLocale } from './context/LocaleContext'
 import { useTranslation } from './hooks/useTranslation'
 
@@ -149,6 +150,7 @@ function AppShell() {
       {!isPingRoute && <GrainOverlay />}
       <div className={`flex min-h-screen flex-col ${isPingRoute ? '' : 'pb-16 md:pb-0'}`}>
         <Navbar />
+        <OnboardingContinueBanner />
         <main id="main-content" className="flex-1">
           <AppRoutes />
         </main>

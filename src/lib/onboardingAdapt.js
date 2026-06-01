@@ -18,9 +18,9 @@ export function resolveStepCopy(step, state) {
   }
 }
 
-export function resolveOnboardingSteps(baseSteps, state = {}) {
+export function resolveOnboardingSteps(baseSteps, state = {}, options = {}) {
   if (!baseSteps?.length) return []
-  if (state.ready === false) return []
+  if (!options.ignoreReady && state.ready === false) return []
 
   return baseSteps
     .filter((step) => (step.when ? step.when(state) : true))

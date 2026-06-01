@@ -11,12 +11,13 @@ import {
   isPageOnboardingDone,
   markSessionPageDone,
   sessionPageDone,
+  getNextOnboardingPage,
+  getRemainingOnboardingPages,
 } from '../lib/onboardingRoutes'
 import { ONBOARDING_STEPS_BY_PAGE } from '../lib/onboardingSteps'
 import { mergePageState, resolveOnboardingSteps } from '../lib/onboardingAdapt'
 import OnboardingTour from '../components/onboarding/OnboardingTour'
 import OnboardingHelpButton from '../components/onboarding/OnboardingHelpButton'
-import OnboardingContinueBanner from '../components/onboarding/OnboardingContinueBanner'
 
 const OnboardingContext = createContext(null)
 
@@ -39,9 +40,12 @@ export function OnboardingProvider({ children }) {
 
   const steps = useMemo(() => {
     if (!pageKey || !baseSteps) return null
-    return resolveOnboardingSteps(baseSteps, pageStateRef.current[pageKey] || {})
+    const state = pageStateRef.current[pageKey] || {}
+    return resolveOnboardingSteps(baseSteps, state, {
+      ignoreReady: Boolean(replayPageKey),
+    })
     // eslint-disable-next-line react-hooks/exhaustive-deps -- pageStateVersion triggers re-resolve
-  }, [pageKey, baseSteps, pageStateVersion])
+  }, [pageKey, baseSteps, pageStateVersion, replayPageKey])
 
   const completionOptions = useMemo(() => ({
     marketListingCount: pageStateRef.current.student_dashboard?.marketListingCount
@@ -49,6 +53,16 @@ export function OnboardingProvider({ children }) {
       ?? 0,
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }), [pageStateVersion])
+
+  const nextOnboardingPage = useMemo(
+    () => (profile && !tourOpen ? getNextOnboardingPage(profile, completionOptions) : null),
+    [profile, completionOptions, tourOpen]
+  )
+
+  const remainingOnboardingPages = useMemo(
+    () => (profile ? getRemainingOnboardingPages(profile, completionOptions) : []),
+    [profile, completionOptions]
+  )
 
   const registerPageState = useCallback((key, partial) => {
     if (!key) return
@@ -80,7 +94,13 @@ export function OnboardingProvider({ children }) {
   }, [location.pathname, profile?.role])
 
   useEffect(() => {
-    if (profileLoading || !profile?.id || !pageKey || !steps?.length) return undefined
+    setTourOpen(false)
+    setForced(false)
+    setReplayPageKey(null)
+  }, [location.pathname])
+
+  useEffect(() => {
+    if (profileLoading || !profile?.id || !pageKey || !baseSteps?.length) return undefined
     if (replayPageKey) return undefined
     if (isPageOnboardingDone(profile, pageKey)) return undefined
     if (sessionPageDone(profile.id, pageKey)) return undefined
@@ -89,13 +109,9 @@ export function OnboardingProvider({ children }) {
     if (!liveState || liveState.ready === false) return undefined
 
     setForced(true)
-    const timer = window.setTimeout(() => setTourOpen(true), 500)
+    const timer = window.setTimeout(() => setTourOpen(true), 600)
     return () => clearTimeout(timer)
-  }, [profile, profileLoading, pageKey, steps, replayPageKey, pageStateVersion])
-
-  useEffect(() => {
-    if (!tourOpen) setReplayPageKey(null)
-  }, [tourOpen])
+  }, [profile, profileLoading, pageKey, baseSteps, replayPageKey, pageStateVersion, location.pathname])
 
   const handleStepEnter = useCallback((step) => {
     if (!pageKey) return
@@ -190,17 +206,18 @@ export function OnboardingProvider({ children }) {
       currentPageKey: pageKey,
       tourOpen,
       completionOptions,
+      nextOnboardingPage,
+      remainingOnboardingPages,
     }),
-    [openReplay, registerPageHandler, registerPageState, clearPageState, pageKey, tourOpen, completionOptions]
+    [openReplay, registerPageHandler, registerPageState, clearPageState, pageKey, tourOpen, completionOptions, nextOnboardingPage, remainingOnboardingPages]
   )
 
   return (
     <OnboardingContext.Provider value={value}>
       {children}
-      <OnboardingContinueBanner />
-      {steps && steps.length > 0 && (
+      {(steps?.length > 0 || (tourOpen && replayPageKey && baseSteps?.length)) && (
         <OnboardingTour
-          steps={steps}
+          steps={steps?.length ? steps : resolveOnboardingSteps(baseSteps, pageStateRef.current[pageKey] || {}, { ignoreReady: true })}
           open={tourOpen}
           forced={forced}
           onClose={handleClose}
