@@ -1,5 +1,21 @@
 /** Route → onboarding page key and required pages per role. */
 
+export const ONBOARDING_AUTH_PATHS = new Set([
+  '/login',
+  '/register',
+  '/forgot-password',
+  '/check-email',
+  '/complete-profile',
+])
+
+/** Onboarding UI only for signed-in students/landlords on app pages (not auth screens). */
+export function isOnboardingEligible(profile, user, pathname) {
+  if (!user?.id || !profile?.id) return false
+  if (!['student', 'landlord'].includes(profile.role)) return false
+  if (ONBOARDING_AUTH_PATHS.has(pathname)) return false
+  return true
+}
+
 export const REQUIRED_ONBOARDING_PAGES = {
   student: ['student_dashboard', 'student_browse', 'student_listing'],
   landlord: ['landlord_dashboard', 'landlord_browse'],

@@ -20,7 +20,7 @@ export default function Login() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [transitioning, setTransitioning] = useState(false)
-  const { signIn } = useAuth()
+  const { signIn, user, profile, loading: authLoading } = useAuth()
   const { t } = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
@@ -30,6 +30,12 @@ export default function Login() {
   const verified = searchParams.get('verified') === '1' || location.state?.verified
   const oauthSignup = searchParams.get('oauth') === '1' || location.state?.oauth
   const passwordReset = searchParams.get('reset') === '1'
+
+  useEffect(() => {
+    if (!authLoading && user) {
+      navigate(getPostAuthPath(profile, from), { replace: true })
+    }
+  }, [authLoading, user, profile, navigate, from])
 
   useEffect(() => {
     const stored = readBanInfoFromLogin()

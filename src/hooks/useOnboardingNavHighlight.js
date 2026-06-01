@@ -1,11 +1,15 @@
 import { useLocation } from 'react-router-dom'
+import { useAuth } from './useAuth'
 import { useOnboarding } from '../context/OnboardingContext'
+import { isOnboardingEligible } from '../lib/onboardingRoutes'
 
 /** Returns true when a nav link should be highlighted as the next onboarding destination. */
 export function useOnboardingNavHighlight(path) {
   const location = useLocation()
+  const { user, profile } = useAuth()
   const { actionOnboardingPage, tourOpen, remainingOnboardingPages } = useOnboarding()
 
+  if (!isOnboardingEligible(profile, user, location.pathname)) return false
   if (tourOpen || !actionOnboardingPage || remainingOnboardingPages.length === 0) {
     return false
   }

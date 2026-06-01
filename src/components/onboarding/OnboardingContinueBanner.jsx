@@ -1,13 +1,19 @@
+import { useLocation } from 'react-router-dom'
 import { ArrowRight, Sparkles } from 'lucide-react'
+import { useAuth } from '../../hooks/useAuth'
 import { useTranslation } from '../../hooks/useTranslation'
 import { useOnboarding } from '../../context/OnboardingContext'
+import { isOnboardingEligible } from '../../lib/onboardingRoutes'
 
 export default function OnboardingContinueBanner() {
   const { t } = useTranslation()
+  const { user, profile, loading: authLoading } = useAuth()
+  const location = useLocation()
   const {
     tourOpen, actionOnboardingPage, remainingOnboardingPages, startPageTour,
   } = useOnboarding()
 
+  if (authLoading || !isOnboardingEligible(profile, user, location.pathname)) return null
   if (!actionOnboardingPage || tourOpen || remainingOnboardingPages.length === 0) return null
 
   return (

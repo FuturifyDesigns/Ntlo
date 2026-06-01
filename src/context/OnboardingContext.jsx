@@ -18,6 +18,7 @@ import {
   shouldBlockAutoStart,
   isOnboardingFullyComplete,
   allRequiredPagesDone,
+  isOnboardingEligible,
 } from '../lib/onboardingRoutes'
 import { ONBOARDING_STEPS_BY_PAGE } from '../lib/onboardingSteps'
 import { mergePageState, resolveOnboardingSteps } from '../lib/onboardingAdapt'
@@ -27,7 +28,7 @@ import OnboardingHelpButton from '../components/onboarding/OnboardingHelpButton'
 const OnboardingContext = createContext(null)
 
 export function OnboardingProvider({ children }) {
-  const { profile, profileLoading, refreshProfile, patchProfile } = useAuth()
+  const { user, profile, profileLoading, refreshProfile, patchProfile } = useAuth()
   const location = useLocation()
   const navigate = useNavigate()
   const [tourOpen, setTourOpen] = useState(false)
@@ -76,16 +77,20 @@ export function OnboardingProvider({ children }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }), [pageStateVersion])
 
+  const onboardingActive = isOnboardingEligible(profile, user, location.pathname)
+
   const actionOnboardingPage = useMemo(
-    () => (profile && !tourOpen
+    () => (onboardingActive && !tourOpen
       ? getOnboardingActionPage(profile, location.pathname, profile.role, completionOptions)
       : null),
-    [profile, location.pathname, completionOptions, tourOpen]
+    [onboardingActive, profile, location.pathname, completionOptions, tourOpen]
   )
 
   const remainingOnboardingPages = useMemo(
-    () => (profile ? getRemainingOnboardingPages(profile, completionOptions) : []),
-    [profile, completionOptions]
+    () => (onboardingActive
+      ? getRemainingOnboardingPages(profile, completionOptions)
+      : []),
+    [onboardingActive, profile, completionOptions]
   )
 
   const registerPageState = useCallback((key, partial) => {
@@ -122,6 +127,7 @@ export function OnboardingProvider({ children }) {
   }, [location.pathname, profile?.role, beginTour])
 
   const startPageTour = useCallback((targetKey) => {
+    if (!isOnboardingEligible(profile, user, location.pathname)) return
     if (!targetKey || !ONBOARDING_STEPS_BY_PAGE[targetKey]) return
     const currentKey = profile?.role
       ? getOnboardingPageKey(location.pathname, profile.role)
@@ -154,7 +160,7 @@ export function OnboardingProvider({ children }) {
 
     setPendingTourKey(targetKey)
     navigate(path)
-  }, [profile?.role, location.pathname, navigate, beginTour])
+  }, [profile, user, location.pathname, navigate, beginTour])
 
   useEffect(() => {
     const { open, forced: wasForced, pageKey: closingKey } = activeTourRef.current
@@ -168,7 +174,9 @@ export function OnboardingProvider({ children }) {
   }, [location.pathname])
 
   useEffect(() => {
-    if (profileLoading || !profile?.id || !pageKey || !baseSteps?.length) return undefined
+    if (!onboardingActive || profileLoading || !profile?.id || !pageKey || !baseSteps?.length) {
+      return undefined
+    }
     if (replayPageKey || pendingTourKey) return undefined
     if (isOnboardingFullyComplete(profile, completionOptions)) return undefined
     if (shouldBlockAutoStart(profile, profile.id, pageKey, completionOptions)) return undefined
@@ -179,7 +187,7 @@ export function OnboardingProvider({ children }) {
     setForced(true)
     const timer = window.setTimeout(() => setTourOpen(true), 600)
     return () => clearTimeout(timer)
-  }, [profile, profileLoading, pageKey, baseSteps, replayPageKey, pendingTourKey, pageStateVersion, location.pathname])
+  }, [onboardingActive, profile, profileLoading, pageKey, baseSteps, replayPageKey, pendingTourKey, pageStateVersion, location.pathname])
 
   useEffect(() => {
     if (!pendingTourKey || !profile?.role) return undefined
@@ -323,7 +331,7 @@ export function OnboardingProvider({ children }) {
   return (
     <OnboardingContext.Provider value={value}>
       {children}
-      {tourOpen && tourSteps.length > 0 && (
+      {onboardingActive && tourOpen && tourSteps.length > 0 && (
         <OnboardingTour
           steps={tourSteps}
           open={tourOpen}
