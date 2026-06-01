@@ -18,7 +18,7 @@ export function AuthProvider({ children }) {
     try {
       const { data } = await supabase
         .from('profiles')
-        .select('id, full_name, phone, role, university_id, gender, avatar_url, is_verified, verification_status, verification_notes, is_banned, banned_reason, banned_at, banned_until, ban_reason_code, ban_reason_note, ban_acknowledged_at, subscription_tier, subscription_status, subscription_period_end, last_seen_at')
+        .select('id, full_name, phone, role, university_id, gender, avatar_url, is_verified, verification_status, verification_notes, is_banned, banned_reason, banned_at, banned_until, ban_reason_code, ban_reason_note, ban_acknowledged_at, subscription_tier, subscription_status, subscription_period_end, last_seen_at, onboarding_completed_at')
         .eq('id', userId)
         .maybeSingle()
       setProfile(data)

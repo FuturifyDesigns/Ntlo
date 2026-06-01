@@ -1,0 +1,107 @@
+/** Interactive onboarding step configs per role. */
+
+export const STUDENT_ONBOARDING_STEPS = [
+  {
+    id: 'welcome',
+    type: 'center',
+    icon: 'GraduationCap',
+    titleKey: 'onboarding.student.welcomeTitle',
+    bodyKey: 'onboarding.student.welcomeBody',
+  },
+  {
+    id: 'sections',
+    target: 'student-section-tabs',
+    titleKey: 'onboarding.student.sectionsTitle',
+    bodyKey: 'onboarding.student.sectionsBody',
+    pulse: true,
+  },
+  {
+    id: 'saved',
+    target: 'student-tab-saved',
+    titleKey: 'onboarding.student.savedTitle',
+    bodyKey: 'onboarding.student.savedBody',
+    action: 'click',
+    onEnter: { section: 'saved' },
+    pulse: true,
+  },
+  {
+    id: 'housing',
+    target: 'student-tab-housing',
+    titleKey: 'onboarding.student.housingTitle',
+    bodyKey: 'onboarding.student.housingBody',
+    action: 'click',
+    onEnter: { section: 'housing', housingTab: 'applications' },
+    pulse: true,
+  },
+  {
+    id: 'housing-tabs',
+    target: 'student-housing-tabs',
+    titleKey: 'onboarding.student.housingTabsTitle',
+    bodyKey: 'onboarding.student.housingTabsBody',
+    onEnter: { section: 'housing', housingTab: 'applications' },
+    pulse: true,
+  },
+  {
+    id: 'browse',
+    target: 'student-browse-cta',
+    titleKey: 'onboarding.student.browseTitle',
+    bodyKey: 'onboarding.student.browseBody',
+    onEnter: { section: 'saved' },
+    pulse: true,
+  },
+  {
+    id: 'done',
+    type: 'center',
+    icon: 'PartyPopper',
+    titleKey: 'onboarding.student.doneTitle',
+    bodyKey: 'onboarding.student.doneBody',
+  },
+]
+
+export const LANDLORD_ONBOARDING_STEPS = [
+  {
+    id: 'welcome',
+    type: 'center',
+    icon: 'Building2',
+    titleKey: 'onboarding.landlord.welcomeTitle',
+    bodyKey: 'onboarding.landlord.welcomeBody',
+  },
+  {
+    id: 'stats',
+    target: 'landlord-stats',
+    titleKey: 'onboarding.landlord.statsTitle',
+    bodyKey: 'onboarding.landlord.statsBody',
+    onEnter: { scrollTarget: 'landlord-stats' },
+    pulse: true,
+  },
+  {
+    id: 'add-listing',
+    target: 'landlord-add-listing',
+    titleKey: 'onboarding.landlord.addListingTitle',
+    bodyKey: 'onboarding.landlord.addListingBody',
+    pulse: true,
+  },
+  {
+    id: 'listings',
+    target: 'landlord-listings',
+    titleKey: 'onboarding.landlord.listingsTitle',
+    bodyKey: 'onboarding.landlord.listingsBody',
+    onEnter: { scrollTarget: 'landlord-listings' },
+    pulse: true,
+  },
+  {
+    id: 'inquiries',
+    target: 'landlord-inquiries',
+    titleKey: 'onboarding.landlord.inquiriesTitle',
+    bodyKey: 'onboarding.landlord.inquiriesBody',
+    onEnter: { scrollTarget: 'landlord-inquiries' },
+    pulse: true,
+  },
+  {
+    id: 'done',
+    type: 'center',
+    icon: 'PartyPopper',
+    titleKey: 'onboarding.landlord.doneTitle',
+    bodyKey: 'onboarding.landlord.doneBody',
+  },
+]

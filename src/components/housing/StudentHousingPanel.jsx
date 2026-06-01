@@ -24,7 +24,7 @@ function statusLabel(status, t) {
   return t(`housing.status.${status}`, { defaultValue: status.replace(/_/g, ' ') })
 }
 
-export default function StudentHousingPanel() {
+export default function StudentHousingPanel({ tourTab }) {
   const { t } = useTranslation()
   const [searchParams] = useSearchParams()
   const { conversations, loading: convLoading } = useConversations()
@@ -40,6 +40,12 @@ export default function StudentHousingPanel() {
   useEffect(() => {
     if (!loading && !convLoading) setInitialLoad(false)
   }, [loading, convLoading])
+
+  useEffect(() => {
+    if (tourTab && ['applications', 'viewings', 'messages'].includes(tourTab)) {
+      setTab(tourTab)
+    }
+  }, [tourTab])
 
   useEffect(() => {
     const tabParam = searchParams.get('tab')
@@ -98,7 +104,7 @@ export default function StudentHousingPanel() {
   return (
     <>
     <div className="space-y-4">
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2" data-onboarding="student-housing-tabs">
         {tabs.map((item) => (
           <button
             key={item.id}

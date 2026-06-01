@@ -24,6 +24,9 @@ import { withdrawListing } from '../lib/listingPublish'
 import { mapListingEditError } from '../lib/listingEditPolicy'
 import { getListingLandlordActions } from '../lib/listingReviewPolicy'
 import { MAPS_ENABLED } from '../lib/googleMaps'
+import DashboardOnboarding from '../components/onboarding/DashboardOnboarding'
+import OnboardingHelpButton from '../components/onboarding/OnboardingHelpButton'
+import { LANDLORD_ONBOARDING_STEPS } from '../lib/onboardingSteps'
 
 const PLACEHOLDER = 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400&q=80'
 
@@ -178,6 +181,8 @@ export default function LandlordDashboard() {
   }
 
   return (
+    <DashboardOnboarding steps={LANDLORD_ONBOARDING_STEPS}>
+      {({ openReplay }) => (
     <PageShell className="mx-auto max-w-7xl px-4 py-5 sm:px-6 sm:py-8 lg:px-8">
       <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
         <div>
@@ -186,14 +191,17 @@ export default function LandlordDashboard() {
           <EarlyAccessLandlordNote className="mt-4 max-w-2xl" />
         </div>
         <div className="flex flex-wrap gap-2">
+          <OnboardingHelpButton onClick={openReplay} />
           <Button as={Link} to="/landlord/billing" variant="outline">
             <CreditCard size={18} />
             {t('billing.title')}
           </Button>
-          <Button as={Link} to="/landlord/listings/new">
-            <Plus size={18} />
-            {t('dashboard.addListing')}
-          </Button>
+          <span data-onboarding="landlord-add-listing">
+            <Button as={Link} to="/landlord/listings/new">
+              <Plus size={18} />
+              {t('dashboard.addListing')}
+            </Button>
+          </span>
         </div>
       </div>
 
@@ -221,6 +229,7 @@ export default function LandlordDashboard() {
 
       <motion.div
         className="mb-8 grid gap-4 sm:grid-cols-3"
+        data-onboarding="landlord-stats"
         {...motionProps}
         transition={{ ...fade.transition, delay: prefs.reduceMotion ? 0 : 0.05 }}
       >
@@ -240,7 +249,7 @@ export default function LandlordDashboard() {
         </Card>
       </motion.div>
 
-      <section className="mb-10">
+      <section className="mb-10" data-onboarding="landlord-listings">
         <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
           <div>
             <h2 className="font-display text-xl font-semibold text-primary">{t('dashboard.yourListingsTitle')}</h2>
@@ -372,7 +381,7 @@ export default function LandlordDashboard() {
         </AnimatePresence>
       </section>
 
-      <div className="mb-10">
+      <div className="mb-10" data-onboarding="landlord-inquiries">
         <LandlordInquiriesPanel />
       </div>
 
@@ -389,5 +398,7 @@ export default function LandlordDashboard() {
         </motion.div>
       )}
     </PageShell>
+      )}
+    </DashboardOnboarding>
   )
 }
