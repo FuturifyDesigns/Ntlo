@@ -141,7 +141,7 @@ export function allRequiredPagesDone(profile, options = {}) {
 
 export function isOnboardingFullyComplete(profile, options = {}) {
   if (!profile?.role) return false
-  if (profile.onboarding_completed_at) return true
+  // Per-page progress only — onboarding_completed_at is legacy/grandfathered and must not hide the banner.
   return allRequiredPagesDone(profile, options)
 }
 

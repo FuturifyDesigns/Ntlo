@@ -152,8 +152,10 @@ export function OnboardingProvider({ children }) {
 
   const openReplay = useCallback((key) => {
     const target = key || getOnboardingPageKey(location.pathname, profile?.role)
-    beginTour(target, { isForced: false })
-  }, [location.pathname, profile?.role, beginTour])
+    if (!target) return
+    const progress = getProfileOnboardingProgress(profile)
+    beginTour(target, { isForced: !progress[target] })
+  }, [location.pathname, profile, beginTour])
 
   const startPageTour = useCallback((targetKey) => {
     if (!isOnboardingEligible(profile, user, location.pathname)) return
@@ -333,11 +335,13 @@ export function OnboardingProvider({ children }) {
   }, [])
 
   const handleComplete = useCallback(async () => {
-    if (forced) {
-      await finalizePage(true)
+    const progress = getProfileOnboardingProgress(profile)
+    const pageIncomplete = pageKey && !progress[pageKey]
+    if (forced || pageIncomplete) {
+      await finalizePage(forced)
     }
     handleClose()
-  }, [finalizePage, forced, handleClose])
+  }, [finalizePage, forced, handleClose, profile, pageKey])
 
   const value = useMemo(
     () => ({

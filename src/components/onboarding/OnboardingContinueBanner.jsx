@@ -3,18 +3,31 @@ import { ArrowRight, Sparkles } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 import { useTranslation } from '../../hooks/useTranslation'
 import { useOnboarding } from '../../context/OnboardingContext'
-import { isOnboardingEligible } from '../../lib/onboardingRoutes'
+import {
+  getOnboardingActionPage,
+  getRemainingOnboardingPages,
+  isOnboardingEligible,
+} from '../../lib/onboardingRoutes'
 
 export default function OnboardingContinueBanner() {
   const { t } = useTranslation()
   const { user, profile, loading: authLoading } = useAuth()
   const location = useLocation()
-  const {
-    tourOpen, actionOnboardingPage, remainingOnboardingPages, startPageTour,
-  } = useOnboarding()
+  const { tourOpen, completionOptions, startPageTour } = useOnboarding()
 
   if (authLoading || !isOnboardingEligible(profile, user, location.pathname)) return null
-  if (!actionOnboardingPage || tourOpen || remainingOnboardingPages.length === 0) return null
+  if (tourOpen || !profile?.role) return null
+
+  const remainingOnboardingPages = getRemainingOnboardingPages(profile, completionOptions)
+  if (remainingOnboardingPages.length === 0) return null
+
+  const actionOnboardingPage = getOnboardingActionPage(
+    profile,
+    location.pathname,
+    profile.role,
+    completionOptions,
+  )
+  if (!actionOnboardingPage) return null
 
   return (
     <div className="relative z-30 border-b border-accent/40 bg-accent/10 px-4 py-3.5">
