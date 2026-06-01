@@ -165,19 +165,16 @@ export default function ListingDetail() {
 
           <div className="lg:col-span-1">
             <div className="sticky top-24 max-h-[calc(100vh-6rem)] space-y-4 overflow-y-auto rounded-xl border border-border bg-surface p-6 shadow-sm">
-              <div data-onboarding="listing-apply-panel">
-                <ListingContactPanel listing={listing} />
-              </div>
+              <ListingContactPanel listing={listing} onboardingId="listing-apply-panel" />
 
               {isLandlord ? (
                 <CompetitiveAdvisorPanel listing={listing} />
               ) : (
-                <div data-onboarding="listing-advisor-panel">
-                  <ListingAdvisorPanel
-                    listing={listing}
-                    studentUniversityId={profile?.role === 'student' ? profile.university_id : undefined}
-                  />
-                </div>
+                <ListingAdvisorPanel
+                  listing={listing}
+                  studentUniversityId={profile?.role === 'student' ? profile.university_id : undefined}
+                  onboardingId="listing-advisor-panel"
+                />
               )}
             </div>
           </div>

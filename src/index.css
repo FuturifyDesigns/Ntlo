@@ -379,45 +379,16 @@ html[data-reduce-motion="true"] .ping-aurora-glow {
   position: relative;
   z-index: 221;
   isolation: isolate;
-  background-color: var(--color-surface) !important;
-  color: var(--color-primary) !important;
   opacity: 1 !important;
   filter: none !important;
   box-shadow:
-    0 0 0 3px rgba(200, 168, 75, 0.55),
-    0 12px 40px rgba(26, 26, 46, 0.18);
+    0 0 0 3px rgba(200, 168, 75, 0.65),
+    0 0 0 6px rgba(200, 168, 75, 0.2);
 }
 
+/* Keep highlighted content at full brightness — do not override colors or backgrounds. */
 .onboarding-spotlight-target,
-.onboarding-spotlight-target *:not(svg):not(path) {
+.onboarding-spotlight-target * {
   opacity: 1 !important;
   filter: none !important;
-}
-
-.onboarding-spotlight-target h1,
-.onboarding-spotlight-target h2,
-.onboarding-spotlight-target h3,
-.onboarding-spotlight-target p,
-.onboarding-spotlight-target span,
-.onboarding-spotlight-target button,
-.onboarding-spotlight-target a {
-  color: var(--color-primary) !important;
-}
-
-.onboarding-spotlight-target .text-muted,
-.onboarding-spotlight-target [class*="text-muted"] {
-  color: #4b5563 !important;
-}
-
-.onboarding-spotlight-target .text-accent,
-.onboarding-spotlight-target [class*="text-accent"] {
-  color: var(--color-accent) !important;
-}
-
-.onboarding-spotlight-target .border-accent {
-  border-color: var(--color-accent) !important;
-}
-
-.onboarding-spotlight-target .bg-accent\/10 {
-  background-color: rgba(200, 168, 75, 0.14) !important;
 }

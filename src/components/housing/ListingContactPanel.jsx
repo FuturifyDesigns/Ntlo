@@ -27,7 +27,7 @@ function WhatsAppIcon({ size = 20 }) {
   )
 }
 
-export default function ListingContactPanel({ listing }) {
+export default function ListingContactPanel({ listing, onboardingId }) {
   const { t } = useTranslation()
   const { user, profile } = useAuth()
   const navigate = useNavigate()
@@ -206,7 +206,7 @@ export default function ListingContactPanel({ listing }) {
 
   return (
     <>
-      <div className="space-y-3">
+      <div className="space-y-3" data-onboarding={onboardingId}>
         <div>
           <p className="text-sm text-muted">{t('listingDetail.listedBy')}</p>
           <p className="font-semibold">{landlordName}</p>

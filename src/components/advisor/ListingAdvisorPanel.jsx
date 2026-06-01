@@ -58,7 +58,7 @@ function InsightList({ items, icon: Icon, variant }) {
   )
 }
 
-export default function ListingAdvisorPanel({ listing, studentUniversityId }) {
+export default function ListingAdvisorPanel({ listing, studentUniversityId, onboardingId }) {
   const { t } = useTranslation()
 
   const context = useMemo(
@@ -83,7 +83,7 @@ export default function ListingAdvisorPanel({ listing, studentUniversityId }) {
   if (!listing || !analysis) return null
 
   return (
-    <Card className="space-y-4 p-5">
+    <Card className="space-y-4 p-5" data-onboarding={onboardingId}>
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="flex items-center gap-2">
           <Sparkles size={18} className="text-accent" />
@@ -97,7 +97,7 @@ export default function ListingAdvisorPanel({ listing, studentUniversityId }) {
       <AnimatePresence mode="wait">
         <motion.div
           key={`${listing.id}-${revision}`}
-          initial={{ opacity: 0, y: 6 }}
+          initial={false}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
