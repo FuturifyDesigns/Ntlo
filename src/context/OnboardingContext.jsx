@@ -12,8 +12,10 @@ import {
   getOnboardingActionPage,
   getRemainingOnboardingPages,
   getTourNavigatePath,
+  getProfileOnboardingProgress,
   saveLocalOnboardingProgress,
   shouldBlockAutoStart,
+  isOnboardingFullyComplete,
 } from '../lib/onboardingRoutes'
 import { ONBOARDING_STEPS_BY_PAGE } from '../lib/onboardingSteps'
 import { mergePageState, resolveOnboardingSteps } from '../lib/onboardingAdapt'
@@ -34,6 +36,10 @@ export function OnboardingProvider({ children }) {
   const completingRef = useRef(false)
   const pageHandlersRef = useRef({})
   const pageStateRef = useRef({})
+  const activeTourRef = useRef({ open: false, forced: false, pageKey: null })
+  const finalizePageRef = useRef(null)
+
+  activeTourRef.current = { open: tourOpen, forced, pageKey }
 
   const pageKey = profile?.role
     ? (replayPageKey || getOnboardingPageKey(location.pathname, profile.role))
@@ -149,15 +155,21 @@ export function OnboardingProvider({ children }) {
   }, [profile?.role, location.pathname, navigate, beginTour])
 
   useEffect(() => {
+    const { open, forced: wasForced, pageKey: closingKey } = activeTourRef.current
+    if (open && wasForced && closingKey) {
+      finalizePageRef.current?.(true)
+    }
     setTourOpen(false)
     setForced(false)
     setReplayPageKey(null)
+    setPendingTourKey(null)
   }, [location.pathname])
 
   useEffect(() => {
     if (profileLoading || !profile?.id || !pageKey || !baseSteps?.length) return undefined
     if (replayPageKey || pendingTourKey) return undefined
-    if (shouldBlockAutoStart(profile, profile.id, pageKey)) return undefined
+    if (isOnboardingFullyComplete(profile, completionOptions)) return undefined
+    if (shouldBlockAutoStart(profile, profile.id, pageKey, completionOptions)) return undefined
 
     const liveState = pageStateRef.current[pageKey]
     if (!liveState || liveState.ready === false) return undefined
@@ -196,7 +208,8 @@ export function OnboardingProvider({ children }) {
     try {
       markSessionPageDone(profile.id, pageKey)
 
-      let progress = { ...(profile.onboarding_progress || {}) }
+      const existing = getProfileOnboardingProgress(profile)
+      let progress = { ...existing }
       try {
         progress = await completeOnboardingPage(pageKey)
       } catch {
@@ -247,7 +260,11 @@ export function OnboardingProvider({ children }) {
       try {
         const refreshed = await refreshProfile?.()
         if (refreshed) {
-          const merged = { ...progress, ...(refreshed.onboarding_progress || {}) }
+          const merged = {
+            ...getProfileOnboardingProgress({ ...profile, onboarding_progress: progress }),
+            ...(refreshed.onboarding_progress || {}),
+            ...progress,
+          }
           saveLocalOnboardingProgress(profile.id, merged)
           patchProfile?.({
             onboarding_progress: merged,
@@ -268,6 +285,8 @@ export function OnboardingProvider({ children }) {
       completingRef.current = false
     }
   }, [profile, pageKey, refreshProfile, patchProfile])
+
+  finalizePageRef.current = finalizePage
 
   const handleClose = useCallback(() => {
     setTourOpen(false)

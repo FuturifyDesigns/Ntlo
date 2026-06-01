@@ -94,6 +94,7 @@ export function allRequiredPagesDone(profile, options = {}) {
 
 export function getRemainingOnboardingPages(profile, options = {}) {
   if (!profile?.role) return []
+  if (isOnboardingFullyComplete(profile, options)) return []
   const required = getEffectiveRequiredPages(profile.role, options)
   const progress = getProfileOnboardingProgress(profile)
   return required
@@ -129,12 +130,27 @@ export function clearSessionPageDone(userId, pageKey) {
   }
 }
 
-export function shouldBlockAutoStart(profile, userId, pageKey) {
+export function isOnboardingFullyComplete(profile, options = {}) {
+  if (!profile?.role) return false
+  if (profile.onboarding_completed_at) return true
+  return allRequiredPagesDone(profile, options)
+}
+
+export function shouldBlockAutoStart(profile, userId, pageKey, options = {}) {
   if (!profile || !pageKey) return true
-  if (getProfileOnboardingProgress(profile)[pageKey]) return true
+  if (isOnboardingFullyComplete(profile, options)) return true
+
+  const progress = getProfileOnboardingProgress(profile)
+  if (progress[pageKey]) return true
+
   if (sessionPageDone(userId, pageKey)) {
-    clearSessionPageDone(userId, pageKey)
+    saveLocalOnboardingProgress(userId, {
+      ...progress,
+      [pageKey]: new Date().toISOString(),
+    })
+    return true
   }
+
   return false
 }
 

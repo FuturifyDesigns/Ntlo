@@ -110,21 +110,35 @@ function TooltipCard({
 
   if (hasTarget && rect) {
     const cardW = Math.min(window.innerWidth - 32, 384)
-    const below = rect.top + rect.height + 16
-    const above = rect.top - 16
-    const preferBelow = below + 220 < window.innerHeight || above < 220
+    const cardH = 280
+    const gap = 16
+    const below = rect.top + rect.height + gap
+    const above = rect.top - gap
+    const targetCenterX = rect.left + rect.width / 2
+    const onRightSide = targetCenterX > window.innerWidth * 0.52
 
-    if (preferBelow && below + 200 < window.innerHeight) {
-      positionClass = 'fixed z-[220] w-[min(calc(100vw-2rem),24rem)]'
+    if (onRightSide) {
+      positionClass = 'fixed z-[230] w-[min(calc(100vw-2rem),24rem)]'
       style = {
-        top: below,
-        left: Math.max(16, Math.min(window.innerWidth - cardW - 16, rect.left + rect.width / 2 - cardW / 2)),
+        top: Math.max(16, Math.min(rect.top, window.innerHeight - cardH - 16)),
+        left: Math.max(16, rect.left - cardW - gap),
+        maxWidth: Math.min(cardW, rect.left - gap - 16),
       }
-    } else if (above > 200) {
-      positionClass = 'fixed z-[220] w-[min(calc(100vw-2rem),24rem)]'
-      style = {
-        bottom: window.innerHeight - above,
-        left: Math.max(16, Math.min(window.innerWidth - cardW - 16, rect.left + rect.width / 2 - cardW / 2)),
+    } else {
+      const preferBelow = below + cardH < window.innerHeight || above < cardH
+
+      if (preferBelow && below + cardH < window.innerHeight) {
+        positionClass = 'fixed z-[230] w-[min(calc(100vw-2rem),24rem)]'
+        style = {
+          top: below,
+          left: Math.max(16, Math.min(window.innerWidth - cardW - 16, targetCenterX - cardW / 2)),
+        }
+      } else if (above > cardH) {
+        positionClass = 'fixed z-[230] w-[min(calc(100vw-2rem),24rem)]'
+        style = {
+          bottom: window.innerHeight - above,
+          left: Math.max(16, Math.min(window.innerWidth - cardW - 16, targetCenterX - cardW / 2)),
+        }
       }
     }
   }
@@ -342,7 +356,7 @@ export default function OnboardingTour({
     }
     el.classList.add('onboarding-spotlight-target')
     el.style.position = prev.position || 'relative'
-    el.style.zIndex = '221'
+    el.style.zIndex = '225'
     el.style.isolation = 'isolate'
 
     return () => {

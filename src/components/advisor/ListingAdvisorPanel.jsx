@@ -83,7 +83,7 @@ export default function ListingAdvisorPanel({ listing, studentUniversityId, onbo
   if (!listing || !analysis) return null
 
   return (
-    <Card className="space-y-4 p-5" data-onboarding={onboardingId}>
+    <Card className="space-y-4 p-5">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="flex items-center gap-2">
           <Sparkles size={18} className="text-accent" />
@@ -103,19 +103,24 @@ export default function ListingAdvisorPanel({ listing, studentUniversityId, onbo
           transition={{ duration: 0.2 }}
           className="space-y-4"
         >
-      <ScoreRing score={analysis.overall} />
-      <p className="text-center text-sm font-medium text-primary">
-        {t(`advisor.label.${analysis.label}`)}
-      </p>
+      <div
+        className="rounded-xl border border-border/60 bg-background/50 p-3"
+        data-onboarding={onboardingId}
+      >
+        <ScoreRing score={analysis.overall} />
+        <p className="text-center text-sm font-medium text-primary">
+          {t(`advisor.label.${analysis.label}`)}
+        </p>
 
-      {insightText && (
-        <div className="rounded-lg border border-accent/20 bg-accent/5 p-3">
-          <p className="mb-1 text-sm font-medium text-accent">
-            {t('advisor.insightSummary')}
-          </p>
-          <p className="text-sm leading-relaxed text-primary">{insightText}</p>
-        </div>
-      )}
+        {insightText && (
+          <div className="mt-3 rounded-lg border border-accent/20 bg-accent/5 p-3">
+            <p className="mb-1 text-sm font-medium text-accent">
+              {t('advisor.insightSummary')}
+            </p>
+            <p className="text-sm leading-relaxed text-primary">{insightText}</p>
+          </div>
+        )}
+      </div>
 
       <div className="grid grid-cols-2 gap-2 text-xs">
         {Object.entries(analysis.scores).map(([key, value]) => (

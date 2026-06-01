@@ -377,16 +377,15 @@ html[data-reduce-motion="true"] .ping-aurora-glow {
 
 .onboarding-spotlight-target {
   position: relative;
-  z-index: 221;
+  z-index: 225;
   isolation: isolate;
   opacity: 1 !important;
   filter: none !important;
-  box-shadow:
-    0 0 0 3px rgba(200, 168, 75, 0.65),
-    0 0 0 6px rgba(200, 168, 75, 0.2);
+  box-shadow: none !important;
+  background-color: var(--color-surface, #fff) !important;
 }
 
-/* Keep highlighted content at full brightness — do not override colors or backgrounds. */
+/* Keep highlighted content readable — no dimming or color overrides. */
 .onboarding-spotlight-target,
 .onboarding-spotlight-target * {
   opacity: 1 !important;

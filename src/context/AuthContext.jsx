@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import { getAuthCallbackUrl, getAuthResetUrl, getAuthVerifyUrl } from '../lib/authUrls'
 import { clearOAuthStorage, markOAuthPending, setOAuthIntent } from '../lib/oauthStorage'
 import { isBanActive, saveBanInfoForLogin, shouldBlockLogin } from '../lib/bans'
+import { getProfileOnboardingProgress } from '../lib/onboardingRoutes'
 
 const AuthContext = createContext(null)
 
@@ -23,14 +24,14 @@ export function AuthProvider({ children }) {
         .maybeSingle()
       setProfile((prev) => {
         if (!data) return data
-        if (prev?.id !== data.id) return data
-        return {
+        const mergedProgress = getProfileOnboardingProgress({
           ...data,
           onboarding_progress: {
-            ...(prev.onboarding_progress || {}),
+            ...(prev?.id === data.id ? prev.onboarding_progress : {}),
             ...(data.onboarding_progress || {}),
           },
-        }
+        })
+        return { ...data, onboarding_progress: mergedProgress }
       })
       return data
     } finally {
@@ -87,7 +88,13 @@ export function AuthProvider({ children }) {
         { event: 'UPDATE', schema: 'public', table: 'profiles', filter: `id=eq.${user.id}` },
         (payload) => {
           if (payload.new) {
-            setProfile((prev) => ({ ...prev, ...payload.new }))
+            setProfile((prev) => {
+              const next = { ...prev, ...payload.new }
+              if (prev?.id === next.id) {
+                next.onboarding_progress = getProfileOnboardingProgress(next)
+              }
+              return next
+            })
             if (shouldBlockLogin(payload.new)) {
               supabase.auth.signOut()
               setUser(null)
