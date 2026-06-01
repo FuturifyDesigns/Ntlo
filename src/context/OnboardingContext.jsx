@@ -4,7 +4,8 @@ import {
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import {
-  completeOnboarding, completeOnboardingPage, allRequiredPagesDone,
+  completeOnboarding,
+  completeOnboardingPage,
 } from '../lib/onboarding'
 import {
   getOnboardingPageKey,
@@ -16,6 +17,7 @@ import {
   saveLocalOnboardingProgress,
   shouldBlockAutoStart,
   isOnboardingFullyComplete,
+  allRequiredPagesDone,
 } from '../lib/onboardingRoutes'
 import { ONBOARDING_STEPS_BY_PAGE } from '../lib/onboardingSteps'
 import { mergePageState, resolveOnboardingSteps } from '../lib/onboardingAdapt'
@@ -39,11 +41,11 @@ export function OnboardingProvider({ children }) {
   const activeTourRef = useRef({ open: false, forced: false, pageKey: null })
   const finalizePageRef = useRef(null)
 
-  activeTourRef.current = { open: tourOpen, forced, pageKey }
-
   const pageKey = profile?.role
     ? (replayPageKey || getOnboardingPageKey(location.pathname, profile.role))
     : null
+
+  activeTourRef.current = { open: tourOpen, forced, pageKey }
 
   const baseSteps = pageKey ? ONBOARDING_STEPS_BY_PAGE[pageKey] : null
 
