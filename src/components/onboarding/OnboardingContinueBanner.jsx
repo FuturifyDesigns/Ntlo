@@ -1,16 +1,17 @@
-import { Link } from 'react-router-dom'
 import { ArrowRight, Sparkles } from 'lucide-react'
 import { useTranslation } from '../../hooks/useTranslation'
 import { useOnboarding } from '../../context/OnboardingContext'
 
 export default function OnboardingContinueBanner() {
   const { t } = useTranslation()
-  const { tourOpen, nextOnboardingPage, remainingOnboardingPages } = useOnboarding()
+  const {
+    tourOpen, actionOnboardingPage, remainingOnboardingPages, startPageTour,
+  } = useOnboarding()
 
-  if (!nextOnboardingPage || tourOpen || remainingOnboardingPages.length === 0) return null
+  if (!actionOnboardingPage || tourOpen || remainingOnboardingPages.length === 0) return null
 
   return (
-    <div className="border-b border-accent/40 bg-accent/10 px-4 py-3.5">
+    <div className="relative z-30 border-b border-accent/40 bg-accent/10 px-4 py-3.5">
       <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3">
         <div className="flex min-w-0 items-start gap-2.5">
           <Sparkles size={18} className="mt-0.5 shrink-0 text-accent" />
@@ -21,25 +22,27 @@ export default function OnboardingContinueBanner() {
               {remainingOnboardingPages.map((page, index) => (
                 <span key={page.pageKey}>
                   {index > 0 && ', '}
-                  <Link
-                    to={page.path}
+                  <button
+                    type="button"
+                    onClick={() => startPageTour(page.pageKey)}
                     className="font-bold text-primary underline decoration-accent decoration-2 underline-offset-2 hover:text-accent"
                   >
                     {t(page.pageLabelKey)}
-                  </Link>
+                  </button>
                 </span>
               ))}
             </p>
-            <p className="text-xs text-muted">{t(nextOnboardingPage.descriptionKey)}</p>
+            <p className="text-xs text-muted">{t(actionOnboardingPage.descriptionKey)}</p>
           </div>
         </div>
-        <Link
-          to={nextOnboardingPage.path}
+        <button
+          type="button"
+          onClick={() => startPageTour(actionOnboardingPage.pageKey)}
           className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-primary px-4 py-2.5 text-sm font-bold text-white shadow-sm transition-opacity hover:opacity-90"
         >
-          {t(nextOnboardingPage.actionKey)}
+          {t(actionOnboardingPage.actionKey)}
           <ArrowRight size={14} />
-        </Link>
+        </button>
       </div>
     </div>
   )

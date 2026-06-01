@@ -74,7 +74,8 @@ export default function Browse() {
   const browseOnboardingState = useMemo(() => ({
     ready: !loading,
     listingCount: count ?? listings.length,
-  }), [loading, count, listings.length])
+    sampleListingPath: listings[0]?.id ? `/listings/${listings[0].id}` : null,
+  }), [loading, count, listings.length, listings])
 
   useOnboardingPageState(onboardingPageKey, browseOnboardingState)
 

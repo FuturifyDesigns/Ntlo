@@ -4,15 +4,15 @@ import { useOnboarding } from '../context/OnboardingContext'
 /** Returns true when a nav link should be highlighted as the next onboarding destination. */
 export function useOnboardingNavHighlight(path) {
   const location = useLocation()
-  const { nextOnboardingPage, tourOpen, remainingOnboardingPages } = useOnboarding()
+  const { actionOnboardingPage, tourOpen, remainingOnboardingPages } = useOnboarding()
 
-  if (tourOpen || !nextOnboardingPage || remainingOnboardingPages.length === 0) {
+  if (tourOpen || !actionOnboardingPage || remainingOnboardingPages.length === 0) {
     return false
   }
 
-  if (path !== nextOnboardingPage.path) return false
+  if (path !== actionOnboardingPage.path) return false
 
-  if (nextOnboardingPage.pageKey === 'student_listing') {
+  if (actionOnboardingPage.pageKey === 'student_listing') {
     return !/^\/listings\/[^/]+$/.test(location.pathname)
   }
 
