@@ -2,14 +2,13 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
-  ArrowLeft, ArrowRight, X, Sparkles, GraduationCap, Building2, PartyPopper,
+  ArrowLeft, ArrowRight, X, Sparkles, GraduationCap, Building2, PartyPopper, Search, Home,
 } from 'lucide-react'
 import { useTranslation } from '../../hooks/useTranslation'
 import { useLocale } from '../../context/LocaleContext'
 import Button from '../ui/Button'
-import { completeOnboarding } from '../../lib/onboarding'
 
-const ICONS = { GraduationCap, Building2, PartyPopper, Sparkles }
+const ICONS = { GraduationCap, Building2, PartyPopper, Sparkles, Search, Home }
 
 const PAD = 10
 const RADIUS = 14
@@ -170,11 +169,9 @@ function TooltipCard({
       </h2>
       <p className="mt-2 text-sm leading-relaxed text-muted">{t(step.bodyKey)}</p>
 
-      {step.action === 'click' && (
-        <p className="mt-3 rounded-lg border border-accent/25 bg-accent/5 px-3 py-2 text-xs font-medium text-accent">
-          {t('onboarding.tryItHint')}
-        </p>
-      )}
+      <p className="mt-3 rounded-lg border border-accent/25 bg-accent/5 px-3 py-2 text-xs font-medium text-accent">
+        {t('onboarding.nextHint')}
+      </p>
 
       <div className="mt-4 flex flex-wrap items-center gap-2">
         {!isFirst && (
@@ -307,16 +304,27 @@ export default function OnboardingTour({
   }, [open, stepIndex, step, onStepEnter, prefs.reduceMotion])
 
   useEffect(() => {
-    if (!open || !step?.target || step.action !== 'click') return undefined
+    if (!open || !step?.target) return undefined
     const el = document.querySelector(`[data-onboarding="${step.target}"]`)
     if (!el) return undefined
 
-    function onClick() {
-      setStepIndex((i) => Math.min(i + 1, steps.length - 1))
+    const prev = {
+      position: el.style.position,
+      zIndex: el.style.zIndex,
+      isolation: el.style.isolation,
     }
-    el.addEventListener('click', onClick)
-    return () => el.removeEventListener('click', onClick)
-  }, [open, step, steps.length])
+    el.classList.add('onboarding-spotlight-target')
+    el.style.position = prev.position || 'relative'
+    el.style.zIndex = '221'
+    el.style.isolation = 'isolate'
+
+    return () => {
+      el.classList.remove('onboarding-spotlight-target')
+      el.style.position = prev.position
+      el.style.zIndex = prev.zIndex
+      el.style.isolation = prev.isolation
+    }
+  }, [open, step?.target, stepIndex])
 
   useEffect(() => {
     if (!open) return undefined
@@ -327,15 +335,15 @@ export default function OnboardingTour({
     }
   }, [open])
 
-  const finish = useCallback(async (markComplete) => {
+  const finish = useCallback(async (shouldPersist) => {
     if (completingRef.current) return
     completingRef.current = true
     try {
-      if (markComplete) {
-        await completeOnboarding()
-        onComplete?.()
+      if (shouldPersist) {
+        await onComplete?.()
+      } else {
+        onClose?.()
       }
-      onClose?.()
     } catch {
       onClose?.()
     } finally {
@@ -365,13 +373,14 @@ export default function OnboardingTour({
     <AnimatePresence>
       {open && (
         <div className="fixed inset-0 z-[200]" aria-live="polite">
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[205] bg-primary/70 backdrop-blur-[1px]"
-            aria-hidden={step.type !== 'center'}
-          />
+          {step.type === 'center' && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[205] bg-primary/70 backdrop-blur-[1px]"
+            />
+          )}
           {step.type !== 'center' && <Spotlight rect={rect} />}
           {step.type === 'center' ? (
             <CenterCard

@@ -374,3 +374,15 @@ html[data-reduce-motion="true"] .ping-aurora-glow {
   );
   filter: blur(12px);
 }
+
+.onboarding-spotlight-target {
+  position: relative;
+  z-index: 221;
+  isolation: isolate;
+  background-color: var(--color-surface);
+  color: var(--color-primary);
+}
+
+.onboarding-spotlight-target * {
+  color: inherit;
+}

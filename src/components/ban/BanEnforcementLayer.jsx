@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { ShieldAlert, Loader2 } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 import { useTranslation } from '../../hooks/useTranslation'
+import { markNotificationRead } from '../../lib/notifications'
 import { supabase } from '../../lib/supabase'
 import Button from '../ui/Button'
 import { isBanActive, saveBanInfoForLogin, buildBanInfoFromProfile, formatBanEndsAt } from '../../lib/bans'
@@ -21,11 +22,13 @@ export default function BanEnforcementLayer() {
     if (!needsAcknowledgment || !user?.id) return
     supabase
       .from('notifications')
-      .update({ read_at: new Date().toISOString() })
+      .select('id')
       .eq('user_id', user.id)
       .eq('type', 'account_banned')
       .is('read_at', null)
-      .then(() => {})
+      .then(({ data }) => {
+        Promise.all((data || []).map((n) => markNotificationRead(n.id).catch(() => {})))
+      })
   }, [needsAcknowledgment, user?.id])
 
   if (!needsAcknowledgment) return null
@@ -37,12 +40,13 @@ export default function BanEnforcementLayer() {
     setBusy(true)
     try {
       if (user?.id) {
-        await supabase
+        const { data } = await supabase
           .from('notifications')
-          .update({ read_at: new Date().toISOString() })
+          .select('id')
           .eq('user_id', user.id)
           .eq('type', 'account_banned')
           .is('read_at', null)
+        await Promise.all((data || []).map((n) => markNotificationRead(n.id).catch(() => {})))
       }
       const { error } = await supabase.rpc('acknowledge_account_ban')
       if (error) throw error

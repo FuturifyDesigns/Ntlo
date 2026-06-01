@@ -24,9 +24,7 @@ import { withdrawListing } from '../lib/listingPublish'
 import { mapListingEditError } from '../lib/listingEditPolicy'
 import { getListingLandlordActions } from '../lib/listingReviewPolicy'
 import { MAPS_ENABLED } from '../lib/googleMaps'
-import DashboardOnboarding from '../components/onboarding/DashboardOnboarding'
-import OnboardingHelpButton from '../components/onboarding/OnboardingHelpButton'
-import { LANDLORD_ONBOARDING_STEPS } from '../lib/onboardingSteps'
+import { OnboardingReplayButton } from '../context/OnboardingContext'
 
 const PLACEHOLDER = 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400&q=80'
 
@@ -181,8 +179,6 @@ export default function LandlordDashboard() {
   }
 
   return (
-    <DashboardOnboarding steps={LANDLORD_ONBOARDING_STEPS}>
-      {({ openReplay }) => (
     <PageShell className="mx-auto max-w-7xl px-4 py-5 sm:px-6 sm:py-8 lg:px-8">
       <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
         <div>
@@ -191,7 +187,7 @@ export default function LandlordDashboard() {
           <EarlyAccessLandlordNote className="mt-4 max-w-2xl" />
         </div>
         <div className="flex flex-wrap gap-2">
-          <OnboardingHelpButton onClick={openReplay} />
+          <OnboardingReplayButton />
           <Button as={Link} to="/landlord/billing" variant="outline">
             <CreditCard size={18} />
             {t('billing.title')}
@@ -398,7 +394,5 @@ export default function LandlordDashboard() {
         </motion.div>
       )}
     </PageShell>
-      )}
-    </DashboardOnboarding>
   )
 }

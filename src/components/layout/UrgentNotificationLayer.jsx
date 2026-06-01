@@ -2,7 +2,8 @@ import { useEffect, useState, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../hooks/useAuth'
-import { navigateToNotification, markNotificationRead } from '../../lib/notifications'
+import { useNotifications } from '../../hooks/useNotifications'
+import { navigateToNotification } from '../../lib/notifications'
 import { playNotificationSound } from '../../lib/notificationSound'
 import NotificationDetailModal from '../notifications/NotificationDetailModal'
 
@@ -31,11 +32,13 @@ export function isUrgentNotification(notification) {
 
 export function useUrgentNotificationToasts() {
   const { user, profile } = useAuth()
+  const { readOne } = useNotifications()
   const [toasts, setToasts] = useState([])
   const dismissedRef = useRef(new Set())
 
   const pushToast = useCallback((notification) => {
     if (notification?.type === 'account_banned') return
+    if (notification?.read_at) return
     if (!isUrgentNotification(notification)) return
     if (dismissedRef.current.has(notification.id)) return
     playNotificationSound(notification.id)
@@ -49,6 +52,18 @@ export function useUrgentNotificationToasts() {
     dismissedRef.current.add(id)
     setToasts((prev) => prev.filter((item) => item.id !== id))
   }, [])
+
+  const acknowledge = useCallback(async (notification) => {
+    if (!notification?.id) return
+    dismiss(notification.id)
+    if (!notification.read_at) {
+      try {
+        await readOne(notification.id)
+      } catch {
+        // Still dismissed locally; retry on next explicit open if needed.
+      }
+    }
+  }, [dismiss, readOne])
 
   useEffect(() => {
     if (!user?.id) return undefined
@@ -83,28 +98,45 @@ export function useUrgentNotificationToasts() {
         { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.id}` },
         (payload) => pushToast(payload.new)
       )
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.id}` },
+        (payload) => {
+          if (payload.new.read_at) {
+            dismissedRef.current.add(payload.new.id)
+            setToasts((prev) => prev.filter((item) => item.id !== payload.new.id))
+          }
+        }
+      )
       .subscribe()
 
     return () => supabase.removeChannel(channel)
   }, [user?.id, pushToast])
 
-  return { toasts, dismiss, role: profile?.role }
+  return { toasts, dismiss, acknowledge, role: profile?.role }
 }
 
 export default function UrgentNotificationLayer() {
   const navigate = useNavigate()
-  const { toasts, dismiss, role } = useUrgentNotificationToasts()
+  const { toasts, acknowledge, role } = useUrgentNotificationToasts()
   const [busy, setBusy] = useState(false)
   const active = toasts[0]
 
   async function handleView(notification) {
     setBusy(true)
     try {
-      dismiss(notification.id)
-      if (!notification.read_at) {
-        await markNotificationRead(notification.id).catch(() => {})
-      }
+      await acknowledge(notification)
       navigateToNotification(navigate, notification, role)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function handleClose(notification) {
+    if (!notification) return
+    setBusy(true)
+    try {
+      await acknowledge(notification)
     } finally {
       setBusy(false)
     }
@@ -116,7 +148,7 @@ export default function UrgentNotificationLayer() {
       notification={active}
       urgent
       busy={busy}
-      onClose={() => active && dismiss(active.id)}
+      onClose={() => handleClose(active)}
       onView={handleView}
     />
   )

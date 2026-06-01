@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import { Sparkles, MapPin, Banknote, Trophy } from 'lucide-react'
+import { Sparkles, MapPin, Banknote, Trophy, Heart } from 'lucide-react'
 import { compareListings } from '../../lib/listingAdvisor'
 import { getScoreColor } from '../../lib/aiAdvisor'
 import { useAuth } from '../../hooks/useAuth'
@@ -18,12 +18,30 @@ export default function CompareAdvisor({ listings }) {
     [listings, profile?.university_id]
   )
 
-  if (listings.length < 2) return null
+  if (listings.length === 0) return null
+
+  if (listings.length === 1) {
+    return (
+      <Card className="mb-8 p-5 sm:p-6" data-onboarding="student-compare">
+        <div className="flex items-start gap-3">
+          <Sparkles size={18} className="mt-0.5 shrink-0 text-accent" />
+          <div>
+            <h2 className="font-display text-lg font-semibold text-primary">{t('advisor.compareTitle')}</h2>
+            <p className="mt-1 text-sm text-muted">{t('advisor.compareNeedMore')}</p>
+            <Button as={Link} to="/listings" variant="outline" size="sm" className="mt-3">
+              <Heart size={14} />
+              {t('advisor.findMore')}
+            </Button>
+          </div>
+        </div>
+      </Card>
+    )
+  }
 
   const { ranked, bestId, cheapestId, closestId, summaryKey, meta } = comparison
 
   return (
-    <Card className="mb-8 space-y-5 p-5 sm:p-6">
+    <Card className="mb-8 space-y-5 p-5 sm:p-6" data-onboarding="student-compare">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">

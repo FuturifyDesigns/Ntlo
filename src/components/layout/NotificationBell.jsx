@@ -27,14 +27,29 @@ export default function NotificationBell() {
     return () => document.removeEventListener('mousedown', onDocClick)
   }, [])
 
-  function openNotification(n) {
+  async function openNotification(n) {
     setSelectedId(n.id)
     setOpen(false)
+    if (!n.read_at) {
+      try {
+        await readOne(n.id)
+      } catch {
+        // Modal still opens; user can retry via View.
+      }
+    }
   }
 
-  function closeModal() {
+  async function closeModal() {
+    const current = selected
     setSelectedId(null)
     setBusy(false)
+    if (current?.id && !current.read_at) {
+      try {
+        await readOne(current.id)
+      } catch {
+        // Already attempted on open; ignore.
+      }
+    }
   }
 
   async function handleView(notification) {
@@ -43,7 +58,7 @@ export default function NotificationBell() {
       if (!notification.read_at) {
         await readOne(notification.id)
       }
-      closeModal()
+      setSelectedId(null)
       navigateToNotification(navigate, notification, profile?.role)
     } finally {
       setBusy(false)
@@ -72,7 +87,7 @@ export default function NotificationBell() {
             <div className="flex items-center justify-between border-b border-border px-4 py-3">
               <p className="text-sm font-semibold text-primary">{t('notifications.title')}</p>
               {unreadCount > 0 && (
-                <button type="button" onClick={readAll} className="text-xs font-medium text-accent hover:underline">
+                <button type="button" onClick={() => readAll()} className="text-xs font-medium text-accent hover:underline">
                   {t('notifications.markAllRead')}
                 </button>
               )}

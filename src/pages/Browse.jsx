@@ -5,6 +5,8 @@ import FilterBar from '../components/listings/FilterBar'
 import ListingGrid from '../components/listings/ListingGrid'
 import ListingMap from '../components/listings/ListingMap'
 import { useListings } from '../hooks/useListings'
+import { useAuth } from '../hooks/useAuth'
+import { OnboardingReplayButton } from '../context/OnboardingContext'
 import { getUniversityById, getUniversityMapViewport, getUniversityDisplayName } from '../lib/universities'
 import { pickPrimaryUniversityMatch } from '../lib/universitySearch'
 import { useTranslation } from '../hooks/useTranslation'
@@ -13,6 +15,7 @@ export default function Browse() {
   const [searchParams, setSearchParams] = useSearchParams()
   const [view, setView] = useState(searchParams.get('view') === 'map' ? 'map' : 'grid')
   const { t } = useTranslation()
+  const { user, profile } = useAuth()
   const [filters, setFilters] = useState({
     search: searchParams.get('search') || '',
     universityId: searchParams.get('uni') ? Number(searchParams.get('uni')) : '',
@@ -64,12 +67,17 @@ export default function Browse() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 sm:py-8 lg:px-8">
-      <div className="mb-5 sm:mb-8">
-        <h1 className="font-display text-2xl font-bold text-primary sm:text-3xl">{t('listings.browseTitle')}</h1>
-        <p className="mt-2 text-muted">{t('listings.browseSubtitle')}</p>
+      <div className="mb-5 flex flex-wrap items-start justify-between gap-4 sm:mb-8">
+        <div>
+          <h1 className="font-display text-2xl font-bold text-primary sm:text-3xl">{t('listings.browseTitle')}</h1>
+          <p className="mt-2 text-muted">{t('listings.browseSubtitle')}</p>
+        </div>
+        {user && (profile?.role === 'student' || profile?.role === 'landlord') && (
+          <OnboardingReplayButton />
+        )}
       </div>
 
-      <div className="mb-6">
+      <div className="mb-6" data-onboarding="browse-filters">
         <FilterBar
           filters={filters}
           onChange={setFilters}
@@ -83,7 +91,7 @@ export default function Browse() {
         />
       </div>
 
-      <div className="mb-6 flex gap-2">
+      <div className="mb-6 flex gap-2" data-onboarding="browse-view-toggle">
         <button
           type="button"
           onClick={() => setView('grid')}
@@ -106,7 +114,7 @@ export default function Browse() {
         </button>
       </div>
 
-      <div id="browse-results" className="relative min-h-[420px]">
+      <div id="browse-results" className="relative min-h-[420px]" data-onboarding="browse-listings">
         {isFetching && listings.length > 0 && (
           <div
             className="pointer-events-none absolute inset-x-0 top-0 z-10 h-0.5 overflow-hidden rounded-full bg-border"

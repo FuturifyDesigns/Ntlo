@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { HashRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { AuthProvider } from './context/AuthContext'
+import { NotificationsProvider } from './context/NotificationsContext'
 import { UniversitiesProvider } from './context/UniversitiesContext'
 import { LocaleProvider } from './context/LocaleContext'
 import { WelcomeReturnProvider } from './context/WelcomeReturnContext'
@@ -49,6 +50,8 @@ import PingGalaxyOverlay from './components/ping/PingGalaxyOverlay'
 import { PingTransitionProvider } from './context/PingTransitionContext'
 import GoogleMapsProvider from './components/maps/GoogleMapsProvider'
 import { SavedListingsProvider } from './context/SavedListingsContext'
+import { OnboardingProvider } from './context/OnboardingContext'
+import WelcomeGuestModal from './components/onboarding/WelcomeGuestModal'
 import { useLocale } from './context/LocaleContext'
 import { useTranslation } from './hooks/useTranslation'
 
@@ -161,6 +164,7 @@ function AppShell() {
         <NotificationSoundUnlockBanner />
         <PingGalaxyOverlay />
         <ExitIntentModal />
+        <WelcomeGuestModal />
         <AnalyticsTracker />
       </div>
     </>
@@ -172,19 +176,23 @@ export default function App() {
     <HashRouter>
       <LocaleProvider>
         <AuthProvider>
+          <NotificationsProvider>
           <SavedListingsProvider>
           <UniversitiesProvider>
             <GoogleMapsProvider>
               <CookieConsentProvider>
                 <WelcomeReturnProvider>
                   <PingTransitionProvider>
-                    <AppShell />
+                    <OnboardingProvider>
+                      <AppShell />
+                    </OnboardingProvider>
                   </PingTransitionProvider>
                 </WelcomeReturnProvider>
               </CookieConsentProvider>
             </GoogleMapsProvider>
           </UniversitiesProvider>
           </SavedListingsProvider>
+          </NotificationsProvider>
         </AuthProvider>
       </LocaleProvider>
     </HashRouter>
