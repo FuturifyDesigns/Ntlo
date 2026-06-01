@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Plus, Edit, Trash2, Eye, ToggleLeft, ToggleRight, AlertCircle, CreditCard } from 'lucide-react'
@@ -24,7 +24,8 @@ import { withdrawListing } from '../lib/listingPublish'
 import { mapListingEditError } from '../lib/listingEditPolicy'
 import { getListingLandlordActions } from '../lib/listingReviewPolicy'
 import { MAPS_ENABLED } from '../lib/googleMaps'
-import { OnboardingReplayButton } from '../context/OnboardingContext'
+import { OnboardingReplayButton, useOnboardingPageState } from '../context/OnboardingContext'
+import { useLandlordInquiries } from '../hooks/useHousing'
 
 const PLACEHOLDER = 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400&q=80'
 
@@ -51,6 +52,7 @@ export default function LandlordDashboard() {
   const cached = user?.id && listingsCache.userId === user.id ? listingsCache.items : []
   const [listings, setListings] = useState(cached)
   const [loading, setLoading] = useState(!cached.length)
+  const { applications, viewings, conversations, loading: inquiriesLoading } = useLandlordInquiries()
   const [filter, setFilter] = useState('all')
   const motionProps = prefs.reduceMotion ? {} : fade
 
@@ -178,6 +180,18 @@ export default function LandlordDashboard() {
     inactive: t('dashboard.inactive'),
   }
 
+  const hasInquiries = applications.length + viewings.length + conversations.length > 0
+  const pageReady = !loading && !inquiriesLoading
+
+  const landlordOnboardingState = useMemo(() => ({
+    ready: pageReady,
+    listingCount: listings.length,
+    hasInquiries,
+    inquiryCount: applications.length + viewings.length + conversations.length,
+  }), [pageReady, listings.length, hasInquiries, applications.length, viewings.length, conversations.length])
+
+  useOnboardingPageState('landlord_dashboard', landlordOnboardingState)
+
   return (
     <PageShell className="mx-auto max-w-7xl px-4 py-5 sm:px-6 sm:py-8 lg:px-8">
       <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
@@ -275,6 +289,7 @@ export default function LandlordDashboard() {
             <motion.div
               key="listings-empty"
               className="rounded-xl border border-border bg-surface p-8 text-center sm:p-10"
+              data-onboarding="landlord-listings-empty"
               {...motionProps}
             >
               <p className="text-lg font-medium text-primary">

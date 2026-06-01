@@ -6,7 +6,7 @@ import ListingGrid from '../components/listings/ListingGrid'
 import ListingMap from '../components/listings/ListingMap'
 import { useListings } from '../hooks/useListings'
 import { useAuth } from '../hooks/useAuth'
-import { OnboardingReplayButton } from '../context/OnboardingContext'
+import { OnboardingReplayButton, useOnboardingPageState } from '../context/OnboardingContext'
 import { getUniversityById, getUniversityMapViewport, getUniversityDisplayName } from '../lib/universities'
 import { pickPrimaryUniversityMatch } from '../lib/universitySearch'
 import { useTranslation } from '../hooks/useTranslation'
@@ -64,6 +64,19 @@ export default function Browse() {
 
   const { listings, loading, isFetching, error, count, page, setPage, pageSize } = useListings(queryFilters)
   const uni = filters.universityId ? getUniversityById(filters.universityId) : searchUniversityMatch
+
+  const onboardingPageKey = profile?.role === 'student'
+    ? 'student_browse'
+    : profile?.role === 'landlord'
+      ? 'landlord_browse'
+      : null
+
+  const browseOnboardingState = useMemo(() => ({
+    ready: !loading,
+    listingCount: count ?? listings.length,
+  }), [loading, count, listings.length])
+
+  useOnboardingPageState(onboardingPageKey, browseOnboardingState)
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 sm:py-8 lg:px-8">

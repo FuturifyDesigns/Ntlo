@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { MapPin, ArrowLeft } from 'lucide-react'
@@ -17,6 +18,7 @@ import ListingContactPanel from '../components/housing/ListingContactPanel'
 import TrustedBadge from '../components/trust/TrustedBadge'
 import { resolveListingTrustBadge } from '../lib/tierBenefits'
 import { useAuth } from '../hooks/useAuth'
+import { useOnboardingPageState } from '../context/OnboardingContext'
 import { getUniversityDisplayName } from '../lib/universityNames'
 import { getListingOccupancy, isListingRented } from '../lib/listingOccupancy'
 import { isListingRecentlyUpdated } from '../lib/listingFreshness'
@@ -36,6 +38,12 @@ export default function ListingDetail() {
   const { t } = useTranslation()
   const { profile, isLandlord } = useAuth()
   const { listing, loading, error } = useListing(id)
+  const listingOnboardingState = useMemo(() => ({
+    ready: !loading,
+    hasListing: Boolean(listing),
+  }), [loading, listing])
+
+  useOnboardingPageState(profile?.role === 'student' ? 'student_listing' : null, listingOnboardingState)
   const { listings: related } = useListings(
     listing?.landlord_id ? { landlordId: listing.landlord_id, availableOnly: true } : {}
   )

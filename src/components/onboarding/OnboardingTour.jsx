@@ -287,12 +287,39 @@ export default function OnboardingTour({
   const { prefs } = useLocale()
   const [stepIndex, setStepIndex] = useState(0)
   const completingRef = useRef(false)
+  const activeStepIdRef = useRef(null)
   const step = steps[stepIndex]
   const rect = useTargetRect(step?.target, stepIndex, open && step?.type !== 'center')
 
   useEffect(() => {
-    if (!open) setStepIndex(0)
+    if (!open) {
+      setStepIndex(0)
+      activeStepIdRef.current = null
+    }
   }, [open])
+
+  useEffect(() => {
+    if (!open || !steps.length) return
+    const activeId = activeStepIdRef.current
+    if (!activeId) {
+      activeStepIdRef.current = steps[0]?.id
+      return
+    }
+    const nextIndex = steps.findIndex((s) => s.id === activeId)
+    if (nextIndex >= 0 && nextIndex !== stepIndex) {
+      setStepIndex(nextIndex)
+    } else if (nextIndex < 0) {
+      setStepIndex((i) => Math.min(i, steps.length - 1))
+      activeStepIdRef.current = steps[Math.min(stepIndex, steps.length - 1)]?.id
+    } else if (stepIndex >= steps.length) {
+      setStepIndex(steps.length - 1)
+      activeStepIdRef.current = steps[steps.length - 1]?.id
+    }
+  }, [steps, open, stepIndex])
+
+  useEffect(() => {
+    if (step?.id) activeStepIdRef.current = step.id
+  }, [step?.id])
 
   useEffect(() => {
     if (!open || !step) return undefined
@@ -356,12 +383,18 @@ export default function OnboardingTour({
       finish(forced)
       return
     }
-    setStepIndex((i) => i + 1)
-  }, [stepIndex, steps.length, finish, forced])
+    const nextIndex = stepIndex + 1
+    activeStepIdRef.current = steps[nextIndex]?.id
+    setStepIndex(nextIndex)
+  }, [stepIndex, steps, finish, forced])
 
   const goBack = useCallback(() => {
-    setStepIndex((i) => Math.max(0, i - 1))
-  }, [])
+    setStepIndex((i) => {
+      const prevIndex = Math.max(0, i - 1)
+      activeStepIdRef.current = steps[prevIndex]?.id
+      return prevIndex
+    })
+  }, [steps])
 
   const skip = useCallback(() => {
     finish(forced)

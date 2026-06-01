@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useSearchParams, Link } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Heart, Search, Sparkles } from 'lucide-react'
@@ -6,7 +6,9 @@ import { useSavedListingsContext } from '../context/SavedListingsContext'
 import { useAuth } from '../hooks/useAuth'
 import { useTranslation } from '../hooks/useTranslation'
 import { useLocale } from '../context/LocaleContext'
-import { useOnboarding, OnboardingReplayButton } from '../context/OnboardingContext'
+import { useOnboarding, OnboardingReplayButton, useOnboardingPageState } from '../context/OnboardingContext'
+import { useListings } from '../hooks/useListings'
+import { useConversations, useStudentHousing } from '../hooks/useHousing'
 import ListingCard from '../components/listings/ListingCard'
 import Button from '../components/ui/Button'
 import Card from '../components/ui/Card'
@@ -27,6 +29,9 @@ const fade = {
 export default function StudentDashboard() {
   const { profile, profileLoading } = useAuth()
   const { savedListings, loading } = useSavedListingsContext()
+  const { applications, viewings, loading: housingLoading } = useStudentHousing()
+  const { conversations, loading: convLoading } = useConversations()
+  const { count: marketListingCount, loading: marketLoading } = useListings({})
   const { t } = useTranslation()
   const { prefs } = useLocale()
   const { registerPageHandler } = useOnboarding()
@@ -51,8 +56,31 @@ export default function StudentDashboard() {
     return registerPageHandler('student_dashboard', handleStepEnter)
   }, [registerPageHandler, handleStepEnter])
 
+  const pageLoading = loading || profileLoading || housingLoading || convLoading
+  const hasHousingActivity = applications.length + viewings.length + conversations.length > 0
+
+  const onboardingState = useMemo(() => ({
+    ready: !pageLoading && !marketLoading,
+    savedCount: savedListings.length,
+    hasHousingActivity,
+    applicationsCount: applications.length,
+    viewingsCount: viewings.length,
+    messagesCount: conversations.length,
+    marketListingCount: marketListingCount ?? 0,
+  }), [
+    pageLoading,
+    marketLoading,
+    savedListings.length,
+    hasHousingActivity,
+    applications.length,
+    viewings.length,
+    conversations.length,
+    marketListingCount,
+  ])
+
+  useOnboardingPageState('student_dashboard', onboardingState)
+
   const myUni = getUniversityById(profile?.university_id)
-  const pageLoading = loading || profileLoading
   const motionProps = prefs.reduceMotion ? {} : fade
 
   const sections = [
@@ -130,7 +158,10 @@ export default function StudentDashboard() {
                   )}
                   {savedListings.length >= 1 && <CompareAdvisor listings={savedListings} />}
                   {savedListings.length === 0 ? (
-                    <div className="rounded-xl border border-border bg-surface p-8 text-center sm:p-10">
+                    <div
+                      className="rounded-xl border border-border bg-surface p-8 text-center sm:p-10"
+                      data-onboarding="student-saved-empty"
+                    >
                       <Heart className="mx-auto mb-4 text-muted" size={48} />
                       <p className="text-lg font-medium text-primary">{t('dashboard.noSaved')}</p>
                       <p className="mt-2 text-sm text-muted">{t('dashboard.noSavedDesc')}</p>
