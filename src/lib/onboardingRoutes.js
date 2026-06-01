@@ -81,11 +81,41 @@ export function getProfileOnboardingProgress(profile) {
   let progress = profile.onboarding_progress || {}
   try {
     const raw = localStorage.getItem(`ntlo_ob_progress_${profile.id}`)
-    if (raw) progress = { ...JSON.parse(raw), ...progress }
+    if (raw) progress = { ...progress, ...JSON.parse(raw) }
   } catch {
     // ignore
   }
   return progress
+}
+
+/** Merge server RPC result without dropping pages only stored locally. */
+export function mergeOnboardingProgress(existing, serverProgress, pageKey) {
+  const merged = { ...existing, ...(serverProgress || {}) }
+  if (pageKey && !merged[pageKey]) {
+    merged[pageKey] = new Date().toISOString()
+  }
+  return merged
+}
+
+/** Pages finished this session but not yet in persisted progress. */
+export function syncSessionPagesIntoProgress(profile, options = {}) {
+  if (!profile?.id || !profile?.role) return getProfileOnboardingProgress(profile)
+  const required = getEffectiveRequiredPages(profile.role, options)
+  const progress = { ...getProfileOnboardingProgress(profile) }
+  for (const key of required) {
+    if (sessionPageDone(profile.id, key) && !progress[key]) {
+      progress[key] = new Date().toISOString()
+    }
+  }
+  return progress
+}
+
+export function getMarketListingCountFromState(pageStateRef = {}) {
+  return Math.max(
+    pageStateRef.student_dashboard?.marketListingCount ?? 0,
+    pageStateRef.student_browse?.listingCount ?? 0,
+    pageStateRef.student_listing?.hasListing ? 1 : 0,
+  )
 }
 
 export function saveLocalOnboardingProgress(userId, progress) {

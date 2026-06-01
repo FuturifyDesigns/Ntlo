@@ -41,6 +41,7 @@ export default function ListingDetail() {
   const listingOnboardingState = useMemo(() => ({
     ready: !loading,
     hasListing: Boolean(listing),
+    listingCount: listing ? 1 : 0,
   }), [loading, listing])
 
   useOnboardingPageState(profile?.role === 'student' ? 'student_listing' : null, listingOnboardingState)

@@ -19,6 +19,9 @@ import {
   isOnboardingFullyComplete,
   allRequiredPagesDone,
   isOnboardingEligible,
+  mergeOnboardingProgress,
+  syncSessionPagesIntoProgress,
+  getMarketListingCountFromState,
 } from '../lib/onboardingRoutes'
 import { ONBOARDING_STEPS_BY_PAGE } from '../lib/onboardingSteps'
 import { mergePageState, resolveOnboardingSteps } from '../lib/onboardingAdapt'
@@ -78,6 +81,32 @@ export function OnboardingProvider({ children }) {
   }), [pageStateVersion])
 
   const onboardingActive = isOnboardingEligible(profile, user, location.pathname)
+
+  useEffect(() => {
+    if (!profile?.id || profileLoading) return
+    const finishOptions = {
+      marketListingCount: getMarketListingCountFromState(pageStateRef.current),
+    }
+    const synced = syncSessionPagesIntoProgress(profile, finishOptions)
+    const current = getProfileOnboardingProgress(profile)
+    const changed = Object.keys(synced).some((key) => synced[key] !== current[key])
+    if (!changed) return
+
+    saveLocalOnboardingProgress(profile.id, synced)
+    patchProfile?.({ onboarding_progress: synced })
+
+    if (allRequiredPagesDone({ ...profile, onboarding_progress: synced }, finishOptions)) {
+      completeOnboarding()
+        .then(() => patchProfile?.({
+          onboarding_progress: synced,
+          onboarding_completed_at: profile.onboarding_completed_at || new Date().toISOString(),
+        }))
+        .catch(() => patchProfile?.({
+          onboarding_progress: synced,
+          onboarding_completed_at: new Date().toISOString(),
+        }))
+    }
+  }, [profile, profileLoading, pageStateVersion, patchProfile])
 
   const actionOnboardingPage = useMemo(
     () => (onboardingActive && !tourOpen
@@ -217,30 +246,30 @@ export function OnboardingProvider({ children }) {
     try {
       markSessionPageDone(profile.id, pageKey)
 
-      const existing = getProfileOnboardingProgress(profile)
-      let progress = { ...existing }
+      const finishOptions = {
+        marketListingCount: getMarketListingCountFromState(pageStateRef.current),
+      }
+
+      let progress = syncSessionPagesIntoProgress(profile, finishOptions)
       try {
-        progress = await completeOnboardingPage(pageKey)
+        const serverProgress = await completeOnboardingPage(pageKey)
+        progress = mergeOnboardingProgress(progress, serverProgress, pageKey)
       } catch {
-        progress = { ...progress, [pageKey]: new Date().toISOString() }
+        progress = mergeOnboardingProgress(progress, null, pageKey)
       }
 
       saveLocalOnboardingProgress(profile.id, progress)
 
-      const marketCount = pageStateRef.current.student_dashboard?.marketListingCount
-        ?? pageStateRef.current.student_browse?.listingCount
-        ?? 0
-      const finishOptions = { marketListingCount: marketCount }
-
       if (
         pageKey === 'student_browse'
-        && marketCount === 0
+        && finishOptions.marketListingCount === 0
         && !progress.student_listing
       ) {
         try {
-          progress = await completeOnboardingPage('student_listing')
+          const listingProgress = await completeOnboardingPage('student_listing')
+          progress = mergeOnboardingProgress(progress, listingProgress, 'student_listing')
         } catch {
-          progress = { ...progress, student_listing: new Date().toISOString() }
+          progress = mergeOnboardingProgress(progress, null, 'student_listing')
         }
         saveLocalOnboardingProgress(profile.id, progress)
       }
@@ -250,7 +279,7 @@ export function OnboardingProvider({ children }) {
         onboarding_progress: progress,
       }
 
-      if (markForced && allRequiredPagesDone(mergedProfile, finishOptions)) {
+      if (allRequiredPagesDone(mergedProfile, finishOptions)) {
         try {
           await completeOnboarding()
           mergedProfile.onboarding_completed_at = new Date().toISOString()
@@ -270,7 +299,6 @@ export function OnboardingProvider({ children }) {
         const refreshed = await refreshProfile?.()
         if (refreshed) {
           const merged = {
-            ...getProfileOnboardingProgress({ ...profile, onboarding_progress: progress }),
             ...(refreshed.onboarding_progress || {}),
             ...progress,
           }
