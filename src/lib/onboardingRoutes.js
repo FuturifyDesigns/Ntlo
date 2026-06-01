@@ -92,6 +92,57 @@ export function allRequiredPagesDone(profile, options = {}) {
   return required.every((key) => Boolean(progress[key]))
 }
 
+export function isOnboardingFullyComplete(profile, options = {}) {
+  if (!profile?.role) return false
+  if (profile.onboarding_completed_at) return true
+  return allRequiredPagesDone(profile, options)
+}
+
+export function sessionPageDone(userId, pageKey) {
+  if (!userId || !pageKey) return false
+  try {
+    return sessionStorage.getItem(`ntlo_ob_page_${userId}_${pageKey}`) === '1'
+  } catch {
+    return false
+  }
+}
+
+export function markSessionPageDone(userId, pageKey) {
+  if (!userId || !pageKey) return
+  try {
+    sessionStorage.setItem(`ntlo_ob_page_${userId}_${pageKey}`, '1')
+  } catch {
+    // ignore
+  }
+}
+
+export function clearSessionPageDone(userId, pageKey) {
+  if (!userId || !pageKey) return
+  try {
+    sessionStorage.removeItem(`ntlo_ob_page_${userId}_${pageKey}`)
+  } catch {
+    // ignore
+  }
+}
+
+export function shouldBlockAutoStart(profile, userId, pageKey, options = {}) {
+  if (!profile || !pageKey) return true
+  if (isOnboardingFullyComplete(profile, options)) return true
+
+  const progress = getProfileOnboardingProgress(profile)
+  if (progress[pageKey]) return true
+
+  if (sessionPageDone(userId, pageKey)) {
+    saveLocalOnboardingProgress(userId, {
+      ...progress,
+      [pageKey]: new Date().toISOString(),
+    })
+    return true
+  }
+
+  return false
+}
+
 export function getRemainingOnboardingPages(profile, options = {}) {
   if (!profile?.role) return []
   if (isOnboardingFullyComplete(profile, options)) return []
@@ -121,53 +172,3 @@ export function getTourNavigatePath(pageKey, pageState = {}) {
   return ONBOARDING_PAGE_META[pageKey]?.path || null
 }
 
-export function clearSessionPageDone(userId, pageKey) {
-  if (!userId || !pageKey) return
-  try {
-    sessionStorage.removeItem(`ntlo_ob_page_${userId}_${pageKey}`)
-  } catch {
-    // ignore
-  }
-}
-
-export function isOnboardingFullyComplete(profile, options = {}) {
-  if (!profile?.role) return false
-  if (profile.onboarding_completed_at) return true
-  return allRequiredPagesDone(profile, options)
-}
-
-export function shouldBlockAutoStart(profile, userId, pageKey, options = {}) {
-  if (!profile || !pageKey) return true
-  if (isOnboardingFullyComplete(profile, options)) return true
-
-  const progress = getProfileOnboardingProgress(profile)
-  if (progress[pageKey]) return true
-
-  if (sessionPageDone(userId, pageKey)) {
-    saveLocalOnboardingProgress(userId, {
-      ...progress,
-      [pageKey]: new Date().toISOString(),
-    })
-    return true
-  }
-
-  return false
-}
-
-export function sessionPageDone(userId, pageKey) {
-  if (!userId || !pageKey) return false
-  try {
-    return sessionStorage.getItem(`ntlo_ob_page_${userId}_${pageKey}`) === '1'
-  } catch {
-    return false
-  }
-}
-
-export function markSessionPageDone(userId, pageKey) {
-  if (!userId || !pageKey) return
-  try {
-    sessionStorage.setItem(`ntlo_ob_page_${userId}_${pageKey}`, '1')
-  } catch {
-    // ignore
-  }
-}
