@@ -113,6 +113,19 @@ body {
     0 12px 32px rgba(26, 26, 46, 0.1);
 }
 
+.marquee-track {
+  animation: marquee-scroll var(--marquee-duration, 8s) linear infinite;
+}
+
+.group:hover .marquee-track {
+  animation-play-state: paused;
+}
+
+@keyframes marquee-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
 .hero-mesh {
   background-color: var(--color-primary);
   background-image:

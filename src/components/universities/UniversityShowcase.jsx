@@ -6,6 +6,7 @@ import { useUniversities } from '../../hooks/useUniversities'
 import { getUniversityDisplayName } from '../../lib/universityNames'
 import OtherUniversityModal from './OtherUniversityModal'
 import { Reveal, AnimatedCounter } from '../ui/Motion'
+import MarqueeText from '../ui/MarqueeText'
 import { useTranslation } from '../../hooks/useTranslation'
 
 export default function UniversityShowcase({ counts = {} }) {
@@ -120,9 +121,9 @@ export default function UniversityShowcase({ counts = {} }) {
                           <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/40 to-transparent" />
                           <div className="absolute inset-0 bg-primary/20 opacity-0 transition-opacity group-hover:opacity-100" />
 
-                          <div className="absolute left-3 top-3 z-10 max-w-[calc(100%-1.5rem)]">
-                            <span className="inline-flex max-w-full items-center truncate rounded-full bg-accent px-2.5 py-1.5 text-xs font-bold uppercase leading-none tracking-wide text-primary shadow-sm">
-                              {getUniversityDisplayName(uni)}
+                          <div className={`absolute left-3 top-3 z-10 ${listingCount > 0 ? 'max-w-[calc(100%-5.5rem)]' : 'max-w-[calc(100%-1.5rem)]'}`}>
+                            <span className="inline-flex max-w-full items-center rounded-full bg-accent px-2.5 py-1.5 text-xs font-bold uppercase leading-none tracking-wide text-primary shadow-sm">
+                              <MarqueeText>{getUniversityDisplayName(uni)}</MarqueeText>
                             </span>
                           </div>
 
