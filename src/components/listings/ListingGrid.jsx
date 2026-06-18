@@ -39,7 +39,12 @@ export default function ListingGrid({
     <div>
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {listings.map((listing, i) => (
-          <ListingCard key={listing.id} listing={listing} carouselIndex={i} />
+          <ListingCard
+            key={listing.id}
+            listing={listing}
+            carouselIndex={i}
+            onboardingHeartTarget={i === 0}
+          />
         ))}
       </div>
 

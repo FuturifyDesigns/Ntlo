@@ -45,10 +45,11 @@ export const ONBOARDING_STEPS_BY_PAGE = {
     {
       id: 'compare',
       target: 'student-compare',
+      placement: 'above',
       mascot: 'thinking',
       titleKey: 'onboarding.student.compareTitle',
       bodyKey: 'onboarding.student.compareBody',
-      onEnter: { section: 'saved' },
+      onEnter: { section: 'saved', scrollTarget: 'student-compare' },
       variants: [
         {
           when: (s) => s.savedCount === 0,
@@ -148,9 +149,11 @@ export const ONBOARDING_STEPS_BY_PAGE = {
     {
       id: 'filters',
       target: 'browse-filters',
+      placement: 'above',
       mascot: 'pointUp',
       titleKey: 'onboarding.student.filtersTitle',
       bodyKey: 'onboarding.student.filtersBody',
+      onEnter: { scrollTarget: 'browse-filters' },
       variants: [
         {
           when: (s) => s.listingCount === 0,
@@ -160,10 +163,12 @@ export const ONBOARDING_STEPS_BY_PAGE = {
     },
     {
       id: 'save-heart',
-      target: 'browse-listings',
+      target: 'browse-save-heart',
+      placement: 'left',
       mascot: 'pointLeft',
       titleKey: 'onboarding.student.saveHeartTitle',
       bodyKey: 'onboarding.student.saveHeartBody',
+      onEnter: { scrollTarget: 'browse-save-heart' },
       when: (s) => s.listingCount > 0,
     },
     {
@@ -177,9 +182,11 @@ export const ONBOARDING_STEPS_BY_PAGE = {
     {
       id: 'view-toggle',
       target: 'browse-view-toggle',
+      placement: 'above',
       mascot: 'pointRight',
       titleKey: 'onboarding.student.viewToggleTitle',
       bodyKey: 'onboarding.student.viewToggleBody',
+      onEnter: { scrollTarget: 'browse-view-toggle' },
       variants: [
         {
           when: (s) => s.listingCount === 0,

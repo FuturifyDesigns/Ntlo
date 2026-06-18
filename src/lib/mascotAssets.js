@@ -30,3 +30,23 @@ export function getMascotForStep(step) {
   if (id.includes('filters') || id.includes('add-listing')) return 'pointUp'
   return 'pointRight'
 }
+
+const preloadedMascots = new Set()
+
+/** Warm mascot PNG cache so tour steps swap poses instantly. */
+export function preloadMascotImages(poses = Object.keys(MASCOT_POSES)) {
+  if (typeof window === 'undefined') return
+  poses.forEach((pose) => {
+    const src = getMascotSrc(pose)
+    if (!src || preloadedMascots.has(src)) return
+    preloadedMascots.add(src)
+    const img = new Image()
+    img.decoding = 'async'
+    img.fetchPriority = 'high'
+    img.src = src
+  })
+}
+
+export function isMascotPreloaded(pose) {
+  return preloadedMascots.has(getMascotSrc(pose))
+}

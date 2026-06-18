@@ -12,6 +12,69 @@ import Button from '../ui/Button'
 
 const PAD = 10
 const RADIUS = 14
+const TOOLTIP_Z = 280
+const SPOTLIGHT_Z = 210
+const TARGET_Z = 215
+
+function computeTooltipStyle(rect, step, cardW, cardH, gap) {
+  const vw = window.innerWidth
+  const vh = window.innerHeight
+  const clampLeft = (left) => Math.max(16, Math.min(vw - cardW - 16, left))
+  const clampTop = (top) => Math.max(16, Math.min(vh - cardH - 16, top))
+  const placement = step?.placement || 'above'
+  const targetCenterX = rect.left + rect.width / 2
+  const targetCenterY = rect.top + rect.height / 2
+
+  if (placement === 'left') {
+    return {
+      top: clampTop(targetCenterY - cardH / 2),
+      left: Math.max(16, rect.left - cardW - gap),
+      maxWidth: Math.min(cardW, rect.left - gap - 16),
+    }
+  }
+
+  if (placement === 'right') {
+    return {
+      top: clampTop(targetCenterY - cardH / 2),
+      left: Math.min(rect.left + rect.width + gap, vw - cardW - 16),
+    }
+  }
+
+  if (placement === 'below') {
+    return {
+      top: clampTop(rect.top + rect.height + gap),
+      left: clampLeft(targetCenterX - cardW / 2),
+    }
+  }
+
+  const aboveTop = rect.top - gap - cardH
+  if (aboveTop >= 16) {
+    return {
+      top: aboveTop,
+      left: clampLeft(targetCenterX - cardW / 2),
+    }
+  }
+
+  if (rect.left - cardW - gap >= 16) {
+    return {
+      top: clampTop(Math.min(rect.top, targetCenterY - cardH / 2)),
+      left: rect.left - cardW - gap,
+      maxWidth: Math.min(cardW, rect.left - gap - 16),
+    }
+  }
+
+  if (rect.left + rect.width + gap + cardW <= vw - 16) {
+    return {
+      top: clampTop(Math.min(rect.top, targetCenterY - cardH / 2)),
+      left: rect.left + rect.width + gap,
+    }
+  }
+
+  return {
+    top: clampTop(aboveTop),
+    left: clampLeft(targetCenterX - cardW / 2),
+  }
+}
 
 function useTargetRect(targetId, stepIndex, active) {
   const [rect, setRect] = useState(null)
@@ -39,6 +102,7 @@ function useTargetRect(targetId, stepIndex, active) {
 
     measure()
     const t = window.setTimeout(measure, 80)
+    const tScroll = window.setTimeout(measure, 420)
     window.addEventListener('resize', measure)
     window.addEventListener('scroll', measure, true)
     const obs = new MutationObserver(measure)
@@ -46,6 +110,7 @@ function useTargetRect(targetId, stepIndex, active) {
 
     return () => {
       clearTimeout(t)
+      clearTimeout(tScroll)
       window.removeEventListener('resize', measure)
       window.removeEventListener('scroll', measure, true)
       obs.disconnect()
@@ -61,7 +126,7 @@ function Spotlight({ rect }) {
   const maskId = `onboarding-mask-${Math.round(left)}-${Math.round(top)}`
 
   return (
-    <svg className="pointer-events-none fixed inset-0 z-[210] h-full w-full" aria-hidden>
+    <svg className="pointer-events-none fixed inset-0 h-full w-full" style={{ zIndex: SPOTLIGHT_Z }} aria-hidden>
       <defs>
         <mask id={maskId}>
           <rect width="100%" height="100%" fill="white" />
@@ -111,36 +176,12 @@ function TooltipCard({
 
   if (hasTarget && rect) {
     const cardW = Math.min(window.innerWidth - 32, 384)
-    const cardH = 340
+    const cardH = 320
     const gap = 20
-    const targetCenterX = rect.left + rect.width / 2
-    const clampLeft = (left) => Math.max(16, Math.min(window.innerWidth - cardW - 16, left))
-
-    positionClass = 'fixed z-[230] w-[min(calc(100vw-2rem),24rem)]'
-
-    const aboveTop = rect.top - gap - cardH
-    if (aboveTop >= 16) {
-      style = {
-        top: aboveTop,
-        left: clampLeft(targetCenterX - cardW / 2),
-      }
-    } else if (rect.left - cardW - gap >= 16) {
-      style = {
-        top: Math.max(16, Math.min(rect.top, window.innerHeight - cardH - 16)),
-        left: rect.left - cardW - gap,
-        maxWidth: Math.min(cardW, rect.left - gap - 16),
-      }
-    } else if (rect.left + rect.width + gap + cardW <= window.innerWidth - 16) {
-      style = {
-        top: Math.max(16, Math.min(rect.top, window.innerHeight - cardH - 16)),
-        left: rect.left + rect.width + gap,
-      }
-    } else {
-      const belowTop = rect.top + rect.height + gap
-      style = {
-        top: Math.min(belowTop, window.innerHeight - cardH - 16),
-        left: clampLeft(targetCenterX - cardW / 2),
-      }
+    positionClass = 'fixed w-[min(calc(100vw-2rem),24rem)]'
+    style = {
+      zIndex: TOOLTIP_Z,
+      ...computeTooltipStyle(rect, step, cardW, cardH, gap),
     }
   }
 
@@ -336,12 +377,17 @@ export default function OnboardingTour({
   }, [step?.id])
 
   useEffect(() => {
-    if (!open || !step) return undefined
+    if (!open || !step || step.type === 'center') return undefined
     onStepEnter?.(step)
-    if (step.onEnter?.scrollTarget) {
-      const el = document.querySelector(`[data-onboarding="${step.onEnter.scrollTarget}"]`)
-      el?.scrollIntoView({ behavior: prefs.reduceMotion ? 'auto' : 'smooth', block: 'center' })
-    }
+    const scrollId = step.onEnter?.scrollTarget || step.target
+    if (!scrollId) return undefined
+    const el = document.querySelector(`[data-onboarding="${scrollId}"]`)
+    if (!el) return undefined
+    el.scrollIntoView({
+      behavior: prefs.reduceMotion ? 'auto' : 'smooth',
+      block: step.placement === 'left' || step.placement === 'right' ? 'center' : 'center',
+    })
+    return undefined
   }, [open, stepIndex, step, onStepEnter, prefs.reduceMotion])
 
   useEffect(() => {
@@ -356,7 +402,7 @@ export default function OnboardingTour({
     }
     el.classList.add('onboarding-spotlight-target')
     el.style.position = prev.position || 'relative'
-    el.style.zIndex = '225'
+    el.style.zIndex = String(TARGET_Z)
     el.style.isolation = 'isolate'
 
     return () => {

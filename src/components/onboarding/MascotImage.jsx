@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { getMascotSrc } from '../../lib/mascotAssets'
+import { getMascotSrc, isMascotPreloaded } from '../../lib/mascotAssets'
 
 export default function MascotImage({
   pose = 'neutral',
@@ -15,18 +15,22 @@ export default function MascotImage({
     xl: 'h-40 w-40',
   }
 
-  const motionProps = animate
-    ? {
+  const skipMotion = !animate || isMascotPreloaded(pose)
+  const motionProps = skipMotion
+    ? {}
+    : {
       initial: { opacity: 0, scale: 0.92, y: 6 },
       animate: { opacity: 1, scale: 1, y: 0 },
-      transition: { duration: 0.35, ease: [0.22, 1, 0.36, 1] },
+      transition: { duration: 0.2, ease: [0.22, 1, 0.36, 1] },
     }
-    : {}
 
   return (
     <motion.img
       src={getMascotSrc(pose)}
       alt={alt}
+      loading="eager"
+      decoding="async"
+      fetchPriority="high"
       className={`object-contain ${sizes[size] || sizes.md} ${className}`}
       draggable={false}
       {...motionProps}

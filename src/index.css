@@ -390,7 +390,7 @@ html[data-reduce-motion="true"] .ping-aurora-glow {
 
 .onboarding-spotlight-target {
   position: relative;
-  z-index: 225;
+  z-index: 215;
   isolation: isolate;
   opacity: 1 !important;
   filter: none !important;

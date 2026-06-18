@@ -25,6 +25,7 @@ import {
   getMarketListingCountFromState,
 } from '../lib/onboardingRoutes'
 import { ONBOARDING_STEPS_BY_PAGE } from '../lib/onboardingSteps'
+import { preloadMascotImages } from '../lib/mascotAssets'
 import { mergePageState, resolveOnboardingSteps } from '../lib/onboardingAdapt'
 import OnboardingTour from '../components/onboarding/OnboardingTour'
 import OnboardingHelpButton from '../components/onboarding/OnboardingHelpButton'
@@ -49,6 +50,10 @@ export function OnboardingProvider({ children }) {
   const suppressAutoStartUntilRef = useRef(0)
   const [progressEpoch, setProgressEpoch] = useState(0)
   const [progressOverride, setProgressOverride] = useState(null)
+
+  useEffect(() => {
+    preloadMascotImages()
+  }, [])
 
   const pageKey = profile?.role
     ? (replayPageKey || getOnboardingPageKey(location.pathname, profile.role))
@@ -239,21 +244,39 @@ export function OnboardingProvider({ children }) {
 
   useEffect(() => {
     if (!pendingTourKey || !profile?.role) return undefined
+
     const currentKey = getOnboardingPageKey(location.pathname, profile.role)
     const onTargetPage = currentKey === pendingTourKey
       || (pendingTourKey === 'student_listing' && currentKey === 'student_listing')
 
     if (!onTargetPage) return undefined
 
-    const liveState = pageStateRef.current[pendingTourKey]
-    if (!liveState || liveState.ready === false) return undefined
+    let cancelled = false
+    let attempts = 0
+    const maxAttempts = 40
 
-    const timer = window.setTimeout(() => {
-      setPendingTourKey(null)
-      beginTour(pendingTourKey, { isForced: true })
-    }, 500)
-    return () => clearTimeout(timer)
-  }, [pendingTourKey, profile, location.pathname, pageStateVersion, beginTour])
+    const tryStart = () => {
+      if (cancelled) return
+      const liveState = pageStateRef.current[pendingTourKey]
+      const hasState = Boolean(liveState)
+      const ready = liveState?.ready !== false
+
+      if ((hasState && ready) || attempts >= maxAttempts) {
+        setPendingTourKey(null)
+        beginTour(pendingTourKey, { isForced: true })
+        return
+      }
+
+      attempts += 1
+      window.setTimeout(tryStart, 150)
+    }
+
+    const timer = window.setTimeout(tryStart, 250)
+    return () => {
+      cancelled = true
+      clearTimeout(timer)
+    }
+  }, [pendingTourKey, profile, location.pathname, beginTour])
 
   const handleStepEnter = useCallback((step) => {
     if (!pageKey) return

@@ -16,7 +16,9 @@ import TrustedBadge from '../trust/TrustedBadge'
 import { resolveListingTrustBadge } from '../../lib/tierBenefits'
 import ListingRecentlyUpdatedBadge from './ListingRecentlyUpdatedBadge'
 
-export default function ListingCard({ listing, compact = false, carouselIndex = 0 }) {
+export default function ListingCard({
+  listing, compact = false, carouselIndex = 0, onboardingHeartTarget = false,
+}) {
   const { user } = useAuth()
   const { isSaved, toggleSave } = useSavedListingsContext()
   const navigate = useNavigate()
@@ -74,6 +76,7 @@ export default function ListingCard({ listing, compact = false, carouselIndex = 
           <button
             onClick={handleSave}
             disabled={saving}
+            {...(onboardingHeartTarget ? { 'data-onboarding': 'browse-save-heart' } : {})}
             className={cn(
               'absolute right-3 top-3 z-[2] rounded-full p-2 shadow-md transition-all',
               saved
