@@ -15,6 +15,7 @@ export function resolveStepCopy(step, state) {
     target: variant.target !== undefined ? variant.target : step.target,
     type: variant.type !== undefined ? variant.type : step.type,
     icon: variant.icon !== undefined ? variant.icon : step.icon,
+    mascot: variant.mascot !== undefined ? variant.mascot : step.mascot,
   }
 }
 

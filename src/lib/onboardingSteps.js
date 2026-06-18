@@ -6,6 +6,7 @@ export const ONBOARDING_STEPS_BY_PAGE = {
       id: 'welcome',
       type: 'center',
       icon: 'GraduationCap',
+      mascot: 'welcome',
       titleKey: 'onboarding.student.welcomeTitle',
       bodyKey: 'onboarding.student.welcomeBody',
       variants: [
@@ -18,12 +19,14 @@ export const ONBOARDING_STEPS_BY_PAGE = {
     {
       id: 'sections',
       target: 'student-section-tabs',
+      mascot: 'pointRight',
       titleKey: 'onboarding.student.sectionsTitle',
       bodyKey: 'onboarding.student.sectionsBody',
     },
     {
       id: 'saved',
       target: 'student-tab-saved',
+      mascot: 'pointRight',
       titleKey: 'onboarding.student.savedTitle',
       bodyKey: 'onboarding.student.savedBody',
       onEnter: { section: 'saved' },
@@ -42,6 +45,7 @@ export const ONBOARDING_STEPS_BY_PAGE = {
     {
       id: 'compare',
       target: 'student-compare',
+      mascot: 'thinking',
       titleKey: 'onboarding.student.compareTitle',
       bodyKey: 'onboarding.student.compareBody',
       onEnter: { section: 'saved' },
@@ -63,6 +67,7 @@ export const ONBOARDING_STEPS_BY_PAGE = {
     {
       id: 'housing',
       target: 'student-tab-housing',
+      mascot: 'pointRight',
       titleKey: 'onboarding.student.housingTitle',
       bodyKey: 'onboarding.student.housingBody',
       onEnter: { section: 'housing', housingTab: 'applications' },
@@ -80,6 +85,7 @@ export const ONBOARDING_STEPS_BY_PAGE = {
     {
       id: 'housing-tabs',
       target: 'student-housing-tabs',
+      mascot: 'explain',
       titleKey: 'onboarding.student.housingTabsTitle',
       bodyKey: 'onboarding.student.housingTabsBody',
       onEnter: { section: 'housing', housingTab: 'applications' },
@@ -97,6 +103,7 @@ export const ONBOARDING_STEPS_BY_PAGE = {
     {
       id: 'browse',
       target: 'student-browse-cta',
+      mascot: 'pointLeft',
       titleKey: 'onboarding.student.browseTitle',
       bodyKey: 'onboarding.student.browseBody',
       onEnter: { section: 'saved' },
@@ -111,6 +118,7 @@ export const ONBOARDING_STEPS_BY_PAGE = {
       id: 'done',
       type: 'center',
       icon: 'PartyPopper',
+      mascot: 'thumbsUp',
       titleKey: 'onboarding.student.dashboardDoneTitle',
       bodyKey: 'onboarding.student.dashboardDoneBody',
       variants: [
@@ -127,6 +135,7 @@ export const ONBOARDING_STEPS_BY_PAGE = {
       id: 'browse-welcome',
       type: 'center',
       icon: 'Search',
+      mascot: 'wave',
       titleKey: 'onboarding.student.browseWelcomeTitle',
       bodyKey: 'onboarding.student.browseWelcomeBody',
       variants: [
@@ -139,6 +148,7 @@ export const ONBOARDING_STEPS_BY_PAGE = {
     {
       id: 'filters',
       target: 'browse-filters',
+      mascot: 'pointUp',
       titleKey: 'onboarding.student.filtersTitle',
       bodyKey: 'onboarding.student.filtersBody',
       variants: [
@@ -151,6 +161,7 @@ export const ONBOARDING_STEPS_BY_PAGE = {
     {
       id: 'save-heart',
       target: 'browse-listings',
+      mascot: 'pointLeft',
       titleKey: 'onboarding.student.saveHeartTitle',
       bodyKey: 'onboarding.student.saveHeartBody',
       when: (s) => s.listingCount > 0,
@@ -158,6 +169,7 @@ export const ONBOARDING_STEPS_BY_PAGE = {
     {
       id: 'browse-no-listings',
       target: 'browse-listings',
+      mascot: 'thinking',
       titleKey: 'onboarding.student.browseNoListingsTitle',
       bodyKey: 'onboarding.student.browseNoListingsBody',
       when: (s) => s.listingCount === 0,
@@ -165,6 +177,7 @@ export const ONBOARDING_STEPS_BY_PAGE = {
     {
       id: 'view-toggle',
       target: 'browse-view-toggle',
+      mascot: 'pointRight',
       titleKey: 'onboarding.student.viewToggleTitle',
       bodyKey: 'onboarding.student.viewToggleBody',
       variants: [
@@ -178,6 +191,7 @@ export const ONBOARDING_STEPS_BY_PAGE = {
       id: 'browse-done',
       type: 'center',
       icon: 'PartyPopper',
+      mascot: 'thumbsUp',
       titleKey: 'onboarding.student.browseDoneTitle',
       bodyKey: 'onboarding.student.browseDoneBody',
       variants: [
@@ -194,6 +208,7 @@ export const ONBOARDING_STEPS_BY_PAGE = {
       id: 'listing-welcome',
       type: 'center',
       icon: 'Home',
+      mascot: 'welcome',
       titleKey: 'onboarding.student.listingWelcomeTitle',
       bodyKey: 'onboarding.student.listingWelcomeBody',
       when: (s) => s.hasListing,
@@ -202,6 +217,7 @@ export const ONBOARDING_STEPS_BY_PAGE = {
       id: 'listing-unavailable',
       type: 'center',
       icon: 'Home',
+      mascot: 'thinking',
       titleKey: 'onboarding.student.listingUnavailableTitle',
       bodyKey: 'onboarding.student.listingUnavailableBody',
       when: (s) => !s.hasListing,
@@ -209,6 +225,7 @@ export const ONBOARDING_STEPS_BY_PAGE = {
     {
       id: 'listing-apply',
       target: 'listing-apply-panel',
+      mascot: 'pointRight',
       titleKey: 'onboarding.student.listingApplyTitle',
       bodyKey: 'onboarding.student.listingApplyBody',
       when: (s) => s.hasListing,
@@ -216,6 +233,7 @@ export const ONBOARDING_STEPS_BY_PAGE = {
     {
       id: 'listing-advisor',
       target: 'listing-advisor-panel',
+      mascot: 'thinking',
       titleKey: 'onboarding.student.listingAdvisorTitle',
       bodyKey: 'onboarding.student.listingAdvisorBody',
       when: (s) => s.hasListing,
@@ -224,6 +242,7 @@ export const ONBOARDING_STEPS_BY_PAGE = {
       id: 'listing-done',
       type: 'center',
       icon: 'PartyPopper',
+      mascot: 'thumbsUp',
       titleKey: 'onboarding.student.listingDoneTitle',
       bodyKey: 'onboarding.student.listingDoneBody',
     },
@@ -234,6 +253,7 @@ export const ONBOARDING_STEPS_BY_PAGE = {
       id: 'welcome',
       type: 'center',
       icon: 'Building2',
+      mascot: 'welcome',
       titleKey: 'onboarding.landlord.welcomeTitle',
       bodyKey: 'onboarding.landlord.welcomeBody',
       variants: [
@@ -246,6 +266,7 @@ export const ONBOARDING_STEPS_BY_PAGE = {
     {
       id: 'stats',
       target: 'landlord-stats',
+      mascot: 'explain',
       titleKey: 'onboarding.landlord.statsTitle',
       bodyKey: 'onboarding.landlord.statsBody',
       onEnter: { scrollTarget: 'landlord-stats' },
@@ -259,6 +280,7 @@ export const ONBOARDING_STEPS_BY_PAGE = {
     {
       id: 'add-listing',
       target: 'landlord-add-listing',
+      mascot: 'pointUp',
       titleKey: 'onboarding.landlord.addListingTitle',
       bodyKey: 'onboarding.landlord.addListingBody',
       variants: [
@@ -271,6 +293,7 @@ export const ONBOARDING_STEPS_BY_PAGE = {
     {
       id: 'listings',
       target: 'landlord-listings',
+      mascot: 'pointRight',
       titleKey: 'onboarding.landlord.listingsTitle',
       bodyKey: 'onboarding.landlord.listingsBody',
       onEnter: { scrollTarget: 'landlord-listings' },
@@ -289,6 +312,7 @@ export const ONBOARDING_STEPS_BY_PAGE = {
     {
       id: 'inquiries',
       target: 'landlord-inquiries',
+      mascot: 'explain',
       titleKey: 'onboarding.landlord.inquiriesTitle',
       bodyKey: 'onboarding.landlord.inquiriesBody',
       onEnter: { scrollTarget: 'landlord-inquiries' },
@@ -307,6 +331,7 @@ export const ONBOARDING_STEPS_BY_PAGE = {
       id: 'done',
       type: 'center',
       icon: 'PartyPopper',
+      mascot: 'thumbsUp',
       titleKey: 'onboarding.landlord.dashboardDoneTitle',
       bodyKey: 'onboarding.landlord.dashboardDoneBody',
       variants: [
@@ -323,6 +348,7 @@ export const ONBOARDING_STEPS_BY_PAGE = {
       id: 'landlord-browse-welcome',
       type: 'center',
       icon: 'Search',
+      mascot: 'wave',
       titleKey: 'onboarding.landlord.browseWelcomeTitle',
       bodyKey: 'onboarding.landlord.browseWelcomeBody',
       variants: [
@@ -335,6 +361,7 @@ export const ONBOARDING_STEPS_BY_PAGE = {
     {
       id: 'landlord-browse-market',
       target: 'browse-listings',
+      mascot: 'pointLeft',
       titleKey: 'onboarding.landlord.browseMarketTitle',
       bodyKey: 'onboarding.landlord.browseMarketBody',
       variants: [
@@ -348,6 +375,7 @@ export const ONBOARDING_STEPS_BY_PAGE = {
       id: 'landlord-browse-done',
       type: 'center',
       icon: 'PartyPopper',
+      mascot: 'thumbsUp',
       titleKey: 'onboarding.landlord.browseDoneTitle',
       bodyKey: 'onboarding.landlord.browseDoneBody',
       variants: [

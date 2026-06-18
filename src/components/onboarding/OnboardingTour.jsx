@@ -2,13 +2,13 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
-  ArrowLeft, ArrowRight, X, Sparkles, GraduationCap, Building2, PartyPopper, Search, Home,
+  ArrowLeft, ArrowRight, X,
 } from 'lucide-react'
 import { useTranslation } from '../../hooks/useTranslation'
 import { useLocale } from '../../context/LocaleContext'
+import { getMascotForStep } from '../../lib/mascotAssets'
+import MascotImage from './MascotImage'
 import Button from '../ui/Button'
-
-const ICONS = { GraduationCap, Building2, PartyPopper, Sparkles, Search, Home }
 
 const PAD = 10
 const RADIUS = 14
@@ -104,13 +104,14 @@ function TooltipCard({
   const isLast = stepIndex === total - 1
   const isFirst = stepIndex === 0
   const hasTarget = Boolean(step.target)
+  const mascotPose = getMascotForStep(step)
 
   let positionClass = 'fixed left-1/2 top-1/2 z-[220] w-[min(calc(100vw-2rem),24rem)] -translate-x-1/2 -translate-y-1/2'
   let style = {}
 
   if (hasTarget && rect) {
     const cardW = Math.min(window.innerWidth - 32, 384)
-    const cardH = 300
+    const cardH = 340
     const gap = 20
     const targetCenterX = rect.left + rect.width / 2
     const clampLeft = (left) => Math.max(16, Math.min(window.innerWidth - cardW - 16, left))
@@ -157,31 +158,30 @@ function TooltipCard({
       style={style}
       {...motionProps}
     >
-      <div className="mb-3 flex items-start justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-accent/15 text-accent">
-            <Sparkles size={16} />
-          </span>
-          <p className="text-xs font-semibold uppercase tracking-wider text-accent">
-            {t('onboarding.stepOf', { current: stepIndex + 1, total })}
-          </p>
+      <div className="mb-3 flex items-start gap-3">
+        <MascotImage pose={mascotPose} size="sm" className="-mt-1 shrink-0" />
+        <div className="min-w-0 flex-1">
+          <div className="flex items-start justify-between gap-2">
+            <p className="text-xs font-semibold uppercase tracking-wider text-accent">
+              {t('onboarding.stepOf', { current: stepIndex + 1, total })}
+            </p>
+            {!forced && (
+              <button
+                type="button"
+                onClick={onSkip}
+                className="-mr-1 rounded-lg p-1 text-muted hover:bg-background hover:text-primary"
+                aria-label={t('onboarding.close')}
+              >
+                <X size={18} />
+              </button>
+            )}
+          </div>
+          <h2 id={`onboarding-title-${step.id}`} className="mt-1 font-display text-lg font-semibold text-primary">
+            {t(step.titleKey)}
+          </h2>
         </div>
-        {!forced && (
-          <button
-            type="button"
-            onClick={onSkip}
-            className="rounded-lg p-1 text-muted hover:bg-background hover:text-primary"
-            aria-label={t('onboarding.close')}
-          >
-            <X size={18} />
-          </button>
-        )}
       </div>
-
-      <h2 id={`onboarding-title-${step.id}`} className="font-display text-lg font-semibold text-primary">
-        {t(step.titleKey)}
-      </h2>
-      <p className="mt-2 text-sm leading-relaxed text-muted">{t(step.bodyKey)}</p>
+      <p className="text-sm leading-relaxed text-muted">{t(step.bodyKey)}</p>
 
       <p className="mt-3 rounded-lg border border-accent/25 bg-accent/5 px-3 py-2 text-xs font-medium text-accent">
         {t('onboarding.nextHint')}
@@ -227,9 +227,9 @@ function CenterCard({
   step, stepIndex, total, onBack, onNext, onSkip, forced, reduceMotion,
 }) {
   const { t } = useTranslation()
-  const Icon = ICONS[step.icon] || Sparkles
   const isLast = stepIndex === total - 1
   const isFirst = stepIndex === 0
+  const mascotPose = getMascotForStep(step)
 
   const motionProps = reduceMotion
     ? {}
@@ -243,8 +243,8 @@ function CenterCard({
       className="fixed left-1/2 top-1/2 z-[220] w-[min(calc(100vw-2rem),26rem)] -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-accent/30 bg-surface p-6 shadow-2xl sm:p-8"
       {...motionProps}
     >
-      <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-accent/15 text-accent">
-        <Icon size={28} />
+      <div className="mx-auto mb-2 flex justify-center">
+        <MascotImage pose={mascotPose} size="lg" />
       </div>
       <p className="text-center text-xs font-semibold uppercase tracking-wider text-accent">
         {t('onboarding.stepOf', { current: stepIndex + 1, total })}

@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { GraduationCap, Building2, Sparkles, X } from 'lucide-react'
+import { GraduationCap, Building2, X } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../../hooks/useAuth'
 import { useTranslation } from '../../hooks/useTranslation'
 import Button from '../ui/Button'
+import MascotImage from './MascotImage'
 
 const STORAGE_KEY = 'ntlo_guest_welcome_v1'
 
@@ -52,22 +53,26 @@ export default function WelcomeGuestModal() {
             exit={{ opacity: 0, y: 16 }}
             role="dialog"
             aria-modal="true"
-            className="relative w-full max-w-lg rounded-2xl border border-accent/30 bg-surface p-6 shadow-2xl sm:p-8"
+            className="relative w-full max-w-xl rounded-2xl border border-accent/30 bg-surface p-6 shadow-2xl sm:p-8"
           >
             <button
               type="button"
               onClick={dismiss}
-              className="absolute right-4 top-4 rounded-lg p-1.5 text-muted hover:bg-background hover:text-primary"
+              className="absolute right-4 top-4 z-10 rounded-lg p-1.5 text-muted hover:bg-background hover:text-primary"
               aria-label={t('onboarding.close')}
             >
               <X size={18} />
             </button>
 
-            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-accent/15 text-accent">
-              <Sparkles size={24} />
+            <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start sm:gap-6">
+              <div className="shrink-0">
+                <MascotImage pose="wave" size="xl" className="mx-auto sm:mx-0" />
+              </div>
+              <div className="min-w-0 flex-1 text-center sm:text-left">
+                <h2 className="font-display text-2xl font-semibold text-primary">{t('onboarding.guest.title')}</h2>
+                <p className="mt-2 text-sm leading-relaxed text-muted">{t('onboarding.guest.subtitle')}</p>
+              </div>
             </div>
-            <h2 className="font-display text-2xl font-semibold text-primary">{t('onboarding.guest.title')}</h2>
-            <p className="mt-2 text-sm leading-relaxed text-muted">{t('onboarding.guest.subtitle')}</p>
 
             <div className="mt-6 space-y-3">
               <div className="rounded-xl border border-border bg-background p-4">
