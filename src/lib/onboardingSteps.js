@@ -11,6 +11,11 @@ export const ONBOARDING_STEPS_BY_PAGE = {
       bodyKey: 'onboarding.student.welcomeBody',
       variants: [
         {
+          when: (s) => s.isLaunchMode,
+          titleKey: 'onboarding.student.welcomeLaunchTitle',
+          bodyKey: 'onboarding.student.welcomeLaunchBody',
+        },
+        {
           when: (s) => s.savedCount === 0 && !s.hasHousingActivity,
           bodyKey: 'onboarding.student.welcomeBodyFresh',
         },
@@ -22,6 +27,12 @@ export const ONBOARDING_STEPS_BY_PAGE = {
       mascot: 'pointRight',
       titleKey: 'onboarding.student.sectionsTitle',
       bodyKey: 'onboarding.student.sectionsBody',
+      variants: [
+        {
+          when: (s) => s.isLaunchMode,
+          bodyKey: 'onboarding.student.sectionsLaunchBody',
+        },
+      ],
     },
     {
       id: 'saved',
@@ -31,6 +42,11 @@ export const ONBOARDING_STEPS_BY_PAGE = {
       bodyKey: 'onboarding.student.savedBody',
       onEnter: { section: 'saved' },
       variants: [
+        {
+          when: (s) => s.isLaunchMode && s.savedCount === 0,
+          target: 'student-saved-empty',
+          bodyKey: 'onboarding.student.savedLaunchBody',
+        },
         {
           when: (s) => s.savedCount === 0,
           target: 'student-saved-empty',
@@ -51,6 +67,10 @@ export const ONBOARDING_STEPS_BY_PAGE = {
       bodyKey: 'onboarding.student.compareBody',
       onEnter: { section: 'saved', scrollTarget: 'student-compare' },
       variants: [
+        {
+          when: (s) => s.isLaunchMode,
+          bodyKey: 'onboarding.student.compareLaunchBody',
+        },
         {
           when: (s) => s.savedCount === 0,
           bodyKey: 'onboarding.student.compareEmptyBody',
@@ -74,6 +94,10 @@ export const ONBOARDING_STEPS_BY_PAGE = {
       onEnter: { section: 'housing', housingTab: 'applications' },
       variants: [
         {
+          when: (s) => s.isLaunchMode,
+          bodyKey: 'onboarding.student.housingLaunchBody',
+        },
+        {
           when: (s) => !s.hasHousingActivity,
           bodyKey: 'onboarding.student.housingEmptyBody',
         },
@@ -91,6 +115,10 @@ export const ONBOARDING_STEPS_BY_PAGE = {
       bodyKey: 'onboarding.student.housingTabsBody',
       onEnter: { section: 'housing', housingTab: 'applications' },
       variants: [
+        {
+          when: (s) => s.isLaunchMode,
+          bodyKey: 'onboarding.student.housingTabsLaunchBody',
+        },
         {
           when: (s) => !s.hasHousingActivity,
           bodyKey: 'onboarding.student.housingTabsEmptyBody',
@@ -110,7 +138,7 @@ export const ONBOARDING_STEPS_BY_PAGE = {
       onEnter: { section: 'saved' },
       variants: [
         {
-          when: (s) => s.marketListingCount === 0,
+          when: (s) => s.isLaunchMode,
           bodyKey: 'onboarding.student.browseEmptyMarketBody',
         },
       ],
@@ -123,6 +151,11 @@ export const ONBOARDING_STEPS_BY_PAGE = {
       titleKey: 'onboarding.student.dashboardDoneTitle',
       bodyKey: 'onboarding.student.dashboardDoneBody',
       variants: [
+        {
+          when: (s) => s.isLaunchMode,
+          titleKey: 'onboarding.student.dashboardDoneLaunchTitle',
+          bodyKey: 'onboarding.student.dashboardDoneLaunchBody',
+        },
         {
           when: (s) => s.savedCount === 0 && s.marketListingCount === 0,
           bodyKey: 'onboarding.student.dashboardDoneLaunchBody',
@@ -141,6 +174,11 @@ export const ONBOARDING_STEPS_BY_PAGE = {
       bodyKey: 'onboarding.student.browseWelcomeBody',
       variants: [
         {
+          when: (s) => s.isLaunchMode,
+          titleKey: 'onboarding.student.browseWelcomeLaunchTitle',
+          bodyKey: 'onboarding.student.browseWelcomeEmptyBody',
+        },
+        {
           when: (s) => s.listingCount === 0,
           bodyKey: 'onboarding.student.browseWelcomeEmptyBody',
         },
@@ -155,6 +193,10 @@ export const ONBOARDING_STEPS_BY_PAGE = {
       bodyKey: 'onboarding.student.filtersBody',
       onEnter: { scrollTarget: 'browse-filters' },
       variants: [
+        {
+          when: (s) => s.isLaunchMode,
+          bodyKey: 'onboarding.student.filtersEmptyBody',
+        },
         {
           when: (s) => s.listingCount === 0,
           bodyKey: 'onboarding.student.filtersEmptyBody',
@@ -171,7 +213,7 @@ export const ONBOARDING_STEPS_BY_PAGE = {
       titleKey: 'onboarding.student.saveHeartTitle',
       bodyKey: 'onboarding.student.saveHeartBody',
       onEnter: { scrollTarget: 'browse-save-heart' },
-      when: (s) => s.listingCount > 0,
+      when: (s) => s.listingCount > 0 && !s.isLaunchMode,
     },
     {
       id: 'browse-no-listings',
@@ -179,7 +221,7 @@ export const ONBOARDING_STEPS_BY_PAGE = {
       mascot: 'thinking',
       titleKey: 'onboarding.student.browseNoListingsTitle',
       bodyKey: 'onboarding.student.browseNoListingsBody',
-      when: (s) => s.listingCount === 0,
+      when: (s) => s.isLaunchMode || s.listingCount === 0,
     },
     {
       id: 'view-toggle',
@@ -190,6 +232,10 @@ export const ONBOARDING_STEPS_BY_PAGE = {
       bodyKey: 'onboarding.student.viewToggleBody',
       onEnter: { scrollTarget: 'browse-view-toggle' },
       variants: [
+        {
+          when: (s) => s.isLaunchMode,
+          bodyKey: 'onboarding.student.viewToggleEmptyBody',
+        },
         {
           when: (s) => s.listingCount === 0,
           bodyKey: 'onboarding.student.viewToggleEmptyBody',
@@ -205,6 +251,11 @@ export const ONBOARDING_STEPS_BY_PAGE = {
       bodyKey: 'onboarding.student.browseDoneBody',
       variants: [
         {
+          when: (s) => s.isLaunchMode,
+          titleKey: 'onboarding.student.browseDoneLaunchTitle',
+          bodyKey: 'onboarding.student.browseDoneEmptyBody',
+        },
+        {
           when: (s) => s.listingCount === 0,
           bodyKey: 'onboarding.student.browseDoneEmptyBody',
         },
@@ -214,13 +265,31 @@ export const ONBOARDING_STEPS_BY_PAGE = {
 
   student_listing: [
     {
+      id: 'listing-launch',
+      type: 'center',
+      icon: 'Home',
+      mascot: 'thinking',
+      titleKey: 'onboarding.student.listingLaunchTitle',
+      bodyKey: 'onboarding.student.listingLaunchBody',
+      when: (s) => s.isLaunchMode,
+    },
+    {
+      id: 'listing-launch-done',
+      type: 'center',
+      icon: 'PartyPopper',
+      mascot: 'thumbsUp',
+      titleKey: 'onboarding.student.listingLaunchDoneTitle',
+      bodyKey: 'onboarding.student.listingLaunchDoneBody',
+      when: (s) => s.isLaunchMode,
+    },
+    {
       id: 'listing-welcome',
       type: 'center',
       icon: 'Home',
       mascot: 'welcome',
       titleKey: 'onboarding.student.listingWelcomeTitle',
       bodyKey: 'onboarding.student.listingWelcomeBody',
-      when: (s) => s.hasListing,
+      when: (s) => s.hasListing && !s.isLaunchMode,
     },
     {
       id: 'listing-unavailable',
@@ -229,7 +298,7 @@ export const ONBOARDING_STEPS_BY_PAGE = {
       mascot: 'thinking',
       titleKey: 'onboarding.student.listingUnavailableTitle',
       bodyKey: 'onboarding.student.listingUnavailableBody',
-      when: (s) => !s.hasListing,
+      when: (s) => !s.hasListing && !s.isLaunchMode,
     },
     {
       id: 'listing-apply',
@@ -237,7 +306,7 @@ export const ONBOARDING_STEPS_BY_PAGE = {
       mascot: 'pointRight',
       titleKey: 'onboarding.student.listingApplyTitle',
       bodyKey: 'onboarding.student.listingApplyBody',
-      when: (s) => s.hasListing,
+      when: (s) => s.hasListing && !s.isLaunchMode,
     },
     {
       id: 'listing-advisor',
@@ -245,7 +314,7 @@ export const ONBOARDING_STEPS_BY_PAGE = {
       mascot: 'thinking',
       titleKey: 'onboarding.student.listingAdvisorTitle',
       bodyKey: 'onboarding.student.listingAdvisorBody',
-      when: (s) => s.hasListing,
+      when: (s) => s.hasListing && !s.isLaunchMode,
     },
     {
       id: 'listing-done',
@@ -254,6 +323,7 @@ export const ONBOARDING_STEPS_BY_PAGE = {
       mascot: 'thumbsUp',
       titleKey: 'onboarding.student.listingDoneTitle',
       bodyKey: 'onboarding.student.listingDoneBody',
+      when: (s) => !s.isLaunchMode,
     },
   ],
 
@@ -266,6 +336,11 @@ export const ONBOARDING_STEPS_BY_PAGE = {
       titleKey: 'onboarding.landlord.welcomeTitle',
       bodyKey: 'onboarding.landlord.welcomeBody',
       variants: [
+        {
+          when: (s) => s.isLaunchMode,
+          titleKey: 'onboarding.landlord.welcomeLaunchTitle',
+          bodyKey: 'onboarding.landlord.welcomeNoListingsBody',
+        },
         {
           when: (s) => s.listingCount === 0,
           bodyKey: 'onboarding.landlord.welcomeNoListingsBody',
@@ -281,7 +356,7 @@ export const ONBOARDING_STEPS_BY_PAGE = {
       onEnter: { scrollTarget: 'landlord-stats' },
       variants: [
         {
-          when: (s) => s.listingCount === 0,
+          when: (s) => s.isLaunchMode || s.listingCount === 0,
           bodyKey: 'onboarding.landlord.statsEmptyBody',
         },
       ],
@@ -294,7 +369,7 @@ export const ONBOARDING_STEPS_BY_PAGE = {
       bodyKey: 'onboarding.landlord.addListingBody',
       variants: [
         {
-          when: (s) => s.listingCount === 0,
+          when: (s) => s.isLaunchMode || s.listingCount === 0,
           bodyKey: 'onboarding.landlord.addListingFirstBody',
         },
       ],
@@ -308,7 +383,7 @@ export const ONBOARDING_STEPS_BY_PAGE = {
       onEnter: { scrollTarget: 'landlord-listings' },
       variants: [
         {
-          when: (s) => s.listingCount === 0,
+          when: (s) => s.isLaunchMode || s.listingCount === 0,
           target: 'landlord-listings-empty',
           bodyKey: 'onboarding.landlord.listingsEmptyBody',
         },
@@ -327,7 +402,7 @@ export const ONBOARDING_STEPS_BY_PAGE = {
       onEnter: { scrollTarget: 'landlord-inquiries' },
       variants: [
         {
-          when: (s) => !s.hasInquiries,
+          when: (s) => s.isLaunchMode || !s.hasInquiries,
           bodyKey: 'onboarding.landlord.inquiriesEmptyBody',
         },
         {
@@ -344,6 +419,11 @@ export const ONBOARDING_STEPS_BY_PAGE = {
       titleKey: 'onboarding.landlord.dashboardDoneTitle',
       bodyKey: 'onboarding.landlord.dashboardDoneBody',
       variants: [
+        {
+          when: (s) => s.isLaunchMode || s.listingCount === 0,
+          titleKey: 'onboarding.landlord.dashboardDoneLaunchTitle',
+          bodyKey: 'onboarding.landlord.dashboardDoneNoListingsBody',
+        },
         {
           when: (s) => s.listingCount === 0,
           bodyKey: 'onboarding.landlord.dashboardDoneNoListingsBody',
@@ -362,6 +442,11 @@ export const ONBOARDING_STEPS_BY_PAGE = {
       bodyKey: 'onboarding.landlord.browseWelcomeBody',
       variants: [
         {
+          when: (s) => s.isLaunchMode,
+          titleKey: 'onboarding.landlord.browseWelcomeLaunchTitle',
+          bodyKey: 'onboarding.landlord.browseWelcomeEmptyBody',
+        },
+        {
           when: (s) => s.listingCount === 0,
           bodyKey: 'onboarding.landlord.browseWelcomeEmptyBody',
         },
@@ -374,6 +459,10 @@ export const ONBOARDING_STEPS_BY_PAGE = {
       titleKey: 'onboarding.landlord.browseMarketTitle',
       bodyKey: 'onboarding.landlord.browseMarketBody',
       variants: [
+        {
+          when: (s) => s.isLaunchMode,
+          bodyKey: 'onboarding.landlord.browseMarketEmptyBody',
+        },
         {
           when: (s) => s.listingCount === 0,
           bodyKey: 'onboarding.landlord.browseMarketEmptyBody',
@@ -388,6 +477,11 @@ export const ONBOARDING_STEPS_BY_PAGE = {
       titleKey: 'onboarding.landlord.browseDoneTitle',
       bodyKey: 'onboarding.landlord.browseDoneBody',
       variants: [
+        {
+          when: (s) => s.isLaunchMode,
+          titleKey: 'onboarding.landlord.browseDoneLaunchTitle',
+          bodyKey: 'onboarding.landlord.browseDoneEmptyBody',
+        },
         {
           when: (s) => s.listingCount === 0,
           bodyKey: 'onboarding.landlord.browseDoneEmptyBody',

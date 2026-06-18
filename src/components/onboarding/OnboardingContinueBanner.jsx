@@ -8,6 +8,7 @@ import {
   getRemainingOnboardingPages,
   isOnboardingEligible,
 } from '../../lib/onboardingRoutes'
+import { getAdaptiveDescriptionKey } from '../../lib/onboardingState'
 
 export default function OnboardingContinueBanner() {
   const { t } = useTranslation()
@@ -20,6 +21,7 @@ export default function OnboardingContinueBanner() {
     actionOnboardingPage,
     remainingOnboardingPages,
     onboardingProfile,
+    onboardingPageStateRef,
   } = useOnboarding()
 
   if (authLoading || !isOnboardingEligible(profile, user, location.pathname)) return null
@@ -37,6 +39,9 @@ export default function OnboardingContinueBanner() {
     completionOptions,
   )
   if (!action) return null
+
+  const descriptionKey = getAdaptiveDescriptionKey(action.pageKey, onboardingPageStateRef)
+    || action.descriptionKey
 
   return (
     <div className="relative z-30 border-b border-accent/40 bg-accent/10 px-4 py-3.5">
@@ -60,7 +65,7 @@ export default function OnboardingContinueBanner() {
                 </span>
               ))}
             </p>
-            <p className="text-xs text-muted">{t(action.descriptionKey)}</p>
+            <p className="text-xs text-muted">{t(descriptionKey)}</p>
           </div>
         </div>
         <button

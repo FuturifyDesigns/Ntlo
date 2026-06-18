@@ -25,6 +25,7 @@ import {
   syncSessionPagesIntoProgress,
   getMarketListingCountFromState,
 } from '../lib/onboardingRoutes'
+import { getMarketListingCount, getAdaptiveDescriptionKey } from '../lib/onboardingState'
 import { ONBOARDING_STEPS_BY_PAGE } from '../lib/onboardingSteps'
 import { preloadMascotImages } from '../lib/mascotAssets'
 import { mergePageState, resolveOnboardingSteps } from '../lib/onboardingAdapt'
@@ -72,6 +73,8 @@ export function OnboardingProvider({ children }) {
     const state = pageStateRef.current[pageKey] || {}
     return resolveOnboardingSteps(baseSteps, state, {
       ignoreReady: Boolean(replayPageKey),
+      pageStateRef: pageStateRef.current,
+      pageKey,
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pageKey, baseSteps, pageStateVersion, replayPageKey])
@@ -82,7 +85,7 @@ export function OnboardingProvider({ children }) {
     return resolveOnboardingSteps(
       baseSteps,
       pageStateRef.current[pageKey] || {},
-      { ignoreReady: true }
+      { ignoreReady: true, pageStateRef: pageStateRef.current, pageKey }
     )
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [steps, tourOpen, pageKey, baseSteps, pageStateVersion, replayPageKey])
@@ -197,6 +200,16 @@ export function OnboardingProvider({ children }) {
 
     if (targetKey === 'student_listing') {
       const samplePath = getSampleListingPathFromState(pageStateRef.current)
+      const marketEmpty = getMarketListingCount(pageStateRef.current) === 0
+      if (marketEmpty) {
+        pendingListingNavRef.current = false
+        setPendingTourKey(null)
+        if (location.pathname !== '/listings') {
+          navigate('/listings')
+        }
+        beginTour(targetKey, { isForced: !isPageOnboardingDone(profile, targetKey) })
+        return
+      }
       if (samplePath) {
         pendingListingNavRef.current = false
         if (location.pathname === samplePath) {
@@ -455,8 +468,9 @@ export function OnboardingProvider({ children }) {
       progressEpoch,
       completionNotice,
       dismissCompletionNotice,
+      onboardingPageStateRef: pageStateRef.current,
     }),
-    [openReplay, startPageTour, registerPageHandler, registerPageState, clearPageState, pageKey, tourOpen, completionOptions, actionOnboardingPage, remainingOnboardingPages, onboardingProfile, progressEpoch, completionNotice, dismissCompletionNotice]
+    [openReplay, startPageTour, registerPageHandler, registerPageState, clearPageState, pageKey, tourOpen, completionOptions, actionOnboardingPage, remainingOnboardingPages, onboardingProfile, progressEpoch, completionNotice, dismissCompletionNotice, pageStateVersion]
   )
 
   return (

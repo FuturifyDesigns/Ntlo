@@ -1,5 +1,7 @@
 /** Resolve onboarding steps from live page state (empty vs populated, loading, etc.). */
 
+import { enrichOnboardingState } from './onboardingState'
+
 function pickVariant(step, state) {
   if (!step.variants?.length) return null
   return step.variants.find((v) => (v.when ? v.when(state) : true)) || null
@@ -21,11 +23,12 @@ export function resolveStepCopy(step, state) {
 
 export function resolveOnboardingSteps(baseSteps, state = {}, options = {}) {
   if (!baseSteps?.length) return []
-  if (!options.ignoreReady && state.ready === false) return []
+  const enriched = enrichOnboardingState(state, options.pageStateRef || {}, options.pageKey || null)
+  if (!options.ignoreReady && enriched.ready === false) return []
 
   return baseSteps
-    .filter((step) => (step.when ? step.when(state) : true))
-    .map((step) => resolveStepCopy(step, state))
+    .filter((step) => (step.when ? step.when(enriched) : true))
+    .map((step) => resolveStepCopy(step, enriched))
 }
 
 /** Merge partial state updates from nested components (e.g. housing panel). */
