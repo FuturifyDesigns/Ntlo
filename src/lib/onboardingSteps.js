@@ -165,6 +165,8 @@ export const ONBOARDING_STEPS_BY_PAGE = {
       id: 'save-heart',
       target: 'browse-save-heart',
       placement: 'left',
+      spotlightPad: 8,
+      spotlightRadius: 999,
       mascot: 'pointLeft',
       titleKey: 'onboarding.student.saveHeartTitle',
       bodyKey: 'onboarding.student.saveHeartBody',

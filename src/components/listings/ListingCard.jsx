@@ -78,7 +78,8 @@ export default function ListingCard({
             disabled={saving}
             {...(onboardingHeartTarget ? { 'data-onboarding': 'browse-save-heart' } : {})}
             className={cn(
-              'absolute right-3 top-3 z-[2] rounded-full p-2 shadow-md transition-all',
+              'absolute right-3 top-3 rounded-full p-2 shadow-md transition-all',
+              onboardingHeartTarget ? 'z-[5]' : 'z-[2]',
               saved
                 ? 'bg-accent text-primary scale-110'
                 : 'bg-white/95 text-muted hover:text-error hover:scale-105'

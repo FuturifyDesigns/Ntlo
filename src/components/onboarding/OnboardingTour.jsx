@@ -12,9 +12,9 @@ import Button from '../ui/Button'
 
 const PAD = 10
 const RADIUS = 14
-const TOOLTIP_Z = 280
-const SPOTLIGHT_Z = 210
-const TARGET_Z = 215
+const PORTAL_Z = 5000
+const SPOTLIGHT_Z = PORTAL_Z + 1
+const TOOLTIP_Z = PORTAL_Z + 10
 
 function computeTooltipStyle(rect, step, cardW, cardH, gap) {
   const vw = window.innerWidth
@@ -26,10 +26,13 @@ function computeTooltipStyle(rect, step, cardW, cardH, gap) {
   const targetCenterY = rect.top + rect.height / 2
 
   if (placement === 'left') {
-    return {
-      top: clampTop(targetCenterY - cardH / 2),
-      left: Math.max(16, rect.left - cardW - gap),
-      maxWidth: Math.min(cardW, rect.left - gap - 16),
+    const leftPos = rect.left - cardW - gap
+    if (leftPos >= 16) {
+      return {
+        top: clampTop(targetCenterY - cardH / 2),
+        left: leftPos,
+        maxWidth: Math.min(cardW, rect.left - gap - 16),
+      }
     }
   }
 
@@ -76,7 +79,7 @@ function computeTooltipStyle(rect, step, cardW, cardH, gap) {
   }
 }
 
-function useTargetRect(targetId, stepIndex, active) {
+function useTargetRect(targetId, stepIndex, active, spotlightPad = PAD) {
   const [rect, setRect] = useState(null)
 
   useEffect(() => {
@@ -84,6 +87,8 @@ function useTargetRect(targetId, stepIndex, active) {
       setRect(null)
       return undefined
     }
+
+    const pad = spotlightPad
 
     function measure() {
       const el = document.querySelector(`[data-onboarding="${targetId}"]`)
@@ -93,16 +98,17 @@ function useTargetRect(targetId, stepIndex, active) {
       }
       const r = el.getBoundingClientRect()
       setRect({
-        top: r.top - PAD,
-        left: r.left - PAD,
-        width: r.width + PAD * 2,
-        height: r.height + PAD * 2,
+        top: r.top - pad,
+        left: r.left - pad,
+        width: r.width + pad * 2,
+        height: r.height + pad * 2,
       })
     }
 
     measure()
     const t = window.setTimeout(measure, 80)
     const tScroll = window.setTimeout(measure, 420)
+    const tScrollLate = window.setTimeout(measure, 900)
     window.addEventListener('resize', measure)
     window.addEventListener('scroll', measure, true)
     const obs = new MutationObserver(measure)
@@ -111,16 +117,17 @@ function useTargetRect(targetId, stepIndex, active) {
     return () => {
       clearTimeout(t)
       clearTimeout(tScroll)
+      clearTimeout(tScrollLate)
       window.removeEventListener('resize', measure)
       window.removeEventListener('scroll', measure, true)
       obs.disconnect()
     }
-  }, [targetId, stepIndex, active])
+  }, [targetId, stepIndex, active, spotlightPad])
 
   return rect
 }
 
-function Spotlight({ rect }) {
+function Spotlight({ rect, radius = RADIUS }) {
   if (!rect) return null
   const { top, left, width, height } = rect
   const maskId = `onboarding-mask-${Math.round(left)}-${Math.round(top)}`
@@ -135,7 +142,7 @@ function Spotlight({ rect }) {
             y={top}
             width={width}
             height={height}
-            rx={RADIUS}
+            rx={radius}
             fill="black"
           />
         </mask>
@@ -152,7 +159,7 @@ function Spotlight({ rect }) {
         y={top}
         width={width}
         height={height}
-        rx={RADIUS}
+        rx={radius}
         fill="none"
         stroke="rgba(200, 168, 75, 0.95)"
         strokeWidth="2.5"
@@ -171,8 +178,8 @@ function TooltipCard({
   const hasTarget = Boolean(step.target)
   const mascotPose = getMascotForStep(step)
 
-  let positionClass = 'fixed left-1/2 top-1/2 z-[220] w-[min(calc(100vw-2rem),24rem)] -translate-x-1/2 -translate-y-1/2'
-  let style = {}
+  let positionClass = 'fixed left-1/2 top-1/2 w-[min(calc(100vw-2rem),24rem)] -translate-x-1/2 -translate-y-1/2'
+  let style = { zIndex: TOOLTIP_Z }
 
   if (hasTarget && rect) {
     const cardW = Math.min(window.innerWidth - 32, 384)
@@ -281,7 +288,8 @@ function CenterCard({
       key={step.id}
       role="dialog"
       aria-modal="true"
-      className="fixed left-1/2 top-1/2 z-[220] w-[min(calc(100vw-2rem),26rem)] -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-accent/30 bg-surface p-6 shadow-2xl sm:p-8"
+      className="fixed left-1/2 top-1/2 w-[min(calc(100vw-2rem),26rem)] -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-accent/30 bg-surface p-6 shadow-2xl sm:p-8"
+      style={{ zIndex: TOOLTIP_Z }}
       {...motionProps}
     >
       <div className="mx-auto mb-2 flex justify-center">
@@ -344,7 +352,12 @@ export default function OnboardingTour({
   const completingRef = useRef(false)
   const activeStepIdRef = useRef(null)
   const step = steps[stepIndex]
-  const rect = useTargetRect(step?.target, stepIndex, open && step?.type !== 'center')
+  const rect = useTargetRect(
+    step?.target,
+    stepIndex,
+    open && step?.type !== 'center',
+    step?.spotlightPad ?? PAD,
+  )
 
   useEffect(() => {
     if (!open) {
@@ -400,9 +413,11 @@ export default function OnboardingTour({
       zIndex: el.style.zIndex,
       isolation: el.style.isolation,
     }
+    const computed = window.getComputedStyle(el)
     el.classList.add('onboarding-spotlight-target')
-    el.style.position = prev.position || 'relative'
-    el.style.zIndex = String(TARGET_Z)
+    if (computed.position === 'static') {
+      el.style.position = 'relative'
+    }
     el.style.isolation = 'isolate'
 
     return () => {
@@ -465,16 +480,19 @@ export default function OnboardingTour({
   return createPortal(
     <AnimatePresence>
       {open && (
-        <div className="fixed inset-0 z-[200]" aria-live="polite">
+        <div className="fixed inset-0" style={{ zIndex: PORTAL_Z }} aria-live="polite">
           {step.type === 'center' && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[205] bg-primary/70 backdrop-blur-[1px]"
+              className="fixed inset-0 bg-primary/70 backdrop-blur-[1px]"
+              style={{ zIndex: SPOTLIGHT_Z }}
             />
           )}
-          {step.type !== 'center' && <Spotlight rect={rect} />}
+          {step.type !== 'center' && (
+            <Spotlight rect={rect} radius={step?.spotlightRadius ?? RADIUS} />
+          )}
           {step.type === 'center' ? (
             <CenterCard
               step={step}

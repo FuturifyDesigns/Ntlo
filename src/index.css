@@ -389,12 +389,13 @@ html[data-reduce-motion="true"] .ping-aurora-glow {
 }
 
 .onboarding-spotlight-target {
-  position: relative;
-  z-index: 215;
   isolation: isolate;
   opacity: 1 !important;
   filter: none !important;
   box-shadow: none !important;
+}
+
+.onboarding-spotlight-target:not(button):not([role="button"]) {
   background-color: var(--color-surface, #fff) !important;
 }
 
