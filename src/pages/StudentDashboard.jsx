@@ -31,7 +31,7 @@ export default function StudentDashboard() {
   const { savedListings, loading } = useSavedListingsContext()
   const { applications, viewings, loading: housingLoading, refetch: refetchHousing } = useStudentHousing()
   const { conversations, loading: convLoading, refetch: refetchConversations } = useConversations()
-  const { count: marketListingCount, loading: marketLoading } = useListings({})
+  const { count: marketListingCount, listings: marketListings, loading: marketLoading } = useListings({})
   const { t } = useTranslation()
   const { prefs } = useLocale()
   const { registerPageHandler } = useOnboarding()
@@ -59,18 +59,25 @@ export default function StudentDashboard() {
   const pageLoading = loading || profileLoading || housingLoading || convLoading
   const hasHousingActivity = applications.length + viewings.length + conversations.length > 0
 
-  const onboardingState = useMemo(() => ({
-    ready: !pageLoading && !marketLoading,
-    savedCount: savedListings.length,
-    hasHousingActivity,
-    applicationsCount: applications.length,
-    viewingsCount: viewings.length,
-    messagesCount: conversations.length,
-    marketListingCount: marketListingCount ?? 0,
-  }), [
+  const onboardingState = useMemo(() => {
+    const sampleListingPath = savedListings[0]?.id
+      ? `/listings/${savedListings[0].id}`
+      : (marketListings[0]?.id ? `/listings/${marketListings[0].id}` : null)
+    return {
+      ready: !pageLoading && !marketLoading,
+      savedCount: savedListings.length,
+      hasHousingActivity,
+      applicationsCount: applications.length,
+      viewingsCount: viewings.length,
+      messagesCount: conversations.length,
+      marketListingCount: marketListingCount ?? 0,
+      sampleListingPath,
+    }
+  }, [
     pageLoading,
     marketLoading,
-    savedListings.length,
+    savedListings,
+    marketListings,
     hasHousingActivity,
     applications.length,
     viewings.length,

@@ -42,6 +42,7 @@ export default function ListingDetail() {
     ready: !loading,
     hasListing: Boolean(listing),
     listingCount: listing ? 1 : 0,
+    sampleListingPath: listing?.id ? `/listings/${listing.id}` : null,
   }), [loading, listing])
 
   useOnboardingPageState(profile?.role === 'student' ? 'student_listing' : null, listingOnboardingState)

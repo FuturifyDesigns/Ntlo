@@ -13,6 +13,7 @@ import {
   getOnboardingActionPage,
   getRemainingOnboardingPages,
   getTourNavigatePath,
+  getSampleListingPathFromState,
   getProfileOnboardingProgress,
   saveLocalOnboardingProgress,
   shouldBlockAutoStart,
@@ -49,6 +50,7 @@ export function OnboardingProvider({ children }) {
   const activeTourPageKeyRef = useRef(null)
   const finalizePageRef = useRef(null)
   const suppressAutoStartUntilRef = useRef(0)
+  const pendingListingNavRef = useRef(false)
   const [progressEpoch, setProgressEpoch] = useState(0)
   const [progressOverride, setProgressOverride] = useState(null)
   const [completionNotice, setCompletionNotice] = useState(null)
@@ -193,13 +195,24 @@ export function OnboardingProvider({ children }) {
       return
     }
 
-    if (targetKey === 'student_listing' && currentKey === 'student_browse') {
-      const samplePath = pageStateRef.current.student_browse?.sampleListingPath
+    if (targetKey === 'student_listing') {
+      const samplePath = getSampleListingPathFromState(pageStateRef.current)
       if (samplePath) {
+        pendingListingNavRef.current = false
+        if (location.pathname === samplePath) {
+          beginTour(targetKey, { isForced: !isPageOnboardingDone(profile, targetKey) })
+          return
+        }
         setPendingTourKey(targetKey)
         navigate(samplePath)
         return
       }
+      pendingListingNavRef.current = true
+      setPendingTourKey(targetKey)
+      if (location.pathname !== '/listings') {
+        navigate('/listings')
+      }
+      return
     }
 
     const path = getTourNavigatePath(
@@ -278,7 +291,18 @@ export function OnboardingProvider({ children }) {
       cancelled = true
       clearTimeout(timer)
     }
-  }, [pendingTourKey, profile, location.pathname, beginTour])
+  }, [pendingTourKey, profile, location.pathname, pageStateVersion, beginTour])
+
+  useEffect(() => {
+    if (pendingTourKey !== 'student_listing' || !pendingListingNavRef.current) return undefined
+    const samplePath = getSampleListingPathFromState(pageStateRef.current)
+    if (!samplePath) return undefined
+    pendingListingNavRef.current = false
+    if (location.pathname !== samplePath) {
+      navigate(samplePath)
+    }
+    return undefined
+  }, [pendingTourKey, pageStateVersion, location.pathname, navigate])
 
   const handleStepEnter = useCallback((step) => {
     if (!pageKey) return
@@ -391,6 +415,7 @@ export function OnboardingProvider({ children }) {
     setForced(false)
     setReplayPageKey(null)
     setPendingTourKey(null)
+    pendingListingNavRef.current = false
     activeTourPageKeyRef.current = null
   }, [])
 

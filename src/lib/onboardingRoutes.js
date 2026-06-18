@@ -223,9 +223,19 @@ export function getOnboardingActionPage(profile, pathname, role, options = {}) {
 }
 
 export function getTourNavigatePath(pageKey, pageState = {}) {
-  if (pageKey === 'student_listing' && pageState.sampleListingPath) {
+  if (pageKey === 'student_listing') {
     return pageState.sampleListingPath
+      || ONBOARDING_PAGE_META[pageKey]?.path
+      || null
   }
   return ONBOARDING_PAGE_META[pageKey]?.path || null
+}
+
+/** First listing detail URL for the listing-page tour (browse, dashboard, or detail state). */
+export function getSampleListingPathFromState(pageStateRef = {}) {
+  return pageStateRef.student_browse?.sampleListingPath
+    || pageStateRef.student_dashboard?.sampleListingPath
+    || pageStateRef.student_listing?.sampleListingPath
+    || null
 }
 

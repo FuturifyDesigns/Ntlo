@@ -32,7 +32,7 @@ function NavbarLink({
 
 export default function Navbar() {
   const [open, setOpen] = useState(false)
-  const { user, isLandlord } = useAuth()
+  const { user, isLandlord, isStudent } = useAuth()
   usePresenceHeartbeat()
   const { t } = useTranslation()
   const location = useLocation()
@@ -98,9 +98,11 @@ export default function Navbar() {
                 {t('nav.signIn')}
               </Link>
             )}
-            <Button as={Link} to={isLandlord ? '/landlord/listings/new' : '/register?role=landlord'} size="sm">
-              {t('nav.listPlace')}
-            </Button>
+            {!isStudent && (
+              <Button as={Link} to={isLandlord ? '/landlord/listings/new' : '/register?role=landlord'} size="sm">
+                {t('nav.listPlace')}
+              </Button>
+            )}
           </div>
 
           <div className="flex items-center gap-1 md:hidden">
@@ -151,14 +153,16 @@ export default function Navbar() {
                 {t('nav.signIn')}
               </Link>
             )}
-            <Button
-              as={Link}
-              to={isLandlord ? '/landlord/listings/new' : '/register?role=landlord'}
-              className="mt-2 w-full"
-              onClick={() => setOpen(false)}
-            >
-              {t('nav.listPlace')}
-            </Button>
+            {!isStudent && (
+              <Button
+                as={Link}
+                to={isLandlord ? '/landlord/listings/new' : '/register?role=landlord'}
+                className="mt-2 w-full"
+                onClick={() => setOpen(false)}
+              >
+                {t('nav.listPlace')}
+              </Button>
+            )}
           </nav>
         </div>
       )}
