@@ -231,9 +231,17 @@ function TooltipCard({
       </div>
       <p className="text-sm leading-relaxed text-muted">{t(step.bodyKey)}</p>
 
-      <p className="mt-3 rounded-lg border border-accent/25 bg-accent/5 px-3 py-2 text-xs font-medium text-accent">
-        {t('onboarding.nextHint')}
-      </p>
+      {!isLast && (
+        <p className="mt-3 rounded-lg border border-accent/25 bg-accent/5 px-3 py-2 text-xs font-medium text-accent">
+          {t('onboarding.nextHint')}
+        </p>
+      )}
+
+      {isLast && (
+        <p className="mt-3 rounded-lg border border-accent/25 bg-accent/5 px-3 py-2 text-xs font-medium text-accent">
+          {t('onboarding.tourCompleteHint')}
+        </p>
+      )}
 
       <div className="mt-4 flex flex-wrap items-center gap-2">
         {!isFirst && (
@@ -302,6 +310,10 @@ function CenterCard({
         {t(step.titleKey)}
       </h2>
       <p className="mt-3 text-center text-sm leading-relaxed text-muted">{t(step.bodyKey)}</p>
+
+      <p className="mt-4 rounded-lg border border-accent/25 bg-accent/5 px-3 py-2 text-center text-xs font-medium text-accent">
+        {isLast ? t('onboarding.tourCompleteHint') : t('onboarding.nextHint')}
+      </p>
 
       <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
         {!isFirst && (
