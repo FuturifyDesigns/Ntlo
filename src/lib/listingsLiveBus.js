@@ -23,6 +23,11 @@ function ensureChannel() {
       { event: '*', schema: 'public', table: 'listings' },
       () => notifyAll()
     )
+    .on(
+      'postgres_changes',
+      { event: 'UPDATE', schema: 'public', table: 'profiles' },
+      () => notifyAll()
+    )
     .subscribe()
 }
 

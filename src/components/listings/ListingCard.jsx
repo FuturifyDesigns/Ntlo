@@ -13,7 +13,9 @@ import { getUniversityDisplayName } from '../../lib/universityNames'
 import Badge from '../ui/Badge'
 import { IconLocation } from '../ui/Icons'
 import TrustedBadge from '../trust/TrustedBadge'
+import TrustRiskBadge from '../trust/TrustRiskBadge'
 import { resolveListingTrustBadge } from '../../lib/tierBenefits'
+import { getListingTrustProfile } from '../../lib/listingTrust'
 import ListingRecentlyUpdatedBadge from './ListingRecentlyUpdatedBadge'
 
 export default function ListingCard({
@@ -30,6 +32,7 @@ export default function ListingCard({
   const hasMultiplePhotos = listingPhotos.length > 1
   const saved = isSaved(listing.id)
   const trustLevel = resolveListingTrustBadge(listing)
+  const trust = getListingTrustProfile(listing)
   const occupancy = getListingOccupancy(listing)
 
   async function handleSave(e) {
@@ -107,9 +110,10 @@ export default function ListingCard({
             </div>
           )}
 
-          {trustLevel && (
-            <div className="absolute bottom-3 right-3 z-[2]">
-              <TrustedBadge level={trustLevel} compact />
+          {(trustLevel || trust.showRisk) && (
+            <div className="absolute bottom-3 right-3 z-[2] flex flex-col items-end gap-1">
+              {trustLevel && <TrustedBadge level={trustLevel} compact />}
+              {trust.showRisk && <TrustRiskBadge risk={trust.risk} compact />}
             </div>
           )}
         </div>

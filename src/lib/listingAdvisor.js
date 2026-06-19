@@ -2,6 +2,7 @@ import { calculateDistance, formatPrice } from './utils'
 import { getUniversityById } from './universities'
 import { getUniversityDisplayName } from './universityNames'
 import { getListingPosition } from './googleMaps'
+import { getListingTrustProfile } from './listingTrust'
 
 /** Typical monthly student rent in Pula (Botswana market rough guide) */
 const PRICE_GUIDE = {
@@ -31,10 +32,7 @@ function scorePrice(price, roomType) {
 }
 
 function scoreTrust(listing) {
-  let score = 50
-  if (listing.is_verified) score += 30
-  if (listing.landlord?.is_verified) score += 20
-  return Math.min(100, score)
+  return getListingTrustProfile(listing).trustScore
 }
 
 function scoreAmenities(amenities = []) {
@@ -94,8 +92,18 @@ export function analyzeListing(listing, context = {}) {
     cons.push({ key: 'highPrice', priority: 2 })
   }
 
-  if (listing.is_verified || listing.landlord?.is_verified) {
+  const trust = getListingTrustProfile(listing)
+
+  if (trust.listingTrusted && trust.landlordVerified) {
     pros.push({ key: 'verified', priority: 1 })
+  } else if (trust.landlordVerified) {
+    pros.push({ key: 'landlordVerified', priority: 1 })
+    tips.push({ key: 'confirmProperty' })
+  } else if (trust.listingTrusted) {
+    pros.push({ key: 'propertyVerified', priority: 1 })
+  } else if (trust.published) {
+    tips.push({ key: 'moderateRisk' })
+    tips.push({ key: 'askVerification' })
   } else {
     tips.push({ key: 'askVerification' })
   }
@@ -254,10 +262,12 @@ export function buildListingInsightSummary(listing, analysis, t) {
     }
   }
 
-  if (analysis.scores.trust >= 80) {
+  if (analysis.scores.trust >= 85) {
     parts.push(t('advisor.summary.trustHigh'))
-  } else if (analysis.scores.trust < 60) {
+  } else if (analysis.scores.trust < 58) {
     parts.push(t('advisor.summary.trustLow'))
+  } else {
+    parts.push(t('advisor.summary.trustModerate'))
   }
 
   if (analysis.scores.price >= 82) {

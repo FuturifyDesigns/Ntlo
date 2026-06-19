@@ -18,6 +18,9 @@ import { canStudentApplyToListing, genderMatchesListing } from '../../lib/applic
 import { isListingOpenForApply } from '../../lib/listingOccupancy'
 import { useStudentHousing, useStudentListingStatus } from '../../hooks/useHousing'
 import { GENDER_PREFERENCES } from '../../lib/utils'
+import TrustedBadge from '../trust/TrustedBadge'
+import { isLandlordVerified } from '../../lib/listingTrust'
+import { TRUST_LEVEL } from '../../lib/tierBenefits'
 
 function WhatsAppIcon({ size = 20 }) {
   return (
@@ -209,7 +212,12 @@ export default function ListingContactPanel({ listing, onboardingId }) {
       <div className="space-y-3" data-onboarding={onboardingId}>
         <div>
           <p className="text-sm text-muted">{t('listingDetail.listedBy')}</p>
-          <p className="font-semibold">{landlordName}</p>
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="font-semibold">{landlordName}</p>
+            {isLandlordVerified(listing) && (
+              <TrustedBadge level={TRUST_LEVEL.verifiedLandlord} compact />
+            )}
+          </div>
         </div>
 
         {listing.available && isGuest && (

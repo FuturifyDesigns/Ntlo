@@ -1,12 +1,16 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Home, Trash2, MapPin, User, ExternalLink } from 'lucide-react'
+import { Home, Trash2, MapPin, User, ExternalLink, ShieldCheck, ShieldOff } from 'lucide-react'
 import { useTranslation } from '../../hooks/useTranslation'
 import Button from '../ui/Button'
 import Badge from '../ui/Badge'
+import TrustedBadge from '../trust/TrustedBadge'
+import TrustRiskBadge from '../trust/TrustRiskBadge'
+import { getListingTrustProfile } from '../../lib/listingTrust'
 
-export default function AdminLiveListingCard({ listing, onDelete }) {
+export default function AdminLiveListingCard({ listing, onDelete, onSetTrust, trustBusy }) {
   const { t } = useTranslation()
+  const trust = getListingTrustProfile(listing, listing.landlord)
 
   return (
     <motion.div
@@ -26,6 +30,8 @@ export default function AdminLiveListingCard({ listing, onDelete }) {
             {listing.occupancy_status === 'rented' && (
               <Badge variant="warning">{t('admin.listingOccupied')}</Badge>
             )}
+            {trust.primaryBadge && <TrustedBadge level={trust.primaryBadge} compact />}
+            <TrustRiskBadge risk={trust.risk} compact />
           </div>
           <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted">
             <span className="inline-flex items-center gap-1">
@@ -51,6 +57,27 @@ export default function AdminLiveListingCard({ listing, onDelete }) {
           <ExternalLink size={14} />
           {t('admin.viewListing')}
         </Button>
+        {listing.is_verified ? (
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={trustBusy === listing.id}
+            onClick={() => onSetTrust?.(listing, false)}
+          >
+            <ShieldOff size={14} />
+            {t('admin.removeTrustedHome')}
+          </Button>
+        ) : (
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={trustBusy === listing.id}
+            onClick={() => onSetTrust?.(listing, true)}
+          >
+            <ShieldCheck size={14} />
+            {t('admin.awardTrustedHome')}
+          </Button>
+        )}
         <Button size="sm" variant="danger" onClick={onDelete}>
           <Trash2 size={14} />
           {t('admin.deleteListing')}

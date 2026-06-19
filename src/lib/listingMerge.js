@@ -13,6 +13,8 @@ export function mergeListingRow(prev, next) {
     && prev.house_rules === next.house_rules
     && prev.whatsapp_number === next.whatsapp_number
     && prev.verification_status === next.verification_status
+    && prev.is_verified === next.is_verified
+    && prev.landlord_verified === next.landlord_verified
     && prev.verification_notes === next.verification_notes
     && prev.address === next.address
     && prev.area === next.area

@@ -30,6 +30,7 @@ export function useListings(filters = {}) {
     genderPreference,
     search,
     availableOnly = false,
+    verifiedOnly = false,
     sortBy = 'newest',
     amenities = [],
     landlordId,
@@ -56,6 +57,7 @@ export function useListings(filters = {}) {
     genderPreference,
     search,
     availableOnly,
+    verifiedOnly,
     sortBy,
     amenitiesKey,
   ])
@@ -67,7 +69,7 @@ export function useListings(filters = {}) {
 
     const cacheKey = buildFilterKey({
       universityId, minPrice, maxPrice, roomType, genderPreference, search,
-      availableOnly, sortBy, amenitiesKey, landlordId, mapMode, page,
+      availableOnly, verifiedOnly, sortBy, amenitiesKey, landlordId, mapMode, page,
     })
 
     try {
@@ -111,6 +113,9 @@ export function useListings(filters = {}) {
         if (amenities.length) {
           query = query.contains('amenities', amenities)
         }
+        if (verifiedOnly === true) {
+          query = query.eq('is_verified', true)
+        }
 
         if (sortBy === 'price_asc') {
           query = query.order('price', { ascending: true })
@@ -153,6 +158,7 @@ export function useListings(filters = {}) {
     genderPreference,
     search,
     availableOnly,
+    verifiedOnly,
     sortBy,
     amenitiesKey,
     landlordId,
@@ -247,6 +253,34 @@ export function useListing(id) {
 
     return () => supabase.removeChannel(channel)
   }, [id])
+
+  useEffect(() => {
+    if (!id || !listing?.landlord_id) return undefined
+
+    const channel = supabase
+      .channel(`listing-landlord-${listing.landlord_id}`)
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'profiles', filter: `id=eq.${listing.landlord_id}` },
+        (payload) => {
+          if (!payload.new) return
+          setListing((prev) => {
+            if (!prev) return prev
+            const landlordVerified = Boolean(payload.new.is_verified)
+            return {
+              ...prev,
+              landlord_verified: landlordVerified,
+              landlord: prev.landlord
+                ? { ...prev.landlord, is_verified: landlordVerified }
+                : prev.landlord,
+            }
+          })
+        }
+      )
+      .subscribe()
+
+    return () => supabase.removeChannel(channel)
+  }, [id, listing?.landlord_id])
 
   return { listing, loading, error }
 }

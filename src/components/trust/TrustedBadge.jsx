@@ -12,6 +12,14 @@ const STYLES = {
     wrap: 'bg-background/95 text-muted border border-border',
     icon: IconListedHome,
   },
+  [TRUST_LEVEL.trustedHome]: {
+    wrap: 'bg-accent text-primary',
+    icon: IconTrustedHome,
+  },
+  [TRUST_LEVEL.verifiedLandlord]: {
+    wrap: 'bg-success/15 text-success border border-success/35',
+    icon: IconTrustedHome,
+  },
   [TRUST_LEVEL.standard]: {
     wrap: 'bg-accent text-primary',
     icon: IconTrustedHome,

@@ -30,6 +30,7 @@ export default function FilterBar({
       genderPreference: 'any',
       sortBy: 'newest',
       availableOnly: false,
+      verifiedOnly: false,
       amenities: [],
     })
   }
@@ -46,6 +47,8 @@ export default function FilterBar({
     filters.maxPrice ||
     filters.roomType ||
     filters.genderPreference !== 'any' ||
+    filters.availableOnly ||
+    filters.verifiedOnly ||
     filters.amenities?.length
 
   return (
@@ -182,6 +185,15 @@ export default function FilterBar({
               className="rounded border-border accent-accent"
             />
             {t('filter.availableOnly')}
+          </label>
+          <label className="mt-2 flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={filters.verifiedOnly === true}
+              onChange={(e) => update('verifiedOnly', e.target.checked)}
+              className="rounded border-border accent-accent"
+            />
+            {t('filter.verifiedOnly')}
           </label>
         </div>
       </details>

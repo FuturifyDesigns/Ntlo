@@ -1,11 +1,14 @@
-import { BILLING_LIVE } from './subscriptions'
+import { getListingOccupancy } from './listingOccupancy'
+import { getListingTrustProfile } from './listingTrust'
 
-/** Visual badge levels on listings. Tier badges only apply when billing is live. */
+/** Visual badge levels on listings. Identity verification is separate from subscription tiers. */
 export const TRUST_LEVEL = {
   free: 'free',
   listed: 'listed',
   standard: 'standard',
   featured: 'featured',
+  trustedHome: 'trusted_home',
+  verifiedLandlord: 'verified_landlord',
 }
 
 const TIER_RANK = { free: 0, early_access: 0, basic: 1, standard: 2, premium: 3 }
@@ -90,25 +93,22 @@ export function tierMeetsRequirement(profileTier, requiredTier) {
 }
 
 /**
- * Badge on listing cards/detail.
- * Early access: single "Free" badge for every listing — no tier or verification badges.
- * Billing live: badge follows subscription_tier (see BILLING_GO_LIVE.md).
+ * Primary trust badge on listing cards/detail.
  */
 export function resolveListingTrustBadge(listing, landlordProfile) {
-  if (!listing?.available) return null
+  if (!listing || getListingOccupancy(listing) === 'unavailable') return null
+  return getListingTrustProfile(listing, landlordProfile).primaryBadge
+}
 
-  if (!BILLING_LIVE) {
-    return TRUST_LEVEL.free
-  }
-
-  const tier = landlordProfile?.subscription_tier
-  if (tier && TIER_TO_BADGE[tier]) {
-    return TIER_TO_BADGE[tier]
-  }
-  return TRUST_LEVEL.free
+/** Secondary badge when both listing and landlord are verified. */
+export function resolveSecondaryTrustBadge(listing, landlordProfile) {
+  if (!listing || getListingOccupancy(listing) === 'unavailable') return null
+  return getListingTrustProfile(listing, landlordProfile).secondaryBadge
 }
 
 export function trustBadgeLabelKey(level) {
+  if (level === TRUST_LEVEL.trustedHome) return 'trust.trustedHome'
+  if (level === TRUST_LEVEL.verifiedLandlord) return 'trust.verifiedLandlord'
   if (level === TRUST_LEVEL.free) return 'trust.earlyAccessFree'
   if (level === TRUST_LEVEL.featured) return 'trust.featuredTier'
   if (level === TRUST_LEVEL.standard) return 'trust.standardTier'

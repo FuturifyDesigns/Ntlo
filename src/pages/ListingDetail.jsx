@@ -16,7 +16,9 @@ import { ListingGridSkeleton, Skeleton } from '../components/ui/Skeleton'
 import ListingAdvisorPanel from '../components/advisor/ListingAdvisorPanel'
 import ListingContactPanel from '../components/housing/ListingContactPanel'
 import TrustedBadge from '../components/trust/TrustedBadge'
-import { resolveListingTrustBadge } from '../lib/tierBenefits'
+import TrustRiskBadge from '../components/trust/TrustRiskBadge'
+import { resolveListingTrustBadge, resolveSecondaryTrustBadge } from '../lib/tierBenefits'
+import { getListingTrustProfile } from '../lib/listingTrust'
 import { useAuth } from '../hooks/useAuth'
 import { OnboardingReplayButton, useOnboardingPageState } from '../context/OnboardingContext'
 import { getUniversityDisplayName } from '../lib/universityNames'
@@ -73,7 +75,9 @@ export default function ListingDetail() {
 
   const uni = getNearestUniversity(listing)
   const relatedListings = related.filter((l) => l.id !== listing.id).slice(0, 3)
-  const trustLevel = resolveListingTrustBadge(listing)
+  const trustLevel = resolveListingTrustBadge(listing, listing.landlord)
+  const secondaryTrust = resolveSecondaryTrustBadge(listing, listing.landlord)
+  const trust = getListingTrustProfile(listing, listing.landlord)
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
@@ -95,7 +99,11 @@ export default function ListingDetail() {
             <div>
               <div className="flex flex-wrap items-start gap-3">
                 <h1 className="font-display text-2xl font-bold text-primary sm:text-3xl">{listing.title}</h1>
-                {trustLevel && <TrustedBadge level={trustLevel} />}
+                <div className="flex flex-wrap items-center gap-2">
+                  {trustLevel && <TrustedBadge level={trustLevel} />}
+                  {secondaryTrust && <TrustedBadge level={secondaryTrust} compact />}
+                  {trust.showRisk && <TrustRiskBadge risk={trust.risk} />}
+                </div>
               </div>
 
               <p className="mt-2 font-mono text-2xl font-bold text-primary">

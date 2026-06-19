@@ -71,6 +71,7 @@ export default function AdminDashboard() {
   const [banTarget, setBanTarget] = useState(null)
   const [listingDeleteTarget, setListingDeleteTarget] = useState(null)
   const [listingFilter, setListingFilter] = useState('pending')
+  const [trustBusyId, setTrustBusyId] = useState(null)
 
   const selectTab = useCallback((id) => {
     setTab(id)
@@ -319,7 +320,7 @@ export default function AdminDashboard() {
       title: approved ? t('admin.dialog.approveListing') : t('admin.dialog.rejectListing'),
       subtitle: item.title,
       placeholder: approved ? t('admin.approveNotes') : t('admin.rejectNotes'),
-      confirmLabel: approved ? t('admin.verifyListing') : t('admin.reject'),
+      confirmLabel: approved ? t('admin.approveListing') : t('admin.reject'),
       confirmVariant: approved ? 'primary' : 'danger',
       onConfirm: async (notes) => {
         const { error } = await supabase.rpc('admin_review_listing', {
@@ -335,6 +336,27 @@ export default function AdminDashboard() {
         })
       },
     })
+  }
+
+  async function setListingTrust(listing, trusted) {
+    setTrustBusyId(listing.id)
+    try {
+      const { error } = await supabase.rpc('admin_set_listing_trust', {
+        p_listing_id: listing.id,
+        trusted,
+        notes: null,
+      })
+      if (error) throw error
+      await fetchListings()
+      setToast({
+        type: 'success',
+        message: trusted ? t('admin.dialog.listingTrusted') : t('admin.dialog.listingTrustRemoved'),
+      })
+    } catch (err) {
+      setToast({ type: 'error', message: err.message })
+    } finally {
+      setTrustBusyId(null)
+    }
   }
 
   async function confirmDeleteListing({ reasonCode, reasonNote }) {
@@ -744,6 +766,8 @@ export default function AdminDashboard() {
                         key={item.id}
                         listing={item}
                         onDelete={() => setListingDeleteTarget(item)}
+                        onSetTrust={setListingTrust}
+                        trustBusy={trustBusyId}
                       />
                     )
                   }
