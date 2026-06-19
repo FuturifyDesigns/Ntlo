@@ -8,11 +8,17 @@ export const ONBOARDING_AUTH_PATHS = new Set([
   '/complete-profile',
 ])
 
+/** App pages where onboarding UI should wait (e.g. landlord must finish verify first). */
+export const ONBOARDING_DEFERRED_PATHS = new Set([
+  '/landlord/verify',
+])
+
 /** Onboarding UI only for signed-in students/landlords on app pages (not auth screens). */
 export function isOnboardingEligible(profile, user, pathname) {
   if (!user?.id || !profile?.id) return false
   if (!['student', 'landlord'].includes(profile.role)) return false
   if (ONBOARDING_AUTH_PATHS.has(pathname)) return false
+  if (ONBOARDING_DEFERRED_PATHS.has(pathname)) return false
   return true
 }
 

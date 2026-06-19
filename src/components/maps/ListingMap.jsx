@@ -616,26 +616,30 @@ export function LocationPicker({
     )
   }, [applyCoordsFromReverse, allowCamera, t, universityReady])
 
-  // Forward geocode: address fields → red pin
+  // Forward geocode: address fields → red pin (debounced, retries when geocoder loads)
   useEffect(() => {
     if (!universityReady) return undefined
 
+    const hasArea = Boolean(area?.trim().length >= 2)
+    const hasAddress = Boolean(address?.trim().length >= 3)
+    const hasCity = Boolean(city?.trim())
+    const canGeocode = hasCity && (hasArea || hasAddress)
+    if (!canGeocode) return undefined
+
+    const hasPin = Boolean(toLatLng(latRef.current, lngRef.current))
+    if (addressKey === lastGeocodedKeyRef.current && hasPin) return undefined
+
     if (skipForwardGeocodeRef.current) {
       skipForwardGeocodeRef.current = false
-      return undefined
+      if (addressKey === lastGeocodedKeyRef.current) return undefined
     }
 
-    const hasArea = Boolean(area?.trim().length >= 2)
-    const hasCity = Boolean(city?.trim())
-    if (!hasArea || !hasCity) return undefined
-
-    if (addressKey === lastGeocodedKeyRef.current) return undefined
-
     allowCamera()
+    setGeocodeFailed(false)
 
     if (geocodeTimerRef.current) clearTimeout(geocodeTimerRef.current)
     geocodeTimerRef.current = setTimeout(async () => {
-      if (addressKey === lastGeocodedKeyRef.current) return
+      if (addressKey === lastGeocodedKeyRef.current && toLatLng(latRef.current, lngRef.current)) return
 
       setGeocodeBusy(true)
       setGeocodeFailed(false)
@@ -666,7 +670,7 @@ export function LocationPicker({
         setGeocodeFailed(true)
         setGeocodeHint('')
       }
-    }, 700)
+    }, 450)
 
     return () => {
       if (geocodeTimerRef.current) clearTimeout(geocodeTimerRef.current)

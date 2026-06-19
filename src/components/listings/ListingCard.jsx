@@ -130,6 +130,11 @@ export default function ListingCard({
             <IconLocation className="h-3.5 w-3.5 shrink-0 opacity-60" />
             {listing.area ? `${listing.area}, ${listing.city}` : listing.city}
           </p>
+          {trust.published && !trust.listingTrusted && (
+            <p className="mt-1.5 text-xs text-amber-700 dark:text-amber-300">
+              {t('trust.propertyNotFullyVerified')}
+            </p>
+          )}
           <div className="mt-auto flex items-center justify-between pt-3">
             <span className="rounded-md bg-background px-2 py-0.5 text-xs font-medium text-muted">
               {ROOM_TYPES[listing.room_type] || listing.room_type}

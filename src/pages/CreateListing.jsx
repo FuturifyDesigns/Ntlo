@@ -135,6 +135,9 @@ export default function CreateListing() {
 
   function update(field, value) {
     setForm((f) => ({ ...f, [field]: value }))
+    if (['address', 'area', 'city'].includes(field) && fieldErrors.pin) {
+      setFieldErrors((prev) => ({ ...prev, pin: '' }))
+    }
     if (fieldErrors[field]) {
       setFieldErrors((prev) => ({ ...prev, [field]: '' }))
     }
