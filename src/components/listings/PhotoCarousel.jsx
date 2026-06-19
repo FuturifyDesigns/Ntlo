@@ -1,16 +1,23 @@
 import { useEffect, useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { cn } from '../../lib/utils'
+import { getStorageImageVariants, CARD_IMAGE_OPTS, DETAIL_IMAGE_OPTS } from '../../lib/storageImages'
 
 const PLACEHOLDER = 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=1200&q=80'
 const DEFAULT_INTERVAL = 3500
 const CARD_INTERVAL = 3000
 
-function normalizePhotos(photos) {
-  if (!photos) return [PLACEHOLDER]
+function normalizePhotos(photos, compact) {
+  if (!photos) return [{ src: PLACEHOLDER, fallback: PLACEHOLDER }]
   const list = Array.isArray(photos) ? photos : [photos]
   const sorted = [...list].sort((a, b) => (a.display_order || 0) - (b.display_order || 0))
-  return sorted.length ? sorted.map((p) => (typeof p === 'string' ? p : p.url)) : [PLACEHOLDER]
+  const imageOpts = compact ? CARD_IMAGE_OPTS : DETAIL_IMAGE_OPTS
+  return sorted.length
+    ? sorted.map((p) => {
+      const url = typeof p === 'string' ? p : p.url
+      return getStorageImageVariants(url, imageOpts)
+    })
+    : [{ src: PLACEHOLDER, fallback: PLACEHOLDER }]
 }
 
 export default function PhotoCarousel({
@@ -27,12 +34,14 @@ export default function PhotoCarousel({
   altPrefix = 'Photo',
 }) {
   const slideInterval = interval ?? (compact ? CARD_INTERVAL : DEFAULT_INTERVAL)
-  const images = normalizePhotos(photos)
+  const images = normalizePhotos(photos, compact)
   const [index, setIndex] = useState(0)
   const [paused, setPaused] = useState(false)
+  const [fallbackSrc, setFallbackSrc] = useState({})
 
   useEffect(() => {
     setIndex(0)
+    setFallbackSrc({})
   }, [photos])
 
   useEffect(() => {
@@ -75,11 +84,16 @@ export default function PhotoCarousel({
       onBlur={pauseOnHover ? () => setPaused(false) : undefined}
     >
       <div className={cn('relative', aspectClass)}>
-        {images.map((url, i) => (
+        {images.map((image, i) => (
           <img
-            key={`${url}-${i}`}
-            src={url}
+            key={`${image.fallback}-${i}`}
+            src={fallbackSrc[i] || image.src}
             alt={`${altPrefix} ${i + 1}`}
+            onError={() => {
+              if (image.fallback && fallbackSrc[i] !== image.fallback) {
+                setFallbackSrc((prev) => ({ ...prev, [i]: image.fallback }))
+              }
+            }}
             className={cn(
               'absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ease-in-out',
               i === index ? 'opacity-100' : 'opacity-0'

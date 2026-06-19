@@ -1,9 +1,23 @@
 import { supabase } from './supabase'
 
+export const NOTIFICATION_SELECT = 'id, user_id, type, title, body, link, entity_id, read_at, created_at, is_urgent'
+
 export async function fetchNotifications(limit = 30) {
   const { data, error } = await supabase
     .from('notifications')
-    .select('*')
+    .select(NOTIFICATION_SELECT)
+    .order('created_at', { ascending: false })
+    .limit(limit)
+  if (error) throw error
+  return data || []
+}
+
+export async function fetchUnreadUrgentNotifications(userId, limit = 12) {
+  const { data, error } = await supabase
+    .from('notifications')
+    .select(NOTIFICATION_SELECT)
+    .eq('user_id', userId)
+    .is('read_at', null)
     .order('created_at', { ascending: false })
     .limit(limit)
   if (error) throw error

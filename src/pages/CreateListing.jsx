@@ -13,6 +13,8 @@ import Button from '../components/ui/Button'
 import Input, { Select, Textarea } from '../components/ui/Input'
 import { UniversitySelect } from '../components/universities/OtherUniversityModal'
 import { LocationPicker } from '../components/maps/ListingMap'
+import PhoneInput from '../components/ui/PhoneInput'
+import { splitStoredPhone } from '../lib/phoneNumbers'
 import DocumentUpload from '../components/verification/DocumentUpload'
 
 import { LISTING_DOC_TYPES } from '../lib/verification'
@@ -46,6 +48,7 @@ const initialForm = {
   lat: '',
   lng: '',
   amenities: [],
+  whatsapp_country_code: '267',
   whatsapp_number: '',
   description: '',
 }
@@ -274,7 +277,7 @@ export default function CreateListing() {
           custom_university_city: isOther ? form.custom_university_city.trim() || null : null,
           distance_to_campus: distance,
           amenities: form.amenities,
-          whatsapp_number: normalizeListingPhone(form.whatsapp_number),
+          whatsapp_number: normalizeListingPhone(form.whatsapp_number, form.whatsapp_country_code),
           available: true,
         })
         .select('id')
@@ -561,12 +564,12 @@ export default function CreateListing() {
 
             {step === 4 && (
               <div className="space-y-4">
-                <Input
+                <PhoneInput
                   label="WhatsApp number"
-                  type="tel"
-                  value={form.whatsapp_number}
-                  onChange={(e) => update('whatsapp_number', e.target.value)}
-                  placeholder="7X XXX XXX"
+                  countryCode={form.whatsapp_country_code}
+                  national={form.whatsapp_number}
+                  onCountryCodeChange={(code) => update('whatsapp_country_code', code)}
+                  onNationalChange={(value) => update('whatsapp_number', value)}
                   hint={t('listingForm.validation.whatsappHint')}
                   error={fieldErrors.whatsapp_number}
                   required
@@ -625,7 +628,7 @@ export default function CreateListing() {
                   )}
                   <p><strong>Photos:</strong> {photos.length} uploaded</p>
                   <p><strong>Amenities:</strong> {form.amenities.length ? form.amenities.join(', ') : 'None'}</p>
-                  <p><strong>WhatsApp:</strong> {form.whatsapp_number}</p>
+                  <p><strong>WhatsApp:</strong> +{form.whatsapp_country_code} {form.whatsapp_number}</p>
                 </div>
                 <LandlordListingCoach form={form} photoCount={photos.length} marketListings={coachMarketListings} />
               </div>

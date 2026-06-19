@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from './useAuth'
 
 const ONLINE_MS = 90_000
-const HEARTBEAT_MS = 45_000
+const HEARTBEAT_MS = 120_000
 const DISPLAY_TICK_MS = 30_000
 
 export function usePresenceHeartbeat() {
@@ -13,10 +13,11 @@ export function usePresenceHeartbeat() {
     if (!user?.id) return undefined
 
     async function ping() {
+      if (document.visibilityState === 'hidden') return
       await supabase.rpc('touch_last_seen')
     }
 
-    ping()
+    if (document.visibilityState === 'visible') ping()
     const timer = setInterval(ping, HEARTBEAT_MS)
 
     function onVisible() {
@@ -64,15 +65,17 @@ export function useProfilePresence(profile) {
       .on(
         'postgres_changes',
         { event: 'UPDATE', schema: 'public', table: 'profiles', filter: `id=eq.${profileId}` },
-        (payload) => setLastSeenAt(payload.new?.last_seen_at ?? null)
+        (payload) => {
+          if (payload.new?.last_seen_at != null) {
+            setLastSeenAt(payload.new.last_seen_at)
+          }
+        }
       )
       .subscribe()
 
-    const refreshTimer = setInterval(fetchPresence, 60_000)
     const tickTimer = setInterval(() => setTick((n) => n + 1), DISPLAY_TICK_MS)
 
     return () => {
-      clearInterval(refreshTimer)
       clearInterval(tickTimer)
       supabase.removeChannel(channel)
     }

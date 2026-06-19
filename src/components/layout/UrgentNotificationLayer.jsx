@@ -1,9 +1,9 @@
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../hooks/useAuth'
 import { useNotifications } from '../../hooks/useNotifications'
-import { navigateToNotification } from '../../lib/notifications'
+import { fetchUnreadUrgentNotifications, navigateToNotification } from '../../lib/notifications'
+import { subscribeNotificationInserts, subscribeNotificationUpdates } from '../../lib/notificationsLiveBus'
 import { playNotificationSound } from '../../lib/notificationSound'
 import NotificationDetailModal from '../notifications/NotificationDetailModal'
 
@@ -69,14 +69,7 @@ export function useUrgentNotificationToasts() {
     if (!user?.id) return undefined
 
     async function loadUnreadUrgent() {
-      const { data } = await supabase
-        .from('notifications')
-        .select('*')
-        .eq('user_id', user.id)
-        .is('read_at', null)
-        .order('created_at', { ascending: false })
-        .limit(12)
-
+      const data = await fetchUnreadUrgentNotifications(user.id)
       if (!data?.length) return
 
       data
@@ -84,33 +77,20 @@ export function useUrgentNotificationToasts() {
         .forEach((notification) => pushToast(notification))
     }
 
-    loadUnreadUrgent()
+    loadUnreadUrgent().catch(() => {})
 
-    const channelName = `urgent-toast-${user.id}`
-    supabase.getChannels().forEach((ch) => {
-      if (ch.topic === `realtime:${channelName}`) supabase.removeChannel(ch)
+    const unsubInsert = subscribeNotificationInserts(user.id, (notification) => pushToast(notification))
+    const unsubUpdate = subscribeNotificationUpdates(user.id, (notification) => {
+      if (notification.read_at) {
+        dismissedRef.current.add(notification.id)
+        setToasts((prev) => prev.filter((item) => item.id !== notification.id))
+      }
     })
 
-    const channel = supabase
-      .channel(channelName)
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.id}` },
-        (payload) => pushToast(payload.new)
-      )
-      .on(
-        'postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.id}` },
-        (payload) => {
-          if (payload.new.read_at) {
-            dismissedRef.current.add(payload.new.id)
-            setToasts((prev) => prev.filter((item) => item.id !== payload.new.id))
-          }
-        }
-      )
-      .subscribe()
-
-    return () => supabase.removeChannel(channel)
+    return () => {
+      unsubInsert()
+      unsubUpdate()
+    }
   }, [user?.id, pushToast])
 
   return { toasts, dismiss, acknowledge, role: profile?.role }

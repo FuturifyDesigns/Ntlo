@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
-import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { fetchNotifications, markNotificationRead, markAllNotificationsRead } from '../lib/notifications'
+import { subscribeNotificationInserts, subscribeNotificationUpdates } from '../lib/notificationsLiveBus'
 
 const NotificationsContext = createContext(null)
 
@@ -34,31 +34,17 @@ export function NotificationsProvider({ children }) {
   useEffect(() => {
     if (!user?.id) return undefined
 
-    const channelName = `notifications-${user.id}`
-
-    supabase.getChannels().forEach((ch) => {
-      if (ch.topic === `realtime:${channelName}`) supabase.removeChannel(ch)
+    const unsubInsert = subscribeNotificationInserts(user.id, (notification) => {
+      setItems((prev) => [notification, ...prev.filter((n) => n.id !== notification.id)])
+    })
+    const unsubUpdate = subscribeNotificationUpdates(user.id, (notification) => {
+      setItems((prev) => prev.map((n) => (n.id === notification.id ? notification : n)))
     })
 
-    const channel = supabase
-      .channel(channelName)
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.id}` },
-        (payload) => {
-          setItems((prev) => [payload.new, ...prev.filter((n) => n.id !== payload.new.id)])
-        }
-      )
-      .on(
-        'postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.id}` },
-        (payload) => {
-          setItems((prev) => prev.map((n) => (n.id === payload.new.id ? payload.new : n)))
-        }
-      )
-      .subscribe()
-
-    return () => supabase.removeChannel(channel)
+    return () => {
+      unsubInsert()
+      unsubUpdate()
+    }
   }, [user?.id])
 
   const readOne = useCallback(async (id) => {

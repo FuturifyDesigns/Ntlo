@@ -1,22 +1,29 @@
 import { validateFullUniversityName } from './universityNames'
+import {
+  normalizePhone,
+  normalizeBotswanaPhone,
+  validatePhoneNumber,
+} from './phoneNumbers'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i
 const NAME_RE = /^[\p{L}\s'.-]{2,}$/u
-const BW_MOBILE_RE = /^7[1-9]\d{6}$/
 
 function t(messages, key) {
   return messages[key] || key
 }
 
-export function normalizeBotswanaPhone(phone) {
-  let digits = phone.replace(/\D/g, '')
+export { normalizeBotswanaPhone, normalizePhone, validatePhoneNumber }
+
+export function validatePhone(phone, messages = {}, options = {}) {
+  const { countryCode = '267', required = false } = options
+  if (countryCode && phone !== undefined && !String(phone).includes(countryCode)) {
+    return validatePhoneNumber(countryCode, phone, messages, { required })
+  }
+  const digits = String(phone || '').replace(/\D/g, '')
   if (digits.startsWith('267') && digits.length >= 11) {
-    digits = digits.slice(3)
+    return validatePhoneNumber('267', digits.slice(3), messages, { required })
   }
-  if (digits.startsWith('0') && digits.length === 9) {
-    digits = digits.slice(1)
-  }
-  return digits
+  return validatePhoneNumber('267', digits, messages, { required })
 }
 
 export function validateEmail(email, messages = {}) {
@@ -56,19 +63,6 @@ export function validateFullName(name, messages = {}) {
   return ''
 }
 
-export function validatePhone(phone, messages = {}, { required = false } = {}) {
-  const value = phone.trim()
-  if (!value) {
-    return required ? t(messages, 'phoneRequired') : ''
-  }
-
-  const digits = normalizeBotswanaPhone(value)
-  if (digits.length !== 8 || !BW_MOBILE_RE.test(digits)) {
-    return t(messages, 'phoneInvalid')
-  }
-  return ''
-}
-
 export function validateUniversity(form, messages = {}) {
   if (form.role !== 'student') return ''
   if (form.universityId === 'other') {
@@ -92,7 +86,12 @@ export function validateRegisterForm(form, messages = {}) {
   const errors = {}
   const nameError = validateFullName(form.fullName, messages)
   const emailError = validateEmail(form.email, messages)
-  const phoneError = validatePhone(form.phone, messages, { required: true })
+  const phoneError = validatePhoneNumber(
+    form.phoneCountryCode || '267',
+    form.phoneNational ?? form.phone ?? '',
+    messages,
+    { required: true },
+  )
   const passwordError = validatePassword(form.password, messages, { forSignup: true })
   const confirmError = validateConfirmPassword(form.password, form.confirmPassword, messages)
   const universityError = validateUniversity(form, messages)
@@ -112,6 +111,7 @@ export function validateRegisterForm(form, messages = {}) {
 
 export function mapAuthError(message, messages = {}) {
   const lower = (message || '').toLowerCase()
+  if (lower.includes('phone_taken')) return t(messages, 'phoneTaken')
   if (lower.includes('invalid login credentials')) return t(messages, 'invalidCredentials')
   if (lower.includes('email not confirmed')) return t(messages, 'emailNotConfirmed')
   if (

@@ -1,3 +1,5 @@
+import { getStorageImageUrl } from './storageImages'
+
 const base = import.meta.env.BASE_URL
 
 /** UI extras keyed by slug — coordinates live in Supabase. */
@@ -54,5 +56,6 @@ export function enrichUniversity(row) {
 }
 
 export function getUniversityImage(uni) {
-  return uni?.image || `${base}hero/bg.jpg`
+  const url = uni?.image || `${base}hero/bg.jpg`
+  return getStorageImageUrl(url, { width: 420, quality: 75 })
 }

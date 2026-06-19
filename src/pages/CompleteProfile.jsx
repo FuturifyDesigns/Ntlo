@@ -3,11 +3,13 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useAuth } from '../hooks/useAuth'
 import { useTranslation } from '../hooks/useTranslation'
-import { validatePhone, normalizeBotswanaPhone } from '../lib/authValidation'
+import { validatePhone, normalizePhone, mapAuthError } from '../lib/authValidation'
+import { checkPhoneAvailable } from '../lib/phoneAvailability'
+import { splitStoredPhone } from '../lib/phoneNumbers'
 import { validateFullUniversityName } from '../lib/universityNames'
 import { supabase } from '../lib/supabase'
 import Button from '../components/ui/Button'
-import Input from '../components/ui/Input'
+import PhoneInput from '../components/ui/PhoneInput'
 import AuthTransitionOverlay from '../components/auth/AuthTransitionOverlay'
 import { UniversitySelect } from '../components/universities/OtherUniversityModal'
 import GenderSelect from '../components/auth/GenderSelect'
@@ -23,8 +25,10 @@ export default function CompleteProfile() {
   const { t } = useTranslation()
   const navigate = useNavigate()
 
+  const initialPhone = splitStoredPhone(profile?.phone || '')
   const [role, setRole] = useState(profile?.role || defaultRole)
-  const [phone, setPhone] = useState(profile?.phone || '')
+  const [phoneCountryCode, setPhoneCountryCode] = useState(initialPhone.countryCode)
+  const [phoneNational, setPhoneNational] = useState(initialPhone.national)
   const [universityId, setUniversityId] = useState(profile?.university_id ? String(profile.university_id) : '')
   const [customUniversity, setCustomUniversity] = useState('')
   const [gender, setGender] = useState(profile?.gender || '')
@@ -37,7 +41,13 @@ export default function CompleteProfile() {
 
   const handleDraftRestore = useCallback((draft) => {
     if (draft.role) setRole(draft.role)
-    if (draft.phone) setPhone(draft.phone)
+    if (draft.phoneCountryCode) setPhoneCountryCode(draft.phoneCountryCode)
+    if (draft.phoneNational) setPhoneNational(draft.phoneNational)
+    else if (draft.phone) {
+      const split = splitStoredPhone(draft.phone)
+      setPhoneCountryCode(split.countryCode)
+      setPhoneNational(split.national)
+    }
     if (draft.universityId) setUniversityId(draft.universityId)
     if (draft.customUniversity) setCustomUniversity(draft.customUniversity)
     if (draft.gender) setGender(draft.gender)
@@ -45,7 +55,9 @@ export default function CompleteProfile() {
 
   const handleDraftClear = useCallback(() => {
     setRole(profile?.role || defaultRole)
-    setPhone(profile?.phone || '')
+    const split = splitStoredPhone(profile?.phone || '')
+    setPhoneCountryCode(split.countryCode)
+    setPhoneNational(split.national)
     setUniversityId(profile?.university_id ? String(profile.university_id) : '')
     setCustomUniversity('')
     setGender(profile?.gender || '')
@@ -55,7 +67,7 @@ export default function CompleteProfile() {
 
   const { restored: draftRestored, savedLabel, clearDraft, dismissRestored } = useFormDraft(
     draftKey,
-    { role, phone, universityId, customUniversity, gender },
+    { role, phoneCountryCode, phoneNational, universityId, customUniversity, gender },
     handleDraftRestore,
     { enabled: Boolean(user?.id), onClear: handleDraftClear }
   )
@@ -63,6 +75,7 @@ export default function CompleteProfile() {
   const validationMessages = {
     phoneRequired: t('auth.validation.phoneRequired'),
     phoneInvalid: t('auth.validation.phoneInvalid'),
+    phoneTaken: t('auth.validation.phoneTaken'),
     universityRequired: t('auth.validation.universityRequired'),
     universityMin: t('auth.validation.universityMin'),
     universityFullNameMin: t('auth.validation.universityFullNameMin'),
@@ -80,11 +93,34 @@ export default function CompleteProfile() {
 
   function validateField(field) {
     const errors = {}
-    const phoneError = validatePhone(phone, validationMessages, { required: true })
+    const phoneError = validatePhone(phoneNational, validationMessages, {
+      required: true,
+      countryCode: phoneCountryCode,
+    })
     if (phoneError) errors.phone = phoneError
     const uniError = universityOtherError()
     if (uniError) errors.customUniversity = uniError
     setFieldErrors((prev) => ({ ...prev, [field]: errors[field] || '' }))
+  }
+
+  async function validatePhoneAvailability() {
+    const phoneError = validatePhone(phoneNational, validationMessages, {
+      required: true,
+      countryCode: phoneCountryCode,
+    })
+    if (phoneError) return
+
+    const normalizedPhone = normalizePhone(phoneCountryCode, phoneNational)
+    if (!normalizedPhone) return
+
+    try {
+      const available = await checkPhoneAvailable(normalizedPhone, user?.id)
+      if (!available) {
+        setFieldErrors((prev) => ({ ...prev, phone: validationMessages.phoneTaken }))
+      }
+    } catch {
+      // ignore on blur
+    }
   }
 
   async function handleSubmit(e) {
@@ -92,7 +128,10 @@ export default function CompleteProfile() {
     setError('')
 
     const errors = {}
-    const phoneError = validatePhone(phone, validationMessages, { required: true })
+    const phoneError = validatePhone(phoneNational, validationMessages, {
+      required: true,
+      countryCode: phoneCountryCode,
+    })
     if (phoneError) errors.phone = phoneError
     const uniError = universityOtherError()
     if (uniError) errors.customUniversity = uniError
@@ -100,9 +139,25 @@ export default function CompleteProfile() {
     setFieldErrors(errors)
     if (Object.keys(errors).length > 0) return
 
+    const normalizedPhone = normalizePhone(phoneCountryCode, phoneNational)
+    if (!normalizedPhone) {
+      setFieldErrors((prev) => ({ ...prev, phone: validationMessages.phoneInvalid }))
+      return
+    }
+
+    try {
+      const available = await checkPhoneAvailable(normalizedPhone, user?.id)
+      if (!available) {
+        setFieldErrors((prev) => ({ ...prev, phone: validationMessages.phoneTaken }))
+        return
+      }
+    } catch (err) {
+      setError(err.message || validationMessages.authFailed)
+      return
+    }
+
     setLoading(true)
     try {
-      const normalizedPhone = normalizeBotswanaPhone(phone.trim())
       const updates = {
         phone: normalizedPhone,
         role,
@@ -148,7 +203,7 @@ export default function CompleteProfile() {
       const destination = getPostAuthPath(updated)
       navigate(destination, { replace: true })
     } catch (err) {
-      setError(err.message || validationMessages.authFailed)
+      setError(mapAuthError(err.message, validationMessages))
       setLoading(false)
     }
   }
@@ -219,18 +274,16 @@ export default function CompleteProfile() {
               </div>
             </div>
           )}
-          <Input
+          <PhoneInput
             label={t('auth.phone')}
-            type="tel"
-            inputMode="numeric"
-            placeholder="7X XXX XXX"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            onBlur={() => validateField('phone')}
+            countryCode={phoneCountryCode}
+            national={phoneNational}
+            onCountryCodeChange={setPhoneCountryCode}
+            onNationalChange={setPhoneNational}
+            onBlur={validatePhoneAvailability}
             error={fieldErrors.phone}
             hint={!fieldErrors.phone ? t('auth.phoneHint') : undefined}
             required
-            autoComplete="tel"
           />
 
           {role === 'student' && (

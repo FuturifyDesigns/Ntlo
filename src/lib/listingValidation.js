@@ -1,4 +1,4 @@
-import { validatePhone, normalizeBotswanaPhone } from './authValidation'
+import { validatePhone, normalizeBotswanaPhone, normalizePhone } from './authValidation'
 import { validateFullUniversityName } from './universityNames'
 
 const MIN_TITLE = 8
@@ -62,7 +62,10 @@ export function validateListingStep(step, form, { photos = [] } = {}, messages =
   }
 
   if (step === 4) {
-    const phoneError = validatePhone(form.whatsapp_number, messages, { required: true })
+    const phoneError = validatePhone(form.whatsapp_number, messages, {
+      required: true,
+      countryCode: form.whatsapp_country_code || '267',
+    })
     if (phoneError) errors.whatsapp_number = phoneError
 
     const desc = form.description?.trim() || ''
@@ -82,6 +85,6 @@ export function validateListingForm(form, { photos = [] } = {}, messages = {}) {
   return all
 }
 
-export function normalizeListingPhone(phone) {
-  return normalizeBotswanaPhone(phone?.trim() || '')
+export function normalizeListingPhone(phone, countryCode = '267') {
+  return normalizePhone(countryCode, phone?.trim() || '') || normalizeBotswanaPhone(phone?.trim() || '')
 }

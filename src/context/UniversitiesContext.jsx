@@ -5,6 +5,7 @@ import { getGoogleGeocoder } from '../lib/googleGeocoder'
 import { fetchCampusNearbyAreas } from '../lib/campusNearbyAreas'
 import { enrichUniversity } from '../lib/universityMeta'
 import { setUniversitiesCache } from '../lib/universities'
+import { readUniversitiesCache, writeUniversitiesCache, clearUniversitiesCache } from '../lib/universityCache'
 import { useAuth } from '../hooks/useAuth'
 
 const UniversitiesContext = createContext(null)
@@ -99,35 +100,50 @@ export function UniversitiesProvider({ children }) {
     const enriched = list.map(enrichUniversity)
     setUniversities(enriched)
     setUniversitiesCache(enriched)
+    writeUniversitiesCache(enriched)
   }, [])
 
-  const refresh = useCallback(async () => {
-    setError(null)
+  const refresh = useCallback(async ({ background = false } = {}) => {
+    if (!background) setError(null)
     try {
       let list = await fetchUniversitiesFromDb()
       list = await fillMissingCoordinates(list, isAdmin)
       applyList(list)
     } catch (err) {
-      setError(err.message || 'Failed to load universities')
+      if (!background) {
+        setError(err.message || 'Failed to load universities')
+      }
     } finally {
       setLoading(false)
     }
   }, [applyList, isAdmin])
 
   useEffect(() => {
+    const cached = readUniversitiesCache()
+    if (cached?.length) {
+      applyList(cached)
+      setLoading(false)
+      refresh({ background: true })
+      return
+    }
     refresh()
-  }, [refresh])
+  }, [applyList, refresh])
 
   useEffect(() => {
+    if (!isAdmin) return undefined
+
     const channel = supabase
       .channel('universities-realtime')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'universities' }, refresh)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'universities' }, () => {
+        clearUniversitiesCache()
+        refresh({ background: true })
+      })
       .subscribe()
 
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [refresh])
+  }, [isAdmin, refresh])
 
   const value = useMemo(
     () => ({

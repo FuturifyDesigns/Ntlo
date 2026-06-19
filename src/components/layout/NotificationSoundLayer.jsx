@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
-import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../hooks/useAuth'
+import { subscribeNotificationInserts } from '../../lib/notificationsLiveBus'
 import {
   isNotificationSoundEnabled,
   playNotificationSound,
@@ -26,23 +26,9 @@ export default function NotificationSoundLayer() {
   useEffect(() => {
     if (!user?.id || !isNotificationSoundEnabled()) return undefined
 
-    const channelName = `notification-sound-${user.id}`
-    supabase.getChannels().forEach((ch) => {
-      if (ch.topic === `realtime:${channelName}`) supabase.removeChannel(ch)
+    return subscribeNotificationInserts(user.id, (notification) => {
+      playNotificationSound(notification?.id)
     })
-
-    const channel = supabase
-      .channel(channelName)
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.id}` },
-        (payload) => {
-          playNotificationSound(payload.new?.id)
-        }
-      )
-      .subscribe()
-
-    return () => supabase.removeChannel(channel)
   }, [user?.id])
 
   return null

@@ -5,9 +5,12 @@ import { useAuth } from '../hooks/useAuth'
 import { useGoogleAuth } from '../hooks/useGoogleAuth'
 import { submitUniversityRequest } from '../hooks/useStats'
 import { useTranslation } from '../hooks/useTranslation'
-import { validateRegisterForm, mapAuthError, normalizeBotswanaPhone } from '../lib/authValidation'
+import { validateRegisterForm, mapAuthError, normalizePhone } from '../lib/authValidation'
+import { checkPhoneAvailable } from '../lib/phoneAvailability'
+import { splitStoredPhone } from '../lib/phoneNumbers'
 import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
+import PhoneInput from '../components/ui/PhoneInput'
 import PasswordInput from '../components/ui/PasswordInput'
 import GoogleAuthButton from '../components/auth/GoogleAuthButton'
 import AuthTransitionOverlay from '../components/auth/AuthTransitionOverlay'
@@ -29,6 +32,8 @@ export default function Register() {
     password: '',
     confirmPassword: '',
     phone: '',
+    phoneCountryCode: '267',
+    phoneNational: '',
     role: defaultRole,
     universityId: '',
     customUniversity: '',
@@ -47,6 +52,8 @@ export default function Register() {
         fullName: draft.form.fullName ?? prev.fullName,
         email: draft.form.email ?? prev.email,
         phone: draft.form.phone ?? prev.phone,
+        phoneCountryCode: draft.form.phoneCountryCode ?? splitStoredPhone(draft.form.phone).countryCode ?? prev.phoneCountryCode,
+        phoneNational: draft.form.phoneNational ?? splitStoredPhone(draft.form.phone).national ?? prev.phoneNational,
         role: draft.form.role ?? prev.role,
         universityId: draft.form.universityId ?? prev.universityId,
         customUniversity: draft.form.customUniversity ?? prev.customUniversity,
@@ -62,6 +69,8 @@ export default function Register() {
       password: '',
       confirmPassword: '',
       phone: '',
+      phoneCountryCode: '267',
+      phoneNational: '',
       role: defaultRole,
       universityId: '',
       customUniversity: '',
@@ -76,12 +85,14 @@ export default function Register() {
       fullName: form.fullName,
       email: form.email,
       phone: form.phone,
+      phoneCountryCode: form.phoneCountryCode,
+      phoneNational: form.phoneNational,
       role: form.role,
       universityId: form.universityId,
       customUniversity: form.customUniversity,
       gender: form.gender,
     },
-  }), [form.fullName, form.email, form.phone, form.role, form.universityId, form.customUniversity, form.gender])
+  }), [form.fullName, form.email, form.phone, form.phoneCountryCode, form.phoneNational, form.role, form.universityId, form.customUniversity, form.gender])
 
   const { restored: draftRestored, savedLabel, clearDraft, dismissRestored } = useFormDraft(
     draftKey,
@@ -120,6 +131,7 @@ export default function Register() {
     passwordMismatch: t('auth.validation.passwordMismatch'),
     phoneRequired: t('auth.validation.phoneRequired'),
     phoneInvalid: t('auth.validation.phoneInvalid'),
+    phoneTaken: t('auth.validation.phoneTaken'),
     universityRequired: t('auth.validation.universityRequired'),
     universityMin: t('auth.validation.universityMin'),
     universityFullNameMin: t('auth.validation.universityFullNameMin'),
@@ -155,6 +167,24 @@ export default function Register() {
     }
   }
 
+  async function validatePhoneField() {
+    const errors = validateRegisterForm(form, validationMessages)
+    setFieldErrors((prev) => ({ ...prev, phone: errors.phone || '' }))
+    if (errors.phone) return
+
+    const normalizedPhone = normalizePhone(form.phoneCountryCode, form.phoneNational)
+    if (!normalizedPhone) return
+
+    try {
+      const available = await checkPhoneAvailable(normalizedPhone)
+      if (!available) {
+        setFieldErrors((prev) => ({ ...prev, phone: validationMessages.phoneTaken }))
+      }
+    } catch {
+      // ignore availability check errors on blur
+    }
+  }
+
   async function handleSubmit(e) {
     e.preventDefault()
     setError('')
@@ -162,7 +192,22 @@ export default function Register() {
     setFieldErrors(errors)
     if (Object.keys(errors).length > 0) return
 
-    const normalizedPhone = normalizeBotswanaPhone(form.phone.trim())
+    const normalizedPhone = normalizePhone(form.phoneCountryCode, form.phoneNational)
+    if (!normalizedPhone) {
+      setFieldErrors((prev) => ({ ...prev, phone: validationMessages.phoneInvalid }))
+      return
+    }
+
+    try {
+      const available = await checkPhoneAvailable(normalizedPhone)
+      if (!available) {
+        setFieldErrors((prev) => ({ ...prev, phone: validationMessages.phoneTaken }))
+        return
+      }
+    } catch (err) {
+      setError(err.message || validationMessages.authFailed)
+      return
+    }
 
     setLoading(true)
     let createdUserId = null
@@ -324,18 +369,16 @@ export default function Register() {
             required
             autoComplete="email"
           />
-          <Input
+          <PhoneInput
             label={t('auth.phone')}
-            type="tel"
-            inputMode="numeric"
-            placeholder="7X XXX XXX"
-            value={form.phone}
-            onChange={(e) => update('phone', e.target.value)}
-            onBlur={() => validateField('phone')}
+            countryCode={form.phoneCountryCode}
+            national={form.phoneNational}
+            onCountryCodeChange={(code) => update('phoneCountryCode', code)}
+            onNationalChange={(value) => update('phoneNational', value)}
+            onBlur={validatePhoneField}
             error={fieldErrors.phone}
             hint={!fieldErrors.phone ? t('auth.phoneHint') : undefined}
             required
-            autoComplete="tel"
           />
           <PasswordInput
             label={t('auth.password')}

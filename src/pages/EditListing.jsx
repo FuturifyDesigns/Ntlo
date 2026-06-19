@@ -19,6 +19,8 @@ import { UniversitySelect } from '../components/universities/OtherUniversityModa
 import Button from '../components/ui/Button'
 import Input, { Select, Textarea } from '../components/ui/Input'
 import { LocationPicker } from '../components/maps/ListingMap'
+import PhoneInput from '../components/ui/PhoneInput'
+import { splitStoredPhone } from '../lib/phoneNumbers'
 import { Skeleton } from '../components/ui/Skeleton'
 import DocumentUpload from '../components/verification/DocumentUpload'
 import { LISTING_DOC_TYPES } from '../lib/verification'
@@ -76,8 +78,11 @@ export default function EditListing() {
         setError('Listing not found')
       } else {
         const isOther = !data.nearest_university_id && data.custom_university_name
+        const whatsappSplit = splitStoredPhone(data.whatsapp_number || '')
         const dbForm = {
           ...data,
+          whatsapp_country_code: whatsappSplit.countryCode,
+          whatsapp_number: whatsappSplit.national,
           nearest_university_id: isOther ? 'other' : String(data.nearest_university_id || ''),
           deposit_pula: data.deposit_pula ?? '',
           utilities_included: data.utilities_included ?? '',
@@ -235,7 +240,7 @@ export default function EditListing() {
         custom_university_city: isOther ? form.custom_university_city?.trim() || null : null,
         distance_to_campus: distance,
         amenities: form.amenities || [],
-        whatsapp_number: normalizeListingPhone(form.whatsapp_number),
+        whatsapp_number: normalizeListingPhone(form.whatsapp_number, form.whatsapp_country_code),
         updated_at: new Date().toISOString(),
       }
 
@@ -464,10 +469,12 @@ export default function EditListing() {
           universityHint={t('listingForm.universityHint')}
         />
         )}
-        <Input
+        <PhoneInput
           label="WhatsApp"
-          value={form.whatsapp_number}
-          onChange={(e) => update('whatsapp_number', e.target.value)}
+          countryCode={form.whatsapp_country_code || '267'}
+          national={form.whatsapp_number || ''}
+          onCountryCodeChange={(code) => update('whatsapp_country_code', code)}
+          onNationalChange={(value) => update('whatsapp_number', value)}
           hint={t('listingForm.validation.whatsappHint')}
           error={fieldErrors.whatsapp_number}
           required

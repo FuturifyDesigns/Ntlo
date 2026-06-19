@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { useUniversities } from './useUniversities'
 import { subscribeListingsLive } from '../lib/listingsLiveBus'
+import { createDebouncer } from '../lib/queryOptim'
 
 function campusKeyFromListing(row) {
   if (row?.nearest_university_id) return `id:${row.nearest_university_id}`
@@ -68,7 +69,15 @@ export function useStats() {
     }
 
     load()
-    return subscribeListingsLive(() => load())
+    const debouncedLoad = createDebouncer(() => {
+      if (!cancelled) load()
+    }, 5000)
+    const unsub = subscribeListingsLive(() => debouncedLoad())
+    return () => {
+      cancelled = true
+      debouncedLoad.cancel()
+      unsub()
+    }
   }, [universities.length])
 
   return stats

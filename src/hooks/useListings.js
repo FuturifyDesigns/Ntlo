@@ -7,14 +7,24 @@ import { mergeListingRow } from '../lib/listingMerge'
 
 const PAGE_SIZE = 12
 
-const LISTING_SELECT = `
-  id, title, price, room_type, area, city, address, lat, lng,
+const LISTING_CARD_SELECT = `
+  id, title, price, room_type, area, city, lat, lng,
   distance_to_campus, available, occupancy_status, is_verified, landlord_verified, landlord_display_name, featured,
-  whatsapp_number, amenities, gender_preference, deposit_pula, utilities_included, house_rules,
-  created_at, updated_at, views,
+  amenities, gender_preference, created_at, updated_at, views,
   nearest_university_id, custom_university_name,
   nearest_university:universities(id, short_name, name, lat, lng),
   listing_photos(url, is_cover, display_order)
+`
+
+const LISTING_DETAIL_SELECT = `
+  id, landlord_id, title, description, price, room_type, gender_preference,
+  address, area, city, lat, lng, nearest_university_id, custom_university_name, custom_university_city,
+  distance_to_campus, amenities, whatsapp_number, available, occupancy_status,
+  is_verified, landlord_verified, landlord_display_name, featured, verification_status,
+  deposit_pula, utilities_included, house_rules, views, created_at, updated_at,
+  nearest_university:universities(id, short_name, name, lat, lng),
+  listing_photos(id, url, is_cover, display_order),
+  landlord:profiles(id, full_name, is_verified, phone, last_seen_at)
 `
 
 function buildFilterKey(filters) {
@@ -76,7 +86,7 @@ export function useListings(filters = {}) {
       const { data, error: queryError, count: total } = await dedupeAsync(`listings:${cacheKey}`, async () => {
         let query = supabase
           .from('listings')
-          .select(LISTING_SELECT, { count: 'exact' })
+          .select(LISTING_CARD_SELECT, { count: 'exact' })
 
         if (availableOnly === true) {
           query = query.eq('occupancy_status', 'available')
@@ -208,14 +218,7 @@ export function useListing(id) {
       try {
         const { data, error: fetchError } = await supabase
           .from('listings')
-          .select(
-            `
-            *,
-            nearest_university:universities(id, short_name, name, lat, lng),
-            listing_photos(id, url, is_cover, display_order),
-            landlord:profiles(id, full_name, is_verified, phone, last_seen_at)
-          `
-          )
+          .select(LISTING_DETAIL_SELECT)
           .eq('id', id)
           .maybeSingle()
 
@@ -253,34 +256,6 @@ export function useListing(id) {
 
     return () => supabase.removeChannel(channel)
   }, [id])
-
-  useEffect(() => {
-    if (!id || !listing?.landlord_id) return undefined
-
-    const channel = supabase
-      .channel(`listing-landlord-${listing.landlord_id}`)
-      .on(
-        'postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'profiles', filter: `id=eq.${listing.landlord_id}` },
-        (payload) => {
-          if (!payload.new) return
-          setListing((prev) => {
-            if (!prev) return prev
-            const landlordVerified = Boolean(payload.new.is_verified)
-            return {
-              ...prev,
-              landlord_verified: landlordVerified,
-              landlord: prev.landlord
-                ? { ...prev.landlord, is_verified: landlordVerified }
-                : prev.landlord,
-            }
-          })
-        }
-      )
-      .subscribe()
-
-    return () => supabase.removeChannel(channel)
-  }, [id, listing?.landlord_id])
 
   return { listing, loading, error }
 }

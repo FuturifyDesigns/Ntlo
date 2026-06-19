@@ -12,7 +12,7 @@ const notifyAll = createDebouncer(() => {
       /* ignore subscriber errors */
     }
   })
-}, 750)
+}, 1200)
 
 function ensureChannel() {
   if (channel) return
@@ -21,11 +21,6 @@ function ensureChannel() {
     .on(
       'postgres_changes',
       { event: '*', schema: 'public', table: 'listings' },
-      () => notifyAll()
-    )
-    .on(
-      'postgres_changes',
-      { event: 'UPDATE', schema: 'public', table: 'profiles' },
       () => notifyAll()
     )
     .subscribe()
