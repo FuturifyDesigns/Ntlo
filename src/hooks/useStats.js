@@ -1,48 +1,15 @@
 import { useState, useEffect } from 'react'
-import { supabase } from '../lib/supabase'
 import { useUniversities } from './useUniversities'
+import { supabase } from '../lib/supabase'
+import { fetchPublicPlatformStats } from '../lib/platformStats'
+import { subscribePlatformStats } from '../lib/platformStatsLive'
 import { subscribeListingsLive } from '../lib/listingsLiveBus'
 import { createDebouncer } from '../lib/queryOptim'
-
-function campusKeyFromListing(row) {
-  if (row?.nearest_university_id) return `id:${row.nearest_university_id}`
-  const custom = row?.custom_university_name?.trim()
-  if (custom) return `custom:${custom.toLowerCase()}`
-  return null
-}
-
-async function fetchPublicListingStats() {
-  const [listingsRes, campusRes, landlordsRes] = await Promise.all([
-    supabase
-      .from('listings')
-      .select('id', { count: 'exact', head: true })
-      .eq('verification_status', 'approved')
-      .in('occupancy_status', ['available', 'rented']),
-    supabase
-      .from('listings')
-      .select('nearest_university_id, custom_university_name')
-      .eq('verification_status', 'approved')
-      .in('occupancy_status', ['available', 'rented']),
-    supabase
-      .from('profiles')
-      .select('id', { count: 'exact', head: true })
-      .eq('role', 'landlord'),
-  ])
-
-  const campusKeys = new Set(
-    (campusRes.data || []).map(campusKeyFromListing).filter(Boolean)
-  )
-
-  return {
-    listings: listingsRes.count || 0,
-    universitiesWithListings: campusKeys.size,
-    landlords: landlordsRes.count || 0,
-  }
-}
 
 export function useStats() {
   const { universities } = useUniversities()
   const [stats, setStats] = useState({
+    students: 0,
     listings: 0,
     universities: universities.length,
     universitiesWithListings: 0,
@@ -55,10 +22,13 @@ export function useStats() {
 
     async function load() {
       try {
-        const data = await fetchPublicListingStats()
+        const data = await fetchPublicPlatformStats()
         if (!cancelled) {
           setStats({
-            ...data,
+            students: data.students,
+            listings: data.listings,
+            landlords: data.landlords,
+            universitiesWithListings: data.campuses_with_listings,
             universities: universities.length,
             loading: false,
           })
@@ -71,12 +41,16 @@ export function useStats() {
     load()
     const debouncedLoad = createDebouncer(() => {
       if (!cancelled) load()
-    }, 5000)
-    const unsub = subscribeListingsLive(() => debouncedLoad())
+    }, 3000)
+
+    const unsubStats = subscribePlatformStats(() => debouncedLoad())
+    const unsubListings = subscribeListingsLive(() => debouncedLoad())
+
     return () => {
       cancelled = true
       debouncedLoad.cancel()
-      unsub()
+      unsubStats()
+      unsubListings()
     }
   }, [universities.length])
 

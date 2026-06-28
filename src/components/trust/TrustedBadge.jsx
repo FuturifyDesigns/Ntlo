@@ -20,6 +20,10 @@ const STYLES = {
     wrap: 'bg-success/15 text-success border border-success/35',
     icon: IconTrustedHome,
   },
+  [TRUST_LEVEL.landlordUnverified]: {
+    wrap: 'bg-error/10 text-error border border-error/30',
+    icon: IconListedHome,
+  },
   [TRUST_LEVEL.standard]: {
     wrap: 'bg-accent text-primary',
     icon: IconTrustedHome,

@@ -79,17 +79,40 @@ export function landlordDocsComplete(uploadedTypes) {
   return set.has('national_id') && set.has('selfie_with_id') && hasPropertyProof
 }
 
+export function isLandlordIdentityApproved(profile) {
+  return profile?.role === 'landlord' && profile?.verification_status === 'approved'
+}
+
+/** First-time landlords who have not verified or skipped yet. */
+export function landlordNeedsVerificationIntro(profile) {
+  if (profile?.role !== 'landlord') return false
+  if (isLandlordIdentityApproved(profile)) return false
+  if (profile.verification_deferred_at) return false
+  return ['none', 'rejected'].includes(profile?.verification_status || 'none')
+}
+
+/** Show dashboard nudge to complete verification (skipped or never submitted). */
+export function landlordShouldVerify(profile) {
+  if (profile?.role !== 'landlord') return false
+  if (isLandlordIdentityApproved(profile)) return false
+  if (['pending', 'changes_requested'].includes(profile?.verification_status)) return false
+  return true
+}
+
 export function getPostAuthPath(profile, fallback = '/') {
   if (!profile) return '/student'
   if (shouldBlockLogin(profile)) return '/login'
   if (profile.role === 'admin') return '/admin'
   if (profile.role === 'landlord') {
-    if (profile.verification_status !== 'approved') return '/landlord/verify'
+    if (['pending', 'changes_requested'].includes(profile.verification_status)) {
+      return '/landlord/verify'
+    }
+    if (landlordNeedsVerificationIntro(profile)) return '/landlord/verify'
     return fallback === '/' || fallback === '/login' ? '/landlord' : fallback
   }
   return fallback === '/' || fallback === '/login' ? '/student' : fallback
 }
 
 export function landlordCanList(profile) {
-  return profile?.role === 'landlord' && profile?.verification_status === 'approved' && !isBanActive(profile)
+  return profile?.role === 'landlord' && !isBanActive(profile)
 }

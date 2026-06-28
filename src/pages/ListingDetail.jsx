@@ -17,7 +17,7 @@ import ListingAdvisorPanel from '../components/advisor/ListingAdvisorPanel'
 import ListingContactPanel from '../components/housing/ListingContactPanel'
 import TrustedBadge from '../components/trust/TrustedBadge'
 import TrustRiskBadge from '../components/trust/TrustRiskBadge'
-import { resolveListingTrustBadge, resolveSecondaryTrustBadge } from '../lib/tierBenefits'
+import { resolveListingTrustBadge, resolveSecondaryTrustBadge, TRUST_LEVEL } from '../lib/tierBenefits'
 import { getListingTrustProfile } from '../lib/listingTrust'
 import { useAuth } from '../hooks/useAuth'
 import { OnboardingReplayButton, useOnboardingPageState } from '../context/OnboardingContext'
@@ -102,7 +102,10 @@ export default function ListingDetail() {
                 <div className="flex flex-wrap items-center gap-2">
                   {trustLevel && <TrustedBadge level={trustLevel} />}
                   {secondaryTrust && <TrustedBadge level={secondaryTrust} compact />}
-                  {trust.showRisk && <TrustRiskBadge risk={trust.risk} />}
+                  {trust.showUnverifiedLandlord && (
+                    <TrustedBadge level={TRUST_LEVEL.landlordUnverified} compact />
+                  )}
+                  {trust.showRisk && <TrustRiskBadge risk={trust.risk} compact />}
                 </div>
               </div>
 

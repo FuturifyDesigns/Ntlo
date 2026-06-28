@@ -89,8 +89,8 @@ export default function Hero() {
             <Reveal delay={0.85} y={16}>
               <div className="mt-6 flex gap-5 border-t border-white/15 pt-6 sm:mt-8 sm:gap-8 sm:pt-8">
                 {[
+                  { value: stats.students, label: t('hero.students') },
                   { value: stats.listings, label: t('hero.liveListings') },
-                  { value: stats.universitiesWithListings || stats.universities, label: t('hero.campuses') },
                   { value: stats.landlords, label: t('hero.landlords') },
                 ].map(({ value, label }) => (
                   <div key={label}>

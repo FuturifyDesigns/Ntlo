@@ -11,11 +11,13 @@ import {
   fetchUserVerificationDocs,
   submitLandlordVerification,
   uploadVerificationDoc,
+  skipLandlordVerification,
 } from '../lib/verificationStorage'
 import DocumentUpload from '../components/verification/DocumentUpload'
 import Button from '../components/ui/Button'
 import Badge from '../components/ui/Badge'
 import { Skeleton } from '../components/ui/Skeleton'
+import LandlordVerifySkipModal from '../components/landlord/LandlordVerifySkipModal'
 
 export default function LandlordVerify() {
   const { user, profile, refreshProfile } = useAuth()
@@ -24,6 +26,8 @@ export default function LandlordVerify() {
   const [docs, setDocs] = useState([])
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
+  const [skipping, setSkipping] = useState(false)
+  const [skipModalOpen, setSkipModalOpen] = useState(false)
   const [error, setError] = useState('')
 
   const loadDocs = useCallback(async ({ silent = false } = {}) => {
@@ -91,6 +95,23 @@ export default function LandlordVerify() {
       setSubmitting(false)
     }
   }
+
+  async function handleSkipConfirm() {
+    setError('')
+    setSkipping(true)
+    try {
+      await skipLandlordVerification()
+      await refreshProfile()
+      setSkipModalOpen(false)
+      navigate('/landlord')
+    } catch (err) {
+      setError(err.message || t('verification.skipFailed'))
+    } finally {
+      setSkipping(false)
+    }
+  }
+
+  const canSkip = status === 'none' && !profile?.verification_deferred_at
 
   const STATUS_MAP = {
     none: { variant: 'default', icon: Shield, label: t('verification.statusNone') },
@@ -178,6 +199,11 @@ export default function LandlordVerify() {
         </div>
       )}
 
+      <div className="mb-6 rounded-xl border border-accent/25 bg-accent/5 p-4 text-sm">
+        <p className="font-medium text-primary">{t('verification.optionalTitle')}</p>
+        <p className="mt-1 text-muted">{t('verification.optionalBody')}</p>
+      </div>
+
       <div className="mb-6 rounded-xl border border-border bg-surface p-4 text-sm text-muted">
         <p className="font-medium text-primary">{t('verification.whyTitle')}</p>
         <ul className="mt-2 list-inside list-disc space-y-1">
@@ -228,6 +254,16 @@ export default function LandlordVerify() {
                     ? t('verification.resubmit')
                     : t('verification.submitForReview')}
               </Button>
+              {canSkip && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setSkipModalOpen(true)}
+                  disabled={submitting || skipping}
+                >
+                  {t('verification.skipForNow')}
+                </Button>
+              )}
             </div>
           )}
         </div>
@@ -236,6 +272,13 @@ export default function LandlordVerify() {
       <p className="mt-8 text-center text-sm text-muted">
         <Link to="/" className="text-accent hover:underline">{t('verification.backToHome')}</Link>
       </p>
+
+      <LandlordVerifySkipModal
+        open={skipModalOpen}
+        onClose={() => setSkipModalOpen(false)}
+        onConfirm={handleSkipConfirm}
+        busy={skipping}
+      />
     </motion.div>
   )
 }

@@ -14,6 +14,7 @@ import { Skeleton } from '../components/ui/Skeleton'
 import { formatPrice, getCoverPhoto } from '../lib/utils'
 import ListingMap from '../components/listings/ListingMap'
 import LandlordWelcomeBanner from '../components/landlord/LandlordWelcomeBanner'
+import LandlordVerifyNudgeBanner from '../components/landlord/LandlordVerifyNudgeBanner'
 import EarlyAccessBanner from '../components/landlord/EarlyAccessBanner'
 import EarlyAccessLandlordNote from '../components/landlord/EarlyAccessLandlordNote'
 import LandlordInquiriesPanel from '../components/housing/LandlordInquiriesPanel'
@@ -216,6 +217,7 @@ export default function LandlordDashboard() {
       </div>
 
       <LandlordWelcomeBanner userId={user?.id} profile={profile} />
+      <LandlordVerifyNudgeBanner profile={profile} />
       <EarlyAccessBanner />
 
       {statusBanner && (

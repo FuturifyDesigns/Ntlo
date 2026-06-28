@@ -44,8 +44,6 @@ export function getListingTrustProfile(listing, landlordProfile) {
     risk = TRUST_RISK.low
   } else if (listingTrusted || landlordVerified) {
     risk = TRUST_RISK.moderate
-  } else if (published) {
-    risk = TRUST_RISK.moderate
   }
 
   let primaryBadge = null
@@ -65,6 +63,10 @@ export function getListingTrustProfile(listing, landlordProfile) {
     ? TRUST_LEVEL.verifiedLandlord
     : null
 
+  const showUnverifiedLandlord = published
+    && !landlordVerified
+    && getListingOccupancy(listing) !== 'unavailable'
+
   return {
     published,
     listingTrusted,
@@ -73,6 +75,7 @@ export function getListingTrustProfile(listing, landlordProfile) {
     risk,
     primaryBadge,
     secondaryBadge,
+    showUnverifiedLandlord,
     showRisk: published && getListingOccupancy(listing) !== 'unavailable',
   }
 }

@@ -33,8 +33,8 @@ export default function HowItWorks() {
   const steps = tab === 'student' ? studentSteps : landlordSteps
 
   const liveStats = [
+    { value: stats.students, label: t('howItWorks.studentsOnNtlo') },
     { value: stats.listings, label: t('howItWorks.activeListings') },
-    { value: stats.universitiesWithListings || stats.universities, label: t('howItWorks.campusesCovered') },
     { value: stats.landlords, label: t('howItWorks.landlordsOnNtlo') },
   ]
 

@@ -9,6 +9,7 @@ export const TRUST_LEVEL = {
   featured: 'featured',
   trustedHome: 'trusted_home',
   verifiedLandlord: 'verified_landlord',
+  landlordUnverified: 'landlord_unverified',
 }
 
 const TIER_RANK = { free: 0, early_access: 0, basic: 1, standard: 2, premium: 3 }
@@ -109,6 +110,7 @@ export function resolveSecondaryTrustBadge(listing, landlordProfile) {
 export function trustBadgeLabelKey(level) {
   if (level === TRUST_LEVEL.trustedHome) return 'trust.trustedHome'
   if (level === TRUST_LEVEL.verifiedLandlord) return 'trust.verifiedLandlord'
+  if (level === TRUST_LEVEL.landlordUnverified) return 'trust.landlordUnverified'
   if (level === TRUST_LEVEL.free) return 'trust.earlyAccessFree'
   if (level === TRUST_LEVEL.featured) return 'trust.featuredTier'
   if (level === TRUST_LEVEL.standard) return 'trust.standardTier'

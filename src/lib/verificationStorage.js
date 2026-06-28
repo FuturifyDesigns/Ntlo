@@ -59,6 +59,11 @@ export async function fetchListingVerificationDocs(listingId) {
   return data || []
 }
 
+export async function skipLandlordVerification() {
+  const { error } = await supabase.rpc('skip_landlord_verification')
+  if (error) throw error
+}
+
 export async function submitLandlordVerification(userId) {
   const { error } = await supabase
     .from('profiles')

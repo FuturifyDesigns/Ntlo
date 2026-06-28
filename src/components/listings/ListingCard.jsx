@@ -14,7 +14,7 @@ import Badge from '../ui/Badge'
 import { IconLocation } from '../ui/Icons'
 import TrustedBadge from '../trust/TrustedBadge'
 import TrustRiskBadge from '../trust/TrustRiskBadge'
-import { resolveListingTrustBadge } from '../../lib/tierBenefits'
+import { TRUST_LEVEL, resolveListingTrustBadge } from '../../lib/tierBenefits'
 import { getListingTrustProfile } from '../../lib/listingTrust'
 import ListingRecentlyUpdatedBadge from './ListingRecentlyUpdatedBadge'
 
@@ -110,9 +110,12 @@ export default function ListingCard({
             </div>
           )}
 
-          {(trustLevel || trust.showRisk) && (
+          {(trustLevel || trust.showRisk || trust.showUnverifiedLandlord) && (
             <div className="absolute bottom-3 right-3 z-[2] flex flex-col items-end gap-1">
               {trustLevel && <TrustedBadge level={trustLevel} compact />}
+              {trust.showUnverifiedLandlord && (
+                <TrustedBadge level={TRUST_LEVEL.landlordUnverified} compact />
+              )}
               {trust.showRisk && <TrustRiskBadge risk={trust.risk} compact />}
             </div>
           )}

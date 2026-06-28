@@ -2,6 +2,8 @@ import { useMemo } from 'react'
 import { useAuth } from './useAuth'
 import { useTranslation } from './useTranslation'
 
+import { landlordNeedsVerificationIntro } from '../lib/verification'
+
 export function useNavLinks() {
   const { user, isLandlord, isAdmin } = useAuth()
   const { t } = useTranslation()
@@ -30,6 +32,6 @@ export function useDashboardPath() {
   const { user, isLandlord, isAdmin, profile } = useAuth()
   if (!user) return '/login'
   if (isAdmin) return '/admin'
-  if (isLandlord && profile?.verification_status !== 'approved') return '/landlord/verify'
+  if (isLandlord && landlordNeedsVerificationIntro(profile)) return '/landlord/verify'
   return isLandlord ? '/landlord' : '/student'
 }
