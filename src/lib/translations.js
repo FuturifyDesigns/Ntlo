@@ -447,7 +447,7 @@ export const translations = {
       geocodeSearching: 'Looking up address on the map…',
       pinManual: 'Pin placed manually — change area/city to search again, or drag the pin.',
       pinManualShort: 'Pin adjusted',
-      universityHint: 'Nearest university is the campus students search under (orange dot). Your red pin is where the room actually is — distance is calculated between them.',
+      universityHint: 'Nearest university is the campus students search under (orange dot). Your red pin is where the room actually is — the dashed line and label show distance between them.',
       geocodeMiss: 'Could not find that address on the map — click the map or use GPS to place the pin.',
       geoUnsupported: 'Your browser does not support location services.',
       geoDenied: 'Location permission denied. Click the map to place your pin instead.',

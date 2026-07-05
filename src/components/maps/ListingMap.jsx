@@ -388,6 +388,77 @@ function ListingPinMarker() {
   )
 }
 
+/** Dashed geodesic line between campus and listing pin — updates as coords change. */
+function CampusDistanceLine({ campus, pin }) {
+  const map = useMap()
+  const polylineRef = useRef(null)
+
+  useEffect(() => {
+    if (!map) return undefined
+
+    const line = new google.maps.Polyline({
+      strokeColor: '#c45c26',
+      strokeOpacity: 0,
+      strokeWeight: 3,
+      geodesic: true,
+      zIndex: 50,
+      icons: [
+        {
+          icon: {
+            path: 'M 0,-1 0,1',
+            strokeOpacity: 0.9,
+            strokeWeight: 3,
+            scale: 3,
+          },
+          offset: '0',
+          repeat: '14px',
+        },
+      ],
+    })
+    polylineRef.current = line
+
+    return () => {
+      line.setMap(null)
+      polylineRef.current = null
+    }
+  }, [map])
+
+  useEffect(() => {
+    const line = polylineRef.current
+    if (!line || !map) return
+
+    if (!campus?.lat || !pin?.lat) {
+      line.setMap(null)
+      return
+    }
+
+    line.setPath([
+      { lat: campus.lat, lng: campus.lng },
+      { lat: pin.lat, lng: pin.lng },
+    ])
+    line.setMap(map)
+  }, [map, campus?.lat, campus?.lng, pin?.lat, pin?.lng])
+
+  return null
+}
+
+function CampusDistanceLabel({ campus, pin, distanceKm, label }) {
+  if (!campus?.lat || !pin?.lat || distanceKm == null) return null
+
+  const midpoint = {
+    lat: (campus.lat + pin.lat) / 2,
+    lng: (campus.lng + pin.lng) / 2,
+  }
+
+  return (
+    <AdvancedMarker position={midpoint} zIndex={150} anchorPoint={['50%', '50%']}>
+      <div className="whitespace-nowrap rounded-full border-2 border-white bg-primary px-2.5 py-1 text-[10px] font-bold text-white shadow-md">
+        {label}
+      </div>
+    </AdvancedMarker>
+  )
+}
+
 export function LocationPicker({
   lat,
   lng,
@@ -422,8 +493,11 @@ export function LocationPicker({
   const [geocodeFailed, setGeocodeFailed] = useState(false)
   const [geocodeRetryNonce, setGeocodeRetryNonce] = useState(0)
   const [pinLocked, setPinLocked] = useState(false)
+  const [dragPosition, setDragPosition] = useState(null)
   const [cameraCommand, setCameraCommand] = useState(null)
   const [otherCampus, setOtherCampus] = useState(null)
+
+  const pinPosition = dragPosition || position
 
   const geocodeTimerRef = useRef(null)
   const reverseTimerRef = useRef(null)
@@ -450,9 +524,9 @@ export function LocationPicker({
     : campusLabel
 
   const distanceKm = useMemo(() => {
-    if (!position || !activeCampus?.lat) return null
-    return calculateDistance(position.lat, position.lng, activeCampus.lat, activeCampus.lng)
-  }, [position, activeCampus?.lat, activeCampus?.lng])
+    if (!pinPosition || !activeCampus?.lat) return null
+    return calculateDistance(pinPosition.lat, pinPosition.lng, activeCampus.lat, activeCampus.lng)
+  }, [pinPosition, activeCampus?.lat, activeCampus?.lng])
 
   const allowCamera = useCallback(() => {
     userMapControlRef.current = false
@@ -558,20 +632,31 @@ export function LocationPicker({
     }, 200)
   }, [applyCoordsFromReverse, universityReady])
 
-  const handleDragEnd = useCallback((event) => {
-    if (!universityReady) return
-    const ll = event.detail?.latLng || event.latLng
-    if (!ll) return
-    const coords = typeof ll.lat === 'function'
+  const readLatLng = useCallback((ll) => {
+    if (!ll) return null
+    return typeof ll.lat === 'function'
       ? { lat: ll.lat(), lng: ll.lng() }
       : { lat: ll.lat, lng: ll.lng }
+  }, [])
+
+  const handleDrag = useCallback((event) => {
+    if (!universityReady) return
+    const coords = readLatLng(event.detail?.latLng || event.latLng)
+    if (coords) setDragPosition(coords)
+  }, [readLatLng, universityReady])
+
+  const handleDragEnd = useCallback((event) => {
+    if (!universityReady) return
+    const coords = readLatLng(event.detail?.latLng || event.latLng)
+    if (!coords) return
+    setDragPosition(null)
     lastGeocodedKeyRef.current = ''
     setGeocodeFailed(false)
     if (reverseTimerRef.current) clearTimeout(reverseTimerRef.current)
     reverseTimerRef.current = setTimeout(() => {
       applyCoordsFromReverse(coords, 'listingForm.pinManual')
     }, 200)
-  }, [applyCoordsFromReverse, universityReady])
+  }, [applyCoordsFromReverse, readLatLng, universityReady])
 
   const useCurrentLocation = useCallback(async () => {
     if (!universityReady) return
@@ -824,10 +909,22 @@ export function LocationPicker({
           {activeCampus && activeCampusLabel && (
             <CampusReferenceMarker position={activeCampus} label={activeCampusLabel} />
           )}
-          {position && universityReady && (
+          {pinPosition && activeCampus && universityReady && (
+            <>
+              <CampusDistanceLine campus={activeCampus} pin={pinPosition} />
+              <CampusDistanceLabel
+                campus={activeCampus}
+                pin={pinPosition}
+                distanceKm={distanceKm}
+                label={t('listingForm.distanceFromCampus', { km: distanceKm?.toFixed(1) ?? '—' })}
+              />
+            </>
+          )}
+          {pinPosition && universityReady && (
             <AdvancedMarker
-              position={position}
+              position={pinPosition}
               draggable
+              onDrag={handleDrag}
               onDragEnd={handleDragEnd}
             >
               <ListingPinMarker />
