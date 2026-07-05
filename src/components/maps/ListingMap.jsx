@@ -498,6 +498,7 @@ export function LocationPicker({
   const [otherCampus, setOtherCampus] = useState(null)
 
   const pinPosition = dragPosition || position
+  const addressKey = `${address?.trim()}|${area?.trim()}|${city?.trim()}`
 
   const geocodeTimerRef = useRef(null)
   const reverseTimerRef = useRef(null)
@@ -517,7 +518,6 @@ export function LocationPicker({
   lngRef.current = lng
   onChangeRef.current = onChange
 
-  const addressKey = `${address?.trim()}|${area?.trim()}|${city?.trim()}`
 
   const hasArea = Boolean(area?.trim().length >= 2)
   const hasAddress = Boolean(address?.trim().length >= 3)
