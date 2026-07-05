@@ -359,7 +359,7 @@ function MapUserInteractionGuard({ disabledRef, programmaticRef }) {
 
 function CampusReferenceMarker({ position, label }) {
   return (
-    <AdvancedMarker position={position} title={label} zIndex={100}>
+    <AdvancedMarker position={position} title={label} zIndex={100} anchorPoint={['50%', '10px']}>
       <div className="flex flex-col items-center gap-0.5">
         <div
           className="h-5 w-5 rounded-full border-2 border-white shadow-md"
@@ -511,6 +511,7 @@ export function LocationPicker({
   const campusCoordsRef = useRef(campusCoords)
   const latRef = useRef(lat)
   const lngRef = useRef(lng)
+  const prevAddressKeyRef = useRef(addressKey)
   campusCoordsRef.current = campusCoords
   latRef.current = lat
   lngRef.current = lng
@@ -518,15 +519,27 @@ export function LocationPicker({
 
   const addressKey = `${address?.trim()}|${area?.trim()}|${city?.trim()}`
 
-  const activeCampus = universityId === 'other' ? otherCampus : campusCoords
+  const hasArea = Boolean(area?.trim().length >= 2)
+  const hasAddress = Boolean(address?.trim().length >= 3)
+  const hasCity = Boolean(city?.trim())
+  const hasLocationFields = hasCity && (hasArea || hasAddress)
+
+  const activeCampus = universityReady && (universityId === 'other' ? otherCampus : campusCoords)
   const activeCampusLabel = universityId === 'other'
     ? customUniversityName
     : campusLabel
 
+  const showCampus = Boolean(universityReady && activeCampus?.lat && activeCampusLabel)
+  const showPin = Boolean(
+    universityReady
+    && pinPosition
+    && (hasLocationFields || pinLocked || dragPosition)
+  )
+
   const distanceKm = useMemo(() => {
-    if (!pinPosition || !activeCampus?.lat) return null
+    if (!showPin || !showCampus) return null
     return calculateDistance(pinPosition.lat, pinPosition.lng, activeCampus.lat, activeCampus.lng)
-  }, [pinPosition, activeCampus?.lat, activeCampus?.lng])
+  }, [showPin, showCampus, pinPosition, activeCampus?.lat, activeCampus?.lng])
 
   const allowCamera = useCallback(() => {
     userMapControlRef.current = false
@@ -559,6 +572,55 @@ export function LocationPicker({
     setGeocodeHint('')
     allowCamera()
   }, [universityId, customUniversityName, customUniversityCity, allowCamera])
+
+  // Hide pin when address fields are cleared; hide campus when university is removed
+  useEffect(() => {
+    const prevAddressKey = prevAddressKeyRef.current
+    prevAddressKeyRef.current = addressKey
+
+    if (!universityReady) {
+      setDragPosition(null)
+      setPinLocked(false)
+      setGeocodeHint('')
+      setGeocodeFailed(false)
+      lastGeocodedKeyRef.current = ''
+      if (geocodeTimerRef.current) clearTimeout(geocodeTimerRef.current)
+      if (position) {
+        onChangeRef.current({ lat: '', lng: '' })
+      }
+      return
+    }
+
+    if (prevAddressKey !== addressKey && !hasLocationFields) {
+      setPinLocked(false)
+      setDragPosition(null)
+    }
+
+    if (hasLocationFields) return
+    if (pinLocked || dragPosition) return
+
+    setGeocodeHint('')
+    setGeocodeFailed(false)
+    lastGeocodedKeyRef.current = ''
+    if (geocodeTimerRef.current) clearTimeout(geocodeTimerRef.current)
+    if (position) {
+      onChangeRef.current({ lat: '', lng: '' })
+      allowCamera()
+      const campus = universityId === 'other' ? otherCampus : campusCoordsRef.current
+      if (campus?.lat) pushCamera({ campus })
+    }
+  }, [
+    addressKey,
+    universityReady,
+    hasLocationFields,
+    pinLocked,
+    dragPosition,
+    position,
+    universityId,
+    otherCampus,
+    allowCamera,
+    pushCamera,
+  ])
 
   // Pan map to campus once university is ready
   useEffect(() => {
@@ -705,10 +767,7 @@ export function LocationPicker({
   useEffect(() => {
     if (!universityReady) return undefined
 
-    const hasArea = Boolean(area?.trim().length >= 2)
-    const hasAddress = Boolean(address?.trim().length >= 3)
-    const hasCity = Boolean(city?.trim())
-    const canGeocode = hasCity && (hasArea || hasAddress)
+    const canGeocode = hasLocationFields
     if (!canGeocode) return undefined
 
     const hasPin = Boolean(toLatLng(latRef.current, lngRef.current))
@@ -725,6 +784,10 @@ export function LocationPicker({
     if (geocodeTimerRef.current) clearTimeout(geocodeTimerRef.current)
     geocodeTimerRef.current = setTimeout(async () => {
       if (addressKey === lastGeocodedKeyRef.current && toLatLng(latRef.current, lngRef.current)) return
+
+      const stillHasFields = Boolean(city?.trim())
+        && (Boolean(area?.trim().length >= 2) || Boolean(address?.trim().length >= 3))
+      if (!stillHasFields) return
 
       setGeocodeBusy(true)
       setGeocodeFailed(false)
@@ -765,6 +828,7 @@ export function LocationPicker({
     geocoder,
     universityReady,
     universityId,
+    hasLocationFields,
     geocodeRetryNonce,
     allowCamera,
     pushCamera,
@@ -850,13 +914,13 @@ export function LocationPicker({
             {t('listingForm.geocodeSearching')}
           </span>
         )}
-        {position && universityReady && (
+        {showPin && (
           <span className="inline-flex items-center gap-1.5 rounded-lg border border-success/30 bg-success/5 px-3 py-2 text-xs font-medium text-success">
             <MapPin size={14} />
             {pinLocked ? t('listingForm.pinManualShort') : t('listingForm.pinSet')}
           </span>
         )}
-        {distanceKm != null && universityReady && (
+        {distanceKm != null && (
           <span className="inline-flex items-center gap-1.5 rounded-lg border border-accent/30 bg-accent/5 px-3 py-2 text-xs font-medium text-primary">
             {t('listingForm.distanceFromCampus', { km: distanceKm.toFixed(1) })}
           </span>
@@ -906,10 +970,10 @@ export function LocationPicker({
               <MapCameraController command={cameraCommand} disabledRef={userMapControlRef} programmaticRef={programmaticCameraRef} />
             </>
           )}
-          {activeCampus && activeCampusLabel && (
+          {showCampus && (
             <CampusReferenceMarker position={activeCampus} label={activeCampusLabel} />
           )}
-          {pinPosition && activeCampus && universityReady && (
+          {showCampus && showPin && (
             <>
               <CampusDistanceLine campus={activeCampus} pin={pinPosition} />
               <CampusDistanceLabel
@@ -920,9 +984,10 @@ export function LocationPicker({
               />
             </>
           )}
-          {pinPosition && universityReady && (
+          {showPin && (
             <AdvancedMarker
               position={pinPosition}
+              anchorPoint={['50%', '100%']}
               draggable
               onDrag={handleDrag}
               onDragEnd={handleDragEnd}
