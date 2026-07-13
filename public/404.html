@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Page not found — Ntlo</title>
+  <link rel="icon" href="/favicon.ico" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Syne:wght@600;700&display=swap" rel="stylesheet" />
+  <script>
+    (function () {
+      var path = window.location.pathname || '';
+      var segment = path.slice(path.lastIndexOf('/') + 1);
+      var looksLikeFile = segment && /\.[a-z0-9]+$/i.test(segment);
+      if (path.length > 1 && !looksLikeFile) {
+        var target = '/#' + path + window.location.search;
+        if (window.location.hash) target += window.location.hash;
+        window.location.replace(target);
+      }
+    })();
+  </script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'IBM Plex Sans', system-ui, sans-serif;
+      background: #1A1A2E;
+      color: #1A1A2E;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.25rem;
+    }
+    .bg-mesh {
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 70% 50% at 20% 0%, rgba(200, 168, 75, 0.15), transparent 55%),
+        radial-gradient(ellipse 50% 40% at 90% 90%, rgba(200, 168, 75, 0.08), transparent 50%);
+      pointer-events: none;
+    }
+    .card {
+      position: relative;
+      width: 100%;
+      max-width: 440px;
+      background: #fff;
+      border-radius: 1.25rem;
+      padding: 2rem 1.75rem 1.75rem;
+      box-shadow: 0 24px 64px rgba(26, 26, 46, 0.35);
+      text-align: center;
+    }
+    .mascot {
+      width: 5.5rem;
+      height: 5.5rem;
+      margin: 0 auto 1rem;
+      object-fit: contain;
+    }
+    .code {
+      font-family: 'Syne', system-ui, sans-serif;
+      font-size: 3.5rem;
+      font-weight: 700;
+      line-height: 1;
+      color: #C8A84B;
+    }
+    h1 {
+      font-family: 'Syne', system-ui, sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-top: 0.75rem;
+      color: #1A1A2E;
+    }
+    p {
+      margin-top: 0.5rem;
+      font-size: 0.95rem;
+      line-height: 1.55;
+      color: #5c5c72;
+    }
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      justify-content: center;
+      margin-top: 1.5rem;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 2.75rem;
+      padding: 0 1.25rem;
+      border-radius: 0.75rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .btn-primary {
+      background: #1A1A2E;
+      color: #fff;
+      box-shadow: 0 8px 24px rgba(26, 26, 46, 0.2);
+    }
+    .btn-primary:hover { transform: translateY(-1px); }
+    .btn-outline {
+      border: 1px solid #d8d8e4;
+      color: #1A1A2E;
+      background: #fff;
+    }
+    .btn-outline:hover { border-color: #C8A84B; color: #1A1A2E; }
+    .brand {
+      margin-top: 1.25rem;
+      font-size: 0.8rem;
+      color: #8b8ba0;
+    }
+    .brand strong { color: #1A1A2E; }
+  </style>
+</head>
+<body>
+  <div class="bg-mesh" aria-hidden="true"></div>
+  <main class="card">
+    <img class="mascot" src="/mascot/thinking.png" alt="" width="88" height="88" />
+    <p class="code" aria-hidden="true">404</p>
+    <h1>Page not found</h1>
+    <p>This link doesn&apos;t exist or may have moved. Head back to Ntlo and keep browsing rooms near campus.</p>
+    <div class="actions">
+      <a class="btn btn-primary" href="/#/">Back to home</a>
+      <a class="btn btn-outline" href="/#/listings">Browse listings</a>
+    </div>
+    <p class="brand"><strong>Ntlo</strong> — student accommodation in Botswana</p>
+  </main>
+</body>
+</html>

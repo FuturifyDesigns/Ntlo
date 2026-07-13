@@ -1517,6 +1517,7 @@ export const translations = {
       title: 'Page not found',
       subtitle: "This page doesn't exist or has been moved.",
       backHome: 'Back to home',
+      browseListings: 'Browse listings',
     },
     a11y: {
       menu: 'Accessibility menu',
@@ -2964,6 +2965,7 @@ export const translations = {
       title: 'Tsebe ga e bonwe',
       subtitle: 'Tsebe eno ga e yo kgotsa e tsamaile.',
       backHome: 'Boela legae',
+      browseListings: 'Batla dilong',
     },
     a11y: {
       menu: 'Menyu ya go kgona go dirisa',
