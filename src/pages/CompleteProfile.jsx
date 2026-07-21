@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useAuth } from '../hooks/useAuth'
 import { useTranslation } from '../hooks/useTranslation'
@@ -32,6 +32,7 @@ export default function CompleteProfile() {
   const [universityId, setUniversityId] = useState(profile?.university_id ? String(profile.university_id) : '')
   const [customUniversity, setCustomUniversity] = useState('')
   const [gender, setGender] = useState(profile?.gender || '')
+  const [acceptedTerms, setAcceptedTerms] = useState(false)
   const [fieldErrors, setFieldErrors] = useState({})
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -136,6 +137,7 @@ export default function CompleteProfile() {
     const uniError = universityOtherError()
     if (uniError) errors.customUniversity = uniError
     if (role === 'student' && !gender) errors.gender = validationMessages.genderRequired
+    if (!acceptedTerms) errors.acceptedTerms = t('auth.acceptTermsRequired')
     setFieldErrors(errors)
     if (Object.keys(errors).length > 0) return
 
@@ -307,6 +309,34 @@ export default function CompleteProfile() {
               )}
             </div>
             </>
+          )}
+
+          <label className="flex items-start gap-3 rounded-lg border border-border bg-background px-3 py-3 text-sm text-muted">
+            <input
+              type="checkbox"
+              checked={acceptedTerms}
+              onChange={(e) => {
+                setAcceptedTerms(e.target.checked)
+                if (fieldErrors.acceptedTerms) {
+                  setFieldErrors((prev) => ({ ...prev, acceptedTerms: '' }))
+                }
+              }}
+              className="mt-0.5 h-4 w-4 shrink-0 rounded border-border text-accent focus:ring-accent"
+            />
+            <span>
+              {t('auth.acceptTermsPrefix')}{' '}
+              <Link to="/terms" className="font-semibold text-accent hover:underline">
+                {t('footer.terms')}
+              </Link>{' '}
+              {t('auth.acceptTermsAnd')}{' '}
+              <Link to="/privacy" className="font-semibold text-accent hover:underline">
+                {t('footer.privacy')}
+              </Link>
+              .
+            </span>
+          </label>
+          {fieldErrors.acceptedTerms && (
+            <p className="text-xs text-error">{fieldErrors.acceptedTerms}</p>
           )}
 
           {error && <p className="text-sm text-error">{error}</p>}

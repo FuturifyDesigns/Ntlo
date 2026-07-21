@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X } from 'lucide-react'
 import { useCookieConsent } from '../../context/CookieConsentContext'
@@ -40,7 +41,7 @@ export default function CookiePreferencesModal() {
   const { showPreferences, consent, savePreferences, closePreferences, acceptAll } = useCookieConsent()
   const { t } = useTranslation()
   const { prefs } = useLocale()
-  const [functional, setFunctional] = useState(true)
+  const [functional, setFunctional] = useState(false)
   const [analytics, setAnalytics] = useState(false)
 
   useEffect(() => {
@@ -83,7 +84,12 @@ export default function CookiePreferencesModal() {
               </button>
             </div>
 
-            <p className="mb-5 text-sm text-muted">{t('cookies.prefsDesc')}</p>
+            <p className="mb-5 text-sm text-muted">
+              {t('cookies.prefsDesc')}{' '}
+              <Link to="/privacy" className="font-semibold text-accent hover:underline">
+                {t('cookies.privacyLink')}
+              </Link>
+            </p>
 
             <div className="space-y-3">
               <Toggle

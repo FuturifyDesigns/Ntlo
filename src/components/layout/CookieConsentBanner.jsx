@@ -1,4 +1,5 @@
 import { Cookie } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useCookieConsent } from '../../context/CookieConsentContext'
 import { useTranslation } from '../../hooks/useTranslation'
@@ -34,7 +35,10 @@ export default function CookieConsentBanner() {
                 {t('cookies.bannerTitle')}
               </h2>
               <p id="cookie-banner-desc" className="mt-1.5 text-sm leading-relaxed text-muted">
-                {t('cookies.bannerDesc')}
+                {t('cookies.bannerDesc')}{' '}
+                <Link to="/privacy" className="font-semibold text-accent hover:underline">
+                  {t('cookies.privacyLink')}
+                </Link>
               </p>
             </div>
             <div className="flex shrink-0 flex-col gap-2 sm:w-auto sm:min-w-[220px]">

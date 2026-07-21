@@ -105,6 +105,9 @@ export function validateRegisterForm(form, messages = {}) {
   if (form.role === 'student' && !form.gender) {
     errors.gender = messages.genderRequired || 'Gender is required'
   }
+  if (!form.acceptedTerms) {
+    errors.acceptedTerms = messages.acceptTermsRequired || 'Please accept the Terms and Privacy Policy'
+  }
 
   return errors
 }

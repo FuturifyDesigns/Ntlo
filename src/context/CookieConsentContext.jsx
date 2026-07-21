@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import {
+  clearFunctionalStorage,
   clearNonEssentialStorage,
   defaultConsent,
   hasConsentDecision,
@@ -35,6 +36,7 @@ export function CookieConsentProvider({ children }) {
     setShowPreferences(false)
 
     if (!saved.analytics) clearNonEssentialStorage()
+    if (!saved.functional) clearFunctionalStorage()
     if (saved.analytics) initAnalytics()
 
     if (feedbackType) {
@@ -47,7 +49,7 @@ export function CookieConsentProvider({ children }) {
   }, [applyConsent])
 
   const rejectOptional = useCallback(() => {
-    applyConsent({ essential: true, functional: true, analytics: false }, 'essential_only')
+    applyConsent({ essential: true, functional: false, analytics: false }, 'essential_only')
   }, [applyConsent])
 
   const savePreferences = useCallback(

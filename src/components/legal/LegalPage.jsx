@@ -6,7 +6,15 @@ import { ArrowLeft, ShieldCheck } from 'lucide-react'
  * Shared layout for legal pages (Privacy, Terms).
  * sections: [{ heading, body: string | string[] }]
  */
-export default function LegalPage({ icon: Icon = ShieldCheck, title, updated, intro, sections = [], contactEmail }) {
+export default function LegalPage({
+  icon: Icon = ShieldCheck,
+  title,
+  updated,
+  intro,
+  sections = [],
+  contactEmail,
+  contactNote,
+}) {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
       <section className="relative overflow-hidden bg-primary px-4 py-12 text-white sm:px-6 sm:py-16 lg:px-8">
@@ -43,12 +51,12 @@ export default function LegalPage({ icon: Icon = ShieldCheck, title, updated, in
               <div className="mt-3 space-y-3 text-[15px] leading-relaxed text-muted">
                 {Array.isArray(section.body)
                   ? section.body.map((para, j) =>
-                      typeof para === 'string' ? (
+                      typeof para === 'string' || para?.items == null ? (
                         <p key={j}>{para}</p>
                       ) : (
                         <ul key={j} className="list-disc space-y-1.5 pl-5">
-                          {para.items.map((item) => (
-                            <li key={item}>{item}</li>
+                          {para.items.map((item, k) => (
+                            <li key={typeof item === 'string' ? item : k}>{item}</li>
                           ))}
                         </ul>
                       )
@@ -68,6 +76,7 @@ export default function LegalPage({ icon: Icon = ShieldCheck, title, updated, in
               </a>
               .
             </p>
+            {contactNote && <p className="mt-2 text-sm text-muted">{contactNote}</p>}
           </div>
         )}
       </article>

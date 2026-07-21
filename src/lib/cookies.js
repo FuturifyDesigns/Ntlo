@@ -1,6 +1,7 @@
 const STORAGE_KEY = 'ntlo_cookie_consent'
 const COOKIE_NAME = 'ntlo_consent'
-const CONSENT_VERSION = 1
+/** Bump when consent categories or defaults change so users re-confirm under the DPA. */
+const CONSENT_VERSION = 2
 
 export const defaultConsent = {
   version: CONSENT_VERSION,
@@ -79,4 +80,8 @@ export function isAnalyticsAllowed() {
 
 export function clearNonEssentialStorage() {
   localStorage.removeItem('ntlo_analytics_queue')
+}
+
+export function clearFunctionalStorage() {
+  localStorage.removeItem('ntlo_prefs')
 }

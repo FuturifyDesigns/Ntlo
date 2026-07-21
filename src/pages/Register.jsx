@@ -38,6 +38,7 @@ export default function Register() {
     universityId: '',
     customUniversity: '',
     gender: '',
+    acceptedTerms: false,
   })
   const [fieldErrors, setFieldErrors] = useState({})
   const [error, setError] = useState('')
@@ -75,6 +76,7 @@ export default function Register() {
       universityId: '',
       customUniversity: '',
       gender: '',
+      acceptedTerms: false,
     })
     setFieldErrors({})
     setError('')
@@ -113,6 +115,15 @@ export default function Register() {
     onError: handleGoogleError,
   })
 
+  function handleGoogleSignUp() {
+    if (!form.acceptedTerms) {
+      setFieldErrors((prev) => ({ ...prev, acceptedTerms: t('auth.acceptTermsRequired') }))
+      setError(t('auth.acceptTermsRequired'))
+      return
+    }
+    startGoogleAuth()
+  }
+
   const validationMessages = {
     nameRequired: t('auth.validation.nameRequired'),
     nameMin: t('auth.validation.nameMin'),
@@ -138,6 +149,7 @@ export default function Register() {
     universityFullNameRequired: t('auth.validation.universityFullNameRequired'),
     universityNoAbbrev: t('auth.validation.universityNoAbbrev'),
     genderRequired: t('auth.validation.genderRequired'),
+    acceptTermsRequired: t('auth.acceptTermsRequired'),
     emailTaken: t('auth.validation.emailTaken'),
     authFailed: t('auth.validation.authFailed'),
   }
@@ -334,7 +346,7 @@ export default function Register() {
           </div>
         )}
         <GoogleAuthButton
-          onClick={startGoogleAuth}
+          onClick={handleGoogleSignUp}
           loading={googleLoading}
           disabled={loading || googleDisabled}
           label={t('auth.signUpWithGoogle')}
@@ -428,6 +440,28 @@ export default function Register() {
               )}
             </div>
             </>
+          )}
+          <label className="flex items-start gap-3 rounded-lg border border-border bg-background px-3 py-3 text-sm text-muted">
+            <input
+              type="checkbox"
+              checked={form.acceptedTerms}
+              onChange={(e) => update('acceptedTerms', e.target.checked)}
+              className="mt-0.5 h-4 w-4 shrink-0 rounded border-border text-accent focus:ring-accent"
+            />
+            <span>
+              {t('auth.acceptTermsPrefix')}{' '}
+              <Link to="/terms" className="font-semibold text-accent hover:underline">
+                {t('footer.terms')}
+              </Link>{' '}
+              {t('auth.acceptTermsAnd')}{' '}
+              <Link to="/privacy" className="font-semibold text-accent hover:underline">
+                {t('footer.privacy')}
+              </Link>
+              .
+            </span>
+          </label>
+          {fieldErrors.acceptedTerms && (
+            <p className="text-xs text-error">{fieldErrors.acceptedTerms}</p>
           )}
           {error && <p className="text-sm text-error">{error}</p>}
           <Button type="submit" className="w-full" disabled={!authReady || loading || googleLoading || transitioning}>

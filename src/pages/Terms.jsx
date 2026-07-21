@@ -7,13 +7,19 @@ const sections = [
   {
     heading: 'Acceptance of terms',
     body: [
-      'These Terms of Service ("Terms") govern your use of Ntlo, a student accommodation platform operated by Futurify Designs ("Ntlo", "we", "us"). By creating an account or using the platform, you agree to these Terms. If you do not agree, please do not use Ntlo.',
+      'These Terms of Service ("Terms") govern your use of Ntlo, a student accommodation platform operated by Futurify Designs ("Ntlo", "we", "us"). By creating an account or using the platform, you agree to these Terms and to our Privacy Policy. If you do not agree, please do not use Ntlo.',
+    ],
+  },
+  {
+    heading: 'Privacy and data protection',
+    body: [
+      'How we collect, use, store, and share personal data is described in our Privacy Policy. We process personal data in accordance with Botswana\'s Data Protection Act, 2024. By registering, you confirm that you have read the Privacy Policy. Optional cookies and analytics require a separate opt-in via our cookie settings.',
     ],
   },
   {
     heading: 'Who can use Ntlo',
     body: [
-      'You must be at least 18 years old, or the age of majority in your jurisdiction, to create an account. You agree to provide accurate information and to keep your account details up to date. You are responsible for activity that happens under your account.',
+      'You must be at least 18 years old, or the age of majority in Botswana, to create an account. You agree to provide accurate information and to keep your account details up to date. You are responsible for activity that happens under your account.',
     ],
   },
   {
@@ -105,6 +111,12 @@ const sections = [
     ],
   },
   {
+    heading: 'Governing law',
+    body: [
+      'These Terms are governed by the laws of Botswana. Any dispute arising from these Terms or your use of Ntlo will be subject to the courts of Botswana, without prejudice to any mandatory consumer or data-protection rights you may have under Botswana law, including the Data Protection Act, 2024.',
+    ],
+  },
+  {
     heading: 'Changes to these terms',
     body: [
       'We may update these Terms from time to time. The "Last updated" date at the top reflects the latest version. Continued use of Ntlo after changes means you accept the updated Terms.',
@@ -123,7 +135,7 @@ export default function Terms() {
     <LegalPage
       icon={FileText}
       title="Terms of Service"
-      updated="30 May 2026"
+      updated="21 July 2026"
       intro="Please read these Terms carefully. They explain the rules for using Ntlo as a student or landlord, and the responsibilities of everyone on the platform."
       sections={sections}
       contactEmail={CONTACT_EMAIL}
