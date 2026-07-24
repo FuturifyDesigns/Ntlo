@@ -58,7 +58,7 @@ export function writeConsent(consent) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(payload))
 
   const value = encodeURIComponent(JSON.stringify(payload))
-  document.cookie = `${COOKIE_NAME}=${value}; path=${cookiePath()}; max-age=31536000; SameSite=Lax`
+  document.cookie = `${COOKIE_NAME}=${value}; path=${cookiePath()}; max-age=31536000; SameSite=Lax; Secure`
 
   window.dispatchEvent(new CustomEvent('ntlo:consent-change', { detail: payload }))
   return payload

@@ -49,13 +49,14 @@ Configure redirect URLs and paste email templates — see `supabase/email-templa
    - `https://ntlo.online/auth/callback.html`
    - `http://localhost:5173/auth/callback.html`
 
-## 5. GitHub Actions secrets
+## 5. CI build secrets
 
-In your GitHub repo → **Settings** → **Secrets and variables** → **Actions**, add:
+Add these secrets to your CI environment:
 
-- `VITE_SUPABASE_URL` = `https://kbpoljwacmzrakztnlkd.supabase.co`
+- `VITE_SUPABASE_URL` = your Supabase project URL
 - `VITE_SUPABASE_ANON_KEY` = your anon key
 - `VITE_GOOGLE_MAPS_API_KEY` = your Google Maps JavaScript API key
+- `VITE_GOOGLE_MAPS_MAP_ID` = your Map ID (optional but recommended)
 
 ## 6. Google Maps (listings + landlord location picker)
 
@@ -69,15 +70,13 @@ In your GitHub repo → **Settings** → **Secrets and variables** → **Actions
    ```
    VITE_GOOGLE_MAPS_API_KEY=your-key-here
    ```
-5. Add the same value as GitHub Actions secret `VITE_GOOGLE_MAPS_API_KEY`
+5. Add the same value as CI secret `VITE_GOOGLE_MAPS_API_KEY`
 
 Maps appear on browse (map view), listing detail, landlord dashboard, and the create/edit listing location step.
 
-## 7. GitHub Pages
+## 7. Production deploy
 
-In repo **Settings** → **Pages** → Source: **GitHub Actions**, and set **Custom domain** to `ntlo.online`.
-
-Push to `main` and the site deploys to https://ntlo.online/
+Push to `main`. CI builds the static site for https://ntlo.online/. Apply edge security headers from `docs/EDGE_SECURITY_HEADERS.md` on the CDN in front of the origin.
 
 ## 8. Admin panel & landlord verification
 

@@ -1,0 +1,6 @@
+Contact: mailto:futurifydesigns@gmail.com
+Expires: 2027-07-24T00:00:00.000Z
+Preferred-Languages: en, tn
+Canonical: https://ntlo.online/.well-known/security.txt
+Policy: https://ntlo.online/#/privacy
+Acknowledgments: https://ntlo.online/#/privacy

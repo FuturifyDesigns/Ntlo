@@ -6,9 +6,8 @@ Student accommodation finder for Botswana — built by Futurify Designs.
 
 ## Stack
 
-- React 18 + Vite + Tailwind CSS v4
+- React + Vite + Tailwind CSS
 - Supabase (auth, database, storage)
-- GitHub Pages deploy via Actions
 
 ## Local development
 
@@ -20,12 +19,20 @@ npm run dev
 
 ## Deploy
 
-Push to `main`. GitHub Actions builds and deploys to Pages.
+Push to `main`. CI builds the static site and publishes it behind `ntlo.online`.
 
-Add these repository secrets under **Settings → Secrets → Actions**:
+Repository secrets required for the build:
 
 - `VITE_SUPABASE_URL`
 - `VITE_SUPABASE_ANON_KEY`
+- `VITE_GOOGLE_MAPS_API_KEY`
+- `VITE_GOOGLE_MAPS_MAP_ID`
+
+## Security
+
+Edge HTTP headers (HSTS, framing, CSP `frame-ancestors`, etc.) are documented in `docs/EDGE_SECURITY_HEADERS.md`. Apply them on the CDN in front of the origin.
+
+Vulnerability reports: see `https://ntlo.online/.well-known/security.txt`.
 
 ## Supabase setup
 

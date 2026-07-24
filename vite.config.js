@@ -23,10 +23,42 @@ function authConfigPlugin(env) {
   }
 }
 
+/** Keep auth pages on a self-hosted Supabase bundle (no third-party script CDN). */
+function authVendorPlugin() {
+  return {
+    name: 'auth-vendor-supabase',
+    async buildStart() {
+      const entry = path.resolve('node_modules/@supabase/supabase-js/dist/index.mjs')
+      const outfile = path.resolve('public/auth/vendor/supabase.js')
+      if (!fs.existsSync(entry)) return
+      try {
+        const esbuild = await import('esbuild')
+        fs.mkdirSync(path.dirname(outfile), { recursive: true })
+        await esbuild.build({
+          entryPoints: [entry],
+          bundle: true,
+          format: 'esm',
+          platform: 'browser',
+          outfile,
+          minify: true,
+          logLevel: 'silent',
+        })
+      } catch {
+        // Fall back to the committed vendor file if esbuild is unavailable.
+      }
+    },
+  }
+}
+
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
   return {
-    plugins: [react(), tailwindcss(), authConfigPlugin(env)],
+    plugins: [react(), tailwindcss(), authConfigPlugin(env), authVendorPlugin()],
     base: '/',
+    build: {
+      sourcemap: false,
+      // Avoid embedding absolute local paths in production chunks.
+      minify: 'esbuild',
+    },
   }
 })

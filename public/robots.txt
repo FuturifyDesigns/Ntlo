@@ -1,4 +1,9 @@
 User-agent: *
 Allow: /
 
+# Do not index config or domain-control files
+Disallow: /auth/config.js
+Disallow: /CNAME
+Disallow: /.well-known/security.txt
+
 Sitemap: https://ntlo.online/sitemap.xml

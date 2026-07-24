@@ -4,27 +4,19 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="robots" content="noindex, nofollow" />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
+  <meta http-equiv="Permissions-Policy" content="geolocation=(), camera=(), microphone=(), payment=(), usb=()" />
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; upgrade-insecure-requests"
+  />
   <title>Page not found — Ntlo</title>
   <link rel="icon" href="/favicon.ico" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Syne:wght@600;700&display=swap" rel="stylesheet" />
-  <script>
-    (function () {
-      var path = window.location.pathname || '';
-      var segment = path.slice(path.lastIndexOf('/') + 1);
-      var looksLikeFile = segment && /\.[a-z0-9]+$/i.test(segment);
-      if (path.length > 1 && !looksLikeFile) {
-        var target = '/#' + path + window.location.search;
-        if (window.location.hash) target += window.location.hash;
-        window.location.replace(target);
-      }
-    })();
-  </script>
+  <script src="/404-redirect.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: 'IBM Plex Sans', system-ui, sans-serif;
+      font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
       background: #1A1A2E;
       color: #1A1A2E;
       min-height: 100vh;
@@ -58,14 +50,12 @@
       object-fit: contain;
     }
     .code {
-      font-family: 'Syne', system-ui, sans-serif;
       font-size: 3.5rem;
       font-weight: 700;
       line-height: 1;
       color: #C8A84B;
     }
     h1 {
-      font-family: 'Syne', system-ui, sans-serif;
       font-size: 1.5rem;
       font-weight: 700;
       margin-top: 0.75rem;
