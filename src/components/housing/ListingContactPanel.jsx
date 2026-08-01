@@ -21,6 +21,7 @@ import { GENDER_PREFERENCES } from '../../lib/utils'
 import TrustedBadge from '../trust/TrustedBadge'
 import { isLandlordVerified } from '../../lib/listingTrust'
 import { TRUST_LEVEL } from '../../lib/tierBenefits'
+import { isExternalListing } from '../../lib/listingOrigin'
 
 function WhatsAppIcon({ size = 20 }) {
   return (
@@ -60,7 +61,11 @@ export default function ListingContactPanel({ listing, onboardingId }) {
   const [cancelViewingOpen, setCancelViewingOpen] = useState(false)
   const [withdrawBusy, setWithdrawBusy] = useState(false)
 
-  const landlordName = listing.landlord_display_name || listing.landlord?.full_name || 'Landlord'
+  const external = isExternalListing(listing)
+  const landlordName = listing.external_contact_name
+    || listing.landlord_display_name
+    || listing.landlord?.full_name
+    || 'Landlord'
   const isStudent = profile?.role === 'student'
   const isGuest = !user
   const genderRestricted = isStudent
@@ -68,11 +73,12 @@ export default function ListingContactPanel({ listing, onboardingId }) {
     && listing.gender_preference
     && listing.gender_preference !== 'any'
     && !genderMatchesListing(profile.gender, listing.gender_preference)
-  const canContact = user && isStudent && !genderRestricted
+  const canContact = !external && user && isStudent && !genderRestricted
     && (isListingOpenForApply(listing) || activeApplication?.status === 'changes_requested')
   const applyCheck = isStudent ? canStudentApplyToListing(profile, listing) : { ok: false }
   const currentlyRented = myApplications?.some((a) => a.status === 'rented')
   const applyBlockedReason = !applyCheck.ok ? applyCheck.reason : null
+  const whatsappHref = getWhatsAppLink(listing.whatsapp_number, listing.title)
 
   function requireAuth(action) {
     if (!user) {
@@ -214,13 +220,43 @@ export default function ListingContactPanel({ listing, onboardingId }) {
           <p className="text-sm text-muted">{t('listingDetail.listedBy')}</p>
           <div className="flex flex-wrap items-center gap-2">
             <p className="font-semibold">{landlordName}</p>
-            {isLandlordVerified(listing) && (
+            {!external && isLandlordVerified(listing) && (
               <TrustedBadge level={TRUST_LEVEL.verifiedLandlord} compact />
             )}
           </div>
+          {external && listing.external_source_label && (
+            <p className="mt-1 text-xs text-muted">
+              {t('listings.externalSource', { source: listing.external_source_label })}
+            </p>
+          )}
         </div>
 
-        {listing.available && isGuest && (
+        {external && (
+          <div className="space-y-3">
+            <div className="rounded-lg border border-border bg-background p-3 text-sm text-muted">
+              <p className="font-medium text-primary">{t('listings.externalContactTitle')}</p>
+              <p className="mt-1">{t('listings.externalContactHint')}</p>
+            </div>
+            {listing.whatsapp_number ? (
+              <Button
+                as="a"
+                href={whatsappHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                size="lg"
+                className="w-full"
+              >
+                <WhatsAppIcon size={18} />
+                {t('listings.chatWhatsApp')}
+              </Button>
+            ) : (
+              <p className="text-sm text-error">{t('listings.externalNoContact')}</p>
+            )}
+            <p className="text-center text-xs text-muted">{t('listings.externalNoChat')}</p>
+          </div>
+        )}
+
+        {!external && listing.available && isGuest && (
           <div className="rounded-lg border border-border bg-background p-4 text-center">
             <p className="text-sm text-muted">{t('listingDetail.signInPrompt')}</p>
             <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:justify-center">
@@ -234,7 +270,7 @@ export default function ListingContactPanel({ listing, onboardingId }) {
           </div>
         )}
 
-        {genderRestricted && (
+        {!external && genderRestricted && (
           <div className="rounded-xl border border-border bg-background p-4 text-center">
             <p className="font-medium text-primary">{t('housing.genderRestrictionTitle')}</p>
             <p className="mt-2 text-sm text-muted">
@@ -289,7 +325,7 @@ export default function ListingContactPanel({ listing, onboardingId }) {
             <p className="text-center text-xs text-muted">{t('housing.inAppPreferred')}</p>
             <Button
               as="a"
-              href={getWhatsAppLink(listing.whatsapp_number, listing.title)}
+              href={whatsappHref}
               target="_blank"
               rel="noopener noreferrer"
               variant="outline"
@@ -322,6 +358,8 @@ export default function ListingContactPanel({ listing, onboardingId }) {
         )}
       </div>
 
+      {!external && (
+      <>
       <Modal open={chatOpen} onClose={() => setChatOpen(false)} title={t('housing.chatInApp')}>
         {conversationId && (
           <ConversationChat
@@ -421,6 +459,24 @@ export default function ListingContactPanel({ listing, onboardingId }) {
         reasons={VIEWING_CANCEL_REASONS}
         busy={withdrawBusy}
       />
+      </>
+      )}
+
+      {external && listing.whatsapp_number && (
+        <div className="fixed bottom-16 left-0 right-0 z-40 border-t border-border bg-surface p-3 md:hidden">
+          <Button
+            as="a"
+            href={whatsappHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            size="sm"
+            className="w-full"
+          >
+            <WhatsAppIcon size={18} />
+            {t('listings.chatWhatsApp')}
+          </Button>
+        </div>
+      )}
 
       {canContact && (
         <div className="fixed bottom-16 left-0 right-0 z-40 border-t border-border bg-surface p-3 md:hidden">
@@ -434,7 +490,7 @@ export default function ListingContactPanel({ listing, onboardingId }) {
             </Button>
             <Button
               as="a"
-              href={getWhatsAppLink(listing.whatsapp_number, listing.title)}
+              href={whatsappHref}
               target="_blank"
               rel="noopener noreferrer"
               variant="whatsapp"

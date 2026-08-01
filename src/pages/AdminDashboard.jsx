@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import {
   Users, GraduationCap, Shield, Home, Ban, Trash2, Check, X, UserCheck,
-  RefreshCw, Radio, Search, MapPin, CreditCard, ClipboardList, Star, Building2,
+  RefreshCw, Radio, Search, MapPin, CreditCard, ClipboardList, Star, Building2, Link2,
 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useTranslation } from '../hooks/useTranslation'
@@ -29,6 +29,7 @@ import AdminBanModal from '../components/admin/AdminBanModal'
 import AdminDeleteListingModal from '../components/admin/AdminDeleteListingModal'
 import AdminLiveListingCard from '../components/admin/AdminLiveListingCard'
 import AdminReviewsPanel from '../components/admin/AdminReviewsPanel'
+import AdminImportExternalPanel from '../components/admin/AdminImportExternalPanel'
 
 const TABS = [
   { id: 'requests', icon: GraduationCap, labelKey: 'admin.tabRequests' },
@@ -38,6 +39,7 @@ const TABS = [
   { id: 'users', icon: Users, labelKey: 'admin.tabUsers' },
   { id: 'landlords', icon: Shield, labelKey: 'admin.tabLandlords' },
   { id: 'listings', icon: Home, labelKey: 'admin.tabListings' },
+  { id: 'import', icon: Link2, labelKey: 'admin.tabImport' },
   { id: 'subscriptions', icon: CreditCard, labelKey: 'admin.tabSubscriptions' },
 ]
 
@@ -788,6 +790,13 @@ export default function AdminDashboard() {
                 })
               )}
             </div>
+          )}
+
+          {tab === 'import' && (
+            <AdminImportExternalPanel
+              onImported={() => { fetchListings(); selectTab('listings'); setListingFilter('live') }}
+              onToast={setToast}
+            />
           )}
 
           {tab === 'subscriptions' && <AdminSubscriptionsPanel />}

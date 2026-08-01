@@ -6,7 +6,9 @@
   "homepage": "https://ntlo.online",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "node scripts/sync-web-rentals.mjs && vite build",
+    "build:fast": "vite build",
+    "sync:web-rentals": "node scripts/sync-web-rentals.mjs",
     "lint": "eslint .",
     "preview": "vite preview",
     "deploy": "npm run build"

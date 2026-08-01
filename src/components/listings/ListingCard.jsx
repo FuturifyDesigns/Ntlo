@@ -17,6 +17,7 @@ import TrustRiskBadge from '../trust/TrustRiskBadge'
 import { TRUST_LEVEL, resolveListingTrustBadge } from '../../lib/tierBenefits'
 import { getListingTrustProfile } from '../../lib/listingTrust'
 import ListingRecentlyUpdatedBadge from './ListingRecentlyUpdatedBadge'
+import { isExternalListing } from '../../lib/listingOrigin'
 
 export default function ListingCard({
   listing, compact = false, carouselIndex = 0, onboardingHeartTarget = false,
@@ -34,6 +35,7 @@ export default function ListingCard({
   const trustLevel = resolveListingTrustBadge(listing)
   const trust = getListingTrustProfile(listing)
   const occupancy = getListingOccupancy(listing)
+  const external = isExternalListing(listing)
 
   async function handleSave(e) {
     e.preventDefault()
@@ -92,25 +94,31 @@ export default function ListingCard({
             <Heart size={17} fill={saved ? 'currentColor' : 'none'} strokeWidth={2} />
           </button>
 
-          {occupancy === 'unavailable' && (
+          {occupancy === 'unavailable' && !external && (
             <div className="absolute inset-0 z-[3] flex items-center justify-center bg-primary/70 backdrop-blur-[2px]">
               <Badge variant="error">{t('listings.unavailable')}</Badge>
             </div>
           )}
 
-          {isListingRented(listing) && (
+          {external && (
+            <div className="absolute left-3 bottom-3 z-[2]">
+              <Badge variant="default">{t('listings.externalBadge')}</Badge>
+            </div>
+          )}
+
+          {!external && isListingRented(listing) && (
             <div className="absolute left-3 bottom-3 z-[2]">
               <Badge variant="warning">{t('listings.rented')}</Badge>
             </div>
           )}
 
-          {!isListingRented(listing) && isListingRecentlyUpdated(listing) && (
+          {!external && !isListingRented(listing) && isListingRecentlyUpdated(listing) && (
             <div className="absolute left-3 bottom-3 z-[2]">
               <ListingRecentlyUpdatedBadge listing={listing} />
             </div>
           )}
 
-          {(trustLevel || trust.showRisk || trust.showUnverifiedLandlord) && (
+          {!external && (trustLevel || trust.showRisk || trust.showUnverifiedLandlord) && (
             <div className="absolute bottom-3 right-3 z-[2] flex flex-col items-end gap-1">
               {trustLevel && <TrustedBadge level={trustLevel} compact />}
               {trust.showUnverifiedLandlord && (

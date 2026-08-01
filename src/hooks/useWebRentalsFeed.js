@@ -1,0 +1,77 @@
+import { useEffect, useState } from 'react'
+import {
+  WEB_RENTALS,
+  feedItemToListing,
+  setLiveWebRentalsCatalog,
+} from '../data/webRentals'
+
+const FEED_URL = '/data/web-rentals-feed.json'
+const CACHE_KEY = 'ntlo_web_rentals_feed_v1'
+const CACHE_TTL_MS = 6 * 60 * 60 * 1000
+
+function readCache() {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY)
+    if (!raw) return null
+    const parsed = JSON.parse(raw)
+    if (!parsed?.saved_at || Date.now() - parsed.saved_at > CACHE_TTL_MS) return null
+    return Array.isArray(parsed.listings) ? parsed.listings : null
+  } catch {
+    return null
+  }
+}
+
+function writeCache(listings) {
+  try {
+    localStorage.setItem(CACHE_KEY, JSON.stringify({ saved_at: Date.now(), listings }))
+  } catch { /* ignore */ }
+}
+
+function mergeUnique(seed, live) {
+  const map = new Map()
+  for (const row of [...seed, ...live]) {
+    if (!row?.id) continue
+    const key = row.whatsapp_number
+      ? `${row.whatsapp_number}|${row.price}|${String(row.title || '').slice(0, 20).toLowerCase()}`
+      : row.id
+    if (!map.has(key)) map.set(key, row)
+  }
+  return [...map.values()]
+}
+
+/** Static seed + auto-synced public feed (refreshes in the background). */
+export function useWebRentalsFeed() {
+  const [rentals, setRentals] = useState(() => {
+    const cached = typeof localStorage !== 'undefined' ? readCache() : null
+    const initial = mergeUnique(WEB_RENTALS, cached || [])
+    setLiveWebRentalsCatalog(initial)
+    return initial
+  })
+
+  useEffect(() => {
+    let cancelled = false
+    async function load() {
+      try {
+        const res = await fetch(`${FEED_URL}?t=${Date.now()}`, { cache: 'no-store' })
+        if (!res.ok) return
+        const data = await res.json()
+        const live = (data.listings || []).map(feedItemToListing).filter(Boolean)
+        if (cancelled || !live.length) return
+        writeCache(live)
+        const merged = mergeUnique(WEB_RENTALS, live)
+        setLiveWebRentalsCatalog(merged)
+        setRentals(merged)
+      } catch {
+        /* keep seed/cache */
+      }
+    }
+    load()
+    const timer = setInterval(load, CACHE_TTL_MS)
+    return () => {
+      cancelled = true
+      clearInterval(timer)
+    }
+  }, [])
+
+  return rentals
+}

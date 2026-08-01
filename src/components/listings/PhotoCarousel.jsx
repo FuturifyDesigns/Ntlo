@@ -3,7 +3,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { getStorageImageVariants, CARD_IMAGE_OPTS, DETAIL_IMAGE_OPTS } from '../../lib/storageImages'
 
-const PLACEHOLDER = 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=1200&q=80'
+const PLACEHOLDER = '/ntlo-icon.png'
 const DEFAULT_INTERVAL = 3500
 const CARD_INTERVAL = 3000
 
@@ -15,6 +15,7 @@ function normalizePhotos(photos, compact) {
   return sorted.length
     ? sorted.map((p) => {
       const url = typeof p === 'string' ? p : p.url
+      if (!url) return { src: PLACEHOLDER, fallback: PLACEHOLDER }
       return getStorageImageVariants(url, imageOpts)
     })
     : [{ src: PLACEHOLDER, fallback: PLACEHOLDER }]

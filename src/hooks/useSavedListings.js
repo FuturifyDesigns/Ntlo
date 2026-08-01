@@ -1,6 +1,25 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from './useAuth'
+import { getWebRentalById, isWebRentalId } from '../data/webRentals'
+
+const WEB_SAVED_KEY = 'ntlo_saved_web_rentals'
+
+function readWebSavedIds() {
+  try {
+    const raw = localStorage.getItem(WEB_SAVED_KEY)
+    const list = raw ? JSON.parse(raw) : []
+    return new Set(Array.isArray(list) ? list : [])
+  } catch {
+    return new Set()
+  }
+}
+
+function writeWebSavedIds(ids) {
+  try {
+    localStorage.setItem(WEB_SAVED_KEY, JSON.stringify([...ids]))
+  } catch { /* ignore */ }
+}
 
 export function useSavedListings() {
   const { user, loading: authLoading } = useAuth()
@@ -37,11 +56,16 @@ export function useSavedListings() {
 
       if (error) throw error
       const ids = new Set((data || []).map((s) => s.listing_id))
+      const webIds = readWebSavedIds()
+      webIds.forEach((id) => ids.add(id))
       setSavedIds(ids)
-      setSavedListings((data || []).map((s) => s.listing).filter(Boolean))
+      const fromDb = (data || []).map((s) => s.listing).filter(Boolean)
+      const fromWeb = [...webIds].map(getWebRentalById).filter(Boolean)
+      setSavedListings([...fromWeb, ...fromDb])
     } catch {
-      setSavedIds(new Set())
-      setSavedListings([])
+      const webIds = readWebSavedIds()
+      setSavedIds(webIds)
+      setSavedListings([...webIds].map(getWebRentalById).filter(Boolean))
     } finally {
       setLoading(false)
     }
@@ -67,6 +91,27 @@ export function useSavedListings() {
 
   async function toggleSave(listingId) {
     if (!user) return { needsAuth: true }
+
+    if (isWebRentalId(listingId)) {
+      const webIds = readWebSavedIds()
+      if (webIds.has(listingId)) {
+        webIds.delete(listingId)
+        writeWebSavedIds(webIds)
+        setSavedIds((prev) => {
+          const next = new Set(prev)
+          next.delete(listingId)
+          return next
+        })
+        setSavedListings((prev) => prev.filter((l) => l.id !== listingId))
+        return { saved: false }
+      }
+      webIds.add(listingId)
+      writeWebSavedIds(webIds)
+      const web = getWebRentalById(listingId)
+      setSavedIds((prev) => new Set([...prev, listingId]))
+      if (web) setSavedListings((prev) => [web, ...prev.filter((l) => l.id !== listingId)])
+      return { saved: true }
+    }
 
     if (savedIds.has(listingId)) {
       const { error } = await supabase

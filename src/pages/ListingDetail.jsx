@@ -24,6 +24,7 @@ import { OnboardingReplayButton, useOnboardingPageState } from '../context/Onboa
 import { getUniversityDisplayName } from '../lib/universityNames'
 import { getListingOccupancy, isListingRented } from '../lib/listingOccupancy'
 import { isListingRecentlyUpdated } from '../lib/listingFreshness'
+import { isExternalListing } from '../lib/listingOrigin'
 import CompetitiveAdvisorPanel from '../components/advisor/CompetitiveAdvisorPanel'
 import ListingRecentlyUpdatedBadge from '../components/listings/ListingRecentlyUpdatedBadge'
 import {
@@ -75,8 +76,9 @@ export default function ListingDetail() {
 
   const uni = getNearestUniversity(listing)
   const relatedListings = related.filter((l) => l.id !== listing.id).slice(0, 3)
-  const trustLevel = resolveListingTrustBadge(listing, listing.landlord)
-  const secondaryTrust = resolveSecondaryTrustBadge(listing, listing.landlord)
+  const external = isExternalListing(listing)
+  const trustLevel = external ? null : resolveListingTrustBadge(listing, listing.landlord)
+  const secondaryTrust = external ? null : resolveSecondaryTrustBadge(listing, listing.landlord)
   const trust = getListingTrustProfile(listing, listing.landlord)
 
   return (
@@ -100,12 +102,12 @@ export default function ListingDetail() {
               <div className="flex flex-wrap items-start gap-3">
                 <h1 className="font-display text-2xl font-bold text-primary sm:text-3xl">{listing.title}</h1>
                 <div className="flex flex-wrap items-center gap-2">
-                  {trustLevel && <TrustedBadge level={trustLevel} />}
-                  {secondaryTrust && <TrustedBadge level={secondaryTrust} compact />}
-                  {trust.showUnverifiedLandlord && (
+                  {!external && trustLevel && <TrustedBadge level={trustLevel} />}
+                  {!external && secondaryTrust && <TrustedBadge level={secondaryTrust} compact />}
+                  {!external && trust.showUnverifiedLandlord && (
                     <TrustedBadge level={TRUST_LEVEL.landlordUnverified} compact />
                   )}
-                  {trust.showRisk && <TrustRiskBadge risk={trust.risk} compact />}
+                  {!external && trust.showRisk && <TrustRiskBadge risk={trust.risk} compact />}
                 </div>
               </div>
 
@@ -114,12 +116,17 @@ export default function ListingDetail() {
               </p>
 
               <div className="mt-3 flex flex-wrap gap-2">
-                {isListingRented(listing) ? (
+                {external ? (
+                  <Badge variant="default">{t('listings.externalBadge')}</Badge>
+                ) : isListingRented(listing) ? (
                   <Badge variant="warning">{t('listings.rented')}</Badge>
                 ) : getListingOccupancy(listing) === 'available' ? (
                   <Badge variant="success">{t('listings.available')}</Badge>
                 ) : (
                   <Badge variant="error">{t('listings.unavailable')}</Badge>
+                )}
+                {external && (
+                  <Badge variant="warning">{t('listings.externalConfirmAvailability')}</Badge>
                 )}
                 {uni && (
                   <Badge variant="default">
@@ -134,7 +141,7 @@ export default function ListingDetail() {
                 {listing.deposit_pula != null && listing.deposit_pula > 0 && (
                   <Badge variant="default">{t('listingForm.deposit')}: P{listing.deposit_pula}</Badge>
                 )}
-                <ListingRecentlyUpdatedBadge listing={listing} />
+                {!external && <ListingRecentlyUpdatedBadge listing={listing} />}
                 {listing.utilities_included && (
                   <Badge variant="default">{UTILITIES_OPTIONS[listing.utilities_included]}</Badge>
                 )}
@@ -146,9 +153,15 @@ export default function ListingDetail() {
               </p>
             </div>
 
-            {isListingRecentlyUpdated(listing) && (
+            {isListingRecentlyUpdated(listing) && !external && (
               <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 px-4 py-3 text-sm text-primary">
                 {t('listings.landlordEditedRecently')}
+              </div>
+            )}
+
+            {external && (
+              <div className="rounded-xl border border-border bg-background px-4 py-3 text-sm text-muted">
+                {t('listings.externalDetailNote')}
               </div>
             )}
 
@@ -178,14 +191,14 @@ export default function ListingDetail() {
               <SingleListingMap listing={listing} lat={listing.lat} lng={listing.lng} title={listing.title} />
             </div>
 
-            <ReviewSection listingId={listing.id} />
+            {!external && <ReviewSection listingId={listing.id} />}
           </div>
 
           <div className="lg:col-span-1">
             <div className="sticky top-24 max-h-[calc(100vh-6rem)] space-y-4 overflow-y-auto rounded-xl border border-border bg-surface p-6 shadow-sm">
               <ListingContactPanel listing={listing} onboardingId="listing-apply-panel" />
 
-              {isLandlord ? (
+              {!external && (isLandlord ? (
                 <CompetitiveAdvisorPanel listing={listing} />
               ) : (
                 <ListingAdvisorPanel
@@ -193,12 +206,12 @@ export default function ListingDetail() {
                   studentUniversityId={profile?.role === 'student' ? profile.university_id : undefined}
                   onboardingId="listing-advisor-panel"
                 />
-              )}
+              ))}
             </div>
           </div>
         </div>
 
-        {relatedListings.length > 0 && (
+        {!external && relatedListings.length > 0 && (
           <div className="mt-12">
             <h2 className="mb-6 font-display text-xl font-semibold">{t('listingDetail.moreByLandlord')}</h2>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
