@@ -2957,6 +2957,7 @@ export const translations = {
       verifiedLandlord: 'ID e lekodiwe',
       landlordUnverified: 'Moathati o sa netefadiweng',
       propertyNotFullyVerified: 'Lefelo ga le ise le netefadiwe ka botlalo',
+      verifyWithOwner: 'Netefatsa le mong wa lefelo',
       riskLow: 'Kotsi e nnye',
       riskModerate: 'Kotsi e e magareng',
       riskHigher: 'Kotsi e kgolo',
