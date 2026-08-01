@@ -1,5 +1,7 @@
 /** Botswana student-rentable rooms from public classifieds — shown as external listings. */
 import { isUniversityNameQuery, pickPrimaryUniversityMatch } from '../lib/universitySearch'
+import { resolveLiveCampusId } from '../lib/campusAttribution'
+import { getUniversityById } from '../lib/universities'
 
 const NOW = '2026-08-01T09:00:00.000Z'
 
@@ -506,10 +508,15 @@ export function filterWebRentals(filters = {}, catalog = null) {
   let rows = [...(catalog || getAllWebRentals())]
 
   // Strict: selected campus must be the listing's primary university only.
-  // Do not include rooms that merely list this campus as a secondary nearby option.
   if (universityId && universityId !== 'other') {
     const uid = Number(universityId)
-    rows = rows.filter((l) => Number(l.nearest_university_id) === uid)
+    const liveUni = getUniversityById(uid)
+    rows = rows.filter((l) => {
+      const liveId = resolveLiveCampusId(l)
+      if (liveId != null && liveId === uid) return true
+      if (liveUni?.slug && l.nearest_university?.slug === liveUni.slug) return true
+      return Number(l.nearest_university_id) === uid
+    })
   } else if (universityId === 'other') {
     rows = rows.filter((l) => !l.nearest_university_id && l.custom_university_name)
   }

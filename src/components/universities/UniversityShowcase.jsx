@@ -9,7 +9,7 @@ import { Reveal, AnimatedCounter } from '../ui/Motion'
 import MarqueeText from '../ui/MarqueeText'
 import { useTranslation } from '../../hooks/useTranslation'
 
-export default function UniversityShowcase({ counts = {} }) {
+export default function UniversityShowcase({ counts = {}, totalListings: totalListingsProp }) {
   const [search, setSearch] = useState('')
   const [city, setCity] = useState('All')
   const [hovered, setHovered] = useState(null)
@@ -34,8 +34,10 @@ export default function UniversityShowcase({ counts = {} }) {
     })
   }, [search, city, universities])
 
-  const totalListings = Object.values(counts).reduce((s, n) => s + n, 0)
-  const activeUnis = universities.filter((u) => counts[u.id] > 0).length
+  const totalListings = totalListingsProp != null
+    ? totalListingsProp
+    : Object.values(counts).reduce((s, n) => s + n, 0)
+  const activeUnis = universities.filter((u) => (counts[u.id] || counts[String(u.id)] || 0) > 0).length
 
   return (
     <>
@@ -91,7 +93,7 @@ export default function UniversityShowcase({ counts = {} }) {
           <AnimatePresence mode="popLayout">
             <motion.div layout className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {filtered.map((uni, i) => {
-                const listingCount = counts[uni.id] || 0
+                const listingCount = counts[uni.id] || counts[String(uni.id)] || 0
                 const isHovered = hovered === uni.id
 
                 return (

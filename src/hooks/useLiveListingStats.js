@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useWebRentalsFeed } from './useWebRentalsFeed'
+import { useUniversities } from './useUniversities'
 import { buildLiveListingStats, fetchDbListingCampusRows } from '../lib/listingCounts'
 import { subscribeListingsLive } from '../lib/listingsLiveBus'
 import { createDebouncer } from '../lib/queryOptim'
@@ -19,6 +20,7 @@ const EMPTY = {
  */
 export function useLiveListingStats() {
   const webCatalog = useWebRentalsFeed()
+  const { universities } = useUniversities()
   const [stats, setStats] = useState(EMPTY)
 
   useEffect(() => {
@@ -32,7 +34,6 @@ export function useLiveListingStats() {
         setStats({ ...next, loading: false })
       } catch {
         if (cancelled) return
-        // Still show web feed counts if DB is unreachable
         const next = buildLiveListingStats([], webCatalog)
         setStats({ ...next, loading: false })
       }
@@ -50,7 +51,7 @@ export function useLiveListingStats() {
       debouncedLoad.cancel()
       unsub()
     }
-  }, [webCatalog])
+  }, [webCatalog, universities])
 
   return stats
 }

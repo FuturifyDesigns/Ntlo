@@ -4,6 +4,7 @@ import { subscribeListingsLive } from '../lib/listingsLiveBus'
 import { dedupeAsync } from '../lib/queryOptim'
 import { escapeIlikePattern, isUniversityNameQuery, pickPrimaryUniversityMatch } from '../lib/universitySearch'
 import { mergeListingRow } from '../lib/listingMerge'
+import { enrichListingsCampusFromWeb } from '../lib/campusAttribution'
 import { getWebRentalById, isWebRentalId, mergeWebIntoListings } from '../data/webRentals'
 import { useWebRentalsFeed } from './useWebRentalsFeed'
 
@@ -12,19 +13,19 @@ const PAGE_SIZE = 12
 const LISTING_CARD_SELECT = `
   id, title, price, room_type, area, city, lat, lng,
   distance_to_campus, available, occupancy_status, is_verified, landlord_verified, landlord_display_name, featured,
-  amenities, gender_preference, created_at, updated_at, views,
+  amenities, gender_preference, created_at, updated_at, views, whatsapp_number,
   nearest_university_id, custom_university_name,
-  nearest_university:universities(id, short_name, name, lat, lng),
+  nearest_university:universities(id, short_name, name, lat, lng, slug),
   listing_photos(url, is_cover, display_order)
 `
 
 const LISTING_CARD_SELECT_WITH_ORIGIN = `
   id, title, price, room_type, area, city, lat, lng,
   distance_to_campus, available, occupancy_status, is_verified, landlord_verified, landlord_display_name, featured,
-  amenities, gender_preference, created_at, updated_at, views,
+  amenities, gender_preference, created_at, updated_at, views, whatsapp_number,
   listing_origin, external_contact_name, external_source_label,
   nearest_university_id, custom_university_name,
-  nearest_university:universities(id, short_name, name, lat, lng),
+  nearest_university:universities(id, short_name, name, lat, lng, slug),
   listing_photos(url, is_cover, display_order)
 `
 
@@ -125,7 +126,8 @@ export function useListings(filters = {}) {
           if (universityId === 'other') {
             query = query.is('nearest_university_id', null)
           } else if (universityId) {
-            query = query.eq('nearest_university_id', universityId)
+            // Include null-campus externals; client enrichment assigns campus from web feed.
+            query = query.or(`nearest_university_id.eq.${universityId},nearest_university_id.is.null`)
           }
           if (minPrice) query = query.gte('price', minPrice)
           if (maxPrice) query = query.lte('price', maxPrice)
@@ -179,7 +181,15 @@ export function useListings(filters = {}) {
 
       if (queryError) throw queryError
 
-      const merged = mergeWebIntoListings(data || [], {
+      const enrichedDb = enrichListingsCampusFromWeb(data || [], webCatalog)
+      const uid = universityId && universityId !== 'other' ? Number(universityId) : null
+      const dbForMerge = uid
+        ? enrichedDb.filter((row) => Number(row.nearest_university_id) === uid)
+        : universityId === 'other'
+          ? enrichedDb.filter((row) => !row.nearest_university_id && row.custom_university_name)
+          : enrichedDb
+
+      const merged = mergeWebIntoListings(dbForMerge, {
         universityId,
         minPrice,
         maxPrice,

@@ -8,7 +8,7 @@ import { useTranslation } from '../hooks/useTranslation'
 export default function Universities() {
   const { t } = useTranslation()
   const { universities } = useUniversities()
-  const { campusCounts } = useLiveListingStats()
+  const { campusCounts, listings: totalLiveListings } = useLiveListingStats()
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
@@ -41,7 +41,7 @@ export default function Universities() {
         </div>
       </section>
 
-      <UniversityShowcase counts={campusCounts} />
+      <UniversityShowcase counts={campusCounts} totalListings={totalLiveListings} />
     </motion.div>
   )
 }
