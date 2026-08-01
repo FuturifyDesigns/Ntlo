@@ -1,0 +1,45 @@
+name: Sync web student rentals
+
+on:
+  schedule:
+    # Every day at 06:00 UTC (08:00 Botswana)
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+  push:
+    paths:
+      - 'scripts/sync-web-rentals.mjs'
+      - '.github/workflows/sync-web-rentals.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-web-rentals
+  cancel-in-progress: true
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Fetch public Botswana student rentals
+        run: node scripts/sync-web-rentals.mjs
+
+      - name: Commit updated feed and photos
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/data/web-rentals-feed.json public/data/web-rental-photos
+          if git diff --staged --quiet; then
+            echo "No feed changes"
+            exit 0
+          fi
+          git commit -m "chore: auto-sync Botswana student web rentals"
+          git push
