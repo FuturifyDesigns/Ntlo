@@ -4,32 +4,29 @@ import { calculateDistance } from './utils'
 export const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || ''
 
 /**
- * Official Google Map ID for Advanced Markers without Cloud Map styling.
- * Safe default — does not apply custom vector styles (those caused solid-blue maps
- * when a misconfigured VITE_GOOGLE_MAPS_MAP_ID was used).
- * @see https://developers.google.com/maps/documentation/javascript/advanced-markers/migration
- */
-export const DEMO_MAP_ID = 'DEMO_MAP_ID'
-
-/**
- * Optional Cloud Console Map ID for custom vector styling.
- * Only applied when VITE_GOOGLE_MAPS_USE_CLOUD_STYLING=true after verifying the
- * Map ID in Google Cloud → Map Management works with this API key.
+ * Cloud Map ID is OPTIONAL and opt-in only.
+ *
+ * Passing any Map ID (including Google's DEMO_MAP_ID or a misconfigured Cloud
+ * Console ID like the old project secret) has repeatedly produced a solid blue
+ * map on ntlo.online. Default = no mapId → raster roadmap + classic Marker.
+ *
+ * To try Advanced Markers / cloud styles later:
+ *   1. Create a working Map ID in Google Cloud → Map Management (roadmap, no broken style)
+ *   2. Set secret VITE_GOOGLE_MAPS_MAP_ID
+ *   3. Set var VITE_GOOGLE_MAPS_USE_CLOUD_STYLING=true
  */
 const rawCloudMapId = String(import.meta.env.VITE_GOOGLE_MAPS_MAP_ID || '').trim()
 const cloudStylingEnabled =
   String(import.meta.env.VITE_GOOGLE_MAPS_USE_CLOUD_STYLING || '').toLowerCase() === 'true'
 
-const cloudMapId =
+export const GOOGLE_MAPS_MAP_ID =
   cloudStylingEnabled
   && rawCloudMapId
-  && rawCloudMapId !== DEMO_MAP_ID
+  && rawCloudMapId !== 'DEMO_MAP_ID'
     ? rawCloudMapId
     : ''
 
-/** Always set so AdvancedMarkerElement works; cloud ID only when explicitly opted in. */
-export const GOOGLE_MAPS_MAP_ID = cloudMapId || DEMO_MAP_ID
-export const usesCloudMapStyling = Boolean(cloudMapId)
+export const usesCloudMapStyling = Boolean(GOOGLE_MAPS_MAP_ID)
 export const hasGoogleMapsMapId = Boolean(GOOGLE_MAPS_MAP_ID)
 export const MAPS_ENABLED = Boolean(GOOGLE_MAPS_API_KEY)
 
@@ -61,7 +58,6 @@ function resolveCampusCoords(listing, preferredCampusId) {
     if (coords) return coords
   }
 
-  // Multi-campus web listings: try each campus id until one has coords
   const campusIds = Array.isArray(listing?.campus_ids) ? listing.campus_ids : []
   for (const id of campusIds) {
     const uni = getUniversityById(id)
@@ -82,7 +78,6 @@ function isWithinCampusRadius(position, campusCenter, maxKm = CAMPUS_PIN_MAX_KM)
   return km <= maxKm
 }
 
-/** Stable hash from listing id — spreads approximate pins without stacking. */
 function listingJitterSeed(listing) {
   const raw = String(listing?.id || listing?.whatsapp_number || listing?.title || 'pin')
   let hash = 0
@@ -92,10 +87,6 @@ function listingJitterSeed(listing) {
   return Math.abs(hash)
 }
 
-/**
- * Approximate pin near campus using distance_to_campus when available,
- * with a deterministic angle so many web listings don't share one pixel.
- */
 export function approximateCampusPosition(campus, listing) {
   if (!campus) return null
   const seed = listingJitterSeed(listing)
@@ -103,7 +94,7 @@ export function approximateCampusPosition(campus, listing) {
   const reportedKm = Number(listing?.distance_to_campus)
   const radiusKm = Number.isFinite(reportedKm) && reportedKm > 0
     ? Math.min(Math.max(reportedKm * 0.85, 0.35), 12)
-    : 0.6 + (seed % 40) / 40 // 0.6–1.6 km ring when unknown
+    : 0.6 + (seed % 40) / 40
 
   const latOffset = (radiusKm / 111.32) * Math.cos(angle)
   const lngDenom = 111.32 * Math.cos((campus.lat * Math.PI) / 180)
@@ -116,7 +107,6 @@ export function approximateCampusPosition(campus, listing) {
   }
 }
 
-/** Exact pin, or approximate campus area when listing has no lat/lng */
 export function getListingPosition(listing) {
   const exact = toLatLng(listing?.lat, listing?.lng)
   if (exact) return { ...exact, approximate: false }
@@ -127,11 +117,6 @@ export function getListingPosition(listing) {
   return null
 }
 
-/**
- * Pin for browse map.
- * Exact coords preferred; when missing, place an approximate pin near the
- * relevant campus so web/external listings still appear on the map.
- */
 export function getMapListingPosition(listing, { campusId, campusCenter } = {}) {
   const exact = toLatLng(listing?.lat, listing?.lng)
 
@@ -141,7 +126,6 @@ export function getMapListingPosition(listing, { campusId, campusCenter } = {}) 
       return { ...exact, approximate: false }
     }
 
-    // No exact coords — only plot near filtered campus when it is this listing's primary campus
     const belongs =
       campusId == null
       || Number(listing?.nearest_university_id) === Number(campusId)

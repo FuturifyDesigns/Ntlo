@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Map, AdvancedMarker, RenderingType } from '@vis.gl/react-google-maps'
+import { Map, AdvancedMarker, Marker, RenderingType } from '@vis.gl/react-google-maps'
 import { Loader2, MapPin, RefreshCw, Upload, ImageIcon } from 'lucide-react'
 import Modal from '../ui/Modal'
 import Button from '../ui/Button'
 import Input, { Textarea } from '../ui/Input'
-import { GOOGLE_MAPS_MAP_ID, usesCloudMapStyling } from '../../lib/googleMaps'
+import { GOOGLE_MAPS_MAP_ID, hasGoogleMapsMapId } from '../../lib/googleMaps'
 import {
   publishUniversityDraft,
   updateUniversityDraft,
@@ -15,9 +15,9 @@ import { useTranslation } from '../../hooks/useTranslation'
 
 function CampusMap({ lat, lng, onPinMove }) {
   const center = { lat, lng }
-  const mapCloudProps = usesCloudMapStyling
+  const mapCloudProps = hasGoogleMapsMapId
     ? { mapId: GOOGLE_MAPS_MAP_ID }
-    : { mapId: GOOGLE_MAPS_MAP_ID, renderingType: RenderingType.RASTER }
+    : { renderingType: RenderingType.RASTER }
 
   const handleDragEnd = (e) => {
     const latLng = e.latLng
@@ -37,7 +37,11 @@ function CampusMap({ lat, lng, onPinMove }) {
         disableDefaultUI
         style={{ width: '100%', height: 240 }}
       >
-        <AdvancedMarker position={center} draggable onDragEnd={handleDragEnd} />
+        {hasGoogleMapsMapId ? (
+          <AdvancedMarker position={center} draggable onDragEnd={handleDragEnd} />
+        ) : (
+          <Marker position={center} draggable onDragEnd={handleDragEnd} />
+        )}
       </Map>
     </div>
   )

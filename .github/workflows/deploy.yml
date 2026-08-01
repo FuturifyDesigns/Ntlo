@@ -32,7 +32,9 @@ jobs:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
           VITE_GOOGLE_MAPS_API_KEY: ${{ secrets.VITE_GOOGLE_MAPS_API_KEY }}
-          VITE_GOOGLE_MAPS_MAP_ID: ${{ secrets.VITE_GOOGLE_MAPS_MAP_ID }}
+          # Intentionally omit VITE_GOOGLE_MAPS_MAP_ID — Map IDs (incl. DEMO_MAP_ID
+          # and the old Cloud Console ID) render solid blue on this project.
+          # Re-enable only with a verified Map ID + VITE_GOOGLE_MAPS_USE_CLOUD_STYLING=true.
 
       - uses: actions/configure-pages@v5
 
