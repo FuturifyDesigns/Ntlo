@@ -5,12 +5,18 @@ export const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '
 
 /**
  * Cloud Map ID for AdvancedMarker / vector styling.
- * Only use a real ID from Google Cloud → Map Management.
- * Never fall back to DEMO_MAP_ID — that often renders a solid blue map.
+ *
+ * IMPORTANT: A misconfigured Map ID (common with older secrets) renders a solid
+ * blue map even when the API key is valid. We only enable it when explicitly
+ * opted in via VITE_GOOGLE_MAPS_USE_CLOUD_STYLING=true after verifying the Map ID
+ * in Google Cloud → Map Management works with this API key.
  */
 const rawMapId = String(import.meta.env.VITE_GOOGLE_MAPS_MAP_ID || '').trim()
+const cloudStylingEnabled =
+  String(import.meta.env.VITE_GOOGLE_MAPS_USE_CLOUD_STYLING || '').toLowerCase() === 'true'
+
 export const GOOGLE_MAPS_MAP_ID =
-  rawMapId && rawMapId !== 'DEMO_MAP_ID' ? rawMapId : ''
+  cloudStylingEnabled && rawMapId && rawMapId !== 'DEMO_MAP_ID' ? rawMapId : ''
 export const hasGoogleMapsMapId = Boolean(GOOGLE_MAPS_MAP_ID)
 export const MAPS_ENABLED = Boolean(GOOGLE_MAPS_API_KEY)
 
