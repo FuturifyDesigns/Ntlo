@@ -30,6 +30,10 @@ import AdminDeleteListingModal from '../components/admin/AdminDeleteListingModal
 import AdminLiveListingCard from '../components/admin/AdminLiveListingCard'
 import AdminReviewsPanel from '../components/admin/AdminReviewsPanel'
 import AdminImportExternalPanel from '../components/admin/AdminImportExternalPanel'
+import { useWebRentalsFeed } from '../hooks/useWebRentalsFeed'
+import { useLiveListingStats } from '../hooks/useLiveListingStats'
+import { listingDedupeKey } from '../lib/campusAttribution'
+import { isWebRentalId } from '../data/webRentals'
 
 const TABS = [
   { id: 'requests', icon: GraduationCap, labelKey: 'admin.tabRequests' },
@@ -45,8 +49,28 @@ const TABS = [
 
 const TAB_STORAGE_KEY = 'ntlo_admin_tab'
 
+function toAdminWebListing(listing) {
+  return {
+    ...listing,
+    verification_status: 'approved',
+    occupancy_status: listing.occupancy_status || 'available',
+    is_web_catalog: true,
+    docs: [],
+    landlord: {
+      id: null,
+      full_name:
+        listing.external_contact_name
+        || listing.landlord_display_name
+        || listing.external_source_label
+        || 'Web listing',
+    },
+  }
+}
+
 export default function AdminDashboard() {
   const { t } = useTranslation()
+  const webCatalog = useWebRentalsFeed()
+  const liveListingStats = useLiveListingStats()
   const [tab, setTab] = useState(() => {
     if (typeof sessionStorage !== 'undefined') {
       const saved = sessionStorage.getItem(TAB_STORAGE_KEY)
@@ -120,14 +144,30 @@ export default function AdminDashboard() {
     const { data, error } = await supabase
       .from('listings')
       .select(`
-        id, title, city, price, verification_status, verification_notes, is_verified, created_at,
-        occupancy_status, available,
+        id, title, city, area, price, verification_status, verification_notes, is_verified, created_at,
+        occupancy_status, available, whatsapp_number, listing_origin, external_contact_name,
+        external_source_label, landlord_display_name,
         landlord:profiles!listings_landlord_id_fkey(id, full_name),
         docs:verification_documents!verification_documents_listing_id_fkey(id, doc_type, file_name, storage_path, status, created_at)
       `)
       .neq('verification_status', 'withdrawn')
       .order('created_at', { ascending: false })
-    if (error) setActionError(error.message)
+    if (error) {
+      // Older schemas may lack listing_origin / external_* columns.
+      const fallback = await supabase
+        .from('listings')
+        .select(`
+          id, title, city, area, price, verification_status, verification_notes, is_verified, created_at,
+          occupancy_status, available, whatsapp_number, landlord_display_name,
+          landlord:profiles!listings_landlord_id_fkey(id, full_name),
+          docs:verification_documents!verification_documents_listing_id_fkey(id, doc_type, file_name, storage_path, status, created_at)
+        `)
+        .neq('verification_status', 'withdrawn')
+        .order('created_at', { ascending: false })
+      if (fallback.error) setActionError(fallback.error.message)
+      setListings(fallback.data || [])
+      return
+    }
     setListings(data || [])
   }, [])
 
@@ -414,16 +454,51 @@ export default function AdminDashboard() {
     [listings, sortMode]
   )
 
+  /** Web/catalog rooms not already imported into DB — same fingerprint as public Browse. */
+  const webCatalogListings = useMemo(() => {
+    const dbKeys = new Set(listings.map((l) => listingDedupeKey(l)).filter(Boolean))
+    return webCatalog
+      .filter((row) => {
+        const key = listingDedupeKey(row)
+        return Boolean(key) && !dbKeys.has(key)
+      })
+      .map(toAdminWebListing)
+  }, [listings, webCatalog])
+
+  const webCatalogQueue = useMemo(
+    () => webCatalogListings.map((item) => ({
+      item,
+      analysis: { status: 'approved', waitingDays: 0, flags: [], score: 0 },
+    })),
+    [webCatalogListings]
+  )
+
+  const pendingListingCount = useMemo(
+    () => listings.filter((l) => ['pending', 'changes_requested'].includes(l.verification_status)).length,
+    [listings]
+  )
+
+  const liveDbListingCount = useMemo(
+    () => listings.filter((l) => l.verification_status === 'approved').length,
+    [listings]
+  )
+
   const filteredListingQueue = useMemo(() => {
-    if (listingFilter === 'all') return listingQueue
-    if (listingFilter === 'live') {
-      return listingQueue.filter(({ item }) => item.verification_status === 'approved')
-    }
     if (listingFilter === 'rejected') {
       return listingQueue.filter(({ item }) => item.verification_status === 'rejected')
     }
-    return listingQueue.filter(({ item }) => ['pending', 'changes_requested'].includes(item.verification_status))
-  }, [listingQueue, listingFilter])
+    if (listingFilter === 'pending') {
+      return listingQueue.filter(({ item }) => ['pending', 'changes_requested'].includes(item.verification_status))
+    }
+    if (listingFilter === 'live') {
+      return [
+        ...listingQueue.filter(({ item }) => item.verification_status === 'approved'),
+        ...webCatalogQueue,
+      ]
+    }
+    // all — DB queue + web catalog extras
+    return [...listingQueue, ...webCatalogQueue]
+  }, [listingQueue, listingFilter, webCatalogQueue])
 
   const isLiveListingView = listingFilter === 'live'
 
@@ -436,18 +511,28 @@ export default function AdminDashboard() {
     })
   }, [users, userSearch, roleFilter])
 
+  const totalLandlords = useMemo(
+    () => users.filter((u) => u.role === 'landlord').length,
+    [users]
+  )
+
+  // Match public home / universities "live listings" total (DB + web, deduped).
+  const liveListingsTotal = liveListingStats.loading
+    ? liveDbListingCount + webCatalogListings.length
+    : liveListingStats.listings
+
   const stats = [
     { id: 'requests', icon: GraduationCap, label: t('admin.statRequests'), value: pendingRequests.length },
     { id: 'users', icon: Users, label: t('admin.statUsers'), value: users.length },
-    { id: 'landlords', icon: Shield, label: t('admin.statLandlords'), value: landlords.length },
-    { id: 'listings', icon: Home, label: t('admin.statListings'), value: listings.length },
+    { id: 'landlords', icon: Shield, label: t('admin.statLandlords'), value: totalLandlords },
+    { id: 'listings', icon: Home, label: t('admin.statListings'), value: liveListingsTotal },
   ]
 
   const tabCounts = {
     requests: pendingRequests.length,
     universities: 0,
     landlords: landlords.length,
-    listings: listings.length,
+    listings: liveListingsTotal,
   }
 
   return (
@@ -728,11 +813,11 @@ export default function AdminDashboard() {
             <div className="space-y-4">
               <div className="flex flex-wrap gap-2">
                 {[
-                  { id: 'pending', label: t('admin.listingFilterPending') },
-                  { id: 'live', label: t('admin.listingFilterLive') },
-                  { id: 'rejected', label: t('admin.listingFilterRejected') },
-                  { id: 'all', label: t('admin.listingFilterAll') },
-                ].map(({ id, label }) => (
+                  { id: 'pending', label: t('admin.listingFilterPending'), count: pendingListingCount },
+                  { id: 'live', label: t('admin.listingFilterLive'), count: liveListingsTotal },
+                  { id: 'rejected', label: t('admin.listingFilterRejected'), count: listings.filter((l) => l.verification_status === 'rejected').length },
+                  { id: 'all', label: t('admin.listingFilterAll'), count: listings.length + webCatalogListings.length },
+                ].map(({ id, label, count }) => (
                   <button
                     key={id}
                     type="button"
@@ -744,6 +829,9 @@ export default function AdminDashboard() {
                     }`}
                   >
                     {label}
+                    <span className={`ml-1.5 tabular-nums ${listingFilter === id ? 'text-white/80' : 'text-muted'}`}>
+                      {count}
+                    </span>
                   </button>
                 ))}
               </div>
@@ -755,20 +843,27 @@ export default function AdminDashboard() {
                 />
               )}
               {isLiveListingView && (
-                <p className="text-sm text-muted">{t('admin.liveListingsHint')}</p>
+                <p className="text-sm text-muted">
+                  {t('admin.liveListingsHint', {
+                    db: liveDbListingCount,
+                    web: webCatalogListings.length,
+                    total: liveListingsTotal,
+                  })}
+                </p>
               )}
               {filteredListingQueue.length === 0 ? (
                 <Card className="p-8 text-center text-muted">{t('admin.noListingsMatch')}</Card>
               ) : (
                 filteredListingQueue.map(({ item, analysis }) => {
+                  const isWebCatalog = item.is_web_catalog || isWebRentalId(item.id)
                   const isLive = item.verification_status === 'approved'
-                  if (isLiveListingView || (listingFilter === 'all' && isLive)) {
+                  if (isLiveListingView || (listingFilter === 'all' && isLive) || isWebCatalog) {
                     return (
                       <AdminLiveListingCard
                         key={item.id}
                         listing={item}
-                        onDelete={() => setListingDeleteTarget(item)}
-                        onSetTrust={setListingTrust}
+                        onDelete={isWebCatalog ? undefined : () => setListingDeleteTarget(item)}
+                        onSetTrust={isWebCatalog ? undefined : setListingTrust}
                         trustBusy={trustBusyId}
                       />
                     )
