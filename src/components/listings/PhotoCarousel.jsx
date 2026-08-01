@@ -3,22 +3,55 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { getStorageImageVariants, CARD_IMAGE_OPTS, DETAIL_IMAGE_OPTS } from '../../lib/storageImages'
 
-const PLACEHOLDER = '/ntlo-icon.png'
 const DEFAULT_INTERVAL = 3500
 const CARD_INTERVAL = 3000
 
+function hasRealUrl(url) {
+  return typeof url === 'string' && /^https?:\/\//i.test(url.trim())
+}
+
 function normalizePhotos(photos, compact) {
-  if (!photos) return [{ src: PLACEHOLDER, fallback: PLACEHOLDER }]
+  if (!photos) return []
   const list = Array.isArray(photos) ? photos : [photos]
   const sorted = [...list].sort((a, b) => (a.display_order || 0) - (b.display_order || 0))
   const imageOpts = compact ? CARD_IMAGE_OPTS : DETAIL_IMAGE_OPTS
-  return sorted.length
-    ? sorted.map((p) => {
-      const url = typeof p === 'string' ? p : p.url
-      if (!url) return { src: PLACEHOLDER, fallback: PLACEHOLDER }
+  return sorted
+    .map((p) => {
+      const url = typeof p === 'string' ? p : p?.url
+      if (!hasRealUrl(url)) return null
       return getStorageImageVariants(url, imageOpts)
     })
-    : [{ src: PLACEHOLDER, fallback: PLACEHOLDER }]
+    .filter(Boolean)
+}
+
+function CoverPlaceholder({ title, subtitle, compact }) {
+  return (
+    <div
+      className="absolute inset-0 flex flex-col items-center justify-center px-4 text-center bg-[linear-gradient(145deg,#1A1A2E_0%,#2a2a45_42%,#3d3420_100%)]"
+      aria-hidden
+    >
+      <div
+        className="pointer-events-none absolute inset-0 opacity-30"
+        style={{
+          backgroundImage:
+            'radial-gradient(circle at 20% 20%, rgba(200,168,75,0.35), transparent 42%), radial-gradient(circle at 80% 70%, rgba(226,201,126,0.2), transparent 40%)',
+        }}
+      />
+      <p
+        className={cn(
+          'relative z-[1] max-w-[90%] font-display font-semibold leading-snug text-white',
+          compact ? 'text-sm sm:text-base' : 'text-lg sm:text-2xl'
+        )}
+      >
+        {title || 'Student room'}
+      </p>
+      {subtitle ? (
+        <p className={cn('relative z-[1] mt-1.5 text-white/75', compact ? 'text-[11px]' : 'text-sm')}>
+          {subtitle}
+        </p>
+      ) : null}
+    </div>
+  )
 }
 
 export default function PhotoCarousel({
@@ -33,9 +66,12 @@ export default function PhotoCarousel({
   className,
   aspectClass = 'aspect-[16/10] sm:aspect-[16/9]',
   altPrefix = 'Photo',
+  placeholderTitle,
+  placeholderSubtitle,
 }) {
   const slideInterval = interval ?? (compact ? CARD_INTERVAL : DEFAULT_INTERVAL)
   const images = normalizePhotos(photos, compact)
+  const empty = images.length === 0
   const [index, setIndex] = useState(0)
   const [paused, setPaused] = useState(false)
   const [fallbackSrc, setFallbackSrc] = useState({})
@@ -85,27 +121,36 @@ export default function PhotoCarousel({
       onBlur={pauseOnHover ? () => setPaused(false) : undefined}
     >
       <div className={cn('relative', aspectClass)}>
-        {images.map((image, i) => (
-          <img
-            key={`${image.fallback}-${i}`}
-            src={fallbackSrc[i] || image.src}
-            alt={`${altPrefix} ${i + 1}`}
-            onError={() => {
-              if (image.fallback && fallbackSrc[i] !== image.fallback) {
-                setFallbackSrc((prev) => ({ ...prev, [i]: image.fallback }))
-              }
-            }}
-            className={cn(
-              'absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ease-in-out',
-              i === index ? 'opacity-100' : 'opacity-0'
-            )}
-            loading={i === 0 ? 'eager' : 'lazy'}
-            draggable={false}
+        {empty ? (
+          <CoverPlaceholder
+            title={placeholderTitle || altPrefix}
+            subtitle={placeholderSubtitle}
+            compact={compact}
           />
-        ))}
+        ) : (
+          images.map((image, i) => (
+            <img
+              key={`${image.fallback}-${i}`}
+              src={fallbackSrc[i] || image.src}
+              alt={`${altPrefix} ${i + 1}`}
+              onError={() => {
+                if (image.fallback && fallbackSrc[i] !== image.fallback) {
+                  setFallbackSrc((prev) => ({ ...prev, [i]: image.fallback }))
+                }
+              }}
+              className={cn(
+                'absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ease-in-out',
+                i === index ? 'opacity-100' : 'opacity-0'
+              )}
+              loading={i === 0 ? 'eager' : 'lazy'}
+              draggable={false}
+              referrerPolicy="no-referrer"
+            />
+          ))
+        )}
       </div>
 
-      {images.length > 1 && showArrows && (
+      {!empty && images.length > 1 && showArrows && (
         <>
           <button
             type="button"
@@ -126,7 +171,7 @@ export default function PhotoCarousel({
         </>
       )}
 
-      {images.length > 1 && showDots && (
+      {!empty && images.length > 1 && showDots && (
         <div
           className={cn(
             'absolute left-1/2 z-10 flex -translate-x-1/2 gap-1.5',

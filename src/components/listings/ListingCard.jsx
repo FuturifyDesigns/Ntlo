@@ -29,7 +29,10 @@ export default function ListingCard({
   const [saving, setSaving] = useState(false)
 
   const uni = getNearestUniversity(listing)
-  const listingPhotos = getListingPhotos(listing)
+  const listingPhotos = getListingPhotos(listing).filter((p) => {
+    const url = typeof p === 'string' ? p : p?.url
+    return typeof url === 'string' && /^https?:\/\//i.test(url)
+  })
   const hasMultiplePhotos = listingPhotos.length > 1
   const saved = isSaved(listing.id)
   const trustLevel = resolveListingTrustBadge(listing)
@@ -66,6 +69,8 @@ export default function ListingCard({
             className="h-full rounded-none"
             aspectClass="h-full w-full"
             altPrefix={listing.title}
+            placeholderTitle={listing.area || listing.city || listing.title}
+            placeholderSubtitle={listing.city && listing.area ? listing.city : 'Botswana'}
           />
           <div className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-t from-primary/50 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 
@@ -141,11 +146,15 @@ export default function ListingCard({
             <IconLocation className="h-3.5 w-3.5 shrink-0 opacity-60" />
             {listing.area ? `${listing.area}, ${listing.city}` : listing.city}
           </p>
-          {trust.published && !trust.listingTrusted && (
+          {external ? (
+            <p className="mt-1.5 text-xs text-muted">
+              {t('trust.verifyWithOwner')}
+            </p>
+          ) : trust.published && !trust.listingTrusted ? (
             <p className="mt-1.5 text-xs text-amber-700 dark:text-amber-300">
               {t('trust.propertyNotFullyVerified')}
             </p>
-          )}
+          ) : null}
           <div className="mt-auto flex items-center justify-between pt-3">
             <span className="rounded-md bg-background px-2 py-0.5 text-xs font-medium text-muted">
               {ROOM_TYPES[listing.room_type] || listing.room_type}

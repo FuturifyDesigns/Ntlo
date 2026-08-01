@@ -96,7 +96,12 @@ export default function ListingDetail() {
 
         <div className="grid gap-8 lg:grid-cols-3">
           <div className="lg:col-span-2 space-y-6">
-            <PhotoCarousel photos={listing.listing_photos} />
+            <PhotoCarousel
+              photos={listing.listing_photos}
+              altPrefix={listing.title}
+              placeholderTitle={listing.area || listing.title}
+              placeholderSubtitle={[listing.area, listing.city].filter(Boolean).join(', ') || 'Botswana'}
+            />
 
             <div>
               <div className="flex flex-wrap items-start gap-3">
@@ -188,7 +193,24 @@ export default function ListingDetail() {
 
             <div>
               <h2 className="mb-3 font-display text-lg font-semibold">{t('listingDetail.location')}</h2>
-              <SingleListingMap listing={listing} lat={listing.lat} lng={listing.lng} title={listing.title} />
+              {listing.lat != null && listing.lng != null ? (
+                <SingleListingMap listing={listing} lat={listing.lat} lng={listing.lng} title={listing.title} />
+              ) : (
+                <div className="space-y-2">
+                  <div className="flex min-h-[180px] flex-col items-center justify-center rounded-xl border border-border bg-[linear-gradient(145deg,#F8F7F4_0%,#EDE9DF_55%,#E2C97E33_100%)] px-6 py-10 text-center">
+                    <MapPin size={22} className="text-accent" />
+                    <p className="mt-3 font-display text-lg font-semibold text-primary">
+                      {listing.area ? `${listing.area}, ${listing.city}` : listing.city || listing.address}
+                    </p>
+                    <p className="mt-1 max-w-md text-sm text-muted">
+                      {external
+                        ? t('listings.mapExternalNoPin')
+                        : t('listings.mapSingleUnavailable')}
+                    </p>
+                  </div>
+                  <p className="text-xs leading-relaxed text-muted">{t('listings.mapAreaDisclaimer')}</p>
+                </div>
+              )}
             </div>
 
             {!external && <ReviewSection listingId={listing.id} />}
