@@ -10,6 +10,7 @@ import {
   SINGLE_LISTING_ZOOM,
   getListingPosition,
   getMapListingPosition,
+  toBotswanaLatLng,
 } from '../../lib/googleMaps'
 import { formatPrice } from '../../lib/utils'
 import { useTranslation } from '../../hooks/useTranslation'
@@ -197,12 +198,9 @@ export default function OsmListingMap({
 export function OsmSingleListingMap({ listing, lat, lng, title, height = '280px' }) {
   const { t } = useTranslation()
   const coords = useMemo(() => {
-    const exactLat = lat ?? listing?.lat
-    const exactLng = lng ?? listing?.lng
-    const fromExact = Number.isFinite(Number(exactLat)) && Number.isFinite(Number(exactLng))
-      ? { lat: Number(exactLat), lng: Number(exactLng), approximate: false }
-      : null
-    return fromExact || getListingPosition(listing)
+    const exact = toBotswanaLatLng(lat ?? listing?.lat, lng ?? listing?.lng)
+    if (exact) return { ...exact, approximate: false }
+    return getListingPosition(listing)
   }, [listing, lat, lng])
 
   if (!coords) {

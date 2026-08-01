@@ -39,11 +39,33 @@ export const SINGLE_LISTING_ZOOM = 16
 /** Max km a listing pin may be from the filtered campus (drops bad/outlier coords). */
 export const CAMPUS_PIN_MAX_KM = 35
 
+/**
+ * Botswana bounding box (plus a small margin for border towns).
+ * Rows saved with 0/0 or otherwise unset coordinates land in the Atlantic
+ * ("Null Island"), which renders as an all-blue ocean map.
+ */
+const BOTSWANA_BOUNDS = { minLat: -27.5, maxLat: -17.0, minLng: 19.5, maxLng: 30.0 }
+
 export function toLatLng(lat, lng) {
+  // Number(null) and Number('') are 0, which silently pins listings at 0,0.
+  if (lat == null || lng == null || lat === '' || lng === '') return null
   const latitude = Number(lat)
   const longitude = Number(lng)
   if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return null
+  if (latitude === 0 && longitude === 0) return null
   return { lat: latitude, lng: longitude }
+}
+
+/** Coordinates we are willing to drop a pin on (rejects 0/0 and far-away junk). */
+export function toBotswanaLatLng(lat, lng) {
+  const coords = toLatLng(lat, lng)
+  if (!coords) return null
+  const inBox =
+    coords.lat >= BOTSWANA_BOUNDS.minLat
+    && coords.lat <= BOTSWANA_BOUNDS.maxLat
+    && coords.lng >= BOTSWANA_BOUNDS.minLng
+    && coords.lng <= BOTSWANA_BOUNDS.maxLng
+  return inBox ? coords : null
 }
 
 export function hasValidCoords(lat, lng) {
@@ -54,19 +76,19 @@ function resolveCampusCoords(listing, preferredCampusId) {
   const preferred = preferredCampusId ?? listing?.nearest_university_id
   const fromApp = getUniversityById(preferred)
   if (fromApp) {
-    const coords = toLatLng(fromApp.lat, fromApp.lng)
+    const coords = toBotswanaLatLng(fromApp.lat, fromApp.lng)
     if (coords) return coords
   }
 
   const campusIds = Array.isArray(listing?.campus_ids) ? listing.campus_ids : []
   for (const id of campusIds) {
     const uni = getUniversityById(id)
-    const coords = toLatLng(uni?.lat, uni?.lng)
+    const coords = toBotswanaLatLng(uni?.lat, uni?.lng)
     if (coords) return coords
   }
 
   const embedded = listing?.nearest_university
-  const fromEmbedded = toLatLng(embedded?.lat, embedded?.lng)
+  const fromEmbedded = toBotswanaLatLng(embedded?.lat, embedded?.lng)
   if (fromEmbedded) return fromEmbedded
 
   return null
@@ -108,7 +130,7 @@ export function approximateCampusPosition(campus, listing) {
 }
 
 export function getListingPosition(listing) {
-  const exact = toLatLng(listing?.lat, listing?.lng)
+  const exact = toBotswanaLatLng(listing?.lat, listing?.lng)
   if (exact) return { ...exact, approximate: false }
 
   const campus = resolveCampusCoords(listing)
@@ -118,7 +140,7 @@ export function getListingPosition(listing) {
 }
 
 export function getMapListingPosition(listing, { campusId, campusCenter } = {}) {
-  const exact = toLatLng(listing?.lat, listing?.lng)
+  const exact = toBotswanaLatLng(listing?.lat, listing?.lng)
 
   if (campusCenter) {
     if (exact) {
