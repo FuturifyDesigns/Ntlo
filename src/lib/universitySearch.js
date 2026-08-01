@@ -66,6 +66,25 @@ export function getUniversityIdsFromSearch(query) {
   return findUniversitiesBySearch(query).map((uni) => uni.id)
 }
 
+/** True when the query is clearly a campus name/abbr (not a city or area search). */
+export function isUniversityNameQuery(query, uni = pickPrimaryUniversityMatch(query)) {
+  if (!uni || !query) return false
+  const q = normalizeQuery(query)
+  if (q.length < 2) return false
+  const short = (uni.short_name || '').toLowerCase()
+  const name = (uni.name || '').toLowerCase()
+  const slug = (uni.slug || '').toLowerCase()
+  if (!short && !name && !slug) return false
+  return (
+    short === q
+    || name === q
+    || slug === q
+    || (short.length >= 2 && short.startsWith(q))
+    || (name.length >= 4 && (name.startsWith(q) || name.includes(q)))
+    || (slug.length >= 2 && slug.startsWith(q))
+  )
+}
+
 export function escapeIlikePattern(value) {
   return (value || '').replace(/[%_\\]/g, '')
 }

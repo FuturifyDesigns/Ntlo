@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 import { subscribeListingsLive } from '../lib/listingsLiveBus'
 import { dedupeAsync } from '../lib/queryOptim'
-import { getUniversityIdsFromSearch, escapeIlikePattern } from '../lib/universitySearch'
+import { escapeIlikePattern, isUniversityNameQuery, pickPrimaryUniversityMatch } from '../lib/universitySearch'
 import { mergeListingRow } from '../lib/listingMerge'
 import { getWebRentalById, isWebRentalId, mergeWebIntoListings } from '../data/webRentals'
 import { useWebRentalsFeed } from './useWebRentalsFeed'
@@ -138,11 +138,12 @@ export function useListings(filters = {}) {
           if (search) {
             const trimmed = escapeIlikePattern(search.trim())
             if (trimmed) {
-              const matchedUniIds = universityId ? [] : getUniversityIdsFromSearch(trimmed)
-              const textOr = `title.ilike.%${trimmed}%,area.ilike.%${trimmed}%,city.ilike.%${trimmed}%,address.ilike.%${trimmed}%,custom_university_name.ilike.%${trimmed}%`
-              if (matchedUniIds.length > 0) {
-                query = query.or(`${textOr},nearest_university_id.in.(${matchedUniIds.join(',')})`)
+              const uniFromSearch = !universityId ? pickPrimaryUniversityMatch(trimmed) : null
+              if (uniFromSearch && isUniversityNameQuery(trimmed, uniFromSearch)) {
+                // Searching a campus name should only return that campus's primary listings
+                query = query.eq('nearest_university_id', uniFromSearch.id)
               } else {
+                const textOr = `title.ilike.%${trimmed}%,area.ilike.%${trimmed}%,city.ilike.%${trimmed}%,address.ilike.%${trimmed}%,custom_university_name.ilike.%${trimmed}%`
                 query = query.or(textOr)
               }
             }

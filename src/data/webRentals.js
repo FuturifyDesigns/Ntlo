@@ -1,4 +1,6 @@
 /** Botswana student-rentable rooms from public classifieds — shown as external listings. */
+import { isUniversityNameQuery, pickPrimaryUniversityMatch } from '../lib/universitySearch'
+
 const NOW = '2026-08-01T09:00:00.000Z'
 
 const CAMPUS = {
@@ -503,12 +505,11 @@ export function filterWebRentals(filters = {}, catalog = null) {
 
   let rows = [...(catalog || getAllWebRentals())]
 
+  // Strict: selected campus must be the listing's primary university only.
+  // Do not include rooms that merely list this campus as a secondary nearby option.
   if (universityId && universityId !== 'other') {
     const uid = Number(universityId)
-    rows = rows.filter((l) =>
-      (l.campus_ids || []).includes(uid)
-      || Number(l.nearest_university_id) === uid
-    )
+    rows = rows.filter((l) => Number(l.nearest_university_id) === uid)
   } else if (universityId === 'other') {
     rows = rows.filter((l) => !l.nearest_university_id && l.custom_university_name)
   }
@@ -526,12 +527,18 @@ export function filterWebRentals(filters = {}, catalog = null) {
     rows = rows.filter((l) => amenities.every((a) => (l.amenities || []).includes(a)))
   }
   if (search?.trim()) {
-    const q = search.trim().toLowerCase()
-    rows = rows.filter((l) =>
-      [l.title, l.area, l.city, l.address, l.description, l.custom_university_name, l.nearest_university?.name, l.nearest_university?.short_name]
-        .filter(Boolean)
-        .some((v) => String(v).toLowerCase().includes(q))
-    )
+    const q = search.trim()
+    const uniFromSearch = !universityId ? pickPrimaryUniversityMatch(q) : null
+    if (uniFromSearch && isUniversityNameQuery(q, uniFromSearch)) {
+      rows = rows.filter((l) => Number(l.nearest_university_id) === Number(uniFromSearch.id))
+    } else {
+      const needle = q.toLowerCase()
+      rows = rows.filter((l) =>
+        [l.title, l.area, l.city, l.address, l.description, l.custom_university_name, l.nearest_university?.name, l.nearest_university?.short_name]
+          .filter(Boolean)
+          .some((v) => String(v).toLowerCase().includes(needle))
+      )
+    }
   }
 
   return rows

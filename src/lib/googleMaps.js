@@ -122,11 +122,10 @@ export function getMapListingPosition(listing, { campusId, campusCenter } = {}) 
       return { ...exact, approximate: false }
     }
 
-    // No exact coords — still show near the filtered campus when this listing belongs there
+    // No exact coords — only plot near filtered campus when it is this listing's primary campus
     const belongs =
       campusId == null
       || Number(listing?.nearest_university_id) === Number(campusId)
-      || (Array.isArray(listing?.campus_ids) && listing.campus_ids.map(Number).includes(Number(campusId)))
 
     if (!belongs && campusId != null) return null
     return approximateCampusPosition(campusCenter, listing)
