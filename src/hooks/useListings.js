@@ -131,7 +131,8 @@ export function useListings(filters = {}) {
           if (maxPrice) query = query.lte('price', maxPrice)
           if (roomType) query = query.eq('room_type', roomType)
           if (genderPreference && genderPreference !== 'any') {
-            query = query.eq('gender_preference', genderPreference)
+            // Include open-to-all rooms when filtering by a gender preference
+            query = query.in('gender_preference', [genderPreference, 'any'])
           }
           if (landlordId) query = query.eq('landlord_id', landlordId)
           if (search) {

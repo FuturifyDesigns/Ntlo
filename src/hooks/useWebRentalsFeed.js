@@ -6,8 +6,8 @@ import {
 } from '../data/webRentals'
 
 const FEED_URL = '/data/web-rentals-feed.json'
-const CACHE_KEY = 'ntlo_web_rentals_feed_v1'
-const CACHE_TTL_MS = 6 * 60 * 60 * 1000
+const CACHE_KEY = 'ntlo_web_rentals_feed_v2'
+const CACHE_TTL_MS = 30 * 60 * 1000
 
 function readCache() {
   try {
@@ -27,6 +27,10 @@ function writeCache(listings) {
   } catch { /* ignore */ }
 }
 
+function photoCount(row) {
+  return Array.isArray(row?.listing_photos) ? row.listing_photos.length : 0
+}
+
 function mergeUnique(seed, live) {
   const map = new Map()
   for (const row of [...seed, ...live]) {
@@ -34,7 +38,10 @@ function mergeUnique(seed, live) {
     const key = row.whatsapp_number
       ? `${row.whatsapp_number}|${row.price}|${String(row.title || '').slice(0, 20).toLowerCase()}`
       : row.id
-    if (!map.has(key)) map.set(key, row)
+    const prev = map.get(key)
+    if (!prev || photoCount(row) > photoCount(prev)) {
+      map.set(key, row)
+    }
   }
   return [...map.values()]
 }

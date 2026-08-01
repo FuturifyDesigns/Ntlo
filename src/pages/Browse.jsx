@@ -9,6 +9,7 @@ import { useAuth } from '../hooks/useAuth'
 import { OnboardingReplayButton, useOnboardingPageState } from '../context/OnboardingContext'
 import { getUniversityById, getUniversityMapViewport, getUniversityDisplayName } from '../lib/universities'
 import { pickPrimaryUniversityMatch } from '../lib/universitySearch'
+import { listingFiltersFromSearchParams, listingFiltersToSearchParams } from '../lib/listingFilters'
 import { useTranslation } from '../hooks/useTranslation'
 
 export default function Browse() {
@@ -16,22 +17,14 @@ export default function Browse() {
   const [view, setView] = useState(searchParams.get('view') === 'map' ? 'map' : 'grid')
   const { t } = useTranslation()
   const { user, profile } = useAuth()
-  const [filters, setFilters] = useState({
-    search: searchParams.get('search') || '',
-    universityId: searchParams.get('uni') ? Number(searchParams.get('uni')) : '',
-    minPrice: '',
-    maxPrice: '',
-    roomType: '',
-    genderPreference: 'any',
-    sortBy: 'newest',
-    availableOnly: false,
-    amenities: [],
-  })
+  const [filters, setFilters] = useState(() => listingFiltersFromSearchParams(searchParams))
+  const paramsKey = searchParams.toString()
 
+  // Keep filters in sync when landing from Home with query params (or browser back/forward).
   useEffect(() => {
-    const search = searchParams.get('search')
-    if (search) setFilters((f) => ({ ...f, search }))
-  }, [searchParams])
+    setFilters(listingFiltersFromSearchParams(new URLSearchParams(paramsKey)))
+    if (new URLSearchParams(paramsKey).get('view') === 'map') setView('map')
+  }, [paramsKey])
 
   const queryFilters = useMemo(
     () => ({ ...filters, mapMode: view === 'map' }),
@@ -54,13 +47,9 @@ export default function Browse() {
   }, [filters.universityId, searchUniversityMatch])
 
   const syncSearchToUrl = useCallback(() => {
-    const params = new URLSearchParams()
-    if (filters.search?.trim()) params.set('search', filters.search.trim())
-    if (filters.universityId) params.set('uni', String(filters.universityId))
-    if (view === 'map') params.set('view', 'map')
-    setSearchParams(params, { replace: true })
+    setSearchParams(listingFiltersToSearchParams(filters, { view }), { replace: true })
     document.getElementById('browse-results')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-  }, [filters.search, filters.universityId, view, setSearchParams])
+  }, [filters, view, setSearchParams])
 
   const { listings, loading, isFetching, error, count, page, setPage, pageSize } = useListings(queryFilters)
   const uni = filters.universityId ? getUniversityById(filters.universityId) : searchUniversityMatch

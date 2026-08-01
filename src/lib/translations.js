@@ -63,10 +63,15 @@ export const translations = {
     },
     featured: {
       topPicks: 'Top picks',
+      filtered: 'Filtered',
       viewAllListings: 'View all listings',
     },
     listings: {
       recommended: 'Recommended for you',
+      matchingResults: 'Matching rooms',
+      matchingResultsHint: 'Updates as you change the filters above.',
+      noFilterResults: 'No rooms match these filters',
+      noFilterResultsHint: 'Try clearing filters or browse all listings.',
       verifiedNearCampus: 'Verified listings near campus',
       viewAll: 'View all',
       comingSoon: 'Be the first to list',
@@ -1773,10 +1778,15 @@ export const translations = {
     },
     featured: {
       topPicks: 'Dikgetho tse di kwa godimo',
+      filtered: 'E e sifted',
       viewAllListings: 'Bona dilong tsotlhe',
     },
     listings: {
       recommended: 'E go kgothaleditswe',
+      matchingResults: 'Dikamore tse di tshwanang',
+      matchingResultsHint: 'Di fetoga fa o fetola difilter.',
+      noFilterResults: 'Ga go na dikamore tse di tshwanang',
+      noFilterResultsHint: 'Leka go tlosa difilter kgotsa o bone tsotlhe.',
       verifiedNearCampus: 'Dilong tse di netefaditsweng kgaufi le khamposi',
       viewAll: 'Bona tsotlhe',
       comingSoon: 'Nna wa ntlha go namela',

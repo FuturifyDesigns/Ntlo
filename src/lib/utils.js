@@ -5,7 +5,7 @@ export function formatPrice(amount) {
 
 export function getWhatsAppLink(phone, listingTitle) {
   const message = encodeURIComponent(
-    `Hi! I saw your listing "${listingTitle}" on Ntlo and I'm interested. Is it still available?`
+    `Hi! I saw your listing "${listingTitle}" and I'm interested. Is it still available?`
   )
   const cleaned = String(phone).replace(/\D/g, '')
   const number = cleaned.startsWith('267') ? cleaned : `267${cleaned}`

@@ -2,13 +2,15 @@
  * Fetches public Botswana house-share classifieds and writes a student rental feed.
  * Used by CI cron + local: node scripts/sync-web-rentals.mjs
  */
-import { mkdirSync, writeFileSync, readFileSync, existsSync } from 'node:fs'
+import { mkdirSync, writeFileSync, readFileSync, existsSync, readdirSync, unlinkSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const ROOT = join(__dirname, '..')
 const OUT = join(ROOT, 'public', 'data', 'web-rentals-feed.json')
+const PHOTO_DIR = join(ROOT, 'public', 'data', 'web-rental-photos')
+const PHOTO_PUBLIC_PREFIX = '/data/web-rental-photos'
 
 const SOURCES = [
   {
@@ -192,6 +194,91 @@ function dedupe(listings) {
   return out
 }
 
+function photoExt(url, contentType) {
+  const fromUrl = String(url || '').split('?')[0].match(/\.(jpe?g|png|webp|gif)$/i)
+  if (fromUrl) return `.${fromUrl[1].toLowerCase().replace('jpeg', 'jpg')}`
+  if (/png/i.test(contentType || '')) return '.png'
+  if (/webp/i.test(contentType || '')) return '.webp'
+  if (/gif/i.test(contentType || '')) return '.gif'
+  return '.jpg'
+}
+
+function safePhotoName(listingId, index, ext) {
+  const base = String(listingId || `photo-${index}`)
+    .replace(/[^a-zA-Z0-9_-]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 80)
+  return `${base}-${index}${ext}`
+}
+
+/** Download remote covers into public/ so CSP img-src 'self' can load them on ntlo.online. */
+async function mirrorPhotos(listings) {
+  mkdirSync(PHOTO_DIR, { recursive: true })
+  const kept = new Set()
+
+  for (const row of listings) {
+    const urls = Array.isArray(row.photo_urls) ? row.photo_urls : []
+    const local = []
+    for (let i = 0; i < urls.length; i += 1) {
+      const remote = urls[i]
+      if (!remote || !/^https?:\/\//i.test(remote)) continue
+      if (remote.startsWith(PHOTO_PUBLIC_PREFIX) || remote.startsWith('/data/')) {
+        local.push(remote)
+        kept.add(remote.split('/').pop())
+        continue
+      }
+      try {
+        let res = null
+        for (let attempt = 0; attempt < 3; attempt += 1) {
+          try {
+            res = await fetch(remote, {
+              headers: {
+                'User-Agent': 'NtloStudentHousingBot/1.0 (+https://ntlo.online)',
+                Accept: 'image/*',
+                Referer: 'https://bw.zimcompass.com/',
+              },
+            })
+            if (res.ok) break
+          } catch (err) {
+            if (attempt === 2) throw err
+            await new Promise((r) => setTimeout(r, 400 * (attempt + 1)))
+          }
+        }
+        if (!res?.ok) {
+          console.warn(`photo skip ${row.id}: HTTP ${res?.status || 'fail'}`)
+          continue
+        }
+        const ext = photoExt(remote, res.headers.get('content-type'))
+        const name = safePhotoName(row.id, i, ext)
+        const buf = Buffer.from(await res.arrayBuffer())
+        if (buf.length < 800) {
+          console.warn(`photo skip ${row.id}: too small`)
+          continue
+        }
+        writeFileSync(join(PHOTO_DIR, name), buf)
+        kept.add(name)
+        local.push(`${PHOTO_PUBLIC_PREFIX}/${name}`)
+      } catch (err) {
+        console.warn(`photo skip ${row.id}:`, err.message || err)
+      }
+    }
+    row.photo_urls = local
+    if (urls.length && !local.length) {
+      // Keep remote URL as last resort if download failed (needs CSP allowlist).
+      row.photo_urls = urls.filter((u) => /^https?:\/\//i.test(u))
+    }
+  }
+
+  // Drop stale mirrored files from previous runs
+  try {
+    for (const file of readdirSync(PHOTO_DIR)) {
+      if (!kept.has(file)) unlinkSync(join(PHOTO_DIR, file))
+    }
+  } catch { /* ignore */ }
+
+  return listings
+}
+
 async function main() {
   const collected = []
   const errors = []
@@ -206,7 +293,7 @@ async function main() {
     }
   }
 
-  const listings = dedupe(collected)
+  let listings = dedupe(collected)
   const payload = {
     updated_at: new Date().toISOString(),
     source_count: SOURCES.length,
@@ -230,8 +317,12 @@ async function main() {
     } catch { /* ignore */ }
   }
 
+  payload.listings = await mirrorPhotos(payload.listings)
+  payload.listing_count = payload.listings.length
+  payload.photos_mirrored = payload.listings.reduce((n, row) => n + (row.photo_urls?.length || 0), 0)
+
   writeFileSync(OUT, `${JSON.stringify(payload, null, 2)}\n`)
-  console.log(`Wrote ${payload.listing_count} listings → public/data/web-rentals-feed.json`)
+  console.log(`Wrote ${payload.listing_count} listings (${payload.photos_mirrored} photos) → public/data/web-rentals-feed.json`)
 }
 
 main().catch((err) => {

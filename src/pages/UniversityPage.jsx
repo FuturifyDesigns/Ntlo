@@ -10,6 +10,7 @@ import { useState, useEffect, useMemo } from 'react'
 import Button from '../components/ui/Button'
 import { AnimatedCounter } from '../components/ui/Motion'
 import { useTranslation } from '../hooks/useTranslation'
+import { emptyListingFilters } from '../lib/listingFilters'
 
 export default function UniversityPage() {
   const { slug } = useParams()
@@ -19,17 +20,7 @@ export default function UniversityPage() {
     [universities, slug]
   )
   const { t } = useTranslation()
-  const [filters, setFilters] = useState({
-    universityId: '',
-    availableOnly: false,
-    sortBy: 'distance',
-    search: '',
-    minPrice: '',
-    maxPrice: '',
-    roomType: '',
-    genderPreference: 'any',
-    amenities: [],
-  })
+  const [filters, setFilters] = useState(() => emptyListingFilters({ sortBy: 'distance' }))
 
   useEffect(() => {
     if (university?.id) {
@@ -132,6 +123,7 @@ export default function UniversityPage() {
             onSearchSubmit={scrollToListings}
             resultCount={count}
             universityName={getUniversityDisplayName(university)}
+            lockedFilters={{ universityId: university.id, sortBy: 'distance' }}
           />
         </div>
 

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useUniversities } from './useUniversities'
+import { useLiveListingStats } from './useLiveListingStats'
 import { supabase } from '../lib/supabase'
 import { fetchPublicPlatformStats } from '../lib/platformStats'
 import { subscribePlatformStats } from '../lib/platformStatsLive'
@@ -8,11 +9,9 @@ import { createDebouncer } from '../lib/queryOptim'
 
 export function useStats() {
   const { universities } = useUniversities()
-  const [stats, setStats] = useState({
+  const liveListings = useLiveListingStats()
+  const [profileStats, setProfileStats] = useState({
     students: 0,
-    listings: 0,
-    universities: universities.length,
-    universitiesWithListings: 0,
     landlords: 0,
     loading: true,
   })
@@ -24,17 +23,14 @@ export function useStats() {
       try {
         const data = await fetchPublicPlatformStats()
         if (!cancelled) {
-          setStats({
+          setProfileStats({
             students: data.students,
-            listings: data.listings,
             landlords: data.landlords,
-            universitiesWithListings: data.campuses_with_listings,
-            universities: universities.length,
             loading: false,
           })
         }
       } catch {
-        if (!cancelled) setStats((s) => ({ ...s, loading: false }))
+        if (!cancelled) setProfileStats((s) => ({ ...s, loading: false }))
       }
     }
 
@@ -54,7 +50,14 @@ export function useStats() {
     }
   }, [universities.length])
 
-  return stats
+  return {
+    students: profileStats.students,
+    landlords: profileStats.landlords,
+    listings: liveListings.listings,
+    universities: universities.length,
+    universitiesWithListings: liveListings.campusesWithListings,
+    loading: profileStats.loading || liveListings.loading,
+  }
 }
 
 export async function submitUniversityRequest({ name, city, userId, email }) {

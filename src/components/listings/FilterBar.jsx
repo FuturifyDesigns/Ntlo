@@ -1,6 +1,7 @@
 import { Search, SlidersHorizontal, X } from 'lucide-react'
 import { useUniversities } from '../../hooks/useUniversities'
 import { getUniversityDisplayName } from '../../lib/universityNames'
+import { emptyListingFilters } from '../../lib/listingFilters'
 import { AMENITIES, ROOM_TYPES } from '../../lib/utils'
 import { Select } from '../ui/Input'
 import { useTranslation } from '../../hooks/useTranslation'
@@ -12,6 +13,8 @@ export default function FilterBar({
   resultCount,
   universityName,
   liveSearch = true,
+  /** Keys always restored on clear (e.g. campus page keeps universityId). */
+  lockedFilters = null,
 }) {
   const { t } = useTranslation()
   const { universities } = useUniversities()
@@ -21,18 +24,7 @@ export default function FilterBar({
   }
 
   function clearFilters() {
-    onChange({
-      search: '',
-      universityId: '',
-      minPrice: '',
-      maxPrice: '',
-      roomType: '',
-      genderPreference: 'any',
-      sortBy: 'newest',
-      availableOnly: false,
-      verifiedOnly: false,
-      amenities: [],
-    })
+    onChange(emptyListingFilters(lockedFilters || {}))
   }
 
   function handleSearchSubmit(e) {

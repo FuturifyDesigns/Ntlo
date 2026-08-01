@@ -1,36 +1,14 @@
-import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import UniversityShowcase from '../components/universities/UniversityShowcase'
-import { supabase } from '../lib/supabase'
 import { useUniversities } from '../hooks/useUniversities'
-import { getUniversityImage } from '../lib/universities'
+import { useLiveListingStats } from '../hooks/useLiveListingStats'
 import { RevealText } from '../components/ui/Motion'
 import { useTranslation } from '../hooks/useTranslation'
 
 export default function Universities() {
-  const [uniCounts, setUniCounts] = useState({})
   const { t } = useTranslation()
   const { universities } = useUniversities()
-
-  useEffect(() => {
-    async function fetchCounts() {
-      const { data } = await supabase
-        .from('listings')
-        .select('nearest_university_id')
-        .eq('verification_status', 'approved')
-        .in('occupancy_status', ['available', 'rented'])
-      if (data) {
-        const counts = {}
-        data.forEach((l) => {
-          if (l.nearest_university_id) {
-            counts[l.nearest_university_id] = (counts[l.nearest_university_id] || 0) + 1
-          }
-        })
-        setUniCounts(counts)
-      }
-    }
-    fetchCounts()
-  }, [])
+  const { campusCounts } = useLiveListingStats()
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
@@ -63,7 +41,7 @@ export default function Universities() {
         </div>
       </section>
 
-      <UniversityShowcase counts={uniCounts} />
+      <UniversityShowcase counts={campusCounts} />
     </motion.div>
   )
 }

@@ -31,7 +31,9 @@ export default function ListingCard({
   const uni = getNearestUniversity(listing)
   const listingPhotos = getListingPhotos(listing).filter((p) => {
     const url = typeof p === 'string' ? p : p?.url
-    return typeof url === 'string' && /^https?:\/\//i.test(url)
+    if (typeof url !== 'string') return false
+    const trimmed = url.trim()
+    return /^https?:\/\//i.test(trimmed) || trimmed.startsWith('/data/')
   })
   const hasMultiplePhotos = listingPhotos.length > 1
   const saved = isSaved(listing.id)

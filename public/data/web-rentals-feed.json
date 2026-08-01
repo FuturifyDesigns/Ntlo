@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-08-01T07:49:35.351Z",
+  "updated_at": "2026-08-01T08:17:50.080Z",
   "source_count": 1,
   "listing_count": 17,
   "errors": [],
@@ -23,11 +23,11 @@
       "source_label": "ZimCompass house share",
       "source_url": "https://bw.zimcompass.com/product?id=111137",
       "photo_urls": [
-        "https://zimcompass.ap-south-1.linodeobjects.com/zimcompass-product_e8ea639186843552191163.jpg"
+        "/data/web-rental-photos/auto-26772900189-a-room-available-for-rent-in-a-4-beds-to-0.jpg"
       ],
       "deposit_pula": null,
       "utilities_included": "included",
-      "fetched_at": "2026-08-01T07:49:35.340Z"
+      "fetched_at": "2026-08-01T08:17:49.820Z"
     },
     {
       "id": "auto-26772417037-a-room-for-rent-in-a-2-and-half-to",
@@ -48,11 +48,11 @@
       "source_label": "ZimCompass house share",
       "source_url": "https://bw.zimcompass.com/product?id=109076",
       "photo_urls": [
-        "https://zimcompass.ap-south-1.linodeobjects.com/zimcompass-product_bcdc639167353332478324.jpg"
+        "/data/web-rental-photos/auto-26772417037-a-room-for-rent-in-a-2-and-half-to-0.jpg"
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-01T07:49:35.345Z"
+      "fetched_at": "2026-08-01T08:17:50.075Z"
     },
     {
       "id": "auto-26771746344-house-to-share",
@@ -76,7 +76,7 @@
       "photo_urls": [],
       "deposit_pula": 1100,
       "utilities_included": null,
-      "fetched_at": "2026-08-01T07:49:35.345Z"
+      "fetched_at": "2026-08-01T08:17:50.075Z"
     },
     {
       "id": "auto-26776001754-1-room-in-a-3-beds-to-share",
@@ -97,11 +97,11 @@
       "source_label": "ZimCompass house share",
       "source_url": "https://bw.zimcompass.com/product?id=93594",
       "photo_urls": [
-        "https://zimcompass.ap-south-1.linodeobjects.com/zimcompass-product_deb8638953258143405162.jpg"
+        "/data/web-rental-photos/auto-26776001754-1-room-in-a-3-beds-to-share-0.jpg"
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-01T07:49:35.346Z"
+      "fetched_at": "2026-08-01T08:17:50.076Z"
     },
     {
       "id": "auto-26773458500-house-to-share-p1600-block-8-gaborone",
@@ -122,11 +122,11 @@
       "source_label": "ZimCompass house share",
       "source_url": "https://bw.zimcompass.com/product?id=93399",
       "photo_urls": [
-        "https://zimcompass.ap-south-1.linodeobjects.com/zimcompass-product_5a6f638948110230021206.jpg"
+        "/data/web-rental-photos/auto-26773458500-house-to-share-p1600-block-8-gaborone-0.jpg"
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-01T07:49:35.346Z"
+      "fetched_at": "2026-08-01T08:17:50.076Z"
     },
     {
       "id": "auto-26776325612-room-to-share-in-bontleng-malema",
@@ -150,7 +150,7 @@
       "photo_urls": [],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-01T07:49:35.348Z"
+      "fetched_at": "2026-08-01T08:17:50.076Z"
     },
     {
       "id": "auto-26774247384-house-mate-needed",
@@ -171,11 +171,11 @@
       "source_label": "ZimCompass house share",
       "source_url": "https://bw.zimcompass.com/product?id=83873",
       "photo_urls": [
-        "https://zimcompass.ap-south-1.linodeobjects.com/zimcompass-product_60ac638716315452422647.jpg"
+        "/data/web-rental-photos/auto-26774247384-house-mate-needed-0.jpg"
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-01T07:49:35.348Z"
+      "fetched_at": "2026-08-01T08:17:50.076Z"
     },
     {
       "id": "auto-26776968183-beds",
@@ -199,7 +199,7 @@
       "photo_urls": [],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-01T07:49:35.348Z"
+      "fetched_at": "2026-08-01T08:17:50.076Z"
     },
     {
       "id": "auto-26776104760-rooms-to-rent",
@@ -220,11 +220,11 @@
       "source_label": "ZimCompass house share",
       "source_url": "https://bw.zimcompass.com/product?id=78764",
       "photo_urls": [
-        "https://zimcompass.ap-south-1.linodeobjects.com/zimcompass-product_7963638616969756330019.jpg"
+        "/data/web-rental-photos/auto-26776104760-rooms-to-rent-0.jpg"
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-01T07:49:35.348Z"
+      "fetched_at": "2026-08-01T08:17:50.077Z"
     },
     {
       "id": "auto-26774215618-room-to-rent-gabane",
@@ -243,11 +243,11 @@
       "source_label": "ZimCompass house share",
       "source_url": "https://bw.zimcompass.com/product?id=71237",
       "photo_urls": [
-        "https://zimcompass.ap-south-1.linodeobjects.com/zimcompass-product_f042638563583194937221.jpg"
+        "/data/web-rental-photos/auto-26774215618-room-to-rent-gabane-0.jpg"
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-01T07:49:35.349Z"
+      "fetched_at": "2026-08-01T08:17:50.077Z"
     },
     {
       "id": "auto-26771557655-room-for-rent-in-block-5",
@@ -268,11 +268,11 @@
       "source_label": "ZimCompass house share",
       "source_url": "https://bw.zimcompass.com/product?id=69505",
       "photo_urls": [
-        "https://zimcompass.ap-south-1.linodeobjects.com/zimcompass-product_7616638552378567271026.jpg"
+        "/data/web-rental-photos/auto-26771557655-room-for-rent-in-block-5-0.jpg"
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-01T07:49:35.349Z"
+      "fetched_at": "2026-08-01T08:17:50.077Z"
     },
     {
       "id": "auto-26774517254-house-to-share",
@@ -293,11 +293,11 @@
       "source_label": "ZimCompass house share",
       "source_url": "https://bw.zimcompass.com/product?id=65767",
       "photo_urls": [
-        "https://zimcompass.ap-south-1.linodeobjects.com/zimcompass-product_7244638525594236583772.jpg"
+        "/data/web-rental-photos/auto-26774517254-house-to-share-0.jpg"
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-01T07:49:35.349Z"
+      "fetched_at": "2026-08-01T08:17:50.078Z"
     },
     {
       "id": "auto-26771557655-room-available-in-block-5-for-rent",
@@ -318,11 +318,11 @@
       "source_label": "ZimCompass house share",
       "source_url": "https://bw.zimcompass.com/product?id=64678",
       "photo_urls": [
-        "https://zimcompass.ap-south-1.linodeobjects.com/zimcompass-product_2f73638519474787929649.jpg"
+        "/data/web-rental-photos/auto-26771557655-room-available-in-block-5-for-rent-0.jpg"
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-01T07:49:35.349Z"
+      "fetched_at": "2026-08-01T08:17:50.078Z"
     },
     {
       "id": "auto-26771817707-3-bedroom-house-to-share",
@@ -341,11 +341,11 @@
       "source_label": "ZimCompass house share",
       "source_url": "https://bw.zimcompass.com/product?id=64669",
       "photo_urls": [
-        "https://zimcompass.ap-south-1.linodeobjects.com/zimcompass-product_9ce2638519474625388784.jpg"
+        "/data/web-rental-photos/auto-26771817707-3-bedroom-house-to-share-0.jpg"
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-01T07:49:35.349Z"
+      "fetched_at": "2026-08-01T08:17:50.078Z"
     },
     {
       "id": "auto-26778439391-servant-s-quarters",
@@ -368,7 +368,7 @@
       "photo_urls": [],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-01T07:49:35.349Z"
+      "fetched_at": "2026-08-01T08:17:50.078Z"
     },
     {
       "id": "auto-26778439391-rooms-to-rent",
@@ -389,11 +389,11 @@
       "source_label": "ZimCompass house share",
       "source_url": "https://bw.zimcompass.com/product?id=64299",
       "photo_urls": [
-        "https://zimcompass.ap-south-1.linodeobjects.com/zimcompass-product_651c638517817668771332.jpg"
+        "/data/web-rental-photos/auto-26778439391-rooms-to-rent-0.jpg"
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-01T07:49:35.349Z"
+      "fetched_at": "2026-08-01T08:17:50.078Z"
     },
     {
       "id": "auto-26778439391-rooms-for-rent",
@@ -416,7 +416,8 @@
       "photo_urls": [],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-01T07:49:35.350Z"
+      "fetched_at": "2026-08-01T08:17:50.078Z"
     }
-  ]
+  ],
+  "photos_mirrored": 12
 }

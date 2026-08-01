@@ -4,9 +4,12 @@ import {
   AdvancedMarker,
   InfoWindow,
   Map,
+  Marker,
+  RenderingType,
   useAdvancedMarkerRef,
   useMap,
   useMapsLibrary,
+  useMarkerRef,
 } from '@vis.gl/react-google-maps'
 import { MapPin, Navigation, Loader2, AlertCircle } from 'lucide-react'
 import {
@@ -18,6 +21,7 @@ import {
   SINGLE_LISTING_ZOOM,
   getListingPosition,
   getMapListingPosition,
+  hasGoogleMapsMapId,
   toLatLng,
 } from '../../lib/googleMaps'
 import { geocodeWithGoogle, resolveAddressCoords, resolveUniversityCampusCoords, reverseGeocodeWithGoogle } from '../../lib/geocodeAddress'
@@ -26,6 +30,11 @@ import { calculateDistance, formatPrice } from '../../lib/utils'
 import { useTranslation } from '../../hooks/useTranslation'
 import Button from '../ui/Button'
 import { MapUnavailable } from './GoogleMapsProvider'
+
+/** Real Map ID → vector/AdvancedMarker; otherwise raster tiles + classic Marker (avoids blue DEMO_MAP_ID). */
+const MAP_CLOUD_PROPS = hasGoogleMapsMapId
+  ? { mapId: GOOGLE_MAPS_MAP_ID }
+  : { renderingType: RenderingType.RASTER }
 
 /** Keep campus centered when filter changes; do not re-center when listings load or user pans. */
 function CampusViewportLock({ viewport }) {
@@ -69,6 +78,9 @@ function ListingsBoundsFit({ plotted, disabled }) {
 }
 
 function CampusMarker({ position, label }) {
+  if (!hasGoogleMapsMapId) {
+    return <Marker position={position} title={label} zIndex={2000} />
+  }
   return (
     <AdvancedMarker position={position} title={label} zIndex={2000} anchorPoint={['50%', '50%']}>
       <div
@@ -80,38 +92,67 @@ function CampusMarker({ position, label }) {
   )
 }
 
+function ListingPinInfo({ listing, position, onClear, t }) {
+  return (
+    <div className="max-w-[220px] space-y-2 p-1">
+      <p className="font-semibold text-primary">{listing.title}</p>
+      <p className="text-sm font-mono font-semibold text-accent">
+        {formatPrice(listing.price)}{t('listings.perMo')}
+      </p>
+      <p className="text-xs text-muted">
+        {[listing.area, listing.city].filter(Boolean).join(', ')}
+      </p>
+      {position.approximate && (
+        <p className="text-xs text-muted">{t('listings.mapApproxPin')}</p>
+      )}
+      <Link
+        to={`/listings/${listing.id}`}
+        className="inline-block text-sm font-semibold text-accent hover:underline"
+      >
+        {t('listings.viewListing')} →
+      </Link>
+    </div>
+  )
+}
+
 function ListingPin({ listing, position, interactive, selected, onSelect, onClear, t }) {
-  const [markerRef, marker] = useAdvancedMarkerRef()
+  const [advancedRef, advancedMarker] = useAdvancedMarkerRef()
+  const [classicRef, classicMarker] = useMarkerRef()
+  const pinPosition = { lat: position.lat, lng: position.lng }
+  const zIndex = selected ? 200 : 100
+  const onClick = interactive ? () => onSelect(listing.id) : undefined
+
+  if (!hasGoogleMapsMapId) {
+    return (
+      <>
+        <Marker
+          ref={classicRef}
+          position={pinPosition}
+          title={listing.title}
+          zIndex={zIndex}
+          onClick={onClick}
+        />
+        {interactive && selected && (
+          <InfoWindow anchor={classicMarker} onCloseClick={onClear}>
+            <ListingPinInfo listing={listing} position={position} onClear={onClear} t={t} />
+          </InfoWindow>
+        )}
+      </>
+    )
+  }
 
   return (
     <>
       <AdvancedMarker
-        ref={markerRef}
-        position={{ lat: position.lat, lng: position.lng }}
+        ref={advancedRef}
+        position={pinPosition}
         title={listing.title}
-        zIndex={selected ? 200 : 100}
-        onClick={interactive ? () => onSelect(listing.id) : undefined}
+        zIndex={zIndex}
+        onClick={onClick}
       />
       {interactive && selected && (
-        <InfoWindow anchor={marker} onCloseClick={onClear}>
-          <div className="max-w-[220px] space-y-2 p-1">
-            <p className="font-semibold text-primary">{listing.title}</p>
-            <p className="text-sm font-mono font-semibold text-accent">
-              {formatPrice(listing.price)}{t('listings.perMo')}
-            </p>
-            <p className="text-xs text-muted">
-              {[listing.area, listing.city].filter(Boolean).join(', ')}
-            </p>
-            {position.approximate && (
-              <p className="text-xs text-muted">{t('listings.mapApproxPin')}</p>
-            )}
-            <Link
-              to={`/listings/${listing.id}`}
-              className="inline-block text-sm font-semibold text-accent hover:underline"
-            >
-              {t('listings.viewListing')} →
-            </Link>
-          </div>
+        <InfoWindow anchor={advancedMarker} onCloseClick={onClear}>
+          <ListingPinInfo listing={listing} position={position} onClear={onClear} t={t} />
         </InfoWindow>
       )}
     </>
@@ -136,12 +177,10 @@ function MapWithMarkers({
     () =>
       listings
         .map((listing) => {
-          const position = campusLocked
-            ? getMapListingPosition(listing, {
-                campusId: viewport?.id,
-                campusCenter,
-              })
-            : getListingPosition(listing)
+          const position = getMapListingPosition(listing, {
+            campusId: campusLocked ? viewport?.id : undefined,
+            campusCenter: campusLocked ? campusCenter : undefined,
+          })
           if (!position) return null
           return { listing, position }
         })
@@ -186,7 +225,7 @@ function MapWithMarkers({
         </div>
       )}
       <Map
-        mapId={GOOGLE_MAPS_MAP_ID}
+        {...MAP_CLOUD_PROPS}
         defaultCenter={initialCenter}
         defaultZoom={initialZoom}
         gestureHandling="cooperative"
@@ -294,13 +333,17 @@ export function SingleListingMap({ lat, lng, listing, height = '280px', title })
       )}
       <div className="overflow-hidden rounded-xl border border-border" style={{ height }}>
         <Map
-          mapId={GOOGLE_MAPS_MAP_ID}
+          {...MAP_CLOUD_PROPS}
           defaultCenter={coords}
           defaultZoom={SINGLE_LISTING_ZOOM}
           gestureHandling="cooperative"
           style={{ width: '100%', height: '100%' }}
         >
-          <AdvancedMarker position={coords} title={title || listing?.title || 'Listing location'} />
+          {hasGoogleMapsMapId ? (
+            <AdvancedMarker position={coords} title={title || listing?.title || 'Listing location'} />
+          ) : (
+            <Marker position={coords} title={title || listing?.title || 'Listing location'} />
+          )}
         </Map>
       </div>
       <p className="text-xs leading-relaxed text-muted">{t('listings.mapAreaDisclaimer')}</p>
@@ -358,6 +401,9 @@ function MapUserInteractionGuard({ disabledRef, programmaticRef }) {
 }
 
 function CampusReferenceMarker({ position, label }) {
+  if (!hasGoogleMapsMapId) {
+    return <Marker position={position} title={label} zIndex={100} />
+  }
   return (
     <AdvancedMarker position={position} title={label} zIndex={100} anchorPoint={['50%', '10px']}>
       <div className="flex flex-col items-center gap-0.5">
@@ -448,6 +494,11 @@ function CampusDistanceLabel({ campus, pin, distanceKm, label }) {
   const midpoint = {
     lat: (campus.lat + pin.lat) / 2,
     lng: (campus.lng + pin.lng) / 2,
+  }
+
+  if (!hasGoogleMapsMapId) {
+    // Classic markers can't host HTML labels; title still exposes distance on hover.
+    return <Marker position={midpoint} zIndex={150} title={label} />
   }
 
   return (
@@ -956,7 +1007,7 @@ export function LocationPicker({
         style={{ height }}
       >
         <Map
-          mapId={GOOGLE_MAPS_MAP_ID}
+          {...MAP_CLOUD_PROPS}
           defaultCenter={mapCenter}
           defaultZoom={mapZoom}
           gestureHandling={universityReady ? 'greedy' : 'none'}
@@ -985,15 +1036,24 @@ export function LocationPicker({
             </>
           )}
           {showPin && (
-            <AdvancedMarker
-              position={pinPosition}
-              anchorPoint={['50%', '100%']}
-              draggable
-              onDrag={handleDrag}
-              onDragEnd={handleDragEnd}
-            >
-              <ListingPinMarker />
-            </AdvancedMarker>
+            hasGoogleMapsMapId ? (
+              <AdvancedMarker
+                position={pinPosition}
+                anchorPoint={['50%', '100%']}
+                draggable
+                onDrag={handleDrag}
+                onDragEnd={handleDragEnd}
+              >
+                <ListingPinMarker />
+              </AdvancedMarker>
+            ) : (
+              <Marker
+                position={pinPosition}
+                draggable
+                onDrag={handleDrag}
+                onDragEnd={handleDragEnd}
+              />
+            )
           )}
         </Map>
       </div>

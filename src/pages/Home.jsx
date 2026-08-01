@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import Hero from '../components/home/Hero'
@@ -10,20 +10,33 @@ import { useListings } from '../hooks/useListings'
 import { useTranslation } from '../hooks/useTranslation'
 import Button from '../components/ui/Button'
 import { PatternBotswana } from '../components/ui/Icons'
+import { emptyListingFilters, listingFiltersToSearchParams } from '../lib/listingFilters'
+import { getUniversityById, getUniversityDisplayName } from '../lib/universities'
+import { pickPrimaryUniversityMatch } from '../lib/universitySearch'
 
 export default function Home() {
   const navigate = useNavigate()
-  const [filters, setFilters] = useState({ availableOnly: false, sortBy: 'newest', search: '' })
-  const { listings } = useListings({ ...filters, sortBy: 'newest' })
+  const [filters, setFilters] = useState(() => emptyListingFilters())
+  const { listings, count, loading } = useListings(filters)
   const { t } = useTranslation()
 
+  const browsePath = useMemo(() => {
+    const params = listingFiltersToSearchParams(filters)
+    const qs = params.toString()
+    return `/listings${qs ? `?${qs}` : ''}`
+  }, [filters])
+
+  const universityName = useMemo(() => {
+    if (filters.universityId === 'other') return t('filter.otherUniversity')
+    if (filters.universityId) {
+      return getUniversityDisplayName(getUniversityById(filters.universityId)) || ''
+    }
+    const match = pickPrimaryUniversityMatch(filters.search)
+    return match ? getUniversityDisplayName(match) : ''
+  }, [filters.universityId, filters.search, t])
+
   function goToBrowseWithSearch() {
-    const params = new URLSearchParams()
-    if (filters.search?.trim()) params.set('search', filters.search.trim())
-    if (filters.universityId) params.set('uni', String(filters.universityId))
-    if (filters.roomType) params.set('roomType', filters.roomType)
-    if (filters.maxPrice) params.set('maxPrice', String(filters.maxPrice))
-    navigate(`/listings${params.toString() ? `?${params.toString()}` : ''}`)
+    navigate(browsePath)
   }
 
   return (
@@ -37,12 +50,23 @@ export default function Home() {
             filters={filters}
             onChange={setFilters}
             onSearchSubmit={goToBrowseWithSearch}
-            resultCount={listings.length}
+            resultCount={loading && count === 0 ? null : count}
+            universityName={universityName}
           />
         </div>
       </section>
 
-      <FeaturedListings listings={listings} />
+      <FeaturedListings listings={listings} browsePath={browsePath} filtered={Boolean(
+        filters.search
+        || filters.universityId
+        || filters.minPrice
+        || filters.maxPrice
+        || filters.roomType
+        || (filters.genderPreference && filters.genderPreference !== 'any')
+        || filters.availableOnly
+        || filters.verifiedOnly
+        || filters.amenities?.length
+      )} />
       <TrustFeatures />
 
       <section className="relative overflow-hidden bg-primary py-8 sm:py-14 lg:py-16">

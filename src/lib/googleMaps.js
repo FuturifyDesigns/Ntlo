@@ -2,8 +2,16 @@ import { getUniversityById } from './universities'
 import { calculateDistance } from './utils'
 
 export const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || ''
-/** Cloud map style ID — required for AdvancedMarker. Create one in Google Cloud → Map Management. */
-export const GOOGLE_MAPS_MAP_ID = import.meta.env.VITE_GOOGLE_MAPS_MAP_ID || 'DEMO_MAP_ID'
+
+/**
+ * Cloud Map ID for AdvancedMarker / vector styling.
+ * Only use a real ID from Google Cloud → Map Management.
+ * Never fall back to DEMO_MAP_ID — that often renders a solid blue map.
+ */
+const rawMapId = String(import.meta.env.VITE_GOOGLE_MAPS_MAP_ID || '').trim()
+export const GOOGLE_MAPS_MAP_ID =
+  rawMapId && rawMapId !== 'DEMO_MAP_ID' ? rawMapId : ''
+export const hasGoogleMapsMapId = Boolean(GOOGLE_MAPS_MAP_ID)
 export const MAPS_ENABLED = Boolean(GOOGLE_MAPS_API_KEY)
 
 /** Gaborone / UB area when no campus filter is active */
@@ -27,9 +35,26 @@ export function hasValidCoords(lat, lng) {
 }
 
 function resolveCampusCoords(listing, preferredCampusId) {
-  const fromApp = getUniversityById(preferredCampusId ?? listing?.nearest_university_id)
-  const uni = fromApp || listing?.nearest_university
-  return toLatLng(uni?.lat, uni?.lng)
+  const preferred = preferredCampusId ?? listing?.nearest_university_id
+  const fromApp = getUniversityById(preferred)
+  if (fromApp) {
+    const coords = toLatLng(fromApp.lat, fromApp.lng)
+    if (coords) return coords
+  }
+
+  // Multi-campus web listings: try each campus id until one has coords
+  const campusIds = Array.isArray(listing?.campus_ids) ? listing.campus_ids : []
+  for (const id of campusIds) {
+    const uni = getUniversityById(id)
+    const coords = toLatLng(uni?.lat, uni?.lng)
+    if (coords) return coords
+  }
+
+  const embedded = listing?.nearest_university
+  const fromEmbedded = toLatLng(embedded?.lat, embedded?.lng)
+  if (fromEmbedded) return fromEmbedded
+
+  return null
 }
 
 function isWithinCampusRadius(position, campusCenter, maxKm = CAMPUS_PIN_MAX_KM) {
@@ -38,20 +63,55 @@ function isWithinCampusRadius(position, campusCenter, maxKm = CAMPUS_PIN_MAX_KM)
   return km <= maxKm
 }
 
+/** Stable hash from listing id — spreads approximate pins without stacking. */
+function listingJitterSeed(listing) {
+  const raw = String(listing?.id || listing?.whatsapp_number || listing?.title || 'pin')
+  let hash = 0
+  for (let i = 0; i < raw.length; i += 1) {
+    hash = ((hash << 5) - hash + raw.charCodeAt(i)) | 0
+  }
+  return Math.abs(hash)
+}
+
+/**
+ * Approximate pin near campus using distance_to_campus when available,
+ * with a deterministic angle so many web listings don't share one pixel.
+ */
+export function approximateCampusPosition(campus, listing) {
+  if (!campus) return null
+  const seed = listingJitterSeed(listing)
+  const angle = ((seed % 360) * Math.PI) / 180
+  const reportedKm = Number(listing?.distance_to_campus)
+  const radiusKm = Number.isFinite(reportedKm) && reportedKm > 0
+    ? Math.min(Math.max(reportedKm * 0.85, 0.35), 12)
+    : 0.6 + (seed % 40) / 40 // 0.6–1.6 km ring when unknown
+
+  const latOffset = (radiusKm / 111.32) * Math.cos(angle)
+  const lngDenom = 111.32 * Math.cos((campus.lat * Math.PI) / 180)
+  const lngOffset = lngDenom === 0 ? 0 : (radiusKm / lngDenom) * Math.sin(angle)
+
+  return {
+    lat: campus.lat + latOffset,
+    lng: campus.lng + lngOffset,
+    approximate: true,
+  }
+}
+
 /** Exact pin, or approximate campus area when listing has no lat/lng */
 export function getListingPosition(listing) {
   const exact = toLatLng(listing?.lat, listing?.lng)
   if (exact) return { ...exact, approximate: false }
 
   const campus = resolveCampusCoords(listing)
-  if (campus) return { ...campus, approximate: true }
+  if (campus) return approximateCampusPosition(campus, listing)
 
   return null
 }
 
 /**
- * Pin for browse map — when a campus filter is active, only plot exact coords
- * near that campus so pins stay consistent with the filtered university.
+ * Pin for browse map.
+ * Exact coords preferred; when missing, place an approximate pin near the
+ * relevant campus so web/external listings still appear on the map.
  */
 export function getMapListingPosition(listing, { campusId, campusCenter } = {}) {
   const exact = toLatLng(listing?.lat, listing?.lng)
@@ -61,13 +121,21 @@ export function getMapListingPosition(listing, { campusId, campusCenter } = {}) 
       if (!isWithinCampusRadius(exact, campusCenter)) return null
       return { ...exact, approximate: false }
     }
-    return null
+
+    // No exact coords — still show near the filtered campus when this listing belongs there
+    const belongs =
+      campusId == null
+      || Number(listing?.nearest_university_id) === Number(campusId)
+      || (Array.isArray(listing?.campus_ids) && listing.campus_ids.map(Number).includes(Number(campusId)))
+
+    if (!belongs && campusId != null) return null
+    return approximateCampusPosition(campusCenter, listing)
   }
 
   if (exact) return { ...exact, approximate: false }
 
   const campus = resolveCampusCoords(listing, campusId)
-  if (campus) return { ...campus, approximate: true }
+  if (campus) return approximateCampusPosition(campus, listing)
 
   return null
 }

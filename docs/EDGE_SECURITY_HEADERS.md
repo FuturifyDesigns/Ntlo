@@ -58,12 +58,13 @@ When DNS is proxied, visitors see Cloudflare’s IPs and certificate — not the
 Paste this as the **entire** `Content-Security-Policy` value (one line):
 
 ```
-frame-ancestors 'self'; default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'; script-src 'self' 'unsafe-eval' blob: https://maps.googleapis.com https://maps.gstatic.com https://*.gstatic.com https://static.cloudflareinsights.com; worker-src 'self' blob: https://maps.googleapis.com; child-src 'self' blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://maps.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https://*.supabase.co https://*.googleusercontent.com https://maps.gstatic.com https://*.googleapis.com https://*.ggpht.com https://*.tile.openstreetmap.org https://*.google.com; connect-src 'self' blob: data: https://*.supabase.co wss://*.supabase.co https://tessdata.projectnaptha.com https://cdn.jsdelivr.net https://*.tile.openstreetmap.org https://nominatim.openstreetmap.org https://cloudflareinsights.com https://maps.googleapis.com https://*.googleapis.com https://mapsresources-pa.googleapis.com https://*.gstatic.com https://*.google.com; frame-src 'self' https://*.supabase.co; upgrade-insecure-requests
+frame-ancestors 'self'; default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'; script-src 'self' 'unsafe-eval' blob: https://maps.googleapis.com https://maps.gstatic.com https://*.gstatic.com https://static.cloudflareinsights.com; worker-src 'self' blob: https://maps.googleapis.com; child-src 'self' blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://maps.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https://*.supabase.co https://*.googleusercontent.com https://maps.gstatic.com https://*.googleapis.com https://*.ggpht.com https://*.tile.openstreetmap.org https://*.google.com https://*.linodeobjects.com https://*.zimcompass.com https://bw.zimcompass.com; connect-src 'self' blob: data: https://*.supabase.co wss://*.supabase.co https://tessdata.projectnaptha.com https://cdn.jsdelivr.net https://*.tile.openstreetmap.org https://nominatim.openstreetmap.org https://cloudflareinsights.com https://maps.googleapis.com https://*.googleapis.com https://mapsresources-pa.googleapis.com https://*.gstatic.com https://*.google.com; frame-src 'self' https://*.supabase.co; upgrade-insecure-requests
 ```
 
 **Important**
 
 - Keep `geolocation=(self)` — landlords need “Use my location”. Never use `geolocation=()`.
+- `img-src` must allow `https://*.linodeobjects.com` and `https://*.zimcompass.com` so student web-listing cover photos can load.
 - If you already have an older “Security headers” rule, **edit it** instead of creating duplicates (two CSPs fight each other).
 - After changing CSP in `index.html`, update this Cloudflare value to stay in sync (add `frame-ancestors 'self';` only on the CDN header).
 
@@ -165,6 +166,7 @@ DNS lookup for `ntlo.online` should show Cloudflare anycast IPs while the record
 | Symptom | Fix |
 |--------|-----|
 | Map is solid blue / Google blocked | CSP too strict — restore the CSP line above (especially `mapsresources-pa.googleapis.com` and `*.gstatic.com`) |
+| Web listing photos broken / blank | Update Cloudflare CSP `img-src` to include `https://*.linodeobjects.com` and `https://*.zimcompass.com` (or rely on build-time mirrored `/data/web-rental-photos/` which uses `img-src 'self'`) |
 | “Permissions policy violation: geolocation” | Set `Permissions-Policy` to `geolocation=(self), ...` not `geolocation=()` |
 | Site broken after CSP change | Temporarily disable the Transform Rule, fix CSP, re-enable |
 | `/CNAME` still downloads | WAF rule not matching — check host + path expression; purge cache |

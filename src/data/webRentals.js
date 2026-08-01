@@ -8,6 +8,8 @@ const CAMPUS = {
     name: 'University of Botswana',
     slug: 'university-of-botswana',
     city: 'Gaborone',
+    lat: -24.6576,
+    lng: 25.9398,
   },
   biust: {
     id: 2,
@@ -15,6 +17,8 @@ const CAMPUS = {
     name: 'Botswana International University of Science and Technology',
     slug: 'biust',
     city: 'Palapye',
+    lat: -22.5972,
+    lng: 27.1220,
   },
   botho: {
     id: 3,
@@ -22,6 +26,8 @@ const CAMPUS = {
     name: 'Botho University',
     slug: 'botho-university',
     city: 'Gaborone',
+    lat: -24.6846,
+    lng: 25.8783,
   },
   limkokwing: {
     id: 4,
@@ -29,6 +35,8 @@ const CAMPUS = {
     name: 'Limkokwing University College',
     slug: 'limkokwing',
     city: 'Gaborone',
+    lat: -24.6225,
+    lng: 25.8928,
   },
   baisago: {
     id: 5,
@@ -36,6 +44,8 @@ const CAMPUS = {
     name: 'Ba Isago University',
     slug: 'ba-isago',
     city: 'Gaborone',
+    lat: -24.6570,
+    lng: 25.9020,
   },
   bac: {
     id: 9,
@@ -43,6 +53,8 @@ const CAMPUS = {
     name: 'Botswana Accountancy College',
     slug: 'botswana-accountancy-college',
     city: 'Gaborone',
+    lat: -24.6576,
+    lng: 25.9080,
   },
   boitekanelo: {
     id: 10,
@@ -50,6 +62,8 @@ const CAMPUS = {
     name: 'Boitekanelo college',
     slug: 'boitekanelo-college',
     city: 'Tlokweng',
+    lat: -24.6680,
+    lng: 25.9710,
   },
 }
 
@@ -432,9 +446,9 @@ export function getWebRentalById(id) {
 const CAMPUS_BY_ID = Object.fromEntries(
   Object.values(CAMPUS).map((c) => [c.id, c])
 )
-CAMPUS_BY_ID[6] = { id: 6, short_name: 'ABM University College', name: 'ABM University College', slug: 'abm-university', city: 'Gaborone' }
-CAMPUS_BY_ID[7] = { id: 7, short_name: 'Gaborone University College', name: 'Gaborone University College', slug: 'guc', city: 'Gaborone' }
-CAMPUS_BY_ID[8] = { id: 8, short_name: 'BUAN', name: 'Botswana University of Agriculture and Natural Resources', slug: 'botswana-university-of-agriculture-and-natural-resources', city: 'Gaborone' }
+CAMPUS_BY_ID[6] = { id: 6, short_name: 'ABM University College', name: 'ABM University College', slug: 'abm-university', city: 'Gaborone', lat: -24.6580, lng: 25.9180 }
+CAMPUS_BY_ID[7] = { id: 7, short_name: 'Gaborone University College', name: 'Gaborone University College', slug: 'guc', city: 'Gaborone', lat: -24.6732, lng: 25.9221 }
+CAMPUS_BY_ID[8] = { id: 8, short_name: 'BUAN', name: 'Botswana University of Agriculture and Natural Resources', slug: 'botswana-university-of-agriculture-and-natural-resources', city: 'Gaborone', lat: -24.5900, lng: 25.9410 }
 
 /** Convert auto-sync feed JSON rows into listing objects. */
 export function feedItemToListing(item) {
