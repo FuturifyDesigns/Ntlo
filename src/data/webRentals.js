@@ -1,6 +1,6 @@
 /** Botswana student-rentable rooms from public classifieds — shown as external listings. */
 import { isUniversityNameQuery, pickPrimaryUniversityMatch } from '../lib/universitySearch'
-import { resolveLiveCampusId } from '../lib/campusAttribution'
+import { listingDedupeKey, resolveLiveCampusId } from '../lib/campusAttribution'
 import { getUniversityById } from '../lib/universities'
 
 const NOW = '2026-08-01T09:00:00.000Z'
@@ -551,11 +551,14 @@ export function filterWebRentals(filters = {}, catalog = null) {
   return rows
 }
 
-/** Merge DB listings with web rentals; skip web dupes that already exist in DB by WhatsApp. */
+/** Merge DB listings with web rentals; skip web rooms already present in DB (same WhatsApp + price). */
 export function mergeWebIntoListings(dbListings, filters = {}, { page = 0, pageSize = 12, mapMode = false, sortBy = 'newest', catalog = null } = {}) {
   const db = Array.isArray(dbListings) ? dbListings : []
-  const dbWhatsapps = new Set(db.map((l) => l.whatsapp_number).filter(Boolean))
-  const web = filterWebRentals(filters, catalog).filter((l) => !dbWhatsapps.has(l.whatsapp_number))
+  const dbKeys = new Set(db.map((l) => listingDedupeKey(l)).filter(Boolean))
+  const web = filterWebRentals(filters, catalog).filter((l) => {
+    const key = listingDedupeKey(l)
+    return Boolean(key) && !dbKeys.has(key)
+  })
 
   let merged = [...db, ...web]
 

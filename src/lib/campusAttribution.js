@@ -14,6 +14,26 @@ const SEED_CAMPUS_SLUG_BY_ID = {
   10: 'boitekanelo-college',
 }
 
+export function normalizeWhatsapp(value) {
+  return String(value ?? '').replace(/\D/g, '')
+}
+
+/**
+ * Stable room identity for deduping DB ↔ web catalog.
+ * Same contact + price ≈ same room (titles often differ across imports).
+ */
+export function listingDedupeKey(listing) {
+  if (!listing) return null
+  const wa = normalizeWhatsapp(listing.whatsapp_number)
+  if (wa) {
+    const price = Number(listing.price)
+    const pricePart = Number.isFinite(price) ? String(Math.round(price)) : ''
+    return `${wa}|${pricePart}`
+  }
+  if (listing.id != null) return `id:${listing.id}`
+  return null
+}
+
 export function primaryCampusIdFromListing(listing) {
   if (!listing) return null
   if (listing.nearest_university_id != null && Number.isFinite(Number(listing.nearest_university_id))) {
@@ -57,7 +77,7 @@ export function resolveLiveCampusId(listingOrCampusId) {
 export function indexWebRentalsByWhatsapp(webCatalog = []) {
   const map = new Map()
   for (const row of webCatalog || []) {
-    const wa = row?.whatsapp_number != null ? String(row.whatsapp_number).replace(/\D/g, '') : ''
+    const wa = normalizeWhatsapp(row?.whatsapp_number)
     if (!wa) continue
     const prev = map.get(wa)
     const prevPhotos = Array.isArray(prev?.listing_photos) ? prev.listing_photos.length : 0
@@ -80,7 +100,7 @@ export function enrichListingCampusFromWeb(listing, webByWhatsapp) {
     }
   }
 
-  const wa = listing.whatsapp_number != null ? String(listing.whatsapp_number).replace(/\D/g, '') : ''
+  const wa = normalizeWhatsapp(listing.whatsapp_number)
   const web = wa && webByWhatsapp ? webByWhatsapp.get(wa) : null
   if (!web) return listing
 

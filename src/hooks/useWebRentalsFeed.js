@@ -4,9 +4,10 @@ import {
   feedItemToListing,
   setLiveWebRentalsCatalog,
 } from '../data/webRentals'
+import { listingDedupeKey } from '../lib/campusAttribution'
 
 const FEED_URL = '/data/web-rentals-feed.json'
-const CACHE_KEY = 'ntlo_web_rentals_feed_v2'
+const CACHE_KEY = 'ntlo_web_rentals_feed_v3'
 const CACHE_TTL_MS = 30 * 60 * 1000
 
 function readCache() {
@@ -34,10 +35,9 @@ function photoCount(row) {
 function mergeUnique(seed, live) {
   const map = new Map()
   for (const row of [...seed, ...live]) {
-    if (!row?.id) continue
-    const key = row.whatsapp_number
-      ? `${row.whatsapp_number}|${row.price}|${String(row.title || '').slice(0, 20).toLowerCase()}`
-      : row.id
+    if (!row?.id && !row?.whatsapp_number) continue
+    const key = listingDedupeKey(row) || row.id
+    if (!key) continue
     const prev = map.get(key)
     if (!prev || photoCount(row) > photoCount(prev)) {
       map.set(key, row)
