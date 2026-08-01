@@ -4,19 +4,32 @@ import { calculateDistance } from './utils'
 export const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || ''
 
 /**
- * Cloud Map ID for AdvancedMarker / vector styling.
- *
- * IMPORTANT: A misconfigured Map ID (common with older secrets) renders a solid
- * blue map even when the API key is valid. We only enable it when explicitly
- * opted in via VITE_GOOGLE_MAPS_USE_CLOUD_STYLING=true after verifying the Map ID
- * in Google Cloud → Map Management works with this API key.
+ * Official Google Map ID for Advanced Markers without Cloud Map styling.
+ * Safe default — does not apply custom vector styles (those caused solid-blue maps
+ * when a misconfigured VITE_GOOGLE_MAPS_MAP_ID was used).
+ * @see https://developers.google.com/maps/documentation/javascript/advanced-markers/migration
  */
-const rawMapId = String(import.meta.env.VITE_GOOGLE_MAPS_MAP_ID || '').trim()
+export const DEMO_MAP_ID = 'DEMO_MAP_ID'
+
+/**
+ * Optional Cloud Console Map ID for custom vector styling.
+ * Only applied when VITE_GOOGLE_MAPS_USE_CLOUD_STYLING=true after verifying the
+ * Map ID in Google Cloud → Map Management works with this API key.
+ */
+const rawCloudMapId = String(import.meta.env.VITE_GOOGLE_MAPS_MAP_ID || '').trim()
 const cloudStylingEnabled =
   String(import.meta.env.VITE_GOOGLE_MAPS_USE_CLOUD_STYLING || '').toLowerCase() === 'true'
 
-export const GOOGLE_MAPS_MAP_ID =
-  cloudStylingEnabled && rawMapId && rawMapId !== 'DEMO_MAP_ID' ? rawMapId : ''
+const cloudMapId =
+  cloudStylingEnabled
+  && rawCloudMapId
+  && rawCloudMapId !== DEMO_MAP_ID
+    ? rawCloudMapId
+    : ''
+
+/** Always set so AdvancedMarkerElement works; cloud ID only when explicitly opted in. */
+export const GOOGLE_MAPS_MAP_ID = cloudMapId || DEMO_MAP_ID
+export const usesCloudMapStyling = Boolean(cloudMapId)
 export const hasGoogleMapsMapId = Boolean(GOOGLE_MAPS_MAP_ID)
 export const MAPS_ENABLED = Boolean(GOOGLE_MAPS_API_KEY)
 

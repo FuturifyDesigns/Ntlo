@@ -4,12 +4,10 @@ import {
   AdvancedMarker,
   InfoWindow,
   Map,
-  Marker,
   RenderingType,
   useAdvancedMarkerRef,
   useMap,
   useMapsLibrary,
-  useMarkerRef,
 } from '@vis.gl/react-google-maps'
 import { MapPin, Navigation, Loader2, AlertCircle } from 'lucide-react'
 import {
@@ -21,8 +19,8 @@ import {
   SINGLE_LISTING_ZOOM,
   getListingPosition,
   getMapListingPosition,
-  hasGoogleMapsMapId,
   toLatLng,
+  usesCloudMapStyling,
 } from '../../lib/googleMaps'
 import { geocodeWithGoogle, resolveAddressCoords, resolveUniversityCampusCoords, reverseGeocodeWithGoogle } from '../../lib/geocodeAddress'
 import { applyMapCameraFocus } from '../../lib/mapCamera'
@@ -31,10 +29,14 @@ import { useTranslation } from '../../hooks/useTranslation'
 import Button from '../ui/Button'
 import { MapUnavailable } from './GoogleMapsProvider'
 
-/** Real Map ID → vector/AdvancedMarker; otherwise raster tiles + classic Marker (avoids blue DEMO_MAP_ID). */
-const MAP_CLOUD_PROPS = hasGoogleMapsMapId
+/**
+ * Always pass a Map ID so AdvancedMarker works.
+ * DEMO_MAP_ID + raster = roadmap tiles without broken cloud styles (solid blue).
+ * Opt-in cloud Map ID keeps vector styling when verified.
+ */
+const MAP_CLOUD_PROPS = usesCloudMapStyling
   ? { mapId: GOOGLE_MAPS_MAP_ID }
-  : { renderingType: RenderingType.RASTER }
+  : { mapId: GOOGLE_MAPS_MAP_ID, renderingType: RenderingType.RASTER }
 
 /** Keep campus centered when filter changes; do not re-center when listings load or user pans. */
 function CampusViewportLock({ viewport }) {
@@ -78,9 +80,6 @@ function ListingsBoundsFit({ plotted, disabled }) {
 }
 
 function CampusMarker({ position, label }) {
-  if (!hasGoogleMapsMapId) {
-    return <Marker position={position} title={label} zIndex={2000} />
-  }
   return (
     <AdvancedMarker position={position} title={label} zIndex={2000} anchorPoint={['50%', '50%']}>
       <div
@@ -116,42 +115,22 @@ function ListingPinInfo({ listing, position, onClear, t }) {
 }
 
 function ListingPin({ listing, position, interactive, selected, onSelect, onClear, t }) {
-  const [advancedRef, advancedMarker] = useAdvancedMarkerRef()
-  const [classicRef, classicMarker] = useMarkerRef()
+  const [markerRef, marker] = useAdvancedMarkerRef()
   const pinPosition = { lat: position.lat, lng: position.lng }
   const zIndex = selected ? 200 : 100
   const onClick = interactive ? () => onSelect(listing.id) : undefined
 
-  if (!hasGoogleMapsMapId) {
-    return (
-      <>
-        <Marker
-          ref={classicRef}
-          position={pinPosition}
-          title={listing.title}
-          zIndex={zIndex}
-          onClick={onClick}
-        />
-        {interactive && selected && (
-          <InfoWindow anchor={classicMarker} onCloseClick={onClear}>
-            <ListingPinInfo listing={listing} position={position} onClear={onClear} t={t} />
-          </InfoWindow>
-        )}
-      </>
-    )
-  }
-
   return (
     <>
       <AdvancedMarker
-        ref={advancedRef}
+        ref={markerRef}
         position={pinPosition}
         title={listing.title}
         zIndex={zIndex}
         onClick={onClick}
       />
       {interactive && selected && (
-        <InfoWindow anchor={advancedMarker} onCloseClick={onClear}>
+        <InfoWindow anchor={marker} onCloseClick={onClear}>
           <ListingPinInfo listing={listing} position={position} onClear={onClear} t={t} />
         </InfoWindow>
       )}
@@ -339,11 +318,7 @@ export function SingleListingMap({ lat, lng, listing, height = '280px', title })
           gestureHandling="cooperative"
           style={{ width: '100%', height: '100%' }}
         >
-          {hasGoogleMapsMapId ? (
-            <AdvancedMarker position={coords} title={title || listing?.title || 'Listing location'} />
-          ) : (
-            <Marker position={coords} title={title || listing?.title || 'Listing location'} />
-          )}
+          <AdvancedMarker position={coords} title={title || listing?.title || 'Listing location'} />
         </Map>
       </div>
       <p className="text-xs leading-relaxed text-muted">{t('listings.mapAreaDisclaimer')}</p>
@@ -401,9 +376,6 @@ function MapUserInteractionGuard({ disabledRef, programmaticRef }) {
 }
 
 function CampusReferenceMarker({ position, label }) {
-  if (!hasGoogleMapsMapId) {
-    return <Marker position={position} title={label} zIndex={100} />
-  }
   return (
     <AdvancedMarker position={position} title={label} zIndex={100} anchorPoint={['50%', '10px']}>
       <div className="flex flex-col items-center gap-0.5">
@@ -494,11 +466,6 @@ function CampusDistanceLabel({ campus, pin, distanceKm, label }) {
   const midpoint = {
     lat: (campus.lat + pin.lat) / 2,
     lng: (campus.lng + pin.lng) / 2,
-  }
-
-  if (!hasGoogleMapsMapId) {
-    // Classic markers can't host HTML labels; title still exposes distance on hover.
-    return <Marker position={midpoint} zIndex={150} title={label} />
   }
 
   return (
@@ -1036,24 +1003,15 @@ export function LocationPicker({
             </>
           )}
           {showPin && (
-            hasGoogleMapsMapId ? (
-              <AdvancedMarker
-                position={pinPosition}
-                anchorPoint={['50%', '100%']}
-                draggable
-                onDrag={handleDrag}
-                onDragEnd={handleDragEnd}
-              >
-                <ListingPinMarker />
-              </AdvancedMarker>
-            ) : (
-              <Marker
-                position={pinPosition}
-                draggable
-                onDrag={handleDrag}
-                onDragEnd={handleDragEnd}
-              />
-            )
+            <AdvancedMarker
+              position={pinPosition}
+              anchorPoint={['50%', '100%']}
+              draggable
+              onDrag={handleDrag}
+              onDragEnd={handleDragEnd}
+            >
+              <ListingPinMarker />
+            </AdvancedMarker>
           )}
         </Map>
       </div>
