@@ -13,7 +13,7 @@ import {
 export async function fetchDbListingCampusRows() {
   const { data, error } = await supabase
     .from('listings')
-    .select('whatsapp_number, nearest_university_id, price, title')
+    .select('id, whatsapp_number, nearest_university_id, price, title')
     .eq('verification_status', 'approved')
     .in('occupancy_status', ['available', 'rented'])
 
@@ -28,9 +28,9 @@ export async function fetchDbListingCampusRows() {
 export function buildLiveListingStats(dbRows = [], webCatalog = null) {
   const rows = Array.isArray(dbRows) ? dbRows : []
   const web = Array.isArray(webCatalog) ? webCatalog : getAllWebRentals()
-  const webByWa = indexWebRentalsByWhatsapp(web)
 
   const enrichedDb = enrichListingsCampusFromWeb(rows, web)
+  // Same merge/dedupe path Browse uses for unfiltered "rooms found".
   const merged = mergeWebIntoListings(
     enrichedDb,
     {},
@@ -38,8 +38,8 @@ export function buildLiveListingStats(dbRows = [], webCatalog = null) {
   )
 
   const campusCounts = {}
-  function bump(campusId) {
-    const liveId = resolveLiveCampusId(campusId)
+  function bump(campusIdOrListing) {
+    const liveId = resolveLiveCampusId(campusIdOrListing)
     if (liveId == null || !Number.isFinite(liveId)) return
     campusCounts[liveId] = (campusCounts[liveId] || 0) + 1
   }
@@ -57,11 +57,8 @@ export function buildLiveListingStats(dbRows = [], webCatalog = null) {
     bump(listing)
   }
 
-  // Prefer merged length as source of truth (matches Browse "rooms found")
-  const listings = merged.count
-
   return {
-    listings,
+    listings: merged.count,
     dbListings: rows.length,
     webListings: webExtra,
     campusCounts,

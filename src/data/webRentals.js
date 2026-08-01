@@ -433,13 +433,37 @@ export function setLiveWebRentalsCatalog(rows) {
   liveWebCatalog = Array.isArray(rows) ? rows : []
 }
 
+function photoCount(row) {
+  return Array.isArray(row?.listing_photos) ? row.listing_photos.length : 0
+}
+
+/** Prefer live/feed rows (more photos) over seed when collapsing duplicates. */
+function preferListing(a, b) {
+  if (!a) return b
+  if (!b) return a
+  const pa = photoCount(a)
+  const pb = photoCount(b)
+  if (pb !== pa) return pb > pa ? b : a
+  // Prefer auto-synced feed ids over static seed ids
+  const aLive = String(a.id || '').startsWith('auto-')
+  const bLive = String(b.id || '').startsWith('auto-')
+  if (aLive !== bLive) return bLive ? b : a
+  return b
+}
+
 export function getAllWebRentals() {
-  const map = new Map()
+  const byId = new Map()
   for (const row of [...WEB_RENTALS, ...liveWebCatalog]) {
     if (!row?.id) continue
-    map.set(row.id, row)
+    byId.set(row.id, row)
   }
-  return [...map.values()]
+  // Collapse same room across seed + feed (different ids, same WhatsApp + price).
+  const byRoom = new Map()
+  for (const row of byId.values()) {
+    const key = listingDedupeKey(row) || row.id
+    byRoom.set(key, preferListing(byRoom.get(key), row))
+  }
+  return [...byRoom.values()]
 }
 
 export function getWebRentalById(id) {
@@ -553,12 +577,24 @@ export function filterWebRentals(filters = {}, catalog = null) {
 
 /** Merge DB listings with web rentals; skip web rooms already present in DB (same WhatsApp + price). */
 export function mergeWebIntoListings(dbListings, filters = {}, { page = 0, pageSize = 12, mapMode = false, sortBy = 'newest', catalog = null } = {}) {
-  const db = Array.isArray(dbListings) ? dbListings : []
-  const dbKeys = new Set(db.map((l) => listingDedupeKey(l)).filter(Boolean))
-  const web = filterWebRentals(filters, catalog).filter((l) => {
-    const key = listingDedupeKey(l)
-    return Boolean(key) && !dbKeys.has(key)
-  })
+  const dbRaw = Array.isArray(dbListings) ? dbListings : []
+  // One row per room fingerprint so Browse total matches hero "live listings".
+  const dbByKey = new Map()
+  for (const row of dbRaw) {
+    const key = listingDedupeKey(row) || (row?.id != null ? `id:${row.id}` : null)
+    if (!key) continue
+    dbByKey.set(key, preferListing(dbByKey.get(key), row))
+  }
+  const db = [...dbByKey.values()]
+  const dbKeys = new Set(dbByKey.keys())
+
+  const webByKey = new Map()
+  for (const row of filterWebRentals(filters, catalog)) {
+    const key = listingDedupeKey(row) || row?.id
+    if (!key || dbKeys.has(key)) continue
+    webByKey.set(key, preferListing(webByKey.get(key), row))
+  }
+  const web = [...webByKey.values()]
 
   let merged = [...db, ...web]
 
