@@ -27,7 +27,9 @@ jobs:
 
       - run: npm ci
 
-      - run: npm run build
+      # Use the committed feed from the daily sync workflow — do not re-scrape
+      # during Pages builds (that job is slow and often gets cancelled).
+      - run: npm run build:fast
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
