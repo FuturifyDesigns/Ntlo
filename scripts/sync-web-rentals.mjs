@@ -1,6 +1,12 @@
 /**
- * Fetches public Botswana house-share classifieds and writes a student rental feed.
+ * Daily Botswana student-rental aggregator.
+ * Pulls public classifieds (ZimCompass house-share pages), filters for
+ * student-suitable rooms, mirrors photos, and writes public/data/web-rentals-feed.json.
+ *
  * Used by CI cron + local: node scripts/sync-web-rentals.mjs
+ *
+ * Scope note: we only fetch public HTML classified pages we are allowed to
+ * crawl. Facebook Marketplace / closed groups are not scraped (ToS + auth wall).
  */
 import { mkdirSync, writeFileSync, readFileSync, existsSync, readdirSync, unlinkSync } from 'node:fs'
 import { dirname, join } from 'node:path'
@@ -12,13 +18,26 @@ const OUT = join(ROOT, 'public', 'data', 'web-rentals-feed.json')
 const PHOTO_DIR = join(ROOT, 'public', 'data', 'web-rental-photos')
 const PHOTO_PUBLIC_PREFIX = '/data/web-rental-photos'
 
-const SOURCES = [
-  {
-    id: 'zimcompass-house-share',
-    label: 'ZimCompass house share',
-    url: 'https://bw.zimcompass.com/house-share',
-  },
-]
+/** Keep listings that fall off page-1 for this many days so Ntlo stays stocked. */
+const KEEP_DAYS = 21
+/** How many ZimCompass result pages to crawl each run. */
+const ZIMCOMPASS_PAGES = 5
+
+function zimcompassSources() {
+  const pages = []
+  for (let page = 1; page <= ZIMCOMPASS_PAGES; page += 1) {
+    pages.push({
+      id: `zimcompass-house-share-p${page}`,
+      label: 'ZimCompass house share',
+      url: page === 1
+        ? 'https://bw.zimcompass.com/house-share'
+        : `https://bw.zimcompass.com/house-share?page=${page}`,
+    })
+  }
+  return pages
+}
+
+const SOURCES = [...zimcompassSources()]
 
 const STUDENT_HINT = /\b(student|share|sharing|room|rooms|bed|beds|ub\b|botho|campus|university|college|bac\b|biust|limkokwing|gaborone|mogoditshane|tlokweng|gabane|palapye|francistown|ledumadumane|broadhurst|block\s*\d)\b/i
 const NOISE = /\b(bmw|toyota|nissan|honda|mercedes|car diagnosis|nail technician|botswana ?post|chief|zambia|mthatha|ongwediva|namibia|messenger)\b/i
@@ -95,7 +114,7 @@ function guessCampuses(area, city, details) {
   if (blob.includes('biust') || blob.includes('palapye')) ids.add(2)
   if (blob.includes('boitekanelo') || blob.includes('tlokweng')) ids.add(10)
   if (blob.includes('buan') || blob.includes('ledumadumane') || blob.includes('sebele')) ids.add(8)
-  if (blob.includes('francistown')) return { campus_ids: [], custom_university_name: 'University of Botswana — Francistown Campus' }
+  if (blob.includes('francistown')) return { campus_ids: [], custom_university_name: 'University of Botswana ? Francistown Campus' }
   if (blob.includes('ub') || blob.includes('extension 10') || blob.includes('block 5') || blob.includes('gaborone')) ids.add(1)
   if (!ids.size && city === 'Gaborone') ids.add(1)
   return { campus_ids: [...ids], custom_university_name: null }
@@ -107,6 +126,10 @@ function isStudentRentable(title, details, location) {
   if (!STUDENT_HINT.test(blob) && !BW_CITIES.test(blob)) return false
   if (!/\b(room|share|bed|house|apartment|flat|sq\b|servant|student)\b/i.test(blob)) return false
   return true
+}
+
+function listingKey(row) {
+  return `${String(row.whatsapp_number || '').replace(/\D/g, '')}|${row.price}|${String(row.title || '').slice(0, 24).toLowerCase()}`
 }
 
 function parseZimcompass(html, source) {
@@ -128,7 +151,6 @@ function parseZimcompass(html, source) {
     if (!price) continue
 
     const city = guessCity(location, details)
-    // Skip obvious non-Botswana leftovers
     if (/namibia|zambia|mthatha|ongwediva/i.test(`${location} ${details}`)) continue
 
     const area = guessArea(location, details, city)
@@ -141,9 +163,10 @@ function parseZimcompass(html, source) {
       : source.url
 
     const slug = `${phone}-${title.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 40)}`
+    const now = new Date().toISOString()
     out.push({
       id: `auto-${slug}`.replace(/-+$/g, ''),
-      title: title.length > 8 ? title : `Student room share — ${area}`,
+      title: title.length > 8 ? title : `Student room share ? ${area}`,
       description: `${details}\n\nStudent-friendly Botswana rental from a public classifieds post. Confirm availability, rent, and viewing on WhatsApp before visiting or paying.`,
       price,
       room_type: /single|servant|sq\b/i.test(`${title} ${details}`) ? 'single' : 'sharing',
@@ -163,7 +186,8 @@ function parseZimcompass(html, source) {
         return m ? Number(m[1].replace(/,/g, '')) : null
       })(),
       utilities_included: /including (bills|water|electricity)|bills included/i.test(details) ? 'included' : null,
-      fetched_at: new Date().toISOString(),
+      fetched_at: now,
+      last_seen_at: now,
     })
   }
   return out
@@ -183,15 +207,47 @@ async function fetchSource(source) {
 }
 
 function dedupe(listings) {
-  const seen = new Set()
-  const out = []
+  const map = new Map()
   for (const row of listings) {
-    const key = `${row.whatsapp_number}|${row.price}|${(row.title || '').slice(0, 24).toLowerCase()}`
-    if (seen.has(key)) continue
-    seen.add(key)
-    out.push(row)
+    const key = listingKey(row)
+    if (!key || key.startsWith('|')) continue
+    const prev = map.get(key)
+    if (!prev) {
+      map.set(key, row)
+      continue
+    }
+    const prevPhotos = Array.isArray(prev.photo_urls) ? prev.photo_urls.length : 0
+    const nextPhotos = Array.isArray(row.photo_urls) ? row.photo_urls.length : 0
+    const prevSeen = Date.parse(prev.last_seen_at || prev.fetched_at || 0) || 0
+    const nextSeen = Date.parse(row.last_seen_at || row.fetched_at || 0) || 0
+    if (nextPhotos > prevPhotos || nextSeen >= prevSeen) {
+      map.set(key, {
+        ...prev,
+        ...row,
+        fetched_at: prev.fetched_at || row.fetched_at,
+        last_seen_at: row.last_seen_at || prev.last_seen_at || row.fetched_at,
+        photo_urls: nextPhotos >= prevPhotos ? row.photo_urls : prev.photo_urls,
+      })
+    }
   }
-  return out
+  return [...map.values()]
+}
+
+/** Merge fresh crawl with previous feed; drop listings not seen for KEEP_DAYS. */
+function mergeWithPrevious(fresh, previous = []) {
+  const now = Date.now()
+  const cutoff = now - KEEP_DAYS * 24 * 60 * 60 * 1000
+  const freshKeys = new Set(fresh.map(listingKey))
+
+  const carried = []
+  for (const row of previous) {
+    const key = listingKey(row)
+    if (freshKeys.has(key)) continue
+    const seen = Date.parse(row.last_seen_at || row.fetched_at || 0) || 0
+    if (seen >= cutoff) carried.push(row)
+  }
+
+  return dedupe([...fresh, ...carried])
 }
 
 function photoExt(url, contentType) {
@@ -211,7 +267,6 @@ function safePhotoName(listingId, index, ext) {
   return `${base}-${index}${ext}`
 }
 
-/** Download remote covers into public/ so CSP img-src 'self' can load them on ntlo.online. */
 async function mirrorPhotos(listings) {
   mkdirSync(PHOTO_DIR, { recursive: true })
   const kept = new Set()
@@ -221,12 +276,13 @@ async function mirrorPhotos(listings) {
     const local = []
     for (let i = 0; i < urls.length; i += 1) {
       const remote = urls[i]
-      if (!remote || !/^https?:\/\//i.test(remote)) continue
+      if (!remote) continue
       if (remote.startsWith(PHOTO_PUBLIC_PREFIX) || remote.startsWith('/data/')) {
         local.push(remote)
         kept.add(remote.split('/').pop())
         continue
       }
+      if (!/^https?:\/\//i.test(remote)) continue
       try {
         let res = null
         for (let attempt = 0; attempt < 3; attempt += 1) {
@@ -264,12 +320,10 @@ async function mirrorPhotos(listings) {
     }
     row.photo_urls = local
     if (urls.length && !local.length) {
-      // Keep remote URL as last resort if download failed (needs CSP allowlist).
-      row.photo_urls = urls.filter((u) => /^https?:\/\//i.test(u))
+      row.photo_urls = urls.filter((u) => /^https?:\/\//i.test(u) || String(u).startsWith('/'))
     }
   }
 
-  // Drop stale mirrored files from previous runs
   try {
     for (const file of readdirSync(PHOTO_DIR)) {
       if (!kept.has(file)) unlinkSync(join(PHOTO_DIR, file))
@@ -277,6 +331,16 @@ async function mirrorPhotos(listings) {
   } catch { /* ignore */ }
 
   return listings
+}
+
+function loadPreviousFeed() {
+  if (!existsSync(OUT)) return []
+  try {
+    const prev = JSON.parse(readFileSync(OUT, 'utf8'))
+    return Array.isArray(prev?.listings) ? prev.listings : []
+  } catch {
+    return []
+  }
 }
 
 async function main() {
@@ -293,28 +357,29 @@ async function main() {
     }
   }
 
-  let listings = dedupe(collected)
+  const previous = loadPreviousFeed()
+  const freshUnique = dedupe(collected)
+  let listings = mergeWithPrevious(freshUnique, previous)
+
   const payload = {
     updated_at: new Date().toISOString(),
     source_count: SOURCES.length,
+    sources: SOURCES.map((s) => s.id),
+    keep_days: KEEP_DAYS,
     listing_count: listings.length,
+    fresh_count: freshUnique.length,
+    carried_count: Math.max(0, listings.length - freshUnique.length),
     errors,
     listings,
   }
 
   mkdirSync(dirname(OUT), { recursive: true })
 
-  // Keep previous listings if a fetch fails hard and we got nothing new
-  if (listings.length === 0 && existsSync(OUT)) {
-    try {
-      const prev = JSON.parse(readFileSync(OUT, 'utf8'))
-      if (prev?.listings?.length) {
-        payload.listings = prev.listings
-        payload.listing_count = prev.listings.length
-        payload.stale = true
-        payload.note = 'Kept previous feed because this run found 0 listings'
-      }
-    } catch { /* ignore */ }
+  if (listings.length === 0 && previous.length) {
+    payload.listings = previous
+    payload.listing_count = previous.length
+    payload.stale = true
+    payload.note = 'Kept previous feed because this run found 0 listings'
   }
 
   payload.listings = await mirrorPhotos(payload.listings)
@@ -322,7 +387,11 @@ async function main() {
   payload.photos_mirrored = payload.listings.reduce((n, row) => n + (row.photo_urls?.length || 0), 0)
 
   writeFileSync(OUT, `${JSON.stringify(payload, null, 2)}\n`)
-  console.log(`Wrote ${payload.listing_count} listings (${payload.photos_mirrored} photos) → public/data/web-rentals-feed.json`)
+  console.log(
+    `Wrote ${payload.listing_count} listings `
+    + `(${payload.photos_mirrored} photos, fresh=${freshUnique.length}, carried=${payload.carried_count}) `
+    + `? public/data/web-rentals-feed.json`
+  )
 }
 
 main().catch((err) => {

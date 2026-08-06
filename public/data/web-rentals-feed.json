@@ -57,22 +57,22 @@
     {
       "id": "auto-26771746344-house-to-share",
       "title": "House to share",
-      "description": "House to share in Ledumadumane near pula spar P1330, security P1100. Call or WhatsApp 71746344\n\nStudent-friendly Botswana rental from a public classifieds post. Confirm availability, rent, and viewing on WhatsApp before visiting or paying.",
+      "description": "A room to be shared in a 3 bedroom house by Ledumadumane pula spar . Rent P1330 including water and electricity. Deposit P1100. Call or WhatsApp 71746344. Looking for a See more\n\nStudent-friendly Botswana rental from a public classifieds post. Confirm availability, rent, and viewing on WhatsApp before visiting or paying.",
       "price": 1330,
       "room_type": "sharing",
       "gender_preference": "any",
       "area": "Ledumadumane",
       "city": "Gaborone",
-      "address": "Botswana | 31 May, 2026",
+      "address": "Botswana | 10 November, 2025",
       "whatsapp_number": "26771746344",
-      "contact_name": "Elsa",
+      "contact_name": "Carelink",
       "campus_ids": [
         8,
         1
       ],
       "custom_university_name": null,
       "source_label": "ZimCompass house share",
-      "source_url": "https://bw.zimcompass.com/product?id=108470",
+      "source_url": "https://bw.zimcompass.com/product?id=95818",
       "photo_urls": [],
       "deposit_pula": 1100,
       "utilities_included": null,
@@ -179,7 +179,7 @@
     },
     {
       "id": "auto-26776968183-beds",
-      "title": "Student room share — block 9",
+      "title": "Student room share ? block 9",
       "description": "2 beds available Tsolamosese Mogoditshane blk4..fitted and multires, motorised Gates, paved yard and electric fence p3500 plus security. &#xA; Finders fee P250&#xA; Call 76968183 for pics and viewing A room to share with a female in a 2 beds that goes for P3k available in Tlokweng , Letlapeng each paying P1500 plus equivalent security each. It&#x27;s fitted with electric fence. P200 finders fee.&#xA; Call 76968183 for pics and vewing A room in a three beds in Gaborone block 9 available at P1500 rent plus security... More\n\nStudent-friendly Botswana rental from a public classifieds post. Confirm availability, rent, and viewing on WhatsApp before visiting or paying.",
       "price": 3500,
       "room_type": "sharing",
@@ -204,21 +204,21 @@
     {
       "id": "auto-26776104760-rooms-to-rent",
       "title": "Rooms to Rent",
-      "description": "Servant&#x27;s quarters available, Broadhurst ext 27, near kbl brewery and park 27, rooms are P1,300 that includes water and power, call watsapp for viewing 76104760 (if you want to share with partner or friend a further P400 would be required for utilities) Master bedroom in main house also available, large room with fitted wardrobes, P1,800 that includes water and power, fully furnished optional for additional charge, call 76104760 for viewing\n\nStudent-friendly Botswana rental from a public classifieds post. Confirm availability, rent, and viewing on WhatsApp before visiting or paying.",
+      "description": "Servant&#x27;s quarters available, Broadhurst ext 27, near kbl brewery and park 27, rooms are P1,300 that includes water and power, call watsapp for viewing 76104760 (if you want to share with partner or friend a further P400 would be required for utilities) Master bedroom in main house also available, large room with fitted wardrobes, P1,800 that includes water and power, deposit required equivalent to one month&#x27;s rent, call 76104760 for viewing\n\nStudent-friendly Botswana rental from a public classifieds post. Confirm availability, rent, and viewing on WhatsApp before visiting or paying.",
       "price": 1300,
       "room_type": "single",
       "gender_preference": "any",
       "area": "Broadhurst ext 27",
       "city": "Gaborone",
-      "address": "Gaborone | 12 September, 2024",
+      "address": "Gaborone | 20 August, 2024",
       "whatsapp_number": "26776104760",
-      "contact_name": "Nutty",
+      "contact_name": "Svitsai",
       "campus_ids": [
         1
       ],
       "custom_university_name": null,
       "source_label": "ZimCompass house share",
-      "source_url": "https://bw.zimcompass.com/product?id=78764",
+      "source_url": "https://bw.zimcompass.com/product?id=76143",
       "photo_urls": [
         "/data/web-rental-photos/auto-26776104760-rooms-to-rent-0.jpg"
       ],
@@ -419,5 +419,5 @@
       "fetched_at": "2026-08-06T15:26:33.787Z"
     }
   ],
-  "photos_mirrored": 12
+  "photos_mirrored": 20
 }
