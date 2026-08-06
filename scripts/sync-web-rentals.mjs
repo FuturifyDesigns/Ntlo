@@ -167,7 +167,7 @@ function parseZimcompass(html, source) {
     out.push({
       id: `auto-${slug}`.replace(/-+$/g, ''),
       title: title.length > 8 ? title : `Student room share ? ${area}`,
-      description: `${details}\n\nStudent-friendly Botswana rental from a public classifieds post. Confirm availability, rent, and viewing on WhatsApp before visiting or paying.`,
+      description: details || title,
       price,
       room_type: /single|servant|sq\b/i.test(`${title} ${details}`) ? 'single' : 'sharing',
       gender_preference: /female only|ladies only|girls only/i.test(details) ? 'female' : /male only|gents only/i.test(details) ? 'male' : 'any',
