@@ -224,11 +224,6 @@ export default function ListingContactPanel({ listing, onboardingId }) {
               <TrustedBadge level={TRUST_LEVEL.verifiedLandlord} compact />
             )}
           </div>
-          {external && listing.external_source_label && (
-            <p className="mt-1 text-xs text-muted">
-              {t('listings.externalSource', { source: listing.external_source_label })}
-            </p>
-          )}
         </div>
 
         {external && (
