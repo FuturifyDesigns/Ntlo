@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-08-06T15:31:00.673Z",
+  "updated_at": "2026-08-06T16:13:30.555Z",
   "source_count": 5,
   "sources": [
     "zimcompass-house-share-p1",
@@ -37,8 +37,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": "included",
-      "fetched_at": "2026-08-06T15:30:58.746Z",
-      "last_seen_at": "2026-08-06T15:31:00.671Z"
+      "fetched_at": "2026-08-06T16:13:28.726Z",
+      "last_seen_at": "2026-08-06T16:13:30.553Z"
     },
     {
       "id": "auto-26772417037-a-room-for-rent-in-a-2-and-half-to",
@@ -63,8 +63,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-06T15:30:58.748Z",
-      "last_seen_at": "2026-08-06T15:31:00.671Z"
+      "fetched_at": "2026-08-06T16:13:28.727Z",
+      "last_seen_at": "2026-08-06T16:13:30.553Z"
     },
     {
       "id": "auto-26771746344-house-to-share",
@@ -88,8 +88,8 @@
       "photo_urls": [],
       "deposit_pula": null,
       "utilities_included": "included",
-      "fetched_at": "2026-08-06T15:30:58.748Z",
-      "last_seen_at": "2026-08-06T15:31:00.671Z"
+      "fetched_at": "2026-08-06T16:13:28.728Z",
+      "last_seen_at": "2026-08-06T16:13:30.553Z"
     },
     {
       "id": "auto-26776001754-1-room-in-a-3-beds-to-share",
@@ -114,8 +114,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-06T15:30:58.749Z",
-      "last_seen_at": "2026-08-06T15:31:00.671Z"
+      "fetched_at": "2026-08-06T16:13:28.730Z",
+      "last_seen_at": "2026-08-06T16:13:30.553Z"
     },
     {
       "id": "auto-26773458500-house-to-share-p1600-block-8-gaborone",
@@ -140,8 +140,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-06T15:30:58.749Z",
-      "last_seen_at": "2026-08-06T15:31:00.671Z"
+      "fetched_at": "2026-08-06T16:13:28.730Z",
+      "last_seen_at": "2026-08-06T16:13:30.553Z"
     },
     {
       "id": "auto-26776325612-room-to-share-in-bontleng-malema",
@@ -165,8 +165,8 @@
       "photo_urls": [],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-06T15:30:58.750Z",
-      "last_seen_at": "2026-08-06T15:31:00.671Z"
+      "fetched_at": "2026-08-06T16:13:28.731Z",
+      "last_seen_at": "2026-08-06T16:13:30.553Z"
     },
     {
       "id": "auto-26774247384-house-mate-needed",
@@ -191,8 +191,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-06T15:30:58.750Z",
-      "last_seen_at": "2026-08-06T15:31:00.671Z"
+      "fetched_at": "2026-08-06T16:13:28.731Z",
+      "last_seen_at": "2026-08-06T16:13:30.553Z"
     },
     {
       "id": "auto-26776968183-beds",
@@ -216,8 +216,8 @@
       "photo_urls": [],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-06T15:30:58.750Z",
-      "last_seen_at": "2026-08-06T15:31:00.671Z"
+      "fetched_at": "2026-08-06T16:13:28.732Z",
+      "last_seen_at": "2026-08-06T16:13:30.554Z"
     },
     {
       "id": "auto-26776104760-rooms-to-rent",
@@ -242,8 +242,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-06T15:30:58.750Z",
-      "last_seen_at": "2026-08-06T15:31:00.672Z"
+      "fetched_at": "2026-08-06T16:13:28.732Z",
+      "last_seen_at": "2026-08-06T16:13:30.554Z"
     },
     {
       "id": "auto-26774215618-room-to-rent-gabane",
@@ -266,8 +266,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-06T15:30:58.750Z",
-      "last_seen_at": "2026-08-06T15:31:00.672Z"
+      "fetched_at": "2026-08-06T16:13:28.732Z",
+      "last_seen_at": "2026-08-06T16:13:30.554Z"
     },
     {
       "id": "auto-26771557655-room-for-rent-in-block-5",
@@ -292,8 +292,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-06T15:30:58.750Z",
-      "last_seen_at": "2026-08-06T15:31:00.672Z"
+      "fetched_at": "2026-08-06T16:13:28.733Z",
+      "last_seen_at": "2026-08-06T16:13:30.554Z"
     },
     {
       "id": "auto-26774517254-house-to-share",
@@ -318,8 +318,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-06T15:30:58.751Z",
-      "last_seen_at": "2026-08-06T15:31:00.672Z"
+      "fetched_at": "2026-08-06T16:13:28.733Z",
+      "last_seen_at": "2026-08-06T16:13:30.554Z"
     },
     {
       "id": "auto-26771557655-room-available-in-block-5-for-rent",
@@ -344,8 +344,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-06T15:30:58.751Z",
-      "last_seen_at": "2026-08-06T15:31:00.672Z"
+      "fetched_at": "2026-08-06T16:13:28.733Z",
+      "last_seen_at": "2026-08-06T16:13:30.554Z"
     },
     {
       "id": "auto-26771817707-3-bedroom-house-to-share",
@@ -368,8 +368,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-06T15:30:58.751Z",
-      "last_seen_at": "2026-08-06T15:31:00.672Z"
+      "fetched_at": "2026-08-06T16:13:28.733Z",
+      "last_seen_at": "2026-08-06T16:13:30.554Z"
     },
     {
       "id": "auto-26778439391-servant-s-quarters",
@@ -392,8 +392,8 @@
       "photo_urls": [],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-06T15:30:58.751Z",
-      "last_seen_at": "2026-08-06T15:31:00.672Z"
+      "fetched_at": "2026-08-06T16:13:28.733Z",
+      "last_seen_at": "2026-08-06T16:13:30.554Z"
     },
     {
       "id": "auto-26778439391-rooms-to-rent",
@@ -418,8 +418,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-06T15:30:58.751Z",
-      "last_seen_at": "2026-08-06T15:31:00.672Z"
+      "fetched_at": "2026-08-06T16:13:28.733Z",
+      "last_seen_at": "2026-08-06T16:13:30.554Z"
     },
     {
       "id": "auto-26778439391-rooms-for-rent",
@@ -442,13 +442,13 @@
       "photo_urls": [],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-06T15:30:58.751Z",
-      "last_seen_at": "2026-08-06T15:31:00.672Z"
+      "fetched_at": "2026-08-06T16:13:28.734Z",
+      "last_seen_at": "2026-08-06T16:13:30.554Z"
     },
     {
       "id": "auto-26772862253-am-looking-for-someone-who-can-share-wit",
       "title": "Am looking for someone who can share with me",
-      "description": "Looking for a housemate to share stand alone fitted 2 beds in Mogoditshane block 9. The whole house is 2700 your share is 1350 plus security 1350 WhatsAap 72862253\n\nStudent-friendly Botswana rental from a public classifieds post. Confirm availability, rent, and viewing on WhatsApp before visiting or paying.",
+      "description": "Looking for a housemate to share stand alone fitted 2 beds in Mogoditshane block 9. The whole house is 2700 your share is 1350 plus security 1350 WhatsAap 72862253",
       "price": 1350,
       "room_type": "sharing",
       "gender_preference": "any",
@@ -466,13 +466,13 @@
       "photo_urls": [],
       "deposit_pula": 1350,
       "utilities_included": null,
-      "fetched_at": "2026-08-06T15:30:58.846Z",
-      "last_seen_at": "2026-08-06T15:30:58.846Z"
+      "fetched_at": "2026-08-06T16:13:28.957Z",
+      "last_seen_at": "2026-08-06T16:13:28.957Z"
     },
     {
       "id": "auto-26775072260-need-house-to-rent",
       "title": "Need house to rent",
-      "description": "I need a house budget 1500,or less location, broadhurst, Tsholofelo east, block 3,or block 8.,i don&#x27;t mind to share 75072260 orange, 1st march\n\nStudent-friendly Botswana rental from a public classifieds post. Confirm availability, rent, and viewing on WhatsApp before visiting or paying.",
+      "description": "I need a house budget 1500,or less location, broadhurst, Tsholofelo east, block 3,or block 8.,i don&#x27;t mind to share 75072260 orange, 1st march",
       "price": 1500,
       "room_type": "sharing",
       "gender_preference": "any",
@@ -490,13 +490,13 @@
       "photo_urls": [],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-06T15:30:58.846Z",
-      "last_seen_at": "2026-08-06T15:30:58.846Z"
+      "fetched_at": "2026-08-06T16:13:28.957Z",
+      "last_seen_at": "2026-08-06T16:13:28.957Z"
     },
     {
       "id": "auto-26775671270-3-bedroom-house-with-a-room-to-share",
       "title": "3 bedroom house with a room to share",
-      "description": "Accommodation available P1100 in Mmopane near senior stop. Whatsup 75671270\n\nStudent-friendly Botswana rental from a public classifieds post. Confirm availability, rent, and viewing on WhatsApp before visiting or paying.",
+      "description": "Accommodation available P1100 in Mmopane near senior stop. Whatsup 75671270",
       "price": 1100,
       "room_type": "sharing",
       "gender_preference": "any",
@@ -516,13 +516,13 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-06T15:30:58.846Z",
-      "last_seen_at": "2026-08-06T15:30:58.846Z"
+      "fetched_at": "2026-08-06T16:13:28.957Z",
+      "last_seen_at": "2026-08-06T16:13:28.957Z"
     },
     {
       "id": "auto-26772463662-time-project-house-to-share-in-block-6-i",
       "title": "Time Project house to share in block 6. its a",
-      "description": "Time Project house to share in block 6. its a 3 bedroomed house ,nice security. your share is 1500 inclusive of bills. for details please contact 72463662\n\nStudent-friendly Botswana rental from a public classifieds post. Confirm availability, rent, and viewing on WhatsApp before visiting or paying.",
+      "description": "Time Project house to share in block 6. its a 3 bedroomed house ,nice security. your share is 1500 inclusive of bills. for details please contact 72463662",
       "price": 1500,
       "room_type": "sharing",
       "gender_preference": "any",
@@ -540,13 +540,13 @@
       "photo_urls": [],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-06T15:30:58.846Z",
-      "last_seen_at": "2026-08-06T15:30:58.846Z"
+      "fetched_at": "2026-08-06T16:13:28.957Z",
+      "last_seen_at": "2026-08-06T16:13:28.957Z"
     },
     {
       "id": "auto-26772237516-two-bedroom-house-looking-gor-someone-to",
       "title": "Two bedroom house looking gor someone to share",
-      "description": "Two bedroom house open plan kitchen fitted and both bedrooms fitted wardrobes and airconditions.Burglar doors in both sitting room and kitchen. In a secure and spacious multi res with dura wall,electric fence and motor gate. Price P1375 including water bill plus P1250 security. Location Mogoditshane block5 Contacts 72237516\n\nStudent-friendly Botswana rental from a public classifieds post. Confirm availability, rent, and viewing on WhatsApp before visiting or paying.",
+      "description": "Two bedroom house open plan kitchen fitted and both bedrooms fitted wardrobes and airconditions.Burglar doors in both sitting room and kitchen. In a secure and spacious multi res with dura wall,electric fence and motor gate. Price P1375 including water bill plus P1250 security. Location Mogoditshane block5 Contacts 72237516",
       "price": 1375,
       "room_type": "sharing",
       "gender_preference": "any",
@@ -566,13 +566,13 @@
       ],
       "deposit_pula": null,
       "utilities_included": "included",
-      "fetched_at": "2026-08-06T15:30:58.846Z",
-      "last_seen_at": "2026-08-06T15:30:58.846Z"
+      "fetched_at": "2026-08-06T16:13:28.957Z",
+      "last_seen_at": "2026-08-06T16:13:28.957Z"
     },
     {
       "id": "auto-26774549287-house-to-shsre",
       "title": "House to shsre",
-      "description": "2 bedroom house to share in Mmopane block 1 for P1200 excluding utilities. Next to the main road. Available. Phone 74549287/72264824\n\nStudent-friendly Botswana rental from a public classifieds post. Confirm availability, rent, and viewing on WhatsApp before visiting or paying.",
+      "description": "2 bedroom house to share in Mmopane block 1 for P1200 excluding utilities. Next to the main road. Available. Phone 74549287/72264824",
       "price": 1200,
       "room_type": "sharing",
       "gender_preference": "any",
@@ -592,13 +592,13 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-06T15:30:58.847Z",
-      "last_seen_at": "2026-08-06T15:30:58.847Z"
+      "fetched_at": "2026-08-06T16:13:28.957Z",
+      "last_seen_at": "2026-08-06T16:13:28.957Z"
     },
     {
       "id": "auto-26775362884-house-to-share",
       "title": "House to share",
-      "description": "A room in a 2nd half available for rent in Mogoditshane block 7!5 minutes walk to Mogoditshane route 7 combies!!We share bathroom and kitchen.Very spacious rooms, has ceiling and tiled!The yard is paved.No landlord!!Your share is P1050 plus P500 security.. Call/App 75362884\n\nStudent-friendly Botswana rental from a public classifieds post. Confirm availability, rent, and viewing on WhatsApp before visiting or paying.",
+      "description": "A room in a 2nd half available for rent in Mogoditshane block 7!5 minutes walk to Mogoditshane route 7 combies!!We share bathroom and kitchen.Very spacious rooms, has ceiling and tiled!The yard is paved.No landlord!!Your share is P1050 plus P500 security.. Call/App 75362884",
       "price": 1050,
       "room_type": "sharing",
       "gender_preference": "any",
@@ -620,13 +620,13 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-06T15:30:58.847Z",
-      "last_seen_at": "2026-08-06T15:30:58.847Z"
+      "fetched_at": "2026-08-06T16:13:28.958Z",
+      "last_seen_at": "2026-08-06T16:13:28.958Z"
     },
     {
       "id": "auto-26775920949-house-for-rent",
       "title": "House for rent",
-      "description": "1 room to share in 2 beds available in Tsholofelo by yellow tuckshop. Your share P1400 Security 500 Call or app 75920949/72806992 Fee 100 See Translation\n\nStudent-friendly Botswana rental from a public classifieds post. Confirm availability, rent, and viewing on WhatsApp before visiting or paying.",
+      "description": "1 room to share in 2 beds available in Tsholofelo by yellow tuckshop. Your share P1400 Security 500 Call or app 75920949/72806992 Fee 100 See Translation",
       "price": 1400,
       "room_type": "sharing",
       "gender_preference": "any",
@@ -644,13 +644,13 @@
       "photo_urls": [],
       "deposit_pula": 500,
       "utilities_included": null,
-      "fetched_at": "2026-08-06T15:30:58.847Z",
-      "last_seen_at": "2026-08-06T15:30:58.847Z"
+      "fetched_at": "2026-08-06T16:13:28.958Z",
+      "last_seen_at": "2026-08-06T16:13:28.958Z"
     },
     {
       "id": "auto-26774250032-three-bedroomed-house-to-share-in-block",
       "title": "Three bedroomed house to share in Block 5 Francistown...call 74250032",
-      "description": "Three bedroomed house to share in Block 5 Francistown...call: 74250032 Rent: P 730.00 See Translation\n\nStudent-friendly Botswana rental from a public classifieds post. Confirm availability, rent, and viewing on WhatsApp before visiting or paying.",
+      "description": "Three bedroomed house to share in Block 5 Francistown...call: 74250032 Rent: P 730.00 See Translation",
       "price": 730,
       "room_type": "sharing",
       "gender_preference": "any",
@@ -666,13 +666,13 @@
       "photo_urls": [],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-06T15:30:58.847Z",
-      "last_seen_at": "2026-08-06T15:30:58.847Z"
+      "fetched_at": "2026-08-06T16:13:28.958Z",
+      "last_seen_at": "2026-08-06T16:13:28.958Z"
     },
     {
       "id": "auto-26778060149-house-to-share",
       "title": "House to share",
-      "description": "House to share 2 rooms available in tloaneng app me 78060149\n\nStudent-friendly Botswana rental from a public classifieds post. Confirm availability, rent, and viewing on WhatsApp before visiting or paying.",
+      "description": "House to share 2 rooms available in tloaneng app me 78060149",
       "price": 750,
       "room_type": "sharing",
       "gender_preference": "any",
@@ -692,13 +692,13 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-06T15:30:58.848Z",
-      "last_seen_at": "2026-08-06T15:30:58.848Z"
+      "fetched_at": "2026-08-06T16:13:28.958Z",
+      "last_seen_at": "2026-08-06T16:13:28.958Z"
     },
     {
       "id": "auto-26774722297-office-to-share-available-at-main-mall-e",
       "title": "Office to Share available at Main Mall Embassy Chambers Office",
-      "description": "Office to Share at Main Mall Call 74722297 Your share 1.500 BWP Location: Embassy Chambers First Floor Office # 21 Next to Shell Filling Station\n\nStudent-friendly Botswana rental from a public classifieds post. Confirm availability, rent, and viewing on WhatsApp before visiting or paying.",
+      "description": "Office to Share at Main Mall Call 74722297 Your share 1.500 BWP Location: Embassy Chambers First Floor Office # 21 Next to Shell Filling Station",
       "price": 1500,
       "room_type": "sharing",
       "gender_preference": "any",
@@ -716,13 +716,13 @@
       "photo_urls": [],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-06T15:30:58.848Z",
-      "last_seen_at": "2026-08-06T15:30:58.848Z"
+      "fetched_at": "2026-08-06T16:13:28.958Z",
+      "last_seen_at": "2026-08-06T16:13:28.958Z"
     },
     {
       "id": "auto-26772354971-house-to-share",
       "title": "House to share",
-      "description": "A room to rent in a house to share. Phase 4, walking distance to game city. Fitted room, paved yard, screen wall, motorized gate. Rent is 1800 per month plus equivalent security. Call or app 72354971.\n\nStudent-friendly Botswana rental from a public classifieds post. Confirm availability, rent, and viewing on WhatsApp before visiting or paying.",
+      "description": "A room to rent in a house to share. Phase 4, walking distance to game city. Fitted room, paved yard, screen wall, motorized gate. Rent is 1800 per month plus equivalent security. Call or app 72354971.",
       "price": 1800,
       "room_type": "sharing",
       "gender_preference": "any",
@@ -740,13 +740,13 @@
       "photo_urls": [],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-06T15:30:58.848Z",
-      "last_seen_at": "2026-08-06T15:30:58.848Z"
+      "fetched_at": "2026-08-06T16:13:28.958Z",
+      "last_seen_at": "2026-08-06T16:13:28.958Z"
     },
     {
       "id": "auto-26775085701-room-for-rent-in-3-beds-in-bew-naledi-1",
       "title": "Room for rent in 3 beds in Bew Naledi 1.5",
-      "description": "Room with fitted wardrobe available in a 3 beds to share. Looking for a female room mate. Security payable in 2 installments Available immediately 75085701\n\nStudent-friendly Botswana rental from a public classifieds post. Confirm availability, rent, and viewing on WhatsApp before visiting or paying.",
+      "description": "Room with fitted wardrobe available in a 3 beds to share. Looking for a female room mate. Security payable in 2 installments Available immediately 75085701",
       "price": 1500,
       "room_type": "sharing",
       "gender_preference": "any",
@@ -764,13 +764,13 @@
       "photo_urls": [],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-06T15:30:58.848Z",
-      "last_seen_at": "2026-08-06T15:30:58.848Z"
+      "fetched_at": "2026-08-06T16:13:28.958Z",
+      "last_seen_at": "2026-08-06T16:13:28.958Z"
     },
     {
       "id": "auto-26774284733-house-to-share",
       "title": "House to share",
-      "description": "House to share near bbs available NOW. Fitted kichen (no stove), closet, geyser, screen wall, secure location, 3 minutes walk into bbs, combi access to most areas. P1700 with equivalent security, bills not included. Call/app 74284733\n\nStudent-friendly Botswana rental from a public classifieds post. Confirm availability, rent, and viewing on WhatsApp before visiting or paying.",
+      "description": "House to share near bbs available NOW. Fitted kichen (no stove), closet, geyser, screen wall, secure location, 3 minutes walk into bbs, combi access to most areas. P1700 with equivalent security, bills not included. Call/app 74284733",
       "price": 1700,
       "room_type": "sharing",
       "gender_preference": "any",
@@ -788,13 +788,13 @@
       "photo_urls": [],
       "deposit_pula": 0,
       "utilities_included": null,
-      "fetched_at": "2026-08-06T15:30:58.848Z",
-      "last_seen_at": "2026-08-06T15:30:58.848Z"
+      "fetched_at": "2026-08-06T16:13:28.958Z",
+      "last_seen_at": "2026-08-06T16:13:28.958Z"
     },
     {
       "id": "auto-26777105801-3-beds-2-baths-room-only",
       "title": "3 Beds 2 Baths Room only",
-      "description": "Three bedroomed house to share in Gabane, Lonaka ward, next to Gabane Primary School. Your share P1000. Call 77105801 for viewing and further info.\n\nStudent-friendly Botswana rental from a public classifieds post. Confirm availability, rent, and viewing on WhatsApp before visiting or paying.",
+      "description": "Three bedroomed house to share in Gabane, Lonaka ward, next to Gabane Primary School. Your share P1000. Call 77105801 for viewing and further info.",
       "price": 1000,
       "room_type": "sharing",
       "gender_preference": "any",
@@ -812,13 +812,13 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-06T15:30:58.938Z",
-      "last_seen_at": "2026-08-06T15:30:58.938Z"
+      "fetched_at": "2026-08-06T16:13:29.072Z",
+      "last_seen_at": "2026-08-06T16:13:29.072Z"
     },
     {
       "id": "auto-26774235150-a-room-in-2beds",
       "title": "A room in 2beds",
-      "description": "A big room in a 2beds, near Mogoditshane Clinic, to share kitchen and bathroom. Room is not fitted. Walled with electric gate. P1400 with equal amount of security which can be paid in 2months. Call 74235150/ 74380900\n\nStudent-friendly Botswana rental from a public classifieds post. Confirm availability, rent, and viewing on WhatsApp before visiting or paying.",
+      "description": "A big room in a 2beds, near Mogoditshane Clinic, to share kitchen and bathroom. Room is not fitted. Walled with electric gate. P1400 with equal amount of security which can be paid in 2months. Call 74235150/ 74380900",
       "price": 1400,
       "room_type": "sharing",
       "gender_preference": "any",
@@ -836,13 +836,13 @@
       "photo_urls": [],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-06T15:30:58.938Z",
-      "last_seen_at": "2026-08-06T15:30:58.938Z"
+      "fetched_at": "2026-08-06T16:13:29.073Z",
+      "last_seen_at": "2026-08-06T16:13:29.073Z"
     },
     {
       "id": "auto-26772514386-gabs-phase-2-1-single-person-needed-to-s",
       "title": "Gabs Phase 2 1 single person needed to share this",
-      "description": "Single person needed to share a 3 bedroomed house with another single person occupying 2 bedrooms at Gabs Phase 2. The house has 2 bathrooms, kitchen, lounge & carport. Your share of rental will be P1700/m &#x2B; security call 72514386.\n\nStudent-friendly Botswana rental from a public classifieds post. Confirm availability, rent, and viewing on WhatsApp before visiting or paying.",
+      "description": "Single person needed to share a 3 bedroomed house with another single person occupying 2 bedrooms at Gabs Phase 2. The house has 2 bathrooms, kitchen, lounge & carport. Your share of rental will be P1700/m &#x2B; security call 72514386.",
       "price": 1700,
       "room_type": "single",
       "gender_preference": "any",
@@ -862,13 +862,13 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-06T15:30:58.939Z",
-      "last_seen_at": "2026-08-06T15:30:58.939Z"
+      "fetched_at": "2026-08-06T16:13:29.073Z",
+      "last_seen_at": "2026-08-06T16:13:29.073Z"
     },
     {
       "id": "auto-26777356852-house-to-share-available",
       "title": "House to share available",
-      "description": "A clean and mature person wanted to share a bedroomed house in mmopane block1 behind complex...the house is fitted with aircon stove and geyser...bedrooms and kitchen also fitted... Ur share is 1500 plus equivalent security Contact 77356852\n\nStudent-friendly Botswana rental from a public classifieds post. Confirm availability, rent, and viewing on WhatsApp before visiting or paying.",
+      "description": "A clean and mature person wanted to share a bedroomed house in mmopane block1 behind complex...the house is fitted with aircon stove and geyser...bedrooms and kitchen also fitted... Ur share is 1500 plus equivalent security Contact 77356852",
       "price": 1500,
       "room_type": "sharing",
       "gender_preference": "any",
@@ -888,8 +888,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-06T15:30:58.939Z",
-      "last_seen_at": "2026-08-06T15:30:58.939Z"
+      "fetched_at": "2026-08-06T16:13:29.073Z",
+      "last_seen_at": "2026-08-06T16:13:29.073Z"
     }
   ],
   "photos_mirrored": 20
