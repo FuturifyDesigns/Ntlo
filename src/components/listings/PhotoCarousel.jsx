@@ -9,7 +9,7 @@ const CARD_INTERVAL = 3000
 function hasRealUrl(url) {
   if (typeof url !== 'string') return false
   const trimmed = url.trim()
-  return /^https?:\/\//i.test(trimmed) || trimmed.startsWith('/data/')
+  return /^https?:\/\//i.test(trimmed) || trimmed.startsWith('/data/') || trimmed.startsWith('/images/')
 }
 
 function normalizePhotos(photos, compact) {
@@ -26,32 +26,19 @@ function normalizePhotos(photos, compact) {
     .filter(Boolean)
 }
 
-function CoverPlaceholder({ title, subtitle, compact }) {
+function CoverPlaceholder({ compact }) {
   return (
-    <div
-      className="absolute inset-0 flex flex-col items-center justify-center px-4 text-center bg-[linear-gradient(145deg,#1A1A2E_0%,#2a2a45_42%,#3d3420_100%)]"
-      aria-hidden
-    >
-      <div
-        className="pointer-events-none absolute inset-0 opacity-30"
-        style={{
-          backgroundImage:
-            'radial-gradient(circle at 20% 20%, rgba(200,168,75,0.35), transparent 42%), radial-gradient(circle at 80% 70%, rgba(226,201,126,0.2), transparent 40%)',
-        }}
-      />
-      <p
+    <div className="absolute inset-0 flex items-center justify-center bg-white" aria-hidden>
+      <img
+        src="/images/listing-placeholder.png"
+        alt=""
         className={cn(
-          'relative z-[1] max-w-[90%] font-display font-semibold leading-snug text-white',
-          compact ? 'text-sm sm:text-base' : 'text-lg sm:text-2xl'
+          'h-full w-full object-contain p-4 sm:p-6',
+          compact ? 'max-h-full' : 'max-h-full'
         )}
-      >
-        {title || 'Student room'}
-      </p>
-      {subtitle ? (
-        <p className={cn('relative z-[1] mt-1.5 text-white/75', compact ? 'text-[11px]' : 'text-sm')}>
-          {subtitle}
-        </p>
-      ) : null}
+        draggable={false}
+        decoding="async"
+      />
     </div>
   )
 }
@@ -158,11 +145,7 @@ export default function PhotoCarousel({
     >
       <div className={cn('relative', aspectClass)}>
         {empty ? (
-          <CoverPlaceholder
-            title={placeholderTitle || altPrefix}
-            subtitle={placeholderSubtitle}
-            compact={compact}
-          />
+          <CoverPlaceholder compact={compact} />
         ) : (
           images.map((image, i) => {
             if (broken[i]) return null

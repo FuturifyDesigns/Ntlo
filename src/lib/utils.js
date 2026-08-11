@@ -3,6 +3,9 @@ export function formatPrice(amount) {
   return `P${Number(amount).toLocaleString('en-BW')}`
 }
 
+/** Default image for listings with no photos. */
+export const LISTING_PLACEHOLDER_IMAGE = '/images/listing-placeholder.png'
+
 export function getWhatsAppLink(phone, listingTitle) {
   const message = encodeURIComponent(
     `Hi! I saw your listing "${listingTitle}" and I'm interested. Is it still available?`
@@ -88,9 +91,9 @@ export function relativeTimeParts(dateInput) {
 
 export function getCoverPhoto(listing) {
   const photos = getListingPhotos(listing)
-  if (!photos.length) return null
+  if (!photos.length) return LISTING_PLACEHOLDER_IMAGE
   const cover = photos.find((p) => p.is_cover)
-  return cover?.url || photos[0]?.url
+  return cover?.url || photos[0]?.url || LISTING_PLACEHOLDER_IMAGE
 }
 
 export function getListingPhotos(listing) {

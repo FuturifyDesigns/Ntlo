@@ -11,7 +11,7 @@ import Badge from '../components/ui/Badge'
 import Card from '../components/ui/Card'
 import PageShell from '../components/layout/PageShell'
 import { Skeleton } from '../components/ui/Skeleton'
-import { formatPrice, getCoverPhoto } from '../lib/utils'
+import { formatPrice, getCoverPhoto, LISTING_PLACEHOLDER_IMAGE } from '../lib/utils'
 import ListingMap from '../components/listings/ListingMap'
 import LandlordWelcomeBanner from '../components/landlord/LandlordWelcomeBanner'
 import LandlordVerifyNudgeBanner from '../components/landlord/LandlordVerifyNudgeBanner'
@@ -25,8 +25,6 @@ import { getListingLandlordActions } from '../lib/listingReviewPolicy'
 import { MAPS_ENABLED } from '../lib/googleMaps'
 import { OnboardingReplayButton, useOnboardingPageState } from '../context/OnboardingContext'
 import { useLandlordInquiries } from '../hooks/useHousing'
-
-const PLACEHOLDER = 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400&q=80'
 
 const fade = {
   initial: { opacity: 0, y: 6 },
@@ -319,7 +317,7 @@ export default function LandlordDashboard() {
                     }`}
                   >
                     <img
-                      src={getCoverPhoto(listing) || PLACEHOLDER}
+                      src={getCoverPhoto(listing) || LISTING_PLACEHOLDER_IMAGE}
                       alt={listing.title}
                       className="h-20 w-28 shrink-0 rounded-lg object-cover"
                     />
