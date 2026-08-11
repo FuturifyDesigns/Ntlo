@@ -1,5 +1,5 @@
 export function formatPrice(amount) {
-  if (amount == null) return 'P—'
+  if (amount == null || amount === '' || Number.isNaN(Number(amount))) return 'POA'
   return `P${Number(amount).toLocaleString('en-BW')}`
 }
 

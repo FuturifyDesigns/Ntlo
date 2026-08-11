@@ -480,7 +480,10 @@ CAMPUS_BY_ID[8] = { id: 8, short_name: 'BUAN', name: 'Botswana University of Agr
 
 /** Convert auto-sync feed JSON rows into listing objects. */
 export function feedItemToListing(item) {
-  if (!item?.whatsapp_number || !item?.title || !item?.price) return null
+  if (!item?.whatsapp_number || !item?.title) return null
+  const priceOnRequest = Boolean(item.price_on_request) || item.price == null || item.price === ''
+  const price = priceOnRequest ? null : Number(item.price)
+  if (!priceOnRequest && (!Number.isFinite(price) || price <= 0)) return null
   const campusIds = Array.isArray(item.campus_ids) ? item.campus_ids.map(Number).filter(Boolean) : []
   const primaryId = campusIds[0] || null
   const campus = primaryId ? CAMPUS_BY_ID[primaryId] : null
@@ -492,7 +495,7 @@ export function feedItemToListing(item) {
     id: id.replace(/^web-/, '').replace(/^auto-/, ''),
     title: item.title,
     description: item.description || item.title,
-    price: Number(item.price),
+    price,
     room_type: item.room_type || 'sharing',
     gender_preference: item.gender_preference || 'any',
     area: item.area || item.city || 'Gaborone',
@@ -548,8 +551,8 @@ export function filterWebRentals(filters = {}, catalog = null) {
   if (availableOnly) {
     rows = rows.filter((l) => l.occupancy_status === 'available')
   }
-  if (minPrice) rows = rows.filter((l) => l.price >= Number(minPrice))
-  if (maxPrice) rows = rows.filter((l) => l.price <= Number(maxPrice))
+  if (minPrice) rows = rows.filter((l) => l.price != null && l.price >= Number(minPrice))
+  if (maxPrice) rows = rows.filter((l) => l.price != null && l.price <= Number(maxPrice))
   if (roomType) rows = rows.filter((l) => l.room_type === roomType)
   if (genderPreference && genderPreference !== 'any') {
     rows = rows.filter((l) => l.gender_preference === genderPreference || l.gender_preference === 'any')
@@ -598,8 +601,8 @@ export function mergeWebIntoListings(dbListings, filters = {}, { page = 0, pageS
 
   let merged = [...db, ...web]
 
-  if (sortBy === 'price_asc') merged.sort((a, b) => a.price - b.price)
-  else if (sortBy === 'price_desc') merged.sort((a, b) => b.price - a.price)
+  if (sortBy === 'price_asc') merged.sort((a, b) => (a.price ?? Number.POSITIVE_INFINITY) - (b.price ?? Number.POSITIVE_INFINITY))
+  else if (sortBy === 'price_desc') merged.sort((a, b) => (b.price ?? -1) - (a.price ?? -1))
   else if (sortBy === 'distance') {
     merged.sort((a, b) => (a.distance_to_campus ?? 999) - (b.distance_to_campus ?? 999))
   } else {

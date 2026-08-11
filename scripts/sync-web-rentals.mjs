@@ -1,7 +1,12 @@
 /**
  * Daily Botswana student-rental aggregator.
- * Pulls public classifieds (ZimCompass house-share pages), filters for
+ * Pulls public classifieds from multiple Botswana housing sites, filters for
  * student-suitable rooms, mirrors photos, and writes public/data/web-rentals-feed.json.
+ *
+ * Sources (public HTML only):
+ *  - ZimCompass house-share + houses-for-rent
+ *  - Ezilet Botswana student accommodation listings
+ *  - TswanaHome residential for-rent (student-budget filter)
  *
  * Used by CI cron + local: node scripts/sync-web-rentals.mjs
  *
@@ -20,28 +25,52 @@ const PHOTO_PUBLIC_PREFIX = '/data/web-rental-photos'
 
 /** Keep listings that fall off page-1 for this many days so Ntlo stays stocked. */
 const KEEP_DAYS = 21
-/** How many ZimCompass result pages to crawl each run. */
-const ZIMCOMPASS_PAGES = 10
+/** How many ZimCompass result pages to crawl each run (per category). */
+const ZIMCOMPASS_PAGES = 8
+const UA = 'NtloStudentHousingBot/1.0 (+https://ntlo.online; student accommodation aggregator)'
 
-function zimcompassSources() {
+function zimcompassCategorySources(path, label) {
   const pages = []
   for (let page = 1; page <= ZIMCOMPASS_PAGES; page += 1) {
     pages.push({
-      id: `zimcompass-house-share-p${page}`,
-      label: 'ZimCompass house share',
+      id: `zimcompass-${path}-p${page}`,
+      kind: 'zimcompass',
+      label,
       url: page === 1
-        ? 'https://bw.zimcompass.com/house-share'
-        : `https://bw.zimcompass.com/house-share?page=${page}`,
+        ? `https://bw.zimcompass.com/${path}`
+        : `https://bw.zimcompass.com/${path}?page=${page}`,
     })
   }
   return pages
 }
 
-const SOURCES = [...zimcompassSources()]
+const EZILET_SEEDS = [
+  'https://ezilet.net/listing/bogatsu-ext-10-student-accommodation/',
+  'https://ezilet.net/listing/mohammed-ext-10-student-accommodation/',
+  'https://ezilet.net/listing/tulo-student-residence/',
+  'https://ezilet.net/listing/tlokweng-student-accommodation/',
+]
+
+const EZILET_SEARCHES = [
+  'https://ezilet.net/?s=gaborone+student',
+  'https://ezilet.net/?s=botswana+student+accommodation',
+  'https://ezilet.net/?s=university+of+botswana',
+  'https://ezilet.net/?s=tlokweng+student',
+  'https://ezilet.net/?s=limkokwing+botswana',
+]
+
+const SOURCES = [
+  ...zimcompassCategorySources('house-share', 'ZimCompass house share'),
+  ...zimcompassCategorySources('houses-for-rent', 'ZimCompass houses for rent'),
+  { id: 'ezilet-botswana', kind: 'ezilet', label: 'Ezilet student accommodation' },
+  { id: 'tswanahome-for-rent', kind: 'tswanahome', label: 'TswanaHome for rent', url: 'https://www.tswanahome.com/status/for-rent/' },
+]
 
 const STUDENT_HINT = /\b(student|share|sharing|room|rooms|bed|beds|ub\b|botho|campus|university|college|bac\b|biust|limkokwing|gaborone|mogoditshane|tlokweng|gabane|palapye|francistown|ledumadumane|broadhurst|block\s*\d)\b/i
-const NOISE = /\b(bmw|toyota|nissan|honda|mercedes|car diagnosis|nail technician|botswana ?post|chief|zambia|mthatha|ongwediva|namibia|messenger)\b/i
-const BW_CITIES = /\b(gaborone|francistown|palapye|maun|lobatse|selebi|serowe|molepolole|mogoditshane|tlokweng|gabane|kweneng|broadhurst|block\s*\d|ledumadumane|phase\s*\d|thito|satellite|molapo)\b/i
+const NOISE = /\b(bmw|toyota|nissan|honda|mercedes|car diagnosis|nail technician|botswana ?post|chief|zambia|mthatha|ongwediva|namibia|messenger|office|warehouse|industrial|shop|retail|commercial)\b/i
+const BW_CITIES = /\b(gaborone|francistown|palapye|maun|lobatse|selebi|serowe|molepolole|mogoditshane|tlokweng|gabane|kweneng|broadhurst|block\s*\d|ledumadumane|phase\s*\d|thito|satellite|molapo|extension\s*\d+)\b/i
+const BW_MARKER = /\b(botswana|gaborone|francistown|palapye|tlokweng|mogoditshane|gabane|ub\b|university of botswana|botho|limkokwing|buan|biust)\b/i
+const NON_BW = /\b(grenoble|norwich|winchester|colchester|st\.?\s*louis|uj\b|doornfontein|nsfas|ukzn|johannesburg|pretoria|cape town|namibia|zambia|mthatha)\b/i
 
 function stripTags(html) {
   return String(html || '')
@@ -129,7 +158,8 @@ function isStudentRentable(title, details, location) {
 }
 
 function listingKey(row) {
-  return `${String(row.whatsapp_number || '').replace(/\D/g, '')}|${row.price}|${String(row.title || '').slice(0, 24).toLowerCase()}`
+  const pricePart = row.price_on_request || row.price == null ? 'poa' : row.price
+  return `${String(row.whatsapp_number || '').replace(/\D/g, '')}|${pricePart}|${String(row.title || '').slice(0, 24).toLowerCase()}`
 }
 
 function parseZimcompass(html, source) {
@@ -166,7 +196,7 @@ function parseZimcompass(html, source) {
     const now = new Date().toISOString()
     out.push({
       id: `auto-${slug}`.replace(/-+$/g, ''),
-      title: title.length > 8 ? title : `Student room share ? ${area}`,
+      title: title.length > 8 ? title : `Student room share — ${area}`,
       description: details || title,
       price,
       room_type: /single|servant|sq\b/i.test(`${title} ${details}`) ? 'single' : 'sharing',
@@ -193,16 +223,190 @@ function parseZimcompass(html, source) {
   return out
 }
 
-async function fetchSource(source) {
-  const res = await fetch(source.url, {
+async function fetchHtml(url) {
+  const res = await fetch(url, {
     headers: {
-      'User-Agent': 'NtloStudentHousingBot/1.0 (+https://ntlo.online; student accommodation aggregator)',
-      Accept: 'text/html',
+      'User-Agent': UA,
+      Accept: 'text/html,application/xhtml+xml',
     },
   })
-  if (!res.ok) throw new Error(`${source.id} HTTP ${res.status}`)
-  const html = await res.text()
-  if (source.id.startsWith('zimcompass')) return parseZimcompass(html, source)
+  if (!res.ok) throw new Error(`HTTP ${res.status} for ${url}`)
+  return res.text()
+}
+
+function parseEziletDetail(html, url, source) {
+  const title = stripTags((html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i) || [])[1] || '')
+  if (!title) return null
+  const plain = stripTags(html)
+  if (NON_BW.test(`${title} ${plain}`) && !BW_MARKER.test(`${title} ${url} ${plain}`)) return null
+  if (!BW_MARKER.test(`${title} ${url} ${plain}`)) return null
+  if (NOISE.test(plain) && !/student|accommodation|room|share/i.test(title)) return null
+
+  const phone = extractPhone(html) || extractPhone(plain)
+  if (!phone) return null
+
+  const rentBlock = stripTags((html.match(/block-field-rent[\s\S]{0,400}/i) || [])[0] || '')
+  let price = extractPrice(rentBlock, plain)
+  const priceOnRequest = !price && /POA|price on (application|request)|contact (seller|for price)/i.test(`${rentBlock} ${plain}`)
+  if (!price && !priceOnRequest) {
+    // Still keep Botswana student residences even when rent is only "ask on WhatsApp".
+    price = null
+  }
+
+  const suburb = stripTags((html.match(/Suburb[\s\S]{0,120}?<[^>]+>([^<]{3,80})</i) || html.match(/Suburb\s+([A-Za-z0-9 ,.-]{3,80})/i) || [])[1] || '')
+  const cityRaw = stripTags((html.match(/City[\s\S]{0,80}?<[^>]+>([^<]{3,40})</i) || [])[1] || '')
+  const city = guessCity(`${suburb} ${cityRaw}`, plain)
+  const area = guessArea(suburb || title, plain, city)
+  const campus = guessCampuses(area, city, `${title} ${plain}`)
+  const desc = stripTags((html.match(/Description[\s\S]{0,40}?<(?:div|p)[^>]*>([\s\S]*?)<\/(?:div|p)>/i) || [])[1] || '')
+    || plain.slice(0, 280)
+  const imgs = [...new Set([...html.matchAll(/src="(https:\/\/ezilet\.net\/wp-content\/uploads\/[^"]+\.(?:jpe?g|png|webp))"/gi)].map((m) => m[1]))]
+    .filter((u) => !/logo|icon|avatar|placeholder/i.test(u))
+  const gender = /female|girl|ladies only/i.test(`${title} ${desc}`) ? 'female' : /male only|gents only/i.test(`${title} ${desc}`) ? 'male' : 'any'
+  const now = new Date().toISOString()
+  const slug = `${phone}-${title.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 40)}`
+
+  return {
+    id: `auto-ezilet-${slug}`.replace(/-+$/g, ''),
+    title,
+    description: desc || title,
+    price: priceOnRequest ? null : price,
+    price_on_request: Boolean(priceOnRequest || price == null),
+    room_type: /single|ensuite|self.?contained/i.test(`${title} ${desc}`) ? 'single' : 'sharing',
+    gender_preference: gender,
+    area,
+    city,
+    address: suburb || `${area}, ${city}`,
+    whatsapp_number: phone,
+    contact_name: 'Ezilet listing',
+    campus_ids: campus.campus_ids,
+    custom_university_name: campus.custom_university_name,
+    source_label: source.label,
+    source_url: url,
+    photo_urls: imgs.slice(0, 4),
+    deposit_pula: null,
+    utilities_included: /wifi|wi-fi|utilities included|bills included/i.test(desc) ? 'included' : null,
+    fetched_at: now,
+    last_seen_at: now,
+  }
+}
+
+async function fetchEzilet(source) {
+  const queue = new Set(EZILET_SEEDS)
+  for (const searchUrl of EZILET_SEARCHES) {
+    try {
+      const html = await fetchHtml(searchUrl)
+      for (const href of [...html.matchAll(/href="(https:\/\/ezilet\.net\/listing\/[^"#]+)"/gi)].map((m) => m[1])) {
+        if (BW_MARKER.test(href) || /bogatsu|mohammed|tulo|tlokweng|gaborone|botswana|ub-/i.test(href)) {
+          queue.add(href)
+        }
+      }
+      // Also keep any listing that search returned if page itself mentions Botswana.
+      if (BW_MARKER.test(html)) {
+        for (const href of [...html.matchAll(/href="(https:\/\/ezilet\.net\/listing\/[^"#]+)"/gi)].map((m) => m[1])) {
+          queue.add(href)
+        }
+      }
+    } catch (err) {
+      console.warn(`ezilet search skip ${searchUrl}:`, err.message || err)
+    }
+  }
+
+  const out = []
+  const seen = new Set()
+  for (const url of queue) {
+    if (seen.has(url)) continue
+    seen.add(url)
+    try {
+      const html = await fetchHtml(url)
+      const row = parseEziletDetail(html, url, source)
+      if (row) out.push(row)
+      // Discover related Botswana listings linked from this page.
+      for (const href of [...html.matchAll(/href="(https:\/\/ezilet\.net\/listing\/[^"#]+)"/gi)].map((m) => m[1])) {
+        if (!seen.has(href) && (BW_MARKER.test(href) || /bogatsu|mohammed|tulo|tlokweng|gaborone|botswana/i.test(href))) {
+          queue.add(href)
+        }
+      }
+    } catch (err) {
+      console.warn(`ezilet detail skip ${url}:`, err.message || err)
+    }
+  }
+  return out
+}
+
+function parseTswanahomeDetail(html, url, source) {
+  const title = stripTags((html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i) || [])[1] || '')
+  if (!title) return null
+  if (/office|warehouse|industrial|shop|retail|biz|commercial/i.test(`${title} ${url}`)) return null
+
+  const plain = stripTags(html)
+  if (NOISE.test(`${title} ${plain}`) && !STUDENT_HINT.test(`${title} ${plain}`)) return null
+  if (!STUDENT_HINT.test(`${title} ${plain}`)) return null
+
+  const price = extractPrice(plain, title)
+  if (!price || price > 4500) return null // keep student-budget residential only
+
+  const phones = [...new Set((html.match(/(?:\+?\s*267[\s-]*)?(7[1-9]\d{6})\b/g) || [])
+    .map((p) => `267${p.replace(/\D/g, '').replace(/^267/, '')}`))]
+  const phone = phones.find((p) => !p.endsWith('75159069')) || phones[0] || null
+  if (!phone) return null
+
+  const city = guessCity(title, plain)
+  const area = guessArea(title, plain, city)
+  const campus = guessCampuses(area, city, `${title} ${plain}`)
+  const imgs = [...new Set([...html.matchAll(/src="(https:\/\/www\.tswanahome\.com\/wp-content\/uploads\/[^"]+\.(?:jpe?g|png|webp))"/gi)].map((m) => m[1]))]
+    .filter((u) => !/logo|icon|avatar|placeholder/i.test(u))
+  const now = new Date().toISOString()
+  const slug = `${phone}-${title.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 40)}`
+
+  return {
+    id: `auto-tswana-${slug}`.replace(/-+$/g, ''),
+    title: /student|share|room/i.test(title) ? title : `Student-friendly rental — ${title}`,
+    description: plain.slice(0, 320) || title,
+    price,
+    room_type: /single|bachelor|studio/i.test(`${title} ${plain}`) ? 'single' : /2\s*bed|3\s*bed|house|apartment/i.test(`${title} ${plain}`) ? 'sharing' : 'sharing',
+    gender_preference: 'any',
+    area,
+    city,
+    address: `${area}, ${city}`,
+    whatsapp_number: phone,
+    contact_name: 'TswanaHome listing',
+    campus_ids: campus.campus_ids,
+    custom_university_name: campus.custom_university_name,
+    source_label: source.label,
+    source_url: url,
+    photo_urls: imgs.slice(0, 4),
+    deposit_pula: null,
+    utilities_included: null,
+    fetched_at: now,
+    last_seen_at: now,
+  }
+}
+
+async function fetchTswanahome(source) {
+  const html = await fetchHtml(source.url)
+  const links = [...new Set([...html.matchAll(/href="(https:\/\/www\.tswanahome\.com\/property\/[^"#]+)"/gi)].map((m) => m[1]))]
+    .filter((u) => /rent/i.test(u) && !/office|warehouse|industrial|biz|shop|retail/i.test(u))
+  const out = []
+  for (const url of links.slice(0, 40)) {
+    try {
+      const detail = await fetchHtml(url)
+      const row = parseTswanahomeDetail(detail, url, source)
+      if (row) out.push(row)
+    } catch (err) {
+      console.warn(`tswana detail skip ${url}:`, err.message || err)
+    }
+  }
+  return out
+}
+
+async function fetchSource(source) {
+  if (source.kind === 'zimcompass' || source.id.startsWith('zimcompass')) {
+    const html = await fetchHtml(source.url)
+    return parseZimcompass(html, source)
+  }
+  if (source.kind === 'ezilet') return fetchEzilet(source)
+  if (source.kind === 'tswanahome') return fetchTswanahome(source)
   return []
 }
 
@@ -291,7 +495,11 @@ async function mirrorPhotos(listings) {
               headers: {
                 'User-Agent': 'NtloStudentHousingBot/1.0 (+https://ntlo.online)',
                 Accept: 'image/*',
-                Referer: 'https://bw.zimcompass.com/',
+                Referer: remote.includes('ezilet')
+                  ? 'https://ezilet.net/'
+                  : remote.includes('tswanahome')
+                    ? 'https://www.tswanahome.com/'
+                    : 'https://bw.zimcompass.com/',
               },
             })
             if (res.ok) break

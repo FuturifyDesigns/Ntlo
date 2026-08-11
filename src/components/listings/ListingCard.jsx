@@ -142,7 +142,9 @@ export default function ListingCard({
           </h3>
           <p className="mt-2 font-mono text-xl font-bold text-primary">
             {formatPrice(listing.price)}
-            <span className="ml-1 text-sm font-normal text-muted">{t('listings.perMo')}</span>
+            {listing.price != null && (
+              <span className="ml-1 text-sm font-normal text-muted">{t('listings.perMo')}</span>
+            )}
           </p>
           <p className="mt-1.5 flex items-center gap-1 text-sm text-muted">
             <IconLocation className="h-3.5 w-3.5 shrink-0 opacity-60" />

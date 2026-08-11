@@ -117,7 +117,10 @@ export default function ListingDetail() {
               </div>
 
               <p className="mt-2 font-mono text-2xl font-bold text-primary">
-                {formatPrice(listing.price)} <span className="text-base font-normal text-muted">{t('listings.perMonth')}</span>
+                {formatPrice(listing.price)}
+                {listing.price != null && (
+                  <span className="text-base font-normal text-muted"> {t('listings.perMonth')}</span>
+                )}
               </p>
 
               <div className="mt-3 flex flex-wrap gap-2">
