@@ -24,3 +24,5 @@ public/auth/config.js
 *.njsproj
 *.sln
 *.sw?
+
+ntlo sound.mp3
