@@ -1,12 +1,17 @@
 {
-  "updated_at": "2026-08-11T06:56:47.368Z",
-  "source_count": 5,
+  "updated_at": "2026-08-11T09:54:11.439Z",
+  "source_count": 10,
   "sources": [
     "zimcompass-house-share-p1",
     "zimcompass-house-share-p2",
     "zimcompass-house-share-p3",
     "zimcompass-house-share-p4",
-    "zimcompass-house-share-p5"
+    "zimcompass-house-share-p5",
+    "zimcompass-house-share-p6",
+    "zimcompass-house-share-p7",
+    "zimcompass-house-share-p8",
+    "zimcompass-house-share-p9",
+    "zimcompass-house-share-p10"
   ],
   "keep_days": 21,
   "listing_count": 35,
@@ -37,8 +42,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": "included",
-      "fetched_at": "2026-08-11T06:56:44.896Z",
-      "last_seen_at": "2026-08-11T06:56:47.366Z"
+      "fetched_at": "2026-08-11T09:54:01.041Z",
+      "last_seen_at": "2026-08-11T09:54:09.199Z"
     },
     {
       "id": "auto-26772417037-a-room-for-rent-in-a-2-and-half-to",
@@ -63,8 +68,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T06:56:44.897Z",
-      "last_seen_at": "2026-08-11T06:56:47.366Z"
+      "fetched_at": "2026-08-11T09:54:01.053Z",
+      "last_seen_at": "2026-08-11T09:54:09.199Z"
     },
     {
       "id": "auto-26771746344-house-to-share",
@@ -88,8 +93,8 @@
       "photo_urls": [],
       "deposit_pula": null,
       "utilities_included": "included",
-      "fetched_at": "2026-08-11T06:56:44.897Z",
-      "last_seen_at": "2026-08-11T06:56:47.366Z"
+      "fetched_at": "2026-08-11T09:54:01.054Z",
+      "last_seen_at": "2026-08-11T09:54:09.199Z"
     },
     {
       "id": "auto-26776001754-1-room-in-a-3-beds-to-share",
@@ -114,8 +119,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T06:56:44.898Z",
-      "last_seen_at": "2026-08-11T06:56:47.366Z"
+      "fetched_at": "2026-08-11T09:54:01.054Z",
+      "last_seen_at": "2026-08-11T09:54:09.199Z"
     },
     {
       "id": "auto-26773458500-house-to-share-p1600-block-8-gaborone",
@@ -140,8 +145,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T06:56:44.898Z",
-      "last_seen_at": "2026-08-11T06:56:47.366Z"
+      "fetched_at": "2026-08-11T09:54:01.054Z",
+      "last_seen_at": "2026-08-11T09:54:09.199Z"
     },
     {
       "id": "auto-26776325612-room-to-share-in-bontleng-malema",
@@ -165,8 +170,8 @@
       "photo_urls": [],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T06:56:44.898Z",
-      "last_seen_at": "2026-08-11T06:56:47.366Z"
+      "fetched_at": "2026-08-11T09:54:01.055Z",
+      "last_seen_at": "2026-08-11T09:54:09.199Z"
     },
     {
       "id": "auto-26774247384-house-mate-needed",
@@ -191,8 +196,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T06:56:44.899Z",
-      "last_seen_at": "2026-08-11T06:56:47.366Z"
+      "fetched_at": "2026-08-11T09:54:01.055Z",
+      "last_seen_at": "2026-08-11T09:54:09.199Z"
     },
     {
       "id": "auto-26776968183-beds",
@@ -216,8 +221,8 @@
       "photo_urls": [],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T06:56:44.899Z",
-      "last_seen_at": "2026-08-11T06:56:47.366Z"
+      "fetched_at": "2026-08-11T09:54:01.055Z",
+      "last_seen_at": "2026-08-11T09:54:09.200Z"
     },
     {
       "id": "auto-26776104760-rooms-to-rent",
@@ -242,8 +247,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T06:56:44.899Z",
-      "last_seen_at": "2026-08-11T06:56:47.366Z"
+      "fetched_at": "2026-08-11T09:54:01.055Z",
+      "last_seen_at": "2026-08-11T09:54:09.200Z"
     },
     {
       "id": "auto-26774215618-room-to-rent-gabane",
@@ -266,8 +271,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T06:56:44.899Z",
-      "last_seen_at": "2026-08-11T06:56:47.367Z"
+      "fetched_at": "2026-08-11T09:54:01.055Z",
+      "last_seen_at": "2026-08-11T09:54:09.200Z"
     },
     {
       "id": "auto-26771557655-room-for-rent-in-block-5",
@@ -292,8 +297,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T06:56:44.899Z",
-      "last_seen_at": "2026-08-11T06:56:47.367Z"
+      "fetched_at": "2026-08-11T09:54:01.055Z",
+      "last_seen_at": "2026-08-11T09:54:09.200Z"
     },
     {
       "id": "auto-26774517254-house-to-share",
@@ -318,8 +323,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T06:56:44.899Z",
-      "last_seen_at": "2026-08-11T06:56:47.367Z"
+      "fetched_at": "2026-08-11T09:54:01.055Z",
+      "last_seen_at": "2026-08-11T09:54:09.200Z"
     },
     {
       "id": "auto-26771557655-room-available-in-block-5-for-rent",
@@ -344,8 +349,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T06:56:44.899Z",
-      "last_seen_at": "2026-08-11T06:56:47.367Z"
+      "fetched_at": "2026-08-11T09:54:01.055Z",
+      "last_seen_at": "2026-08-11T09:54:09.200Z"
     },
     {
       "id": "auto-26771817707-3-bedroom-house-to-share",
@@ -368,8 +373,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T06:56:44.900Z",
-      "last_seen_at": "2026-08-11T06:56:47.367Z"
+      "fetched_at": "2026-08-11T09:54:01.055Z",
+      "last_seen_at": "2026-08-11T09:54:09.200Z"
     },
     {
       "id": "auto-26778439391-servant-s-quarters",
@@ -392,8 +397,8 @@
       "photo_urls": [],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T06:56:44.900Z",
-      "last_seen_at": "2026-08-11T06:56:47.367Z"
+      "fetched_at": "2026-08-11T09:54:01.055Z",
+      "last_seen_at": "2026-08-11T09:54:09.200Z"
     },
     {
       "id": "auto-26778439391-rooms-to-rent",
@@ -418,8 +423,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T06:56:44.900Z",
-      "last_seen_at": "2026-08-11T06:56:47.367Z"
+      "fetched_at": "2026-08-11T09:54:01.055Z",
+      "last_seen_at": "2026-08-11T09:54:09.200Z"
     },
     {
       "id": "auto-26778439391-rooms-for-rent",
@@ -442,8 +447,8 @@
       "photo_urls": [],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T06:56:44.900Z",
-      "last_seen_at": "2026-08-11T06:56:47.367Z"
+      "fetched_at": "2026-08-11T09:54:01.055Z",
+      "last_seen_at": "2026-08-11T09:54:09.200Z"
     },
     {
       "id": "auto-26772862253-am-looking-for-someone-who-can-share-wit",
@@ -466,8 +471,8 @@
       "photo_urls": [],
       "deposit_pula": 1350,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T06:56:44.963Z",
-      "last_seen_at": "2026-08-11T06:56:44.963Z"
+      "fetched_at": "2026-08-11T09:54:01.355Z",
+      "last_seen_at": "2026-08-11T09:54:01.355Z"
     },
     {
       "id": "auto-26775072260-need-house-to-rent",
@@ -490,8 +495,8 @@
       "photo_urls": [],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T06:56:44.963Z",
-      "last_seen_at": "2026-08-11T06:56:44.963Z"
+      "fetched_at": "2026-08-11T09:54:01.355Z",
+      "last_seen_at": "2026-08-11T09:54:01.355Z"
     },
     {
       "id": "auto-26775671270-3-bedroom-house-with-a-room-to-share",
@@ -516,8 +521,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T06:56:44.963Z",
-      "last_seen_at": "2026-08-11T06:56:44.963Z"
+      "fetched_at": "2026-08-11T09:54:01.355Z",
+      "last_seen_at": "2026-08-11T09:54:01.355Z"
     },
     {
       "id": "auto-26772463662-time-project-house-to-share-in-block-6-i",
@@ -540,8 +545,8 @@
       "photo_urls": [],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T06:56:44.963Z",
-      "last_seen_at": "2026-08-11T06:56:44.963Z"
+      "fetched_at": "2026-08-11T09:54:01.355Z",
+      "last_seen_at": "2026-08-11T09:54:01.355Z"
     },
     {
       "id": "auto-26772237516-two-bedroom-house-looking-gor-someone-to",
@@ -566,8 +571,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": "included",
-      "fetched_at": "2026-08-11T06:56:44.963Z",
-      "last_seen_at": "2026-08-11T06:56:44.963Z"
+      "fetched_at": "2026-08-11T09:54:01.355Z",
+      "last_seen_at": "2026-08-11T09:54:01.355Z"
     },
     {
       "id": "auto-26774549287-house-to-shsre",
@@ -592,8 +597,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T06:56:44.963Z",
-      "last_seen_at": "2026-08-11T06:56:44.963Z"
+      "fetched_at": "2026-08-11T09:54:01.355Z",
+      "last_seen_at": "2026-08-11T09:54:01.355Z"
     },
     {
       "id": "auto-26775362884-house-to-share",
@@ -620,8 +625,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T06:56:44.964Z",
-      "last_seen_at": "2026-08-11T06:56:44.964Z"
+      "fetched_at": "2026-08-11T09:54:01.355Z",
+      "last_seen_at": "2026-08-11T09:54:01.355Z"
     },
     {
       "id": "auto-26775920949-house-for-rent",
@@ -644,8 +649,8 @@
       "photo_urls": [],
       "deposit_pula": 500,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T06:56:44.964Z",
-      "last_seen_at": "2026-08-11T06:56:44.964Z"
+      "fetched_at": "2026-08-11T09:54:01.355Z",
+      "last_seen_at": "2026-08-11T09:54:01.355Z"
     },
     {
       "id": "auto-26774250032-three-bedroomed-house-to-share-in-block",
@@ -666,8 +671,8 @@
       "photo_urls": [],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T06:56:44.964Z",
-      "last_seen_at": "2026-08-11T06:56:44.964Z"
+      "fetched_at": "2026-08-11T09:54:01.355Z",
+      "last_seen_at": "2026-08-11T09:54:01.355Z"
     },
     {
       "id": "auto-26778060149-house-to-share",
@@ -692,8 +697,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T06:56:44.964Z",
-      "last_seen_at": "2026-08-11T06:56:44.964Z"
+      "fetched_at": "2026-08-11T09:54:01.355Z",
+      "last_seen_at": "2026-08-11T09:54:01.355Z"
     },
     {
       "id": "auto-26774722297-office-to-share-available-at-main-mall-e",
@@ -716,8 +721,8 @@
       "photo_urls": [],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T06:56:44.964Z",
-      "last_seen_at": "2026-08-11T06:56:44.964Z"
+      "fetched_at": "2026-08-11T09:54:01.355Z",
+      "last_seen_at": "2026-08-11T09:54:01.355Z"
     },
     {
       "id": "auto-26772354971-house-to-share",
@@ -740,8 +745,8 @@
       "photo_urls": [],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T06:56:44.964Z",
-      "last_seen_at": "2026-08-11T06:56:44.964Z"
+      "fetched_at": "2026-08-11T09:54:01.356Z",
+      "last_seen_at": "2026-08-11T09:54:01.356Z"
     },
     {
       "id": "auto-26775085701-room-for-rent-in-3-beds-in-bew-naledi-1",
@@ -764,8 +769,8 @@
       "photo_urls": [],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T06:56:44.964Z",
-      "last_seen_at": "2026-08-11T06:56:44.964Z"
+      "fetched_at": "2026-08-11T09:54:01.356Z",
+      "last_seen_at": "2026-08-11T09:54:01.356Z"
     },
     {
       "id": "auto-26774284733-house-to-share",
@@ -788,8 +793,8 @@
       "photo_urls": [],
       "deposit_pula": 0,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T06:56:44.964Z",
-      "last_seen_at": "2026-08-11T06:56:44.964Z"
+      "fetched_at": "2026-08-11T09:54:01.356Z",
+      "last_seen_at": "2026-08-11T09:54:01.356Z"
     },
     {
       "id": "auto-26777105801-3-beds-2-baths-room-only",
@@ -812,8 +817,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T06:56:45.019Z",
-      "last_seen_at": "2026-08-11T06:56:45.019Z"
+      "fetched_at": "2026-08-11T09:54:01.802Z",
+      "last_seen_at": "2026-08-11T09:54:01.802Z"
     },
     {
       "id": "auto-26774235150-a-room-in-2beds",
@@ -836,8 +841,8 @@
       "photo_urls": [],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T06:56:45.020Z",
-      "last_seen_at": "2026-08-11T06:56:45.020Z"
+      "fetched_at": "2026-08-11T09:54:01.802Z",
+      "last_seen_at": "2026-08-11T09:54:01.802Z"
     },
     {
       "id": "auto-26772514386-gabs-phase-2-1-single-person-needed-to-s",
@@ -862,8 +867,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T06:56:45.020Z",
-      "last_seen_at": "2026-08-11T06:56:45.020Z"
+      "fetched_at": "2026-08-11T09:54:01.802Z",
+      "last_seen_at": "2026-08-11T09:54:01.802Z"
     },
     {
       "id": "auto-26777356852-house-to-share-available",
@@ -888,8 +893,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T06:56:45.020Z",
-      "last_seen_at": "2026-08-11T06:56:45.020Z"
+      "fetched_at": "2026-08-11T09:54:01.802Z",
+      "last_seen_at": "2026-08-11T09:54:01.802Z"
     }
   ],
   "photos_mirrored": 20

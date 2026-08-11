@@ -60,5 +60,14 @@ export default defineConfig(({ mode }) => {
       // Avoid embedding absolute local paths in production chunks.
       minify: 'esbuild',
     },
+    // GitHub Pages SPA: serve the app shell for unknown paths.
+    closeBundle() {
+      const dist = path.resolve('dist')
+      const index = path.join(dist, 'index.html')
+      const fallback = path.join(dist, '404.html')
+      if (fs.existsSync(index)) {
+        fs.copyFileSync(index, fallback)
+      }
+    },
   }
 })

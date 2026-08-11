@@ -106,7 +106,7 @@
           "inLanguage": "en",
           "potentialAction": {
             "@type": "SearchAction",
-            "target": "https://ntlo.online/#/listings?q={search_term_string}",
+            "target": "https://ntlo.online/listings?q={search_term_string}",
             "query-input": "required name=search_term_string"
           }
         }
@@ -120,6 +120,21 @@
     <link rel="stylesheet" href="/vendor/leaflet/leaflet.css" />
   </head>
   <body>
+    <script>
+      ;(function () {
+        var hash = window.location.hash || ''
+        if (hash.indexOf('#/') === 0) {
+          history.replaceState(null, '', hash.slice(1) + window.location.search)
+          return
+        }
+        var redirect = sessionStorage.getItem('ntlo_spa_redirect')
+        if (!redirect) return
+        sessionStorage.removeItem('ntlo_spa_redirect')
+        if (redirect !== window.location.pathname + window.location.search) {
+          history.replaceState(null, '', redirect)
+        }
+      })()
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

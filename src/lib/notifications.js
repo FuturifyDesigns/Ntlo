@@ -36,7 +36,7 @@ export async function markAllNotificationsRead() {
   if (error) throw error
 }
 
-/** Route notifications to the right dashboard tab (HashRouter paths). */
+/** Route notifications to the right dashboard tab. */
 export function notificationHref(notification, role) {
   if (!notification) return '/'
 
@@ -127,7 +127,7 @@ export function notificationHref(notification, role) {
   return link ? `/${link}` : '/'
 }
 
-/** HashRouter-safe navigation to a notification target. */
+/** Navigate to a notification target. */
 export function navigateToNotification(navigate, notification, role) {
   const href = notificationHref(notification, role)
   if (href.startsWith('http')) {

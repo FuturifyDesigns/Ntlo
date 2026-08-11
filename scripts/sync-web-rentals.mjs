@@ -21,7 +21,7 @@ const PHOTO_PUBLIC_PREFIX = '/data/web-rental-photos'
 /** Keep listings that fall off page-1 for this many days so Ntlo stays stocked. */
 const KEEP_DAYS = 21
 /** How many ZimCompass result pages to crawl each run. */
-const ZIMCOMPASS_PAGES = 5
+const ZIMCOMPASS_PAGES = 10
 
 function zimcompassSources() {
   const pages = []

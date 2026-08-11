@@ -41,7 +41,7 @@ function isNewOAuthUser(user) {
   return Math.abs(lastSignIn - created) < 60_000
 }
 
-function showError(message, linkHref = '../#/login', linkText = 'Back to sign in') {
+function showError(message, linkHref = '../login', linkText = 'Back to sign in') {
   loading.classList.add('hidden')
   unverified.classList.add('hidden')
   errorEl.classList.remove('hidden')
@@ -129,7 +129,7 @@ async function run() {
       await supabase.auth.signOut()
       showError(
         'An account with this email already exists. Please sign in instead.',
-        '../#/login',
+        '../login',
         'Go to sign in'
       )
       return
@@ -141,7 +141,7 @@ async function run() {
       await supabase.auth.signOut()
       const email = encodeURIComponent(user.email || '')
       setTimeout(() => {
-        window.location.replace(`../#/check-email?email=${email}`)
+        window.location.replace(`../check-email?email=${email}`)
       }, 1200)
       return
     }
@@ -179,18 +179,18 @@ async function run() {
         /* ignore */
       }
       await supabase.auth.signOut().catch(() => {})
-      window.location.replace('../#/login')
+      window.location.replace('../login')
       return
     }
 
     if (profileNeedsSetup(profile)) {
       const roleQuery = pendingRole ? `?role=${pendingRole}` : from === 'login' ? '?role=student' : ''
-      window.location.replace(`../#/complete-profile${roleQuery}`)
+      window.location.replace(`../complete-profile${roleQuery}`)
       return
     }
 
     const role = profile?.role || user.user_metadata?.role || 'student'
-    const destination = role === 'landlord' ? '../#/landlord' : '../#/student'
+    const destination = role === 'landlord' ? '../landlord' : '../student'
     window.location.replace(destination)
   } catch (err) {
     const message = (err.message || '').toLowerCase()
@@ -202,7 +202,7 @@ async function run() {
       await supabase.auth.signOut().catch(() => {})
       showError(
         'An account with this email already exists. Please sign in with your email and password.',
-        '../#/login',
+        '../login',
         'Go to sign in'
       )
       return

@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { HashRouter, Routes, Route, useLocation } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { AuthProvider } from './context/AuthContext'
 import { NotificationsProvider } from './context/NotificationsContext'
@@ -175,7 +175,7 @@ function AppShell() {
 
 export default function App() {
   return (
-    <HashRouter>
+    <BrowserRouter>
       <LocaleProvider>
         <AuthProvider>
           <NotificationsProvider>
@@ -197,6 +197,6 @@ export default function App() {
           </NotificationsProvider>
         </AuthProvider>
       </LocaleProvider>
-    </HashRouter>
+    </BrowserRouter>
   )
 }

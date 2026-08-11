@@ -4,6 +4,10 @@ on:
   push:
     branches: [main, master]
   workflow_dispatch:
+  # Auto-sync commits use GITHUB_TOKEN and do not trigger push workflows.
+  workflow_run:
+    workflows: ['Sync web student rentals']
+    types: [completed]
 
 permissions:
   contents: read
@@ -16,9 +20,12 @@ concurrency:
 
 jobs:
   build:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.ref }}
 
       - uses: actions/setup-node@v4
         with:
