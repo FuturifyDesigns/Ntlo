@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import {
   Users, GraduationCap, Shield, Home, Ban, Trash2, Check, X, UserCheck,
-  RefreshCw, Radio, Search, MapPin, CreditCard, ClipboardList, Star, Building2, Link2,
+  RefreshCw, Radio, Search, MapPin, ClipboardList, Star, Building2, Link2,
 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useTranslation } from '../hooks/useTranslation'
@@ -23,7 +23,6 @@ import VerificationCard from '../components/admin/VerificationCard'
 import DocumentPreviewModal from '../components/admin/DocumentPreviewModal'
 import AdminActionModal from '../components/admin/AdminActionModal'
 import AdminToast from '../components/admin/AdminToast'
-import AdminSubscriptionsPanel from '../components/admin/AdminSubscriptionsPanel'
 import AdminApplicationsPanel from '../components/admin/AdminApplicationsPanel'
 import AdminBanModal from '../components/admin/AdminBanModal'
 import AdminDeleteListingModal from '../components/admin/AdminDeleteListingModal'
@@ -44,7 +43,6 @@ const TABS = [
   { id: 'landlords', icon: Shield, labelKey: 'admin.tabLandlords' },
   { id: 'listings', icon: Home, labelKey: 'admin.tabListings' },
   { id: 'import', icon: Link2, labelKey: 'admin.tabImport' },
-  { id: 'subscriptions', icon: CreditCard, labelKey: 'admin.tabSubscriptions' },
 ]
 
 const TAB_STORAGE_KEY = 'ntlo_admin_tab'
@@ -893,8 +891,6 @@ export default function AdminDashboard() {
               onToast={setToast}
             />
           )}
-
-          {tab === 'subscriptions' && <AdminSubscriptionsPanel />}
         </>
       )}
 

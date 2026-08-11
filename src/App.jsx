@@ -30,7 +30,6 @@ import EditListing from './pages/EditListing'
 import NotFound from './pages/NotFound'
 import AdminDashboard from './pages/AdminDashboard'
 import LandlordVerify from './pages/LandlordVerify'
-import LandlordBilling from './pages/LandlordBilling'
 import Pricing from './pages/Pricing'
 import Privacy from './pages/Privacy'
 import Terms from './pages/Terms'
@@ -112,7 +111,7 @@ function AppRoutes() {
           <Route path="/admin" element={<ProtectedRoute role="admin"><AdminDashboard /></ProtectedRoute>} />
           <Route path="/landlord/verify" element={<ProtectedRoute role="landlord"><LandlordVerify /></ProtectedRoute>} />
           <Route path="/landlord" element={<ProtectedRoute role="landlord"><LandlordDashboard /></ProtectedRoute>} />
-          <Route path="/landlord/billing" element={<ProtectedRoute role="landlord"><LandlordBilling /></ProtectedRoute>} />
+          <Route path="/landlord/billing" element={<ProtectedRoute role="landlord"><LandlordDashboard /></ProtectedRoute>} />
           <Route path="/landlord/listings/new" element={<ProtectedRoute role="landlord"><CreateListing /></ProtectedRoute>} />
           <Route path="/landlord/listings/:id/edit" element={<ProtectedRoute role="landlord"><EditListing /></ProtectedRoute>} />
           <Route path="*" element={<NotFound />} />

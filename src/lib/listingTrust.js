@@ -1,4 +1,3 @@
-import { BILLING_LIVE } from './subscriptions'
 import { getListingOccupancy } from './listingOccupancy'
 import { TRUST_LEVEL } from './tierBenefits'
 
@@ -47,17 +46,9 @@ export function getListingTrustProfile(listing, landlordProfile) {
   }
 
   let primaryBadge = null
-  if (BILLING_LIVE) {
-    const tier = landlordProfile?.subscription_tier || listing?.landlord?.subscription_tier
-    if (tier === 'premium') primaryBadge = TRUST_LEVEL.featured
-    else if (tier === 'standard') primaryBadge = TRUST_LEVEL.standard
-  }
-
-  if (!primaryBadge) {
-    if (listingTrusted) primaryBadge = TRUST_LEVEL.trustedHome
-    else if (landlordVerified) primaryBadge = TRUST_LEVEL.verifiedLandlord
-    else if (published) primaryBadge = TRUST_LEVEL.listed
-  }
+  if (listingTrusted) primaryBadge = TRUST_LEVEL.trustedHome
+  else if (landlordVerified) primaryBadge = TRUST_LEVEL.verifiedLandlord
+  else if (published) primaryBadge = TRUST_LEVEL.listed
 
   const secondaryBadge = listingTrusted && landlordVerified && primaryBadge !== TRUST_LEVEL.verifiedLandlord
     ? TRUST_LEVEL.verifiedLandlord

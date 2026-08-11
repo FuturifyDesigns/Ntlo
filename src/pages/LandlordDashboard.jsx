@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Plus, Edit, Trash2, Eye, ToggleLeft, ToggleRight, AlertCircle, CreditCard } from 'lucide-react'
+import { Plus, Edit, Trash2, Eye, ToggleLeft, ToggleRight, AlertCircle } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { useTranslation } from '../hooks/useTranslation'
@@ -15,8 +15,6 @@ import { formatPrice, getCoverPhoto } from '../lib/utils'
 import ListingMap from '../components/listings/ListingMap'
 import LandlordWelcomeBanner from '../components/landlord/LandlordWelcomeBanner'
 import LandlordVerifyNudgeBanner from '../components/landlord/LandlordVerifyNudgeBanner'
-import EarlyAccessBanner from '../components/landlord/EarlyAccessBanner'
-import EarlyAccessLandlordNote from '../components/landlord/EarlyAccessLandlordNote'
 import LandlordInquiriesPanel from '../components/housing/LandlordInquiriesPanel'
 import { LandlordMarketOverview } from '../components/advisor/CompetitiveAdvisorPanel'
 import { getListingOccupancy } from '../lib/listingOccupancy'
@@ -199,14 +197,9 @@ export default function LandlordDashboard() {
         <div>
           <h1 className="font-display text-3xl font-bold text-primary">{t('dashboard.landlordTitle')}</h1>
           <p className="mt-2 text-muted">{t('dashboard.welcomeLandlord')}, {profile?.full_name || 'Landlord'}</p>
-          <EarlyAccessLandlordNote className="mt-4 max-w-2xl" />
         </div>
         <div className="flex flex-wrap gap-2">
           <OnboardingReplayButton />
-          <Button as={Link} to="/landlord/billing" variant="outline">
-            <CreditCard size={18} />
-            {t('billing.title')}
-          </Button>
           <span data-onboarding="landlord-add-listing">
             <Button as={Link} to="/landlord/listings/new">
               <Plus size={18} />
@@ -218,7 +211,6 @@ export default function LandlordDashboard() {
 
       <LandlordWelcomeBanner userId={user?.id} profile={profile} />
       <LandlordVerifyNudgeBanner profile={profile} />
-      <EarlyAccessBanner />
 
       {statusBanner && (
         <motion.div className="mb-6 rounded-xl border border-accent/30 bg-accent/5 px-4 py-3 text-sm text-primary" {...motionProps}>

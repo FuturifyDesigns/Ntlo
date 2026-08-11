@@ -25,8 +25,7 @@ import { useTranslation } from '../hooks/useTranslation'
 import { validateListingStep, normalizeListingPhone } from '../lib/listingValidation'
 import { getDraftKey } from '../lib/formDrafts'
 import { useFormDraft } from '../hooks/useFormDraft'
-import { getMaxPhotosPerListing, isEarlyAccessMode } from '../lib/subscriptions'
-import EarlyAccessLandlordNote from '../components/landlord/EarlyAccessLandlordNote'
+import { getMaxPhotosPerListing } from '../lib/subscriptions'
 import { isListingUniversityReady } from '../lib/listingLocation'
 
 const STEPS = ['Basics', 'Location', 'Photos', 'Amenities', 'Contact', 'Documents', 'Review']
@@ -344,7 +343,6 @@ export default function CreateListing() {
     >
       <h1 className="font-display text-3xl font-bold text-primary">List a new room</h1>
       <p className="mt-2 text-muted">Step {step + 1} of {STEPS.length}: {STEPS[step]}</p>
-      <EarlyAccessLandlordNote className="mt-4" />
 
       {(draftRestored || savedLabel) && (
         <div className="mt-4 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-accent/30 bg-accent/5 px-3 py-2 text-xs text-primary">
@@ -521,9 +519,7 @@ export default function CreateListing() {
             {step === 2 && (
               <div>
                 <p className="mb-4 text-sm text-muted">
-                  {isEarlyAccessMode()
-                    ? t('listingForm.validation.photosHintEarlyAccess')
-                    : t('listingForm.validation.photosHint')}
+                  {t('listingForm.validation.photosHint')}
                 </p>
                 {fieldErrors.photos && (
                   <p className="mb-3 text-xs text-error">{fieldErrors.photos}</p>

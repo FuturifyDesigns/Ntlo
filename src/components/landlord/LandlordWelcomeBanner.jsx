@@ -46,7 +46,6 @@ export default function LandlordWelcomeBanner({ userId, profile }) {
               {t('dashboard.welcomeVerifiedTitle', { name: profile?.full_name?.split(' ')[0] || 'there' })}
             </p>
             <p className="mt-1 text-sm text-muted">{t('dashboard.welcomeVerifiedBody')}</p>
-            <p className="mt-2 text-sm text-accent/90">{t('billing.earlyAccessWelcomeNote')}</p>
             {notes && (
               <div className="mt-3 rounded-lg border border-success/20 bg-surface px-3 py-2.5">
                 <p className="text-xs font-semibold uppercase tracking-wide text-success">
