@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-08-11T10:19:29.851Z",
+  "updated_at": "2026-08-12T07:16:30.181Z",
   "source_count": 18,
   "sources": [
     "zimcompass-house-share-p1",
@@ -50,8 +50,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": "included",
-      "fetched_at": "2026-08-11T10:18:42.031Z",
-      "last_seen_at": "2026-08-11T10:18:52.136Z"
+      "fetched_at": "2026-08-12T07:15:58.706Z",
+      "last_seen_at": "2026-08-12T07:16:04.643Z"
     },
     {
       "id": "auto-26772417037-a-room-for-rent-in-a-2-and-half-to",
@@ -76,8 +76,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T10:18:42.214Z",
-      "last_seen_at": "2026-08-11T10:18:52.136Z"
+      "fetched_at": "2026-08-12T07:15:58.707Z",
+      "last_seen_at": "2026-08-12T07:16:04.643Z"
     },
     {
       "id": "auto-26771746344-house-to-share",
@@ -101,8 +101,8 @@
       "photo_urls": [],
       "deposit_pula": null,
       "utilities_included": "included",
-      "fetched_at": "2026-08-11T10:18:42.215Z",
-      "last_seen_at": "2026-08-11T10:18:52.137Z"
+      "fetched_at": "2026-08-12T07:15:58.708Z",
+      "last_seen_at": "2026-08-12T07:16:04.643Z"
     },
     {
       "id": "auto-26776001754-1-room-in-a-3-beds-to-share",
@@ -127,8 +127,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T10:18:42.215Z",
-      "last_seen_at": "2026-08-11T10:18:52.137Z"
+      "fetched_at": "2026-08-12T07:15:58.709Z",
+      "last_seen_at": "2026-08-12T07:16:04.643Z"
     },
     {
       "id": "auto-26773458500-house-to-share-p1600-block-8-gaborone",
@@ -153,8 +153,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T10:18:42.215Z",
-      "last_seen_at": "2026-08-11T10:18:52.137Z"
+      "fetched_at": "2026-08-12T07:15:58.709Z",
+      "last_seen_at": "2026-08-12T07:16:04.643Z"
     },
     {
       "id": "auto-26776325612-room-to-share-in-bontleng-malema",
@@ -178,8 +178,8 @@
       "photo_urls": [],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T10:18:42.216Z",
-      "last_seen_at": "2026-08-11T10:18:52.137Z"
+      "fetched_at": "2026-08-12T07:15:58.709Z",
+      "last_seen_at": "2026-08-12T07:16:04.643Z"
     },
     {
       "id": "auto-26774247384-house-mate-needed",
@@ -204,8 +204,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T10:18:42.216Z",
-      "last_seen_at": "2026-08-11T10:18:52.137Z"
+      "fetched_at": "2026-08-12T07:15:58.710Z",
+      "last_seen_at": "2026-08-12T07:16:04.643Z"
     },
     {
       "id": "auto-26776968183-beds",
@@ -229,8 +229,8 @@
       "photo_urls": [],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T10:18:42.216Z",
-      "last_seen_at": "2026-08-11T10:18:52.137Z"
+      "fetched_at": "2026-08-12T07:15:58.710Z",
+      "last_seen_at": "2026-08-12T07:16:04.644Z"
     },
     {
       "id": "auto-26776104760-rooms-to-rent",
@@ -255,8 +255,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T10:18:42.216Z",
-      "last_seen_at": "2026-08-11T10:18:52.280Z"
+      "fetched_at": "2026-08-12T07:15:58.710Z",
+      "last_seen_at": "2026-08-12T07:16:04.644Z"
     },
     {
       "id": "auto-26774215618-room-to-rent-gabane",
@@ -279,8 +279,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T10:18:42.216Z",
-      "last_seen_at": "2026-08-11T10:18:52.280Z"
+      "fetched_at": "2026-08-12T07:15:58.710Z",
+      "last_seen_at": "2026-08-12T07:16:04.644Z"
     },
     {
       "id": "auto-26771557655-room-for-rent-in-block-5",
@@ -305,8 +305,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T10:18:42.216Z",
-      "last_seen_at": "2026-08-11T10:18:52.280Z"
+      "fetched_at": "2026-08-12T07:15:58.710Z",
+      "last_seen_at": "2026-08-12T07:16:04.644Z"
     },
     {
       "id": "auto-26774517254-house-to-share",
@@ -331,8 +331,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T10:18:42.216Z",
-      "last_seen_at": "2026-08-11T10:18:52.280Z"
+      "fetched_at": "2026-08-12T07:15:58.710Z",
+      "last_seen_at": "2026-08-12T07:16:04.644Z"
     },
     {
       "id": "auto-26771557655-room-available-in-block-5-for-rent",
@@ -357,8 +357,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T10:18:42.216Z",
-      "last_seen_at": "2026-08-11T10:18:52.280Z"
+      "fetched_at": "2026-08-12T07:15:58.711Z",
+      "last_seen_at": "2026-08-12T07:16:04.644Z"
     },
     {
       "id": "auto-26771817707-3-bedroom-house-to-share",
@@ -381,8 +381,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T10:18:42.216Z",
-      "last_seen_at": "2026-08-11T10:18:52.280Z"
+      "fetched_at": "2026-08-12T07:15:58.711Z",
+      "last_seen_at": "2026-08-12T07:16:04.644Z"
     },
     {
       "id": "auto-26778439391-servant-s-quarters",
@@ -405,8 +405,8 @@
       "photo_urls": [],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T10:18:42.218Z",
-      "last_seen_at": "2026-08-11T10:18:52.280Z"
+      "fetched_at": "2026-08-12T07:15:58.711Z",
+      "last_seen_at": "2026-08-12T07:16:04.644Z"
     },
     {
       "id": "auto-26778439391-rooms-to-rent",
@@ -431,8 +431,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T10:18:42.218Z",
-      "last_seen_at": "2026-08-11T10:18:52.280Z"
+      "fetched_at": "2026-08-12T07:15:58.711Z",
+      "last_seen_at": "2026-08-12T07:16:04.644Z"
     },
     {
       "id": "auto-26778439391-rooms-for-rent",
@@ -455,8 +455,8 @@
       "photo_urls": [],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T10:18:42.218Z",
-      "last_seen_at": "2026-08-11T10:18:52.280Z"
+      "fetched_at": "2026-08-12T07:15:58.711Z",
+      "last_seen_at": "2026-08-12T07:16:04.644Z"
     },
     {
       "id": "auto-26772862253-am-looking-for-someone-who-can-share-wit",
@@ -479,8 +479,8 @@
       "photo_urls": [],
       "deposit_pula": 1350,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T10:18:43.261Z",
-      "last_seen_at": "2026-08-11T10:18:43.261Z"
+      "fetched_at": "2026-08-12T07:15:58.875Z",
+      "last_seen_at": "2026-08-12T07:15:58.875Z"
     },
     {
       "id": "auto-26775072260-need-house-to-rent",
@@ -503,8 +503,8 @@
       "photo_urls": [],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T10:18:43.261Z",
-      "last_seen_at": "2026-08-11T10:18:43.261Z"
+      "fetched_at": "2026-08-12T07:15:58.875Z",
+      "last_seen_at": "2026-08-12T07:15:58.875Z"
     },
     {
       "id": "auto-26775671270-3-bedroom-house-with-a-room-to-share",
@@ -529,8 +529,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T10:18:43.261Z",
-      "last_seen_at": "2026-08-11T10:18:43.261Z"
+      "fetched_at": "2026-08-12T07:15:58.875Z",
+      "last_seen_at": "2026-08-12T07:15:58.875Z"
     },
     {
       "id": "auto-26772463662-time-project-house-to-share-in-block-6-i",
@@ -553,8 +553,8 @@
       "photo_urls": [],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T10:18:43.262Z",
-      "last_seen_at": "2026-08-11T10:18:43.262Z"
+      "fetched_at": "2026-08-12T07:15:58.876Z",
+      "last_seen_at": "2026-08-12T07:15:58.876Z"
     },
     {
       "id": "auto-26772237516-two-bedroom-house-looking-gor-someone-to",
@@ -579,8 +579,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": "included",
-      "fetched_at": "2026-08-11T10:18:43.262Z",
-      "last_seen_at": "2026-08-11T10:18:43.262Z"
+      "fetched_at": "2026-08-12T07:15:58.876Z",
+      "last_seen_at": "2026-08-12T07:15:58.876Z"
     },
     {
       "id": "auto-26774549287-house-to-shsre",
@@ -605,8 +605,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T10:18:43.262Z",
-      "last_seen_at": "2026-08-11T10:18:43.262Z"
+      "fetched_at": "2026-08-12T07:15:58.876Z",
+      "last_seen_at": "2026-08-12T07:15:58.876Z"
     },
     {
       "id": "auto-26775362884-house-to-share",
@@ -633,8 +633,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T10:18:43.262Z",
-      "last_seen_at": "2026-08-11T10:18:43.262Z"
+      "fetched_at": "2026-08-12T07:15:58.876Z",
+      "last_seen_at": "2026-08-12T07:15:58.876Z"
     },
     {
       "id": "auto-26775920949-house-for-rent",
@@ -657,8 +657,8 @@
       "photo_urls": [],
       "deposit_pula": 500,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T10:18:43.262Z",
-      "last_seen_at": "2026-08-11T10:18:43.262Z"
+      "fetched_at": "2026-08-12T07:15:58.876Z",
+      "last_seen_at": "2026-08-12T07:15:58.876Z"
     },
     {
       "id": "auto-26774250032-three-bedroomed-house-to-share-in-block",
@@ -679,8 +679,8 @@
       "photo_urls": [],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T10:18:43.262Z",
-      "last_seen_at": "2026-08-11T10:18:43.262Z"
+      "fetched_at": "2026-08-12T07:15:58.876Z",
+      "last_seen_at": "2026-08-12T07:15:58.876Z"
     },
     {
       "id": "auto-26778060149-house-to-share",
@@ -705,8 +705,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T10:18:43.262Z",
-      "last_seen_at": "2026-08-11T10:18:43.262Z"
+      "fetched_at": "2026-08-12T07:15:58.876Z",
+      "last_seen_at": "2026-08-12T07:15:58.876Z"
     },
     {
       "id": "auto-26772354971-house-to-share",
@@ -729,8 +729,8 @@
       "photo_urls": [],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T10:18:43.262Z",
-      "last_seen_at": "2026-08-11T10:18:43.262Z"
+      "fetched_at": "2026-08-12T07:15:58.876Z",
+      "last_seen_at": "2026-08-12T07:15:58.876Z"
     },
     {
       "id": "auto-26775085701-room-for-rent-in-3-beds-in-bew-naledi-1",
@@ -753,8 +753,8 @@
       "photo_urls": [],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T10:18:43.262Z",
-      "last_seen_at": "2026-08-11T10:18:43.262Z"
+      "fetched_at": "2026-08-12T07:15:58.876Z",
+      "last_seen_at": "2026-08-12T07:15:58.876Z"
     },
     {
       "id": "auto-26774284733-house-to-share",
@@ -777,8 +777,8 @@
       "photo_urls": [],
       "deposit_pula": 0,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T10:18:43.262Z",
-      "last_seen_at": "2026-08-11T10:18:43.262Z"
+      "fetched_at": "2026-08-12T07:15:58.876Z",
+      "last_seen_at": "2026-08-12T07:15:58.876Z"
     },
     {
       "id": "auto-26777105801-3-beds-2-baths-room-only",
@@ -801,8 +801,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T10:18:43.680Z",
-      "last_seen_at": "2026-08-11T10:18:43.680Z"
+      "fetched_at": "2026-08-12T07:15:58.956Z",
+      "last_seen_at": "2026-08-12T07:15:58.956Z"
     },
     {
       "id": "auto-26774235150-a-room-in-2beds",
@@ -825,8 +825,8 @@
       "photo_urls": [],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T10:18:43.680Z",
-      "last_seen_at": "2026-08-11T10:18:43.680Z"
+      "fetched_at": "2026-08-12T07:15:58.956Z",
+      "last_seen_at": "2026-08-12T07:15:58.956Z"
     },
     {
       "id": "auto-26772514386-gabs-phase-2-1-single-person-needed-to-s",
@@ -851,8 +851,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T10:18:43.681Z",
-      "last_seen_at": "2026-08-11T10:18:43.681Z"
+      "fetched_at": "2026-08-12T07:15:58.956Z",
+      "last_seen_at": "2026-08-12T07:15:58.956Z"
     },
     {
       "id": "auto-26777356852-house-to-share-available",
@@ -877,8 +877,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T10:18:43.681Z",
-      "last_seen_at": "2026-08-11T10:18:43.681Z"
+      "fetched_at": "2026-08-12T07:15:58.956Z",
+      "last_seen_at": "2026-08-12T07:15:58.956Z"
     },
     {
       "id": "auto-26774793521",
@@ -899,8 +899,8 @@
       "photo_urls": [],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T10:18:52.581Z",
-      "last_seen_at": "2026-08-11T10:18:52.581Z"
+      "fetched_at": "2026-08-12T07:16:04.714Z",
+      "last_seen_at": "2026-08-12T07:16:04.714Z"
     },
     {
       "id": "auto-26772237436",
@@ -921,8 +921,8 @@
       "photo_urls": [],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T10:18:52.581Z",
-      "last_seen_at": "2026-08-11T10:18:52.581Z"
+      "fetched_at": "2026-08-12T07:16:04.714Z",
+      "last_seen_at": "2026-08-12T07:16:04.714Z"
     },
     {
       "id": "auto-26771775757",
@@ -947,8 +947,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T10:18:52.581Z",
-      "last_seen_at": "2026-08-11T10:18:54.708Z"
+      "fetched_at": "2026-08-12T07:16:04.714Z",
+      "last_seen_at": "2026-08-12T07:16:06.266Z"
     },
     {
       "id": "auto-26774285156",
@@ -973,8 +973,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T10:18:52.581Z",
-      "last_seen_at": "2026-08-11T10:18:52.581Z"
+      "fetched_at": "2026-08-12T07:16:04.714Z",
+      "last_seen_at": "2026-08-12T07:16:04.714Z"
     },
     {
       "id": "auto-26776547480",
@@ -997,8 +997,8 @@
       "photo_urls": [],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T10:18:52.581Z",
-      "last_seen_at": "2026-08-11T10:18:52.581Z"
+      "fetched_at": "2026-08-12T07:16:04.715Z",
+      "last_seen_at": "2026-08-12T07:16:04.715Z"
     },
     {
       "id": "auto-26774370630",
@@ -1023,8 +1023,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T10:18:52.870Z",
-      "last_seen_at": "2026-08-11T10:18:52.870Z"
+      "fetched_at": "2026-08-12T07:16:05.090Z",
+      "last_seen_at": "2026-08-12T07:16:05.090Z"
     },
     {
       "id": "auto-26772575343",
@@ -1045,8 +1045,8 @@
       "photo_urls": [],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T10:18:52.870Z",
-      "last_seen_at": "2026-08-11T10:18:52.870Z"
+      "fetched_at": "2026-08-12T07:16:05.090Z",
+      "last_seen_at": "2026-08-12T07:16:05.090Z"
     },
     {
       "id": "auto-26775051677",
@@ -1071,8 +1071,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T10:18:52.870Z",
-      "last_seen_at": "2026-08-11T10:18:52.870Z"
+      "fetched_at": "2026-08-12T07:16:05.091Z",
+      "last_seen_at": "2026-08-12T07:16:05.091Z"
     },
     {
       "id": "auto-26774285156",
@@ -1097,8 +1097,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T10:18:53.173Z",
-      "last_seen_at": "2026-08-11T10:18:53.174Z"
+      "fetched_at": "2026-08-12T07:16:05.748Z",
+      "last_seen_at": "2026-08-12T07:16:05.749Z"
     },
     {
       "id": "auto-26772417037",
@@ -1123,8 +1123,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T10:18:53.174Z",
-      "last_seen_at": "2026-08-11T10:18:53.174Z"
+      "fetched_at": "2026-08-12T07:16:05.749Z",
+      "last_seen_at": "2026-08-12T07:16:05.749Z"
     },
     {
       "id": "auto-26772132179",
@@ -1147,8 +1147,8 @@
       "photo_urls": [],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T10:18:53.472Z",
-      "last_seen_at": "2026-08-11T10:18:53.472Z"
+      "fetched_at": "2026-08-12T07:16:05.849Z",
+      "last_seen_at": "2026-08-12T07:16:05.849Z"
     },
     {
       "id": "auto-26774365602",
@@ -1173,8 +1173,8 @@
       ],
       "deposit_pula": 550,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T10:18:53.472Z",
-      "last_seen_at": "2026-08-11T10:18:53.472Z"
+      "fetched_at": "2026-08-12T07:16:05.849Z",
+      "last_seen_at": "2026-08-12T07:16:05.849Z"
     },
     {
       "id": "auto-26775555593",
@@ -1197,8 +1197,8 @@
       ],
       "deposit_pula": 2700,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T10:18:53.472Z",
-      "last_seen_at": "2026-08-11T10:18:53.472Z"
+      "fetched_at": "2026-08-12T07:16:05.849Z",
+      "last_seen_at": "2026-08-12T07:16:05.849Z"
     },
     {
       "id": "auto-26776242849",
@@ -1223,8 +1223,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T10:18:53.767Z",
-      "last_seen_at": "2026-08-11T10:18:53.767Z"
+      "fetched_at": "2026-08-12T07:16:05.922Z",
+      "last_seen_at": "2026-08-12T07:16:05.922Z"
     },
     {
       "id": "auto-26774285156",
@@ -1249,8 +1249,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T10:18:54.109Z",
-      "last_seen_at": "2026-08-11T10:18:54.109Z"
+      "fetched_at": "2026-08-12T07:16:06.045Z",
+      "last_seen_at": "2026-08-12T07:16:06.045Z"
     },
     {
       "id": "auto-26774285156",
@@ -1276,8 +1276,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T10:18:54.109Z",
-      "last_seen_at": "2026-08-11T10:18:54.109Z"
+      "fetched_at": "2026-08-12T07:16:06.046Z",
+      "last_seen_at": "2026-08-12T07:16:06.046Z"
     },
     {
       "id": "auto-26778721873",
@@ -1300,8 +1300,8 @@
       "photo_urls": [],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T10:18:54.409Z",
-      "last_seen_at": "2026-08-11T10:18:54.409Z"
+      "fetched_at": "2026-08-12T07:16:06.180Z",
+      "last_seen_at": "2026-08-12T07:16:06.180Z"
     },
     {
       "id": "auto-26776600329",
@@ -1326,8 +1326,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T10:18:54.409Z",
-      "last_seen_at": "2026-08-11T10:18:54.409Z"
+      "fetched_at": "2026-08-12T07:16:06.180Z",
+      "last_seen_at": "2026-08-12T07:16:06.180Z"
     },
     {
       "id": "auto-26774051929",
@@ -1352,8 +1352,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T10:18:54.410Z",
-      "last_seen_at": "2026-08-11T10:18:54.410Z"
+      "fetched_at": "2026-08-12T07:16:06.181Z",
+      "last_seen_at": "2026-08-12T07:16:06.181Z"
     },
     {
       "id": "auto-26774800034",
@@ -1378,8 +1378,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T10:18:54.708Z",
-      "last_seen_at": "2026-08-11T10:18:54.708Z"
+      "fetched_at": "2026-08-12T07:16:06.266Z",
+      "last_seen_at": "2026-08-12T07:16:06.266Z"
     },
     {
       "id": "auto-26771775757",
@@ -1404,8 +1404,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T10:18:54.709Z",
-      "last_seen_at": "2026-08-11T10:18:54.709Z"
+      "fetched_at": "2026-08-12T07:16:06.266Z",
+      "last_seen_at": "2026-08-12T07:16:06.266Z"
     },
     {
       "id": "auto-ezilet-26775920910-bogatsu-ext-10-student-accommodation",
@@ -1435,8 +1435,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T10:19:09.963Z",
-      "last_seen_at": "2026-08-11T10:19:09.963Z"
+      "fetched_at": "2026-08-12T07:16:14.589Z",
+      "last_seen_at": "2026-08-12T07:16:14.589Z"
     },
     {
       "id": "auto-ezilet-26771757272-mohammed-ext-10-student-accommodation",
@@ -1466,8 +1466,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T10:19:11.302Z",
-      "last_seen_at": "2026-08-11T10:19:11.302Z"
+      "fetched_at": "2026-08-12T07:16:15.642Z",
+      "last_seen_at": "2026-08-12T07:16:15.642Z"
     },
     {
       "id": "auto-ezilet-26772816488-tulo-student-residence",
@@ -1497,8 +1497,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T10:19:12.545Z",
-      "last_seen_at": "2026-08-11T10:19:12.545Z"
+      "fetched_at": "2026-08-12T07:16:16.675Z",
+      "last_seen_at": "2026-08-12T07:16:16.675Z"
     },
     {
       "id": "auto-ezilet-26776242849-tlokweng-student-accommodation",
@@ -1528,8 +1528,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T10:19:13.762Z",
-      "last_seen_at": "2026-08-11T10:19:13.762Z"
+      "fetched_at": "2026-08-12T07:16:17.720Z",
+      "last_seen_at": "2026-08-12T07:16:17.720Z"
     },
     {
       "id": "auto-ezilet-26772143312-rich-minds-student-accommodation",
@@ -1557,8 +1557,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T10:19:15.082Z",
-      "last_seen_at": "2026-08-11T10:19:15.082Z"
+      "fetched_at": "2026-08-12T07:16:18.862Z",
+      "last_seen_at": "2026-08-12T07:16:18.862Z"
     },
     {
       "id": "auto-ezilet-26772809597-tt-student-house-accommodation",
@@ -1582,8 +1582,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T10:19:16.311Z",
-      "last_seen_at": "2026-08-11T10:19:16.311Z"
+      "fetched_at": "2026-08-12T07:16:19.923Z",
+      "last_seen_at": "2026-08-12T07:16:19.923Z"
     },
     {
       "id": "auto-ezilet-26774104414-leru-boarding-house",
@@ -1607,8 +1607,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T10:19:26.403Z",
-      "last_seen_at": "2026-08-11T10:19:26.403Z"
+      "fetched_at": "2026-08-12T07:16:27.909Z",
+      "last_seen_at": "2026-08-12T07:16:27.909Z"
     },
     {
       "id": "auto-tswana-26773950399-2-bed-in-gabane-multires-rent-1725",
@@ -1634,8 +1634,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-11T10:19:29.831Z",
-      "last_seen_at": "2026-08-11T10:19:29.831Z"
+      "fetched_at": "2026-08-12T07:16:30.178Z",
+      "last_seen_at": "2026-08-12T07:16:30.178Z"
     },
     {
       "id": "auto-26776968183-beds",
