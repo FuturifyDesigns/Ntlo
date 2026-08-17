@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-08-17T10:24:45.691Z",
+  "updated_at": "2026-08-17T11:10:24.402Z",
   "source_count": 18,
   "sources": [
     "zimcompass-house-share-p1",
@@ -22,11 +22,374 @@
     "tswanahome-for-rent"
   ],
   "keep_days": 21,
-  "listing_count": 66,
-  "fresh_count": 63,
-  "carried_count": 3,
-  "errors": [],
+  "listing_count": 60,
+  "fresh_count": 8,
+  "carried_count": 52,
+  "errors": [
+    {
+      "source": "zimcompass-house-share-p1",
+      "error": "HTTP 403 for https://bw.zimcompass.com/house-share"
+    },
+    {
+      "source": "zimcompass-house-share-p2",
+      "error": "HTTP 403 for https://bw.zimcompass.com/house-share?page=2"
+    },
+    {
+      "source": "zimcompass-house-share-p3",
+      "error": "HTTP 403 for https://bw.zimcompass.com/house-share?page=3"
+    },
+    {
+      "source": "zimcompass-house-share-p4",
+      "error": "HTTP 403 for https://bw.zimcompass.com/house-share?page=4"
+    },
+    {
+      "source": "zimcompass-house-share-p5",
+      "error": "HTTP 403 for https://bw.zimcompass.com/house-share?page=5"
+    },
+    {
+      "source": "zimcompass-house-share-p6",
+      "error": "HTTP 403 for https://bw.zimcompass.com/house-share?page=6"
+    },
+    {
+      "source": "zimcompass-house-share-p7",
+      "error": "HTTP 403 for https://bw.zimcompass.com/house-share?page=7"
+    },
+    {
+      "source": "zimcompass-house-share-p8",
+      "error": "HTTP 403 for https://bw.zimcompass.com/house-share?page=8"
+    },
+    {
+      "source": "zimcompass-houses-for-rent-p1",
+      "error": "HTTP 403 for https://bw.zimcompass.com/houses-for-rent"
+    },
+    {
+      "source": "zimcompass-houses-for-rent-p2",
+      "error": "HTTP 403 for https://bw.zimcompass.com/houses-for-rent?page=2"
+    },
+    {
+      "source": "zimcompass-houses-for-rent-p3",
+      "error": "HTTP 403 for https://bw.zimcompass.com/houses-for-rent?page=3"
+    },
+    {
+      "source": "zimcompass-houses-for-rent-p4",
+      "error": "HTTP 403 for https://bw.zimcompass.com/houses-for-rent?page=4"
+    },
+    {
+      "source": "zimcompass-houses-for-rent-p5",
+      "error": "HTTP 403 for https://bw.zimcompass.com/houses-for-rent?page=5"
+    },
+    {
+      "source": "zimcompass-houses-for-rent-p6",
+      "error": "HTTP 403 for https://bw.zimcompass.com/houses-for-rent?page=6"
+    },
+    {
+      "source": "zimcompass-houses-for-rent-p7",
+      "error": "HTTP 403 for https://bw.zimcompass.com/houses-for-rent?page=7"
+    },
+    {
+      "source": "zimcompass-houses-for-rent-p8",
+      "error": "HTTP 403 for https://bw.zimcompass.com/houses-for-rent?page=8"
+    }
+  ],
   "listings": [
+    {
+      "id": "auto-ezilet-26775920910-bogatsu-ext-10-student-accommodation",
+      "title": "Bogatsu Ext 10 - Student Accommodation",
+      "description": "Description",
+      "price": null,
+      "price_on_request": true,
+      "room_type": "sharing",
+      "gender_preference": "any",
+      "area": "Block 7",
+      "city": "Gaborone",
+      "address": "Block 7, Gaborone",
+      "whatsapp_number": "26775920910",
+      "contact_name": "Ezilet listing",
+      "campus_ids": [
+        3,
+        4,
+        9,
+        10,
+        1
+      ],
+      "custom_university_name": null,
+      "source_label": "Ezilet student accommodation",
+      "source_url": "https://ezilet.net/listing/bogatsu-ext-10-student-accommodation/",
+      "detail_url": null,
+      "photo_urls": [
+        "/data/web-rental-photos/auto-ezilet-26775920910-bogatsu-ext-10-student-accommodation-0.jpg",
+        "/data/web-rental-photos/auto-ezilet-26775920910-bogatsu-ext-10-student-accommodation-1.jpg"
+      ],
+      "deposit_pula": null,
+      "utilities_included": null,
+      "fetched_at": "2026-08-17T11:10:07.911Z",
+      "last_seen_at": "2026-08-17T11:10:07.911Z",
+      "amenities": [
+        "wifi"
+      ],
+      "lat": -24.68,
+      "lng": 25.888,
+      "geo_precision": "area"
+    },
+    {
+      "id": "auto-ezilet-26771757272-mohammed-ext-10-student-accommodation",
+      "title": "Mohammed Ext 10 - Student Accommodation",
+      "description": "Description",
+      "price": null,
+      "price_on_request": true,
+      "room_type": "sharing",
+      "gender_preference": "any",
+      "area": "Block 7",
+      "city": "Gaborone",
+      "address": "Block 7, Gaborone",
+      "whatsapp_number": "26771757272",
+      "contact_name": "Ezilet listing",
+      "campus_ids": [
+        3,
+        4,
+        9,
+        10,
+        1
+      ],
+      "custom_university_name": null,
+      "source_label": "Ezilet student accommodation",
+      "source_url": "https://ezilet.net/listing/mohammed-ext-10-student-accommodation/",
+      "detail_url": null,
+      "photo_urls": [
+        "/data/web-rental-photos/auto-ezilet-26771757272-mohammed-ext-10-student-accommodation-0.jpg",
+        "/data/web-rental-photos/auto-ezilet-26771757272-mohammed-ext-10-student-accommodation-1.jpg"
+      ],
+      "deposit_pula": null,
+      "utilities_included": null,
+      "fetched_at": "2026-08-17T11:10:08.985Z",
+      "last_seen_at": "2026-08-17T11:10:08.985Z",
+      "amenities": [
+        "wifi"
+      ],
+      "lat": -24.68,
+      "lng": 25.888,
+      "geo_precision": "area"
+    },
+    {
+      "id": "auto-ezilet-26772816488-tulo-student-residence",
+      "title": "Tulo Student Residence",
+      "description": "Description",
+      "price": null,
+      "price_on_request": true,
+      "room_type": "sharing",
+      "gender_preference": "any",
+      "area": "Block 7",
+      "city": "Gaborone",
+      "address": "Block 7, Gaborone",
+      "whatsapp_number": "26772816488",
+      "contact_name": "Ezilet listing",
+      "campus_ids": [
+        3,
+        4,
+        9,
+        10,
+        1
+      ],
+      "custom_university_name": null,
+      "source_label": "Ezilet student accommodation",
+      "source_url": "https://ezilet.net/listing/tulo-student-residence/",
+      "detail_url": null,
+      "photo_urls": [
+        "/data/web-rental-photos/auto-ezilet-26772816488-tulo-student-residence-0.jpg",
+        "/data/web-rental-photos/auto-ezilet-26772816488-tulo-student-residence-1.jpg"
+      ],
+      "deposit_pula": null,
+      "utilities_included": null,
+      "fetched_at": "2026-08-17T11:10:10.066Z",
+      "last_seen_at": "2026-08-17T11:10:10.066Z",
+      "amenities": [
+        "wifi",
+        "security",
+        "furnished"
+      ],
+      "lat": -24.68,
+      "lng": 25.888,
+      "geo_precision": "area"
+    },
+    {
+      "id": "auto-ezilet-26776242849-tlokweng-student-accommodation",
+      "title": "Tlokweng Student Accommodation",
+      "description": "Description",
+      "price": null,
+      "price_on_request": true,
+      "room_type": "sharing",
+      "gender_preference": "any",
+      "area": "Block 7",
+      "city": "Gaborone",
+      "address": "Block 7, Gaborone",
+      "whatsapp_number": "26776242849",
+      "contact_name": "Ezilet listing",
+      "campus_ids": [
+        3,
+        4,
+        9,
+        10,
+        1
+      ],
+      "custom_university_name": null,
+      "source_label": "Ezilet student accommodation",
+      "source_url": "https://ezilet.net/listing/tlokweng-student-accommodation/",
+      "detail_url": null,
+      "photo_urls": [
+        "/data/web-rental-photos/auto-ezilet-26776242849-tlokweng-student-accommodation-0.jpg",
+        "/data/web-rental-photos/auto-ezilet-26776242849-tlokweng-student-accommodation-1.jpg"
+      ],
+      "deposit_pula": null,
+      "utilities_included": null,
+      "fetched_at": "2026-08-17T11:10:11.193Z",
+      "last_seen_at": "2026-08-17T11:10:11.193Z",
+      "amenities": [
+        "wifi"
+      ],
+      "lat": -24.68,
+      "lng": 25.888,
+      "geo_precision": "area"
+    },
+    {
+      "id": "auto-ezilet-26772143312-rich-minds-student-accommodation",
+      "title": "Rich Minds Student Accommodation",
+      "description": "Description",
+      "price": null,
+      "price_on_request": true,
+      "room_type": "sharing",
+      "gender_preference": "any",
+      "area": "Block 8",
+      "city": "Gaborone",
+      "address": "Block 8, Gaborone",
+      "whatsapp_number": "26772143312",
+      "contact_name": "Ezilet listing",
+      "campus_ids": [
+        3,
+        9,
+        1
+      ],
+      "custom_university_name": null,
+      "source_label": "Ezilet student accommodation",
+      "source_url": "https://ezilet.net/listing/rich-minds-student-accommodation/",
+      "detail_url": null,
+      "photo_urls": [
+        "/data/web-rental-photos/auto-ezilet-26772143312-rich-minds-student-accommodation-0.jpg"
+      ],
+      "deposit_pula": null,
+      "utilities_included": null,
+      "fetched_at": "2026-08-17T11:10:12.416Z",
+      "last_seen_at": "2026-08-17T11:10:12.416Z",
+      "amenities": [
+        "wifi",
+        "parking",
+        "laundry"
+      ],
+      "lat": -24.6486,
+      "lng": 25.8964,
+      "geo_precision": "area"
+    },
+    {
+      "id": "auto-ezilet-26772809597-tt-student-house-accommodation",
+      "title": "TT Student House Accommodation",
+      "description": "Description",
+      "price": null,
+      "price_on_request": true,
+      "room_type": "sharing",
+      "gender_preference": "any",
+      "area": "Molapo",
+      "city": "Francistown",
+      "address": "Molapo, Francistown",
+      "whatsapp_number": "26772809597",
+      "contact_name": "Ezilet listing",
+      "campus_ids": [],
+      "custom_university_name": "University of Botswana — Francistown Campus",
+      "source_label": "Ezilet student accommodation",
+      "source_url": "https://ezilet.net/listing/tt-student-house-accommodation/",
+      "detail_url": null,
+      "photo_urls": [
+        "/data/web-rental-photos/auto-ezilet-26772809597-tt-student-house-accommodation-0.jpg"
+      ],
+      "deposit_pula": null,
+      "utilities_included": null,
+      "fetched_at": "2026-08-17T11:10:13.512Z",
+      "last_seen_at": "2026-08-17T11:10:13.512Z",
+      "amenities": [
+        "wifi"
+      ],
+      "lat": -24.635,
+      "lng": 25.945,
+      "geo_precision": "area"
+    },
+    {
+      "id": "auto-ezilet-26774104414-leru-boarding-house",
+      "title": "Leru Boarding House",
+      "description": "Description",
+      "price": null,
+      "price_on_request": true,
+      "room_type": "sharing",
+      "gender_preference": "any",
+      "area": "Francistown",
+      "city": "Francistown",
+      "address": "Francistown, Francistown",
+      "whatsapp_number": "26774104414",
+      "contact_name": "Ezilet listing",
+      "campus_ids": [],
+      "custom_university_name": "University of Botswana — Francistown Campus",
+      "source_label": "Ezilet student accommodation",
+      "source_url": "https://ezilet.net/listing/leru-boarding-house/",
+      "detail_url": null,
+      "photo_urls": [
+        "/data/web-rental-photos/auto-ezilet-26774104414-leru-boarding-house-0.jpg"
+      ],
+      "deposit_pula": null,
+      "utilities_included": null,
+      "fetched_at": "2026-08-17T11:10:22.004Z",
+      "last_seen_at": "2026-08-17T11:10:22.004Z",
+      "amenities": [
+        "wifi",
+        "parking",
+        "laundry"
+      ],
+      "lat": -21.17,
+      "lng": 27.5075,
+      "geo_precision": "area"
+    },
+    {
+      "id": "auto-tswana-26773950399-2-bed-in-gabane-multires-rent-1725",
+      "title": "Student-friendly rental — 2 BED IN GABANE MULTIRES RENT 1725",
+      "description": "2 BED IN GABANE MULTIRES RENT 1725 - Find Real Estate in Botswana About WordPress About WordPress Get Involved WordPress.org Documentation Learn WordPress Support Feedback TswanaHome Dashboard Plugins Themes Widgets Menus Customize Theme Options 9 9 updates available 153 153 Comments in moderation New Post Media Page Floating Element Template Property Agency Agent Testimonial Partner Review User E",
+      "price": 3000,
+      "price_on_request": false,
+      "room_type": "sharing",
+      "gender_preference": "any",
+      "area": "Block 10",
+      "city": "Francistown",
+      "address": "Block 10, Francistown",
+      "whatsapp_number": "26773950399",
+      "contact_name": "TswanaHome listing",
+      "campus_ids": [],
+      "custom_university_name": "University of Botswana — Francistown Campus",
+      "source_label": "TswanaHome for rent",
+      "source_url": "https://www.tswanahome.com/property/2-bed-in-gabane-multires-rent-1725/",
+      "detail_url": null,
+      "photo_urls": [
+        "/data/web-rental-photos/auto-tswana-26773950399-2-bed-in-gabane-multires-rent-1725-0.jpg",
+        "/data/web-rental-photos/auto-tswana-26773950399-2-bed-in-gabane-multires-rent-1725-1.jpg",
+        "/data/web-rental-photos/auto-tswana-26773950399-2-bed-in-gabane-multires-rent-1725-2.jpg",
+        "/data/web-rental-photos/auto-tswana-26773950399-2-bed-in-gabane-multires-rent-1725-3.jpg",
+        "/data/web-rental-photos/auto-tswana-26773950399-2-bed-in-gabane-multires-rent-1725-4.jpg"
+      ],
+      "deposit_pula": null,
+      "utilities_included": null,
+      "fetched_at": "2026-08-17T11:10:24.397Z",
+      "last_seen_at": "2026-08-17T11:10:24.397Z",
+      "amenities": [
+        "kitchen"
+      ],
+      "lat": -24.63,
+      "lng": 25.899,
+      "geo_precision": "area"
+    },
     {
       "id": "auto-26772900189-a-room-available-for-rent-in-a-4-beds-to",
       "title": "A room available for rent in a 4 beds to",
@@ -1222,15 +1585,15 @@
     },
     {
       "id": "auto-26771775757",
-      "title": "Student room share — Gaborone",
-      "description": "Two bedroom apartment for rent In Gaborone North P5500pmCall 71775757-77632791Ready for occupation",
-      "price": 5500,
+      "title": "Student room share — phase 4",
+      "description": "Two bedroom apartment for rent in phase 4 P6000pm Available nowCall 71775757/77532791",
+      "price": 6000,
       "price_on_request": false,
       "room_type": "sharing",
       "gender_preference": "any",
-      "area": "Gaborone",
+      "area": "phase 4",
       "city": "Gaborone",
-      "address": "Gaborone, Botswana | 27 March, 2026",
+      "address": "Gaborone, Botswana | 16 March, 2026",
       "whatsapp_number": "26771775757",
       "contact_name": "Fridah",
       "campus_ids": [
@@ -1238,31 +1601,31 @@
       ],
       "custom_university_name": null,
       "source_label": "ZimCompass houses for rent",
-      "source_url": "https://bw.zimcompass.com/product?id=102775",
-      "detail_url": "https://bw.zimcompass.com/product?id=102775",
+      "source_url": "https://bw.zimcompass.com/product?id=102032",
+      "detail_url": "https://bw.zimcompass.com/product?id=102032",
       "photo_urls": [
         "/data/web-rental-photos/auto-26771775757-0.jpg"
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-17T10:23:28.685Z",
+      "fetched_at": "2026-08-17T10:23:32.449Z",
       "last_seen_at": "2026-08-17T10:23:32.449Z",
       "amenities": [],
-      "lat": -24.6282,
-      "lng": 25.9231,
+      "lat": -24.676,
+      "lng": 25.906,
       "geo_precision": "area"
     },
     {
       "id": "auto-26774285156",
       "title": "Student room share — Gaborone",
-      "description": "GABORONE~ HOUSES FOR RENT @74285156#Gothic~Ethics#House~PortalsAN EXCLUSIVE 3BEDS BHC house for rent in Gaborone St See more",
-      "price": 4000,
+      "description": "HOUSES FOR RENT74285156#Excellent~Houses Portal A super 2beds House for P3000&#x2B;sec in Mmopane village ~Full See more",
+      "price": 3000,
       "price_on_request": false,
       "room_type": "sharing",
       "gender_preference": "any",
       "area": "Gaborone",
       "city": "Gaborone",
-      "address": "Gaborone, Botswana | 02 August, 2026",
+      "address": "Gaborone, Botswana | 03 May, 2026",
       "whatsapp_number": "26774285156",
       "contact_name": "Nathan",
       "campus_ids": [
@@ -1270,16 +1633,18 @@
       ],
       "custom_university_name": null,
       "source_label": "ZimCompass houses for rent",
-      "source_url": "https://bw.zimcompass.com/product?id=113184",
-      "detail_url": "https://bw.zimcompass.com/product?id=113184",
+      "source_url": "https://bw.zimcompass.com/product?id=105907",
+      "detail_url": "https://bw.zimcompass.com/product?id=105507",
       "photo_urls": [
         "/data/web-rental-photos/auto-26774285156-0.jpg"
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-17T10:23:28.686Z",
-      "last_seen_at": "2026-08-17T10:23:28.686Z",
-      "amenities": [],
+      "fetched_at": "2026-08-17T10:07:16.009Z",
+      "last_seen_at": "2026-08-17T10:07:16.009Z",
+      "amenities": [
+        "security"
+      ],
       "lat": -24.6282,
       "lng": 25.9231,
       "geo_precision": "area"
@@ -1406,40 +1771,6 @@
       ],
       "lat": -24.639,
       "lng": 25.888,
-      "geo_precision": "area"
-    },
-    {
-      "id": "auto-26774285156",
-      "title": "Student room share — Block 1",
-      "description": "HOUSES FOR RENT 72942349A nice fully fitted 2beds house for rent in Mmopane Block 1, kitchenette with stovez, bedrooms with closets , Partly paved, walled Motor gate, electric fence, Stunning StarlinkBy tarred road,for only P3400&#x2B;sec74285156/ 72942349 /75963264A See more",
-      "price": 3400,
-      "price_on_request": false,
-      "room_type": "sharing",
-      "gender_preference": "any",
-      "area": "Block 1",
-      "city": "Gaborone",
-      "address": "Gaborone, Botswana | 11 June, 2026",
-      "whatsapp_number": "26774285156",
-      "contact_name": "Nathan",
-      "campus_ids": [
-        1
-      ],
-      "custom_university_name": null,
-      "source_label": "ZimCompass houses for rent",
-      "source_url": "https://bw.zimcompass.com/product?id=109079",
-      "detail_url": "https://bw.zimcompass.com/product?id=109079",
-      "photo_urls": [
-        "/data/web-rental-photos/auto-26774285156-0.jpg"
-      ],
-      "deposit_pula": null,
-      "utilities_included": null,
-      "fetched_at": "2026-08-17T10:23:29.533Z",
-      "last_seen_at": "2026-08-17T10:23:29.534Z",
-      "amenities": [
-        "security"
-      ],
-      "lat": -24.6282,
-      "lng": 25.9231,
       "geo_precision": "area"
     },
     {
@@ -1599,71 +1930,6 @@
       "geo_precision": "area"
     },
     {
-      "id": "auto-26774285156",
-      "title": "Student room share — Mmopane",
-      "description": "HOUSES FOR RENT74285156#Excellent~Houses Portal A super 2beds House for P3000&#x2B;sec in Mmopane village ~Full See more",
-      "price": 3000,
-      "price_on_request": false,
-      "room_type": "sharing",
-      "gender_preference": "any",
-      "area": "Mmopane",
-      "city": "Gaborone",
-      "address": "Gaborone, Botswana | 03 May, 2026",
-      "whatsapp_number": "26774285156",
-      "contact_name": "Nathan",
-      "campus_ids": [
-        1
-      ],
-      "custom_university_name": null,
-      "source_label": "ZimCompass houses for rent",
-      "source_url": "https://bw.zimcompass.com/product?id=105907",
-      "detail_url": "https://bw.zimcompass.com/product?id=105907",
-      "photo_urls": [
-        "/data/web-rental-photos/auto-26774285156-0.jpg"
-      ],
-      "deposit_pula": null,
-      "utilities_included": null,
-      "fetched_at": "2026-08-17T10:23:31.830Z",
-      "last_seen_at": "2026-08-17T10:23:31.830Z",
-      "amenities": [],
-      "lat": -24.5667,
-      "lng": 25.8333,
-      "geo_precision": "area"
-    },
-    {
-      "id": "auto-26774285156",
-      "title": "Student room share — LEDUMADUMANE",
-      "description": "HOUSES FOR RENT74285156#Excellent~Houses Portal \"EXCLUSIVE , GOTHIC\"STUNNING 2BEDS HOUSE FOR RENT IN LEDUMADUMANE WIT See more",
-      "price": 4200,
-      "price_on_request": false,
-      "room_type": "sharing",
-      "gender_preference": "any",
-      "area": "LEDUMADUMANE",
-      "city": "Gaborone",
-      "address": "Gaborone, Botswana | 29 April, 2026",
-      "whatsapp_number": "26774285156",
-      "contact_name": "Nathan",
-      "campus_ids": [
-        8,
-        1
-      ],
-      "custom_university_name": null,
-      "source_label": "ZimCompass houses for rent",
-      "source_url": "https://bw.zimcompass.com/product?id=105507",
-      "detail_url": "https://bw.zimcompass.com/product?id=105507",
-      "photo_urls": [
-        "/data/web-rental-photos/auto-26774285156-0.jpg"
-      ],
-      "deposit_pula": null,
-      "utilities_included": null,
-      "fetched_at": "2026-08-17T10:23:31.830Z",
-      "last_seen_at": "2026-08-17T10:23:31.830Z",
-      "amenities": [],
-      "lat": -24.5867,
-      "lng": 25.85,
-      "geo_precision": "area"
-    },
-    {
       "id": "auto-26778721873",
       "title": "Student room share — block 3",
       "description": "Hellos, am looking for a house to rent, budget P2000-P3000Phase 2, block 3, G West, Block 678721873",
@@ -1792,404 +2058,6 @@
       "geo_precision": "area"
     },
     {
-      "id": "auto-26771775757",
-      "title": "Student room share — phase 4",
-      "description": "Two bedroom apartment for rent in phase 4 P6000pm Available nowCall 71775757/77532791",
-      "price": 6000,
-      "price_on_request": false,
-      "room_type": "sharing",
-      "gender_preference": "any",
-      "area": "phase 4",
-      "city": "Gaborone",
-      "address": "Gaborone, Botswana | 16 March, 2026",
-      "whatsapp_number": "26771775757",
-      "contact_name": "Fridah",
-      "campus_ids": [
-        1
-      ],
-      "custom_university_name": null,
-      "source_label": "ZimCompass houses for rent",
-      "source_url": "https://bw.zimcompass.com/product?id=102032",
-      "detail_url": "https://bw.zimcompass.com/product?id=102032",
-      "photo_urls": [
-        "/data/web-rental-photos/auto-26771775757-0.jpg"
-      ],
-      "deposit_pula": null,
-      "utilities_included": null,
-      "fetched_at": "2026-08-17T10:23:32.449Z",
-      "last_seen_at": "2026-08-17T10:23:32.449Z",
-      "amenities": [],
-      "lat": -24.676,
-      "lng": 25.906,
-      "geo_precision": "area"
-    },
-    {
-      "id": "auto-ezilet-26775920910-bogatsu-ext-10-student-accommodation",
-      "title": "Bogatsu Ext 10 - Student Accommodation",
-      "description": "Description",
-      "price": null,
-      "price_on_request": true,
-      "room_type": "sharing",
-      "gender_preference": "any",
-      "area": "Block 7",
-      "city": "Gaborone",
-      "address": "Block 7, Gaborone",
-      "whatsapp_number": "26775920910",
-      "contact_name": "Ezilet listing",
-      "campus_ids": [
-        3,
-        4,
-        9,
-        10,
-        1
-      ],
-      "custom_university_name": null,
-      "source_label": "Ezilet student accommodation",
-      "source_url": "https://ezilet.net/listing/bogatsu-ext-10-student-accommodation/",
-      "detail_url": null,
-      "photo_urls": [
-        "/data/web-rental-photos/auto-ezilet-26775920910-bogatsu-ext-10-student-accommodation-0.jpg",
-        "/data/web-rental-photos/auto-ezilet-26775920910-bogatsu-ext-10-student-accommodation-1.jpg",
-        "/data/web-rental-photos/auto-ezilet-26775920910-bogatsu-ext-10-student-accommodation-2.png",
-        "/data/web-rental-photos/auto-ezilet-26775920910-bogatsu-ext-10-student-accommodation-3.jpg"
-      ],
-      "deposit_pula": null,
-      "utilities_included": null,
-      "fetched_at": "2026-08-17T10:23:49.774Z",
-      "last_seen_at": "2026-08-17T10:23:49.774Z",
-      "amenities": [
-        "wifi"
-      ],
-      "lat": -24.68,
-      "lng": 25.888,
-      "geo_precision": "area"
-    },
-    {
-      "id": "auto-ezilet-26771757272-mohammed-ext-10-student-accommodation",
-      "title": "Mohammed Ext 10 - Student Accommodation",
-      "description": "Description",
-      "price": null,
-      "price_on_request": true,
-      "room_type": "sharing",
-      "gender_preference": "any",
-      "area": "Block 7",
-      "city": "Gaborone",
-      "address": "Block 7, Gaborone",
-      "whatsapp_number": "26771757272",
-      "contact_name": "Ezilet listing",
-      "campus_ids": [
-        3,
-        4,
-        9,
-        10,
-        1
-      ],
-      "custom_university_name": null,
-      "source_label": "Ezilet student accommodation",
-      "source_url": "https://ezilet.net/listing/mohammed-ext-10-student-accommodation/",
-      "detail_url": null,
-      "photo_urls": [
-        "/data/web-rental-photos/auto-ezilet-26771757272-mohammed-ext-10-student-accommodation-0.jpg",
-        "/data/web-rental-photos/auto-ezilet-26771757272-mohammed-ext-10-student-accommodation-1.jpg",
-        "/data/web-rental-photos/auto-ezilet-26771757272-mohammed-ext-10-student-accommodation-2.png",
-        "/data/web-rental-photos/auto-ezilet-26771757272-mohammed-ext-10-student-accommodation-3.jpg"
-      ],
-      "deposit_pula": null,
-      "utilities_included": null,
-      "fetched_at": "2026-08-17T10:23:51.059Z",
-      "last_seen_at": "2026-08-17T10:23:51.059Z",
-      "amenities": [
-        "wifi"
-      ],
-      "lat": -24.68,
-      "lng": 25.888,
-      "geo_precision": "area"
-    },
-    {
-      "id": "auto-ezilet-26772816488-tulo-student-residence",
-      "title": "Tulo Student Residence",
-      "description": "Description",
-      "price": null,
-      "price_on_request": true,
-      "room_type": "sharing",
-      "gender_preference": "any",
-      "area": "Block 7",
-      "city": "Gaborone",
-      "address": "Block 7, Gaborone",
-      "whatsapp_number": "26772816488",
-      "contact_name": "Ezilet listing",
-      "campus_ids": [
-        3,
-        4,
-        9,
-        10,
-        1
-      ],
-      "custom_university_name": null,
-      "source_label": "Ezilet student accommodation",
-      "source_url": "https://ezilet.net/listing/tulo-student-residence/",
-      "detail_url": null,
-      "photo_urls": [
-        "/data/web-rental-photos/auto-ezilet-26772816488-tulo-student-residence-0.jpg",
-        "/data/web-rental-photos/auto-ezilet-26772816488-tulo-student-residence-1.jpg",
-        "/data/web-rental-photos/auto-ezilet-26772816488-tulo-student-residence-2.png",
-        "/data/web-rental-photos/auto-ezilet-26772816488-tulo-student-residence-3.jpg"
-      ],
-      "deposit_pula": null,
-      "utilities_included": null,
-      "fetched_at": "2026-08-17T10:23:52.307Z",
-      "last_seen_at": "2026-08-17T10:23:52.307Z",
-      "amenities": [
-        "wifi",
-        "security",
-        "furnished"
-      ],
-      "lat": -24.68,
-      "lng": 25.888,
-      "geo_precision": "area"
-    },
-    {
-      "id": "auto-ezilet-26776242849-tlokweng-student-accommodation",
-      "title": "Tlokweng Student Accommodation",
-      "description": "Description",
-      "price": null,
-      "price_on_request": true,
-      "room_type": "sharing",
-      "gender_preference": "any",
-      "area": "Block 7",
-      "city": "Gaborone",
-      "address": "Block 7, Gaborone",
-      "whatsapp_number": "26776242849",
-      "contact_name": "Ezilet listing",
-      "campus_ids": [
-        3,
-        4,
-        9,
-        10,
-        1
-      ],
-      "custom_university_name": null,
-      "source_label": "Ezilet student accommodation",
-      "source_url": "https://ezilet.net/listing/tlokweng-student-accommodation/",
-      "detail_url": null,
-      "photo_urls": [
-        "/data/web-rental-photos/auto-ezilet-26776242849-tlokweng-student-accommodation-0.jpg",
-        "/data/web-rental-photos/auto-ezilet-26776242849-tlokweng-student-accommodation-1.jpg",
-        "/data/web-rental-photos/auto-ezilet-26776242849-tlokweng-student-accommodation-2.png",
-        "/data/web-rental-photos/auto-ezilet-26776242849-tlokweng-student-accommodation-3.jpg"
-      ],
-      "deposit_pula": null,
-      "utilities_included": null,
-      "fetched_at": "2026-08-17T10:23:53.560Z",
-      "last_seen_at": "2026-08-17T10:23:53.560Z",
-      "amenities": [
-        "wifi"
-      ],
-      "lat": -24.68,
-      "lng": 25.888,
-      "geo_precision": "area"
-    },
-    {
-      "id": "auto-ezilet-26772143312-rich-minds-student-accommodation",
-      "title": "Rich Minds Student Accommodation",
-      "description": "Description",
-      "price": null,
-      "price_on_request": true,
-      "room_type": "sharing",
-      "gender_preference": "any",
-      "area": "Block 8",
-      "city": "Gaborone",
-      "address": "Block 8, Gaborone",
-      "whatsapp_number": "26772143312",
-      "contact_name": "Ezilet listing",
-      "campus_ids": [
-        3,
-        9,
-        1
-      ],
-      "custom_university_name": null,
-      "source_label": "Ezilet student accommodation",
-      "source_url": "https://ezilet.net/listing/rich-minds-student-accommodation/",
-      "detail_url": null,
-      "photo_urls": [
-        "/data/web-rental-photos/auto-ezilet-26772143312-rich-minds-student-accommodation-0.jpg",
-        "/data/web-rental-photos/auto-ezilet-26772143312-rich-minds-student-accommodation-1.png",
-        "/data/web-rental-photos/auto-ezilet-26772143312-rich-minds-student-accommodation-2.jpg"
-      ],
-      "deposit_pula": null,
-      "utilities_included": null,
-      "fetched_at": "2026-08-17T10:23:54.933Z",
-      "last_seen_at": "2026-08-17T10:23:54.933Z",
-      "amenities": [
-        "wifi",
-        "parking",
-        "laundry"
-      ],
-      "lat": -24.6486,
-      "lng": 25.8964,
-      "geo_precision": "area"
-    },
-    {
-      "id": "auto-ezilet-26772809597-tt-student-house-accommodation",
-      "title": "TT Student House Accommodation",
-      "description": "Description",
-      "price": null,
-      "price_on_request": true,
-      "room_type": "sharing",
-      "gender_preference": "any",
-      "area": "Molapo",
-      "city": "Francistown",
-      "address": "Molapo, Francistown",
-      "whatsapp_number": "26772809597",
-      "contact_name": "Ezilet listing",
-      "campus_ids": [],
-      "custom_university_name": "University of Botswana — Francistown Campus",
-      "source_label": "Ezilet student accommodation",
-      "source_url": "https://ezilet.net/listing/tt-student-house-accommodation/",
-      "detail_url": null,
-      "photo_urls": [
-        "/data/web-rental-photos/auto-ezilet-26772809597-tt-student-house-accommodation-0.jpg",
-        "/data/web-rental-photos/auto-ezilet-26772809597-tt-student-house-accommodation-1.png",
-        "/data/web-rental-photos/auto-ezilet-26772809597-tt-student-house-accommodation-2.jpg"
-      ],
-      "deposit_pula": null,
-      "utilities_included": null,
-      "fetched_at": "2026-08-17T10:23:56.364Z",
-      "last_seen_at": "2026-08-17T10:23:56.364Z",
-      "amenities": [
-        "wifi"
-      ],
-      "lat": -24.635,
-      "lng": 25.945,
-      "geo_precision": "area"
-    },
-    {
-      "id": "auto-ezilet-26774104414-leru-boarding-house",
-      "title": "Leru Boarding House",
-      "description": "Description",
-      "price": null,
-      "price_on_request": true,
-      "room_type": "sharing",
-      "gender_preference": "any",
-      "area": "Francistown",
-      "city": "Francistown",
-      "address": "Francistown, Francistown",
-      "whatsapp_number": "26774104414",
-      "contact_name": "Ezilet listing",
-      "campus_ids": [],
-      "custom_university_name": "University of Botswana — Francistown Campus",
-      "source_label": "Ezilet student accommodation",
-      "source_url": "https://ezilet.net/listing/leru-boarding-house/",
-      "detail_url": null,
-      "photo_urls": [
-        "/data/web-rental-photos/auto-ezilet-26774104414-leru-boarding-house-0.jpg",
-        "/data/web-rental-photos/auto-ezilet-26774104414-leru-boarding-house-1.png",
-        "/data/web-rental-photos/auto-ezilet-26774104414-leru-boarding-house-2.jpg"
-      ],
-      "deposit_pula": null,
-      "utilities_included": null,
-      "fetched_at": "2026-08-17T10:24:06.860Z",
-      "last_seen_at": "2026-08-17T10:24:06.860Z",
-      "amenities": [
-        "wifi",
-        "parking",
-        "laundry"
-      ],
-      "lat": -21.17,
-      "lng": 27.5075,
-      "geo_precision": "area"
-    },
-    {
-      "id": "auto-tswana-26773950399-2-bed-in-gabane-multires-rent-1725",
-      "title": "Student-friendly rental — 2 BED IN GABANE MULTIRES RENT 1725",
-      "description": "2 BED IN GABANE MULTIRES RENT 1725 - Find Real Estate in Botswana About WordPress About WordPress Get Involved WordPress.org Documentation Learn WordPress Support Feedback TswanaHome Dashboard Plugins Themes Widgets Menus Customize Theme Options 9 9 updates available 153 153 Comments in moderation New Post Media Page Floating Element Template Property Agency Agent Testimonial Partner Review User E",
-      "price": 3000,
-      "price_on_request": false,
-      "room_type": "sharing",
-      "gender_preference": "any",
-      "area": "Block 10",
-      "city": "Francistown",
-      "address": "Block 10, Francistown",
-      "whatsapp_number": "26773950399",
-      "contact_name": "TswanaHome listing",
-      "campus_ids": [],
-      "custom_university_name": "University of Botswana — Francistown Campus",
-      "source_label": "TswanaHome for rent",
-      "source_url": "https://www.tswanahome.com/property/2-bed-in-gabane-multires-rent-1725/",
-      "detail_url": null,
-      "photo_urls": [
-        "/data/web-rental-photos/auto-tswana-26773950399-2-bed-in-gabane-multires-rent-1725-0.jpg",
-        "/data/web-rental-photos/auto-tswana-26773950399-2-bed-in-gabane-multires-rent-1725-1.jpg",
-        "/data/web-rental-photos/auto-tswana-26773950399-2-bed-in-gabane-multires-rent-1725-2.jpg",
-        "/data/web-rental-photos/auto-tswana-26773950399-2-bed-in-gabane-multires-rent-1725-3.jpg",
-        "/data/web-rental-photos/auto-tswana-26773950399-2-bed-in-gabane-multires-rent-1725-4.jpg",
-        "/data/web-rental-photos/auto-tswana-26773950399-2-bed-in-gabane-multires-rent-1725-5.jpg",
-        "/data/web-rental-photos/auto-tswana-26773950399-2-bed-in-gabane-multires-rent-1725-6.jpg",
-        "/data/web-rental-photos/auto-tswana-26773950399-2-bed-in-gabane-multires-rent-1725-7.jpg"
-      ],
-      "deposit_pula": null,
-      "utilities_included": null,
-      "fetched_at": "2026-08-17T10:24:09.761Z",
-      "last_seen_at": "2026-08-17T10:24:09.761Z",
-      "amenities": [
-        "kitchen"
-      ],
-      "lat": -24.63,
-      "lng": 25.899,
-      "geo_precision": "area"
-    },
-    {
-      "id": "auto-26774285156",
-      "title": "Student room share — Gaborone",
-      "description": "HOUSES FOR RENT74285156#Excellent~Houses Portal A super 2beds House for P3000&#x2B;sec in Mmopane village ~Full See more",
-      "price": 3000,
-      "room_type": "sharing",
-      "gender_preference": "any",
-      "area": "Gaborone",
-      "city": "Gaborone",
-      "address": "Gaborone, Botswana | 03 May, 2026",
-      "whatsapp_number": "26774285156",
-      "contact_name": "Nathan",
-      "campus_ids": [
-        1
-      ],
-      "custom_university_name": null,
-      "source_label": "ZimCompass houses for rent",
-      "source_url": "https://bw.zimcompass.com/product?id=105907",
-      "photo_urls": [
-        "/data/web-rental-photos/auto-26774285156-0.jpg"
-      ],
-      "deposit_pula": null,
-      "utilities_included": null,
-      "fetched_at": "2026-08-17T10:07:16.009Z",
-      "last_seen_at": "2026-08-17T10:07:16.009Z"
-    },
-    {
-      "id": "auto-26776968183-beds",
-      "title": "Student room share ? block 9",
-      "description": "2 beds available Tsolamosese Mogoditshane blk4..fitted and multires, motorised Gates, paved yard and electric fence p3500 plus security. &#xA; Finders fee P250&#xA; Call 76968183 for pics and viewing A room to share with a female in a 2 beds that goes for P3k available in Tlokweng , Letlapeng each paying P1500 plus equivalent security each. It&#x27;s fitted with electric fence. P200 finders fee.&#xA; Call 76968183 for pics and vewing A room in a three beds in Gaborone block 9 available at P1500 rent plus security... More",
-      "price": 3500,
-      "room_type": "sharing",
-      "gender_preference": "any",
-      "area": "block 9",
-      "city": "Gaborone",
-      "address": "Botswana | 06 October, 2024",
-      "whatsapp_number": "26776968183",
-      "contact_name": "Malcolm",
-      "campus_ids": [
-        10,
-        1
-      ],
-      "custom_university_name": null,
-      "source_label": "ZimCompass house share",
-      "source_url": "https://bw.zimcompass.com/product?id=81263",
-      "photo_urls": [],
-      "deposit_pula": null,
-      "utilities_included": null,
-      "fetched_at": "2026-08-11T09:58:52.117Z",
-      "last_seen_at": "2026-08-11T09:58:55.852Z"
-    },
-    {
       "id": "auto-26774722297-office-to-share-available-at-main-mall-e",
       "title": "Office to Share available at Main Mall Embassy Chambers Office",
       "description": "Office to Share at Main Mall Call 74722297 Your share 1.500 BWP Location: Embassy Chambers First Floor Office # 21 Next to Shell Filling Station",
@@ -2211,10 +2079,14 @@
       "deposit_pula": null,
       "utilities_included": null,
       "fetched_at": "2026-08-11T09:58:52.214Z",
-      "last_seen_at": "2026-08-11T09:58:52.214Z"
+      "last_seen_at": "2026-08-11T09:58:52.214Z",
+      "amenities": [],
+      "lat": -24.6282,
+      "lng": 25.9231,
+      "geo_precision": "area"
     }
   ],
-  "photos_mirrored": 83,
+  "photos_mirrored": 61,
   "with_amenities": 30,
-  "with_coords": 63
+  "with_coords": 60
 }
