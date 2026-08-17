@@ -93,6 +93,9 @@ function webListing({
   utilities_included = null,
   photo_urls = [],
   distance_to_campus = null,
+  lat = null,
+  lng = null,
+  geo_precision = null,
 }) {
   const primary = campus || null
   const ids = campus_ids || (primary ? [primary.id] : [])
@@ -107,8 +110,9 @@ function webListing({
     address: address || `${area}, ${city}`,
     area,
     city,
-    lat: null,
-    lng: null,
+    lat,
+    lng,
+    geo_precision,
     nearest_university_id: primary?.id ?? null,
     custom_university_name: primary ? null : custom_university_name,
     custom_university_city: primary ? null : city,
@@ -422,8 +426,18 @@ export const WEB_RENTALS = [
   }),
 ]
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
 export function isWebRentalId(id) {
   return typeof id === 'string' && (id.startsWith('web-') || id.startsWith('auto-'))
+}
+
+/**
+ * Web/feed listings use slug ids, not uuids. Postgres rejects them with 22P02,
+ * so every uuid-column query must be skipped for these.
+ */
+export function isDatabaseListingId(id) {
+  return typeof id === 'string' && UUID_RE.test(id)
 }
 
 /** Live auto-synced catalog (filled by useWebRentalsFeed). */
@@ -437,13 +451,20 @@ function photoCount(row) {
   return Array.isArray(row?.listing_photos) ? row.listing_photos.length : 0
 }
 
-/** Prefer live/feed rows (more photos) over seed when collapsing duplicates. */
+/** Richer row wins: gallery size first, then amenities, then a map pin. */
+function richness(row) {
+  return photoCount(row) * 10
+    + (row?.amenities?.length || 0) * 2
+    + (row?.lat != null && row?.lng != null ? 1 : 0)
+}
+
+/** Prefer live/feed rows over seed when collapsing duplicates. */
 function preferListing(a, b) {
   if (!a) return b
   if (!b) return a
-  const pa = photoCount(a)
-  const pb = photoCount(b)
-  if (pb !== pa) return pb > pa ? b : a
+  const ra = richness(a)
+  const rb = richness(b)
+  if (rb !== ra) return rb > ra ? b : a
   // Prefer auto-synced feed ids over static seed ids
   const aLive = String(a.id || '').startsWith('auto-')
   const bLive = String(b.id || '').startsWith('auto-')
@@ -513,6 +534,9 @@ export function feedItemToListing(item) {
     utilities_included: item.utilities_included ?? null,
     photo_urls: item.photo_urls || [],
     distance_to_campus: item.distance_to_campus ?? null,
+    lat: item.lat ?? null,
+    lng: item.lng ?? null,
+    geo_precision: item.geo_precision ?? null,
   })
 }
 

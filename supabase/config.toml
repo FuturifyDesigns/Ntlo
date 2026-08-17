@@ -1,0 +1,5 @@
+# Minimal project config for CLI deploy. Do not put secrets here.
+
+[functions.sync-web-rentals]
+verify_jwt = true
+entrypoint = "./functions/sync-web-rentals/index.ts"

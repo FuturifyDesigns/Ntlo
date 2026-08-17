@@ -1,458 +1,34 @@
 /**
- * Daily Botswana student-rental aggregator.
- * Pulls public classifieds from multiple Botswana housing sites, filters for
- * student-suitable rooms, mirrors photos, and writes public/data/web-rentals-feed.json.
+ * Daily Botswana student-rental aggregator (build-time fallback feed).
  *
- * Sources (public HTML only):
- *  - ZimCompass house-share + houses-for-rent
- *  - Ezilet Botswana student accommodation listings
- *  - TswanaHome residential for-rent (student-budget filter)
+ * The primary sync now runs as the `sync-web-rentals` Supabase Edge Function,
+ * which writes straight to public.web_rental_listings so new rooms appear
+ * without a redeploy. This script produces the static JSON that ships with the
+ * build and is used until the Edge Function has populated the table.
  *
- * Used by CI cron + local: node scripts/sync-web-rentals.mjs
+ * Crawl logic is shared with the Edge Function via
+ * supabase/functions/_shared/rental-parser.js so both stay in step.
  *
- * Scope note: we only fetch public HTML classified pages we are allowed to
- * crawl. Facebook Marketplace / closed groups are not scraped (ToS + auth wall).
+ * Run: node scripts/sync-web-rentals.mjs
  */
 import { mkdirSync, writeFileSync, readFileSync, existsSync, readdirSync, unlinkSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+
+import {
+  SOURCES,
+  KEEP_DAYS,
+  fetchSource,
+  hydrateZimcompassDetails,
+  dedupe,
+  mergeWithPrevious,
+} from '../supabase/functions/_shared/rental-parser.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const ROOT = join(__dirname, '..')
 const OUT = join(ROOT, 'public', 'data', 'web-rentals-feed.json')
 const PHOTO_DIR = join(ROOT, 'public', 'data', 'web-rental-photos')
 const PHOTO_PUBLIC_PREFIX = '/data/web-rental-photos'
-
-/** Keep listings that fall off page-1 for this many days so Ntlo stays stocked. */
-const KEEP_DAYS = 21
-/** How many ZimCompass result pages to crawl each run (per category). */
-const ZIMCOMPASS_PAGES = 8
-const UA = 'NtloStudentHousingBot/1.0 (+https://ntlo.online; student accommodation aggregator)'
-
-function zimcompassCategorySources(path, label) {
-  const pages = []
-  for (let page = 1; page <= ZIMCOMPASS_PAGES; page += 1) {
-    pages.push({
-      id: `zimcompass-${path}-p${page}`,
-      kind: 'zimcompass',
-      label,
-      url: page === 1
-        ? `https://bw.zimcompass.com/${path}`
-        : `https://bw.zimcompass.com/${path}?page=${page}`,
-    })
-  }
-  return pages
-}
-
-const EZILET_SEEDS = [
-  'https://ezilet.net/listing/bogatsu-ext-10-student-accommodation/',
-  'https://ezilet.net/listing/mohammed-ext-10-student-accommodation/',
-  'https://ezilet.net/listing/tulo-student-residence/',
-  'https://ezilet.net/listing/tlokweng-student-accommodation/',
-]
-
-const EZILET_SEARCHES = [
-  'https://ezilet.net/?s=gaborone+student',
-  'https://ezilet.net/?s=botswana+student+accommodation',
-  'https://ezilet.net/?s=university+of+botswana',
-  'https://ezilet.net/?s=tlokweng+student',
-  'https://ezilet.net/?s=limkokwing+botswana',
-]
-
-const SOURCES = [
-  ...zimcompassCategorySources('house-share', 'ZimCompass house share'),
-  ...zimcompassCategorySources('houses-for-rent', 'ZimCompass houses for rent'),
-  { id: 'ezilet-botswana', kind: 'ezilet', label: 'Ezilet student accommodation' },
-  { id: 'tswanahome-for-rent', kind: 'tswanahome', label: 'TswanaHome for rent', url: 'https://www.tswanahome.com/status/for-rent/' },
-]
-
-const STUDENT_HINT = /\b(student|share|sharing|room|rooms|bed|beds|ub\b|botho|campus|university|college|bac\b|biust|limkokwing|gaborone|mogoditshane|tlokweng|gabane|palapye|francistown|ledumadumane|broadhurst|block\s*\d)\b/i
-const NOISE = /\b(bmw|toyota|nissan|honda|mercedes|car diagnosis|nail technician|botswana ?post|chief|zambia|mthatha|ongwediva|namibia|messenger|office|warehouse|industrial|shop|retail|commercial)\b/i
-const BW_CITIES = /\b(gaborone|francistown|palapye|maun|lobatse|selebi|serowe|molepolole|mogoditshane|tlokweng|gabane|kweneng|broadhurst|block\s*\d|ledumadumane|phase\s*\d|thito|satellite|molapo|extension\s*\d+)\b/i
-const BW_MARKER = /\b(botswana|gaborone|francistown|palapye|tlokweng|mogoditshane|gabane|ub\b|university of botswana|botho|limkokwing|buan|biust)\b/i
-const NON_BW = /\b(grenoble|norwich|winchester|colchester|st\.?\s*louis|uj\b|doornfontein|nsfas|ukzn|johannesburg|pretoria|cape town|namibia|zambia|mthatha)\b/i
-
-function stripTags(html) {
-  return String(html || '')
-    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
-    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
-    .replace(/<[^>]+>/g, ' ')
-    .replace(/&nbsp;/g, ' ')
-    .replace(/&amp;/g, '&')
-    .replace(/&#39;/g, "'")
-    .replace(/&quot;/g, '"')
-    .replace(/\s+/g, ' ')
-    .trim()
-}
-
-function extractPhone(text) {
-  const raw = String(text || '')
-  const intl = raw.match(/(?:\+?267[\s-]*)?(7[1-9]\d{6})\b/)
-  if (!intl) return null
-  const national = intl[1]
-  return `267${national}`
-}
-
-function extractPrice(priceText, detailsText) {
-  const blob = `${priceText || ''} ${detailsText || ''}`
-  const bwp = blob.match(/BWP\s*([\d,]+)/i)
-  if (bwp) {
-    const n = Number(bwp[1].replace(/,/g, ''))
-    if (n >= 400 && n <= 8000) return n
-  }
-  const p = blob.match(/(?:^|[^\d])P\s*([\d,]+)/i) || blob.match(/\b([\d]{3,4})\s*(?:\/\s*mo|rent|share)/i)
-  if (p) {
-    const n = Number(p[1].replace(/,/g, ''))
-    if (n >= 400 && n <= 8000) return n
-  }
-  const share = blob.match(/share(?:\s+is)?\s*P?\s*([\d,]+)/i)
-  if (share) {
-    const n = Number(share[1].replace(/,/g, ''))
-    if (n >= 400 && n <= 8000) return n
-  }
-  return null
-}
-
-function guessCity(locationText, detailsText) {
-  const blob = `${locationText || ''} ${detailsText || ''}`.toLowerCase()
-  if (blob.includes('francistown')) return 'Francistown'
-  if (blob.includes('palapye')) return 'Palapye'
-  if (blob.includes('gabane')) return 'Gabane'
-  if (blob.includes('mogoditshane')) return 'Gaborone'
-  if (blob.includes('tlokweng')) return 'Gaborone'
-  if (blob.includes('kweneng')) return 'Gaborone'
-  if (blob.includes('gaborone') || BW_CITIES.test(blob)) return 'Gaborone'
-  return 'Gaborone'
-}
-
-function guessArea(locationText, detailsText, city) {
-  const blob = `${locationText || ''} ${detailsText || ''}`
-  const block = blob.match(/Block\s*\d+/i)
-  if (block) return block[0]
-  const known = blob.match(/\b(Ledumadumane|Broadhurst(?:\s*Ext\.?\s*\d+)?|Phase\s*\d+|Tlokweng|Mogoditshane|Gabane|New Canada|Thito|Satellite|Molapo|Extension\s*\d+)\b/i)
-  if (known) return known[1]
-  return city
-}
-
-function guessCampuses(area, city, details) {
-  const blob = `${area} ${city} ${details}`.toLowerCase()
-  const ids = new Set()
-  if (blob.includes('botho') || blob.includes('block 7') || blob.includes('enco')) ids.add(3)
-  if (blob.includes('limkokwing') || blob.includes('block 7')) ids.add(4)
-  if (blob.includes('bac') || blob.includes('accountancy')) ids.add(9)
-  if (blob.includes('biust') || blob.includes('palapye')) ids.add(2)
-  if (blob.includes('boitekanelo') || blob.includes('tlokweng')) ids.add(10)
-  if (blob.includes('buan') || blob.includes('ledumadumane') || blob.includes('sebele')) ids.add(8)
-  if (blob.includes('francistown')) return { campus_ids: [], custom_university_name: 'University of Botswana ? Francistown Campus' }
-  if (blob.includes('ub') || blob.includes('extension 10') || blob.includes('block 5') || blob.includes('gaborone')) ids.add(1)
-  if (!ids.size && city === 'Gaborone') ids.add(1)
-  return { campus_ids: [...ids], custom_university_name: null }
-}
-
-function isStudentRentable(title, details, location) {
-  const blob = `${title} ${details} ${location}`
-  if (NOISE.test(blob)) return false
-  if (!STUDENT_HINT.test(blob) && !BW_CITIES.test(blob)) return false
-  if (!/\b(room|share|bed|house|apartment|flat|sq\b|servant|student)\b/i.test(blob)) return false
-  return true
-}
-
-function listingKey(row) {
-  const pricePart = row.price_on_request || row.price == null ? 'poa' : row.price
-  return `${String(row.whatsapp_number || '').replace(/\D/g, '')}|${pricePart}|${String(row.title || '').slice(0, 24).toLowerCase()}`
-}
-
-function parseZimcompass(html, source) {
-  const articles = [...html.matchAll(/<article class="listing">([\s\S]*?)<\/article>/gi)]
-  const out = []
-  for (const [, body] of articles) {
-    const title = stripTags((body.match(/<h3 class="heading">([\s\S]*?)<\/h3>/i) || [])[1] || '')
-    const priceText = stripTags((body.match(/<p class="price">([\s\S]*?)<\/p>/i) || [])[1] || '')
-    const details = stripTags((body.match(/<p class="details">([\s\S]*?)<\/p>/i) || [])[1] || '')
-    const seller = stripTags((body.match(/Private Seller:\s*([^<]+)/i) || [])[1] || 'Contact')
-    const location = stripTags((body.match(/<div class="location">([\s\S]*?)<\/div>/i) || [])[1] || '')
-    const img = ((body.match(/<img[^>]+src="([^"]+)"[^>]*class="[^"]*img-fluid/i) || body.match(/<img[^>]+class="[^"]*img-fluid[^"]*"[^>]+src="([^"]+)"/i) || [])[1] || '').trim()
-    const href = ((body.match(/<a[^>]+href="([^"]+)"[^>]*>\s*<h3/i) || body.match(/href="(\/[^"]+)"/i) || [])[1] || '').trim()
-
-    if (!isStudentRentable(title, details, location)) continue
-    const phone = extractPhone(`${details} ${title}`)
-    if (!phone) continue
-    const price = extractPrice(priceText, details)
-    if (!price) continue
-
-    const city = guessCity(location, details)
-    if (/namibia|zambia|mthatha|ongwediva/i.test(`${location} ${details}`)) continue
-
-    const area = guessArea(location, details, city)
-    const campus = guessCampuses(area, city, details)
-    const photo = img
-      ? (img.startsWith('http') ? img : `https://bw.zimcompass.com${img.startsWith('/') ? '' : '/'}${img}`)
-      : null
-    const sourceUrl = href
-      ? (href.startsWith('http') ? href : `https://bw.zimcompass.com${href.startsWith('/') ? '' : '/'}${href}`)
-      : source.url
-
-    const slug = `${phone}-${title.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 40)}`
-    const now = new Date().toISOString()
-    out.push({
-      id: `auto-${slug}`.replace(/-+$/g, ''),
-      title: title.length > 8 ? title : `Student room share — ${area}`,
-      description: details || title,
-      price,
-      room_type: /single|servant|sq\b/i.test(`${title} ${details}`) ? 'single' : 'sharing',
-      gender_preference: /female only|ladies only|girls only/i.test(details) ? 'female' : /male only|gents only/i.test(details) ? 'male' : 'any',
-      area,
-      city,
-      address: location || `${area}, ${city}`,
-      whatsapp_number: phone,
-      contact_name: seller || 'Contact',
-      campus_ids: campus.campus_ids,
-      custom_university_name: campus.custom_university_name,
-      source_label: source.label,
-      source_url: sourceUrl,
-      photo_urls: photo && !/user-silhouette|placeholder/i.test(photo) ? [photo] : [],
-      deposit_pula: (() => {
-        const m = details.match(/security(?:\s*deposit)?\s*P?\s*([\d,]+)/i)
-        return m ? Number(m[1].replace(/,/g, '')) : null
-      })(),
-      utilities_included: /including (bills|water|electricity)|bills included/i.test(details) ? 'included' : null,
-      fetched_at: now,
-      last_seen_at: now,
-    })
-  }
-  return out
-}
-
-async function fetchHtml(url) {
-  const res = await fetch(url, {
-    headers: {
-      'User-Agent': UA,
-      Accept: 'text/html,application/xhtml+xml',
-    },
-  })
-  if (!res.ok) throw new Error(`HTTP ${res.status} for ${url}`)
-  return res.text()
-}
-
-function parseEziletDetail(html, url, source) {
-  const title = stripTags((html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i) || [])[1] || '')
-  if (!title) return null
-  const plain = stripTags(html)
-  if (NON_BW.test(`${title} ${plain}`) && !BW_MARKER.test(`${title} ${url} ${plain}`)) return null
-  if (!BW_MARKER.test(`${title} ${url} ${plain}`)) return null
-  if (NOISE.test(plain) && !/student|accommodation|room|share/i.test(title)) return null
-
-  const phone = extractPhone(html) || extractPhone(plain)
-  if (!phone) return null
-
-  const rentBlock = stripTags((html.match(/block-field-rent[\s\S]{0,400}/i) || [])[0] || '')
-  let price = extractPrice(rentBlock, plain)
-  const priceOnRequest = !price && /POA|price on (application|request)|contact (seller|for price)/i.test(`${rentBlock} ${plain}`)
-  if (!price && !priceOnRequest) {
-    // Still keep Botswana student residences even when rent is only "ask on WhatsApp".
-    price = null
-  }
-
-  const suburb = stripTags((html.match(/Suburb[\s\S]{0,120}?<[^>]+>([^<]{3,80})</i) || html.match(/Suburb\s+([A-Za-z0-9 ,.-]{3,80})/i) || [])[1] || '')
-  const cityRaw = stripTags((html.match(/City[\s\S]{0,80}?<[^>]+>([^<]{3,40})</i) || [])[1] || '')
-  const city = guessCity(`${suburb} ${cityRaw}`, plain)
-  const area = guessArea(suburb || title, plain, city)
-  const campus = guessCampuses(area, city, `${title} ${plain}`)
-  const desc = stripTags((html.match(/Description[\s\S]{0,40}?<(?:div|p)[^>]*>([\s\S]*?)<\/(?:div|p)>/i) || [])[1] || '')
-    || plain.slice(0, 280)
-  const imgs = [...new Set([...html.matchAll(/src="(https:\/\/ezilet\.net\/wp-content\/uploads\/[^"]+\.(?:jpe?g|png|webp))"/gi)].map((m) => m[1]))]
-    .filter((u) => !/logo|icon|avatar|placeholder/i.test(u))
-  const gender = /female|girl|ladies only/i.test(`${title} ${desc}`) ? 'female' : /male only|gents only/i.test(`${title} ${desc}`) ? 'male' : 'any'
-  const now = new Date().toISOString()
-  const slug = `${phone}-${title.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 40)}`
-
-  return {
-    id: `auto-ezilet-${slug}`.replace(/-+$/g, ''),
-    title,
-    description: desc || title,
-    price: priceOnRequest ? null : price,
-    price_on_request: Boolean(priceOnRequest || price == null),
-    room_type: /single|ensuite|self.?contained/i.test(`${title} ${desc}`) ? 'single' : 'sharing',
-    gender_preference: gender,
-    area,
-    city,
-    address: suburb || `${area}, ${city}`,
-    whatsapp_number: phone,
-    contact_name: 'Ezilet listing',
-    campus_ids: campus.campus_ids,
-    custom_university_name: campus.custom_university_name,
-    source_label: source.label,
-    source_url: url,
-    photo_urls: imgs.slice(0, 4),
-    deposit_pula: null,
-    utilities_included: /wifi|wi-fi|utilities included|bills included/i.test(desc) ? 'included' : null,
-    fetched_at: now,
-    last_seen_at: now,
-  }
-}
-
-async function fetchEzilet(source) {
-  const queue = new Set(EZILET_SEEDS)
-  for (const searchUrl of EZILET_SEARCHES) {
-    try {
-      const html = await fetchHtml(searchUrl)
-      for (const href of [...html.matchAll(/href="(https:\/\/ezilet\.net\/listing\/[^"#]+)"/gi)].map((m) => m[1])) {
-        if (BW_MARKER.test(href) || /bogatsu|mohammed|tulo|tlokweng|gaborone|botswana|ub-/i.test(href)) {
-          queue.add(href)
-        }
-      }
-      // Also keep any listing that search returned if page itself mentions Botswana.
-      if (BW_MARKER.test(html)) {
-        for (const href of [...html.matchAll(/href="(https:\/\/ezilet\.net\/listing\/[^"#]+)"/gi)].map((m) => m[1])) {
-          queue.add(href)
-        }
-      }
-    } catch (err) {
-      console.warn(`ezilet search skip ${searchUrl}:`, err.message || err)
-    }
-  }
-
-  const out = []
-  const seen = new Set()
-  for (const url of queue) {
-    if (seen.has(url)) continue
-    seen.add(url)
-    try {
-      const html = await fetchHtml(url)
-      const row = parseEziletDetail(html, url, source)
-      if (row) out.push(row)
-      // Discover related Botswana listings linked from this page.
-      for (const href of [...html.matchAll(/href="(https:\/\/ezilet\.net\/listing\/[^"#]+)"/gi)].map((m) => m[1])) {
-        if (!seen.has(href) && (BW_MARKER.test(href) || /bogatsu|mohammed|tulo|tlokweng|gaborone|botswana/i.test(href))) {
-          queue.add(href)
-        }
-      }
-    } catch (err) {
-      console.warn(`ezilet detail skip ${url}:`, err.message || err)
-    }
-  }
-  return out
-}
-
-function parseTswanahomeDetail(html, url, source) {
-  const title = stripTags((html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i) || [])[1] || '')
-  if (!title) return null
-  if (/office|warehouse|industrial|shop|retail|biz|commercial/i.test(`${title} ${url}`)) return null
-
-  const plain = stripTags(html)
-  if (NOISE.test(`${title} ${plain}`) && !STUDENT_HINT.test(`${title} ${plain}`)) return null
-  if (!STUDENT_HINT.test(`${title} ${plain}`)) return null
-
-  const price = extractPrice(plain, title)
-  if (!price || price > 4500) return null // keep student-budget residential only
-
-  const phones = [...new Set((html.match(/(?:\+?\s*267[\s-]*)?(7[1-9]\d{6})\b/g) || [])
-    .map((p) => `267${p.replace(/\D/g, '').replace(/^267/, '')}`))]
-  const phone = phones.find((p) => !p.endsWith('75159069')) || phones[0] || null
-  if (!phone) return null
-
-  const city = guessCity(title, plain)
-  const area = guessArea(title, plain, city)
-  const campus = guessCampuses(area, city, `${title} ${plain}`)
-  const imgs = [...new Set([...html.matchAll(/src="(https:\/\/www\.tswanahome\.com\/wp-content\/uploads\/[^"]+\.(?:jpe?g|png|webp))"/gi)].map((m) => m[1]))]
-    .filter((u) => !/logo|icon|avatar|placeholder/i.test(u))
-  const now = new Date().toISOString()
-  const slug = `${phone}-${title.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 40)}`
-
-  return {
-    id: `auto-tswana-${slug}`.replace(/-+$/g, ''),
-    title: /student|share|room/i.test(title) ? title : `Student-friendly rental — ${title}`,
-    description: plain.slice(0, 320) || title,
-    price,
-    room_type: /single|bachelor|studio/i.test(`${title} ${plain}`) ? 'single' : /2\s*bed|3\s*bed|house|apartment/i.test(`${title} ${plain}`) ? 'sharing' : 'sharing',
-    gender_preference: 'any',
-    area,
-    city,
-    address: `${area}, ${city}`,
-    whatsapp_number: phone,
-    contact_name: 'TswanaHome listing',
-    campus_ids: campus.campus_ids,
-    custom_university_name: campus.custom_university_name,
-    source_label: source.label,
-    source_url: url,
-    photo_urls: imgs.slice(0, 4),
-    deposit_pula: null,
-    utilities_included: null,
-    fetched_at: now,
-    last_seen_at: now,
-  }
-}
-
-async function fetchTswanahome(source) {
-  const html = await fetchHtml(source.url)
-  const links = [...new Set([...html.matchAll(/href="(https:\/\/www\.tswanahome\.com\/property\/[^"#]+)"/gi)].map((m) => m[1]))]
-    .filter((u) => /rent/i.test(u) && !/office|warehouse|industrial|biz|shop|retail/i.test(u))
-  const out = []
-  for (const url of links.slice(0, 40)) {
-    try {
-      const detail = await fetchHtml(url)
-      const row = parseTswanahomeDetail(detail, url, source)
-      if (row) out.push(row)
-    } catch (err) {
-      console.warn(`tswana detail skip ${url}:`, err.message || err)
-    }
-  }
-  return out
-}
-
-async function fetchSource(source) {
-  if (source.kind === 'zimcompass' || source.id.startsWith('zimcompass')) {
-    const html = await fetchHtml(source.url)
-    return parseZimcompass(html, source)
-  }
-  if (source.kind === 'ezilet') return fetchEzilet(source)
-  if (source.kind === 'tswanahome') return fetchTswanahome(source)
-  return []
-}
-
-function dedupe(listings) {
-  const map = new Map()
-  for (const row of listings) {
-    const key = listingKey(row)
-    if (!key || key.startsWith('|')) continue
-    const prev = map.get(key)
-    if (!prev) {
-      map.set(key, row)
-      continue
-    }
-    const prevPhotos = Array.isArray(prev.photo_urls) ? prev.photo_urls.length : 0
-    const nextPhotos = Array.isArray(row.photo_urls) ? row.photo_urls.length : 0
-    const prevSeen = Date.parse(prev.last_seen_at || prev.fetched_at || 0) || 0
-    const nextSeen = Date.parse(row.last_seen_at || row.fetched_at || 0) || 0
-    if (nextPhotos > prevPhotos || nextSeen >= prevSeen) {
-      map.set(key, {
-        ...prev,
-        ...row,
-        fetched_at: prev.fetched_at || row.fetched_at,
-        last_seen_at: row.last_seen_at || prev.last_seen_at || row.fetched_at,
-        photo_urls: nextPhotos >= prevPhotos ? row.photo_urls : prev.photo_urls,
-      })
-    }
-  }
-  return [...map.values()]
-}
-
-/** Merge fresh crawl with previous feed; drop listings not seen for KEEP_DAYS. */
-function mergeWithPrevious(fresh, previous = []) {
-  const now = Date.now()
-  const cutoff = now - KEEP_DAYS * 24 * 60 * 60 * 1000
-  const freshKeys = new Set(fresh.map(listingKey))
-
-  const carried = []
-  for (const row of previous) {
-    const key = listingKey(row)
-    if (freshKeys.has(key)) continue
-    const seen = Date.parse(row.last_seen_at || row.fetched_at || 0) || 0
-    if (seen >= cutoff) carried.push(row)
-  }
-
-  return dedupe([...fresh, ...carried])
-}
 
 function photoExt(url, contentType) {
   const fromUrl = String(url || '').split('?')[0].match(/\.(jpe?g|png|webp|gif)$/i)
@@ -495,11 +71,7 @@ async function mirrorPhotos(listings) {
               headers: {
                 'User-Agent': 'NtloStudentHousingBot/1.0 (+https://ntlo.online)',
                 Accept: 'image/*',
-                Referer: remote.includes('ezilet')
-                  ? 'https://ezilet.net/'
-                  : remote.includes('tswanahome')
-                    ? 'https://www.tswanahome.com/'
-                    : 'https://bw.zimcompass.com/',
+                Referer: `${new URL(remote).origin}/`,
               },
             })
             if (res.ok) break
@@ -526,17 +98,16 @@ async function mirrorPhotos(listings) {
         console.warn(`photo skip ${row.id}:`, err.message || err)
       }
     }
-    row.photo_urls = local
-    if (urls.length && !local.length) {
-      row.photo_urls = urls.filter((u) => /^https?:\/\//i.test(u) || String(u).startsWith('/'))
-    }
+    row.photo_urls = local.length
+      ? local
+      : urls.filter((u) => /^https?:\/\//i.test(u) || String(u).startsWith('/'))
   }
 
   try {
     for (const file of readdirSync(PHOTO_DIR)) {
       if (!kept.has(file)) unlinkSync(join(PHOTO_DIR, file))
     }
-  } catch { /* ignore */ }
+  } catch { /* first run — nothing to prune */ }
 
   return listings
 }
@@ -554,9 +125,12 @@ function loadPreviousFeed() {
 async function main() {
   const collected = []
   const errors = []
+
   for (const source of SOURCES) {
     try {
-      const rows = await fetchSource(source)
+      const rows = await fetchSource(source, {
+        onError: (url, err) => console.warn(`${source.id} skip ${url}:`, err.message || err),
+      })
       collected.push(...rows)
       console.log(`${source.id}: ${rows.length} student-like listings`)
     } catch (err) {
@@ -565,9 +139,14 @@ async function main() {
     }
   }
 
+  await hydrateZimcompassDetails(collected, {
+    limit: 60,
+    onError: (url, err) => console.warn(`zimcompass detail skip ${url}:`, err.message || err),
+  })
+
   const previous = loadPreviousFeed()
   const freshUnique = dedupe(collected)
-  let listings = mergeWithPrevious(freshUnique, previous)
+  const listings = mergeWithPrevious(freshUnique, previous)
 
   const payload = {
     updated_at: new Date().toISOString(),
@@ -593,12 +172,15 @@ async function main() {
   payload.listings = await mirrorPhotos(payload.listings)
   payload.listing_count = payload.listings.length
   payload.photos_mirrored = payload.listings.reduce((n, row) => n + (row.photo_urls?.length || 0), 0)
+  payload.with_amenities = payload.listings.filter((row) => row.amenities?.length).length
+  payload.with_coords = payload.listings.filter((row) => row.lat != null).length
 
   writeFileSync(OUT, `${JSON.stringify(payload, null, 2)}\n`)
   console.log(
     `Wrote ${payload.listing_count} listings `
-    + `(${payload.photos_mirrored} photos, fresh=${freshUnique.length}, carried=${payload.carried_count}) `
-    + `? public/data/web-rentals-feed.json`
+    + `(${payload.photos_mirrored} photos, ${payload.with_amenities} with amenities, `
+    + `${payload.with_coords} with map pins, fresh=${freshUnique.length}, carried=${payload.carried_count}) `
+    + `-> public/data/web-rentals-feed.json`
   )
 }
 

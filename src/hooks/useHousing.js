@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from './useAuth'
 import { getOrCreateConversation, sendMessage, markMessagesRead, fetchStudentListingStatus } from '../lib/housing'
 import { fetchLandlordApplicationsForUser } from '../lib/landlordApplications'
+import { isDatabaseListingId } from '../data/webRentals'
 
 const APPLICATION_SELECT = `
   *,
@@ -74,7 +75,7 @@ export function useStudentListingStatus(listingId) {
   const fetchRef = useRef(null)
 
   const refetch = useCallback(async ({ silent = false } = {}) => {
-    if (!user || !listingId) {
+    if (!user || !isDatabaseListingId(listingId)) {
       setStatus({ viewing: null, application: null })
       setLoading(false)
       return
@@ -92,7 +93,7 @@ export function useStudentListingStatus(listingId) {
   }, [refetch])
 
   useEffect(() => {
-    if (!user?.id || !listingId) return undefined
+    if (!user?.id || !isDatabaseListingId(listingId)) return undefined
 
     const channel = supabase
       .channel(`listing-status-${listingId}-${user.id}`)

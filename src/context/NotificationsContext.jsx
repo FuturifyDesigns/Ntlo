@@ -54,10 +54,9 @@ export function NotificationsProvider({ children }) {
   }, [])
 
   const readAll = useCallback(async () => {
-    const readAt = new Date().toISOString()
     await markAllNotificationsRead()
-    setItems((prev) => prev.map((n) => ({ ...n, read_at: n.read_at || readAt })))
-  }, [])
+    await refetch()
+  }, [refetch])
 
   const unreadCount = items.filter((n) => !n.read_at).length
 

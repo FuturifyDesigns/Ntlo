@@ -3,9 +3,13 @@ import { supabase } from './supabase'
 export const NOTIFICATION_SELECT = 'id, user_id, type, title, body, link, entity_id, read_at, created_at, is_urgent'
 
 export async function fetchNotifications(limit = 30) {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return []
+
   const { data, error } = await supabase
     .from('notifications')
     .select(NOTIFICATION_SELECT)
+    .eq('user_id', user.id)
     .order('created_at', { ascending: false })
     .limit(limit)
   if (error) throw error
@@ -25,15 +29,40 @@ export async function fetchUnreadUrgentNotifications(userId, limit = 12) {
 }
 
 export async function markNotificationRead(id) {
-  const { error } = await supabase.rpc('mark_notification_read', {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Not authenticated')
+
+  const readAt = new Date().toISOString()
+  const { error } = await supabase
+    .from('notifications')
+    .update({ read_at: readAt })
+    .eq('id', id)
+    .eq('user_id', user.id)
+    .is('read_at', null)
+
+  if (!error) return
+
+  const { error: rpcError } = await supabase.rpc('mark_notification_read', {
     p_notification_id: id,
   })
-  if (error) throw error
+  if (rpcError) throw rpcError
 }
 
 export async function markAllNotificationsRead() {
-  const { error } = await supabase.rpc('mark_all_notifications_read')
-  if (error) throw error
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Not authenticated')
+
+  const readAt = new Date().toISOString()
+  const { error } = await supabase
+    .from('notifications')
+    .update({ read_at: readAt })
+    .eq('user_id', user.id)
+    .is('read_at', null)
+
+  if (!error) return
+
+  const { error: rpcError } = await supabase.rpc('mark_all_notifications_read')
+  if (rpcError) throw rpcError
 }
 
 /** Route notifications to the right dashboard tab. */

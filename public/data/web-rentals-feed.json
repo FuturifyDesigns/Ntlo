@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-08-17T06:41:21.962Z",
+  "updated_at": "2026-08-17T10:24:45.691Z",
   "source_count": 18,
   "sources": [
     "zimcompass-house-share-p1",
@@ -22,76 +22,1807 @@
     "tswanahome-for-rent"
   ],
   "keep_days": 21,
-  "listing_count": 65,
-  "fresh_count": 8,
-  "carried_count": 57,
-  "errors": [
-    {
-      "source": "zimcompass-house-share-p1",
-      "error": "HTTP 403 for https://bw.zimcompass.com/house-share"
-    },
-    {
-      "source": "zimcompass-house-share-p2",
-      "error": "HTTP 403 for https://bw.zimcompass.com/house-share?page=2"
-    },
-    {
-      "source": "zimcompass-house-share-p3",
-      "error": "HTTP 403 for https://bw.zimcompass.com/house-share?page=3"
-    },
-    {
-      "source": "zimcompass-house-share-p4",
-      "error": "HTTP 403 for https://bw.zimcompass.com/house-share?page=4"
-    },
-    {
-      "source": "zimcompass-house-share-p5",
-      "error": "HTTP 403 for https://bw.zimcompass.com/house-share?page=5"
-    },
-    {
-      "source": "zimcompass-house-share-p6",
-      "error": "HTTP 403 for https://bw.zimcompass.com/house-share?page=6"
-    },
-    {
-      "source": "zimcompass-house-share-p7",
-      "error": "HTTP 403 for https://bw.zimcompass.com/house-share?page=7"
-    },
-    {
-      "source": "zimcompass-house-share-p8",
-      "error": "HTTP 403 for https://bw.zimcompass.com/house-share?page=8"
-    },
-    {
-      "source": "zimcompass-houses-for-rent-p1",
-      "error": "HTTP 403 for https://bw.zimcompass.com/houses-for-rent"
-    },
-    {
-      "source": "zimcompass-houses-for-rent-p2",
-      "error": "HTTP 403 for https://bw.zimcompass.com/houses-for-rent?page=2"
-    },
-    {
-      "source": "zimcompass-houses-for-rent-p3",
-      "error": "HTTP 403 for https://bw.zimcompass.com/houses-for-rent?page=3"
-    },
-    {
-      "source": "zimcompass-houses-for-rent-p4",
-      "error": "HTTP 403 for https://bw.zimcompass.com/houses-for-rent?page=4"
-    },
-    {
-      "source": "zimcompass-houses-for-rent-p5",
-      "error": "HTTP 403 for https://bw.zimcompass.com/houses-for-rent?page=5"
-    },
-    {
-      "source": "zimcompass-houses-for-rent-p6",
-      "error": "HTTP 403 for https://bw.zimcompass.com/houses-for-rent?page=6"
-    },
-    {
-      "source": "zimcompass-houses-for-rent-p7",
-      "error": "HTTP 403 for https://bw.zimcompass.com/houses-for-rent?page=7"
-    },
-    {
-      "source": "zimcompass-houses-for-rent-p8",
-      "error": "HTTP 403 for https://bw.zimcompass.com/houses-for-rent?page=8"
-    }
-  ],
+  "listing_count": 66,
+  "fresh_count": 63,
+  "carried_count": 3,
+  "errors": [],
   "listings": [
+    {
+      "id": "auto-26772900189-a-room-available-for-rent-in-a-4-beds-to",
+      "title": "A room available for rent in a 4 beds to",
+      "description": "Including bills P1700 (P700 security)72900189",
+      "price": 1700,
+      "price_on_request": false,
+      "room_type": "sharing",
+      "gender_preference": "any",
+      "area": "Gaborone",
+      "city": "Gaborone",
+      "address": "Kweneng, Botswana | 03 July, 2026",
+      "whatsapp_number": "26772900189",
+      "contact_name": "Diana",
+      "campus_ids": [
+        1
+      ],
+      "custom_university_name": null,
+      "source_label": "ZimCompass house share",
+      "source_url": "https://bw.zimcompass.com/product?id=111137",
+      "detail_url": "https://bw.zimcompass.com/product?id=111137",
+      "photo_urls": [
+        "/data/web-rental-photos/auto-26772900189-a-room-available-for-rent-in-a-4-beds-to-0.jpg"
+      ],
+      "deposit_pula": null,
+      "utilities_included": "included",
+      "fetched_at": "2026-08-17T10:23:18.110Z",
+      "last_seen_at": "2026-08-17T10:23:28.277Z",
+      "amenities": [],
+      "lat": -24.6282,
+      "lng": 25.9231,
+      "geo_precision": "area"
+    },
+    {
+      "id": "auto-26772417037-a-room-for-rent-in-a-2-and-half-to",
+      "title": "A room for rent in a 2 and half to",
+      "description": "A room in a 2 n half to share 72417037",
+      "price": 1300,
+      "price_on_request": false,
+      "room_type": "sharing",
+      "gender_preference": "any",
+      "area": "Gaborone",
+      "city": "Gaborone",
+      "address": "Kweneng, Botswana | 11 June, 2026",
+      "whatsapp_number": "26772417037",
+      "contact_name": "Diana",
+      "campus_ids": [
+        1
+      ],
+      "custom_university_name": null,
+      "source_label": "ZimCompass house share",
+      "source_url": "https://bw.zimcompass.com/product?id=109076",
+      "detail_url": "https://bw.zimcompass.com/product?id=109076",
+      "photo_urls": [
+        "/data/web-rental-photos/auto-26772417037-a-room-for-rent-in-a-2-and-half-to-0.jpg"
+      ],
+      "deposit_pula": null,
+      "utilities_included": null,
+      "fetched_at": "2026-08-17T10:23:18.122Z",
+      "last_seen_at": "2026-08-17T10:23:28.278Z",
+      "amenities": [],
+      "lat": -24.6282,
+      "lng": 25.9231,
+      "geo_precision": "area"
+    },
+    {
+      "id": "auto-26771746344-house-to-share",
+      "title": "House to share",
+      "description": "A room to be shared in a 3 bedroom house by Ledumadumane pula spar . Rent P1330 including water and electricity. Deposit P1100. Call or WhatsApp 71746344. Looking for a See more",
+      "price": 1330,
+      "price_on_request": false,
+      "room_type": "sharing",
+      "gender_preference": "any",
+      "area": "Ledumadumane",
+      "city": "Gaborone",
+      "address": "Botswana | 10 November, 2025",
+      "whatsapp_number": "26771746344",
+      "contact_name": "Carelink",
+      "campus_ids": [
+        8,
+        1
+      ],
+      "custom_university_name": null,
+      "source_label": "ZimCompass house share",
+      "source_url": "https://bw.zimcompass.com/product?id=95818",
+      "detail_url": "https://bw.zimcompass.com/product?id=95818",
+      "photo_urls": [
+        "/data/web-rental-photos/auto-26771746344-house-to-share-0.png"
+      ],
+      "deposit_pula": null,
+      "utilities_included": "included",
+      "fetched_at": "2026-08-17T10:23:18.123Z",
+      "last_seen_at": "2026-08-17T10:23:28.278Z",
+      "amenities": [
+        "water"
+      ],
+      "lat": -24.5867,
+      "lng": 25.85,
+      "geo_precision": "area"
+    },
+    {
+      "id": "auto-26776001754-1-room-in-a-3-beds-to-share",
+      "title": "1 room in a 3 beds to share.",
+      "description": "room available in 3 beds bhc house at New Canada, walled, air con but not fitted P1500. Available on the 1st of October. Call 76001754.",
+      "price": 1500,
+      "price_on_request": false,
+      "room_type": "sharing",
+      "gender_preference": "any",
+      "area": "New Canada",
+      "city": "Gaborone",
+      "address": "Gaborone | 06 October, 2025",
+      "whatsapp_number": "26776001754",
+      "contact_name": "Boineelo",
+      "campus_ids": [
+        1
+      ],
+      "custom_university_name": null,
+      "source_label": "ZimCompass house share",
+      "source_url": "https://bw.zimcompass.com/product?id=93594",
+      "detail_url": "https://bw.zimcompass.com/product?id=93594",
+      "photo_urls": [
+        "/data/web-rental-photos/auto-26776001754-1-room-in-a-3-beds-to-share-0.jpg"
+      ],
+      "deposit_pula": null,
+      "utilities_included": null,
+      "fetched_at": "2026-08-17T10:23:18.123Z",
+      "last_seen_at": "2026-08-17T10:23:28.278Z",
+      "amenities": [],
+      "lat": -24.61,
+      "lng": 25.95,
+      "geo_precision": "area"
+    },
+    {
+      "id": "auto-26773458500-house-to-share-p1600-block-8-gaborone",
+      "title": "House to share P1600 Block 8 Gaborone",
+      "description": "Air-conditioned room available in a 3 bedroom house. Tiled and fitted. Yard paved, electric fence. Fitted kitchen, geyser, shower and bathtub. Rent P1600 plus P750 security. Call 73458500",
+      "price": 1600,
+      "price_on_request": false,
+      "room_type": "sharing",
+      "gender_preference": "any",
+      "area": "Gaborone",
+      "city": "Gaborone",
+      "address": "Gaborone | 30 September, 2025",
+      "whatsapp_number": "26773458500",
+      "contact_name": "Mpho",
+      "campus_ids": [
+        1
+      ],
+      "custom_university_name": null,
+      "source_label": "ZimCompass house share",
+      "source_url": "https://bw.zimcompass.com/product?id=93399",
+      "detail_url": "https://bw.zimcompass.com/product?id=93399",
+      "photo_urls": [
+        "/data/web-rental-photos/auto-26773458500-house-to-share-p1600-block-8-gaborone-0.jpg"
+      ],
+      "deposit_pula": null,
+      "utilities_included": null,
+      "fetched_at": "2026-08-17T10:23:18.124Z",
+      "last_seen_at": "2026-08-17T10:23:28.278Z",
+      "amenities": [
+        "security",
+        "kitchen"
+      ],
+      "lat": -24.6486,
+      "lng": 25.8964,
+      "geo_precision": "area"
+    },
+    {
+      "id": "auto-26776325612-room-to-share-in-bontleng-malema",
+      "title": "Room to share in Bontleng Malema",
+      "description": "Your share is 600 and security is equivalent but payable in 2-3months. 76325612 call or Whatsapp me. Walkable to BAC",
+      "price": 600,
+      "price_on_request": false,
+      "room_type": "sharing",
+      "gender_preference": "any",
+      "area": "Gaborone",
+      "city": "Gaborone",
+      "address": "Gaborone | 28 April, 2025",
+      "whatsapp_number": "26776325612",
+      "contact_name": "Tlamelo",
+      "campus_ids": [
+        9,
+        1
+      ],
+      "custom_university_name": null,
+      "source_label": "ZimCompass house share",
+      "source_url": "https://bw.zimcompass.com/product?id=88406",
+      "detail_url": "https://bw.zimcompass.com/product?id=88406",
+      "photo_urls": [
+        "/data/web-rental-photos/auto-26776325612-room-to-share-in-bontleng-malema-0.png"
+      ],
+      "deposit_pula": null,
+      "utilities_included": null,
+      "fetched_at": "2026-08-17T10:23:18.124Z",
+      "last_seen_at": "2026-08-17T10:23:28.278Z",
+      "amenities": [],
+      "lat": -24.662,
+      "lng": 25.916,
+      "geo_precision": "area"
+    },
+    {
+      "id": "auto-26774247384-house-mate-needed",
+      "title": "House mate needed",
+      "description": "2 bedroom apartment to share in Mogoditshane by Tsabong robots Your share is P1750 &#x2B; equivalent securityTo move in Jan endContact 74247384",
+      "price": 1750,
+      "price_on_request": false,
+      "room_type": "sharing",
+      "gender_preference": "any",
+      "area": "Mogoditshane",
+      "city": "Gaborone",
+      "address": "Gaborone | 05 January, 2025",
+      "whatsapp_number": "26774247384",
+      "contact_name": "Kristie",
+      "campus_ids": [
+        1
+      ],
+      "custom_university_name": null,
+      "source_label": "ZimCompass house share",
+      "source_url": "https://bw.zimcompass.com/product?id=83873",
+      "detail_url": "https://bw.zimcompass.com/product?id=83873",
+      "photo_urls": [
+        "/data/web-rental-photos/auto-26774247384-house-mate-needed-0.jpg"
+      ],
+      "deposit_pula": null,
+      "utilities_included": null,
+      "fetched_at": "2026-08-17T10:23:18.124Z",
+      "last_seen_at": "2026-08-17T10:23:28.278Z",
+      "amenities": [],
+      "lat": -24.6272,
+      "lng": 25.8656,
+      "geo_precision": "area"
+    },
+    {
+      "id": "auto-26776968183-beds",
+      "title": "Student room share — block 9",
+      "description": "2 beds available Tsolamosese Mogoditshane blk4..fitted and multires, motorised Gates, paved yard and electric fence p3500 plus security. &#xA; Finders fee P250&#xA; Call 76968183 for pics and viewing A room to share with a female in a 2 beds that goes for P3k available in Tlokweng , Letlapeng each paying P1500 plus equivalent security each. It&#x27;s fitted with electric fence. P200 finders fee.&#xA; Call 76968183 for pics and vewing A room in a three beds in Gaborone block 9 available at P1500 rent plus security... More",
+      "price": 3500,
+      "price_on_request": false,
+      "room_type": "sharing",
+      "gender_preference": "any",
+      "area": "block 9",
+      "city": "Gaborone",
+      "address": "Botswana | 06 October, 2024",
+      "whatsapp_number": "26776968183",
+      "contact_name": "Malcolm",
+      "campus_ids": [
+        10,
+        1
+      ],
+      "custom_university_name": null,
+      "source_label": "ZimCompass house share",
+      "source_url": "https://bw.zimcompass.com/product?id=81263",
+      "detail_url": "https://bw.zimcompass.com/product?id=81263",
+      "photo_urls": [
+        "/data/web-rental-photos/auto-26776968183-beds-0.png"
+      ],
+      "deposit_pula": null,
+      "utilities_included": null,
+      "fetched_at": "2026-08-17T10:23:18.124Z",
+      "last_seen_at": "2026-08-17T10:23:28.278Z",
+      "amenities": [
+        "security",
+        "parking"
+      ],
+      "lat": -24.639,
+      "lng": 25.888,
+      "geo_precision": "area"
+    },
+    {
+      "id": "auto-26776104760-rooms-to-rent",
+      "title": "Rooms to Rent",
+      "description": "Servant&#x27;s quarters available, Broadhurst ext 27, near kbl brewery and park 27, rooms are P1,300 that includes water and power, call watsapp for viewing 76104760 (if you want to share with partner or friend a further P400 would be required for utilities) Master bedroom in main house also available, large room with fitted wardrobes, P1,800 that includes water and power, deposit required equivalent to one month&#x27;s rent, call 76104760 for viewing",
+      "price": 1300,
+      "price_on_request": false,
+      "room_type": "single",
+      "gender_preference": "any",
+      "area": "Broadhurst ext 27",
+      "city": "Gaborone",
+      "address": "Gaborone | 20 August, 2024",
+      "whatsapp_number": "26776104760",
+      "contact_name": "Svitsai",
+      "campus_ids": [
+        1
+      ],
+      "custom_university_name": null,
+      "source_label": "ZimCompass house share",
+      "source_url": "https://bw.zimcompass.com/product?id=76143",
+      "detail_url": "https://bw.zimcompass.com/product?id=76143",
+      "photo_urls": [
+        "/data/web-rental-photos/auto-26776104760-rooms-to-rent-0.jpg"
+      ],
+      "deposit_pula": null,
+      "utilities_included": null,
+      "fetched_at": "2026-08-17T10:23:18.125Z",
+      "last_seen_at": "2026-08-17T10:23:28.279Z",
+      "amenities": [
+        "water",
+        "furnished"
+      ],
+      "lat": -24.6118,
+      "lng": 25.9436,
+      "geo_precision": "area"
+    },
+    {
+      "id": "auto-26774215618-room-to-rent-gabane",
+      "title": "Room to rent Gabane",
+      "description": "2 bedroom house to share in a safe, spacious & secure yard in Gabane. Spare room is very spacious...free wardrobe & curtains. Strictly needs a single person...no families. Also close to Gabane routes 1 & 3. Your share shall be P900. We will share kitchen & bathroom...hot water available, geyser is working. Call/app on 74215618.",
+      "price": 900,
+      "price_on_request": false,
+      "room_type": "single",
+      "gender_preference": "any",
+      "area": "Mogoditshane",
+      "city": "Gabane",
+      "address": "Mogoditshane | 12 July, 2024",
+      "whatsapp_number": "26774215618",
+      "contact_name": "Car",
+      "campus_ids": [],
+      "custom_university_name": null,
+      "source_label": "ZimCompass house share",
+      "source_url": "https://bw.zimcompass.com/product?id=71237",
+      "detail_url": "https://bw.zimcompass.com/product?id=71237",
+      "photo_urls": [
+        "/data/web-rental-photos/auto-26774215618-room-to-rent-gabane-0.jpg"
+      ],
+      "deposit_pula": null,
+      "utilities_included": null,
+      "fetched_at": "2026-08-17T10:23:18.126Z",
+      "last_seen_at": "2026-08-17T10:23:28.279Z",
+      "amenities": [
+        "security",
+        "furnished",
+        "kitchen"
+      ],
+      "lat": -24.6272,
+      "lng": 25.8656,
+      "geo_precision": "area"
+    },
+    {
+      "id": "auto-26771557655-room-for-rent-in-block-5",
+      "title": "Room for rent in block 5",
+      "description": "Looking for an individual or students( either two females or males) to share a room in Block 5. Room has two single beds available. Rental P1400. Finders fee P300. Call 71557655/74819458",
+      "price": 1400,
+      "price_on_request": false,
+      "room_type": "single",
+      "gender_preference": "any",
+      "area": "Block 5",
+      "city": "Gaborone",
+      "address": "Gaborone | 29 June, 2024",
+      "whatsapp_number": "26771557655",
+      "contact_name": "Botswana",
+      "campus_ids": [
+        1
+      ],
+      "custom_university_name": null,
+      "source_label": "ZimCompass house share",
+      "source_url": "https://bw.zimcompass.com/product?id=69505",
+      "detail_url": "https://bw.zimcompass.com/product?id=69505",
+      "photo_urls": [
+        "/data/web-rental-photos/auto-26771557655-room-for-rent-in-block-5-0.jpg"
+      ],
+      "deposit_pula": null,
+      "utilities_included": null,
+      "fetched_at": "2026-08-17T10:23:18.126Z",
+      "last_seen_at": "2026-08-17T10:23:28.279Z",
+      "amenities": [],
+      "lat": -24.6614,
+      "lng": 25.9042,
+      "geo_precision": "area"
+    },
+    {
+      "id": "auto-26774517254-house-to-share",
+      "title": "House to Share",
+      "description": "Looking for someone to share a 3 bed room house in thito side ya tawana primary not far from main road We share fitted open kitchen and bathroom House is fitted, celling, tiles hot water I don&#x27;t mind anyone I spend 3 month in the bush so you will be alone most of the time The house is 3k Your share is 1.5 Plus P500 security Come fr viewing anytime 72 745 765 orange 74517254 mascom",
+      "price": 3000,
+      "price_on_request": false,
+      "room_type": "sharing",
+      "gender_preference": "any",
+      "area": "thito",
+      "city": "Gaborone",
+      "address": "Maun, Botswana | 29 May, 2024",
+      "whatsapp_number": "26774517254",
+      "contact_name": "Christopher",
+      "campus_ids": [
+        1
+      ],
+      "custom_university_name": null,
+      "source_label": "ZimCompass house share",
+      "source_url": "https://bw.zimcompass.com/product?id=65767",
+      "detail_url": "https://bw.zimcompass.com/product?id=65767",
+      "photo_urls": [
+        "/data/web-rental-photos/auto-26774517254-house-to-share-0.jpg"
+      ],
+      "deposit_pula": null,
+      "utilities_included": null,
+      "fetched_at": "2026-08-17T10:23:18.126Z",
+      "last_seen_at": "2026-08-17T10:23:28.279Z",
+      "amenities": [
+        "kitchen"
+      ],
+      "lat": -19.9833,
+      "lng": 23.4167,
+      "geo_precision": "area"
+    },
+    {
+      "id": "auto-26771557655-room-available-in-block-5-for-rent",
+      "title": "Room available in block 5 for rent",
+      "description": "Looking for an individual or students( either two females or males) to share a room in Block 5. Room has two single beds available. Rental P1400. Finders fee P300. Call 71557655",
+      "price": 1400,
+      "price_on_request": false,
+      "room_type": "single",
+      "gender_preference": "any",
+      "area": "Block 5",
+      "city": "Gaborone",
+      "address": "Gaborone | 22 May, 2024",
+      "whatsapp_number": "26771557655",
+      "contact_name": "Frank",
+      "campus_ids": [
+        1
+      ],
+      "custom_university_name": null,
+      "source_label": "ZimCompass house share",
+      "source_url": "https://bw.zimcompass.com/product?id=64678",
+      "detail_url": "https://bw.zimcompass.com/product?id=64678",
+      "photo_urls": [
+        "/data/web-rental-photos/auto-26771557655-room-available-in-block-5-for-rent-0.jpg"
+      ],
+      "deposit_pula": null,
+      "utilities_included": null,
+      "fetched_at": "2026-08-17T10:23:18.126Z",
+      "last_seen_at": "2026-08-17T10:23:28.279Z",
+      "amenities": [],
+      "lat": -24.6614,
+      "lng": 25.9042,
+      "geo_precision": "area"
+    },
+    {
+      "id": "auto-26771817707-3-bedroom-house-to-share",
+      "title": "3 bedroom house to share",
+      "description": "3 bedroom house to share in gabane near gabane primary 2 mins walk to gabane route 3, fitted kitchen and wall wardrobe, boundary wall with electric fence and motorized gate. P1000 per room the house will be available from 1st of June for viewing contact me on 71817707.",
+      "price": 1000,
+      "price_on_request": false,
+      "room_type": "sharing",
+      "gender_preference": "any",
+      "area": "Gabane",
+      "city": "Gabane",
+      "address": "Gabane, Kweneng, Botswana | 22 May, 2024",
+      "whatsapp_number": "26771817707",
+      "contact_name": "Hero",
+      "campus_ids": [],
+      "custom_university_name": null,
+      "source_label": "ZimCompass house share",
+      "source_url": "https://bw.zimcompass.com/product?id=64669",
+      "detail_url": "https://bw.zimcompass.com/product?id=64669",
+      "photo_urls": [
+        "/data/web-rental-photos/auto-26771817707-3-bedroom-house-to-share-0.jpg"
+      ],
+      "deposit_pula": null,
+      "utilities_included": null,
+      "fetched_at": "2026-08-17T10:23:18.126Z",
+      "last_seen_at": "2026-08-17T10:23:28.279Z",
+      "amenities": [
+        "security",
+        "furnished",
+        "kitchen"
+      ],
+      "lat": -24.6667,
+      "lng": 25.7833,
+      "geo_precision": "area"
+    },
+    {
+      "id": "auto-26778439391-servant-s-quarters",
+      "title": "Servant s quarters",
+      "description": "Servant&#x27;s quarters FREE Servant&#x27;s quarters available, Broadhurst ext 27, near kbl brewery and park 27, rooms are P1,300 that includes water and power, call watsapp for viewing 78439391 (if you want to share with partner or friend a further P400 would be required for utilities) Master bedroom in main house also available, large room with fitted wardrobes, P1,800 that includes water and power, fully furnished optional for additional charge, call 78439491 for viewing",
+      "price": 1300,
+      "price_on_request": false,
+      "room_type": "single",
+      "gender_preference": "any",
+      "area": "Broadhurst ext 27",
+      "city": "Gaborone",
+      "address": "Botswana | 20 May, 2024",
+      "whatsapp_number": "26778439391",
+      "contact_name": "Fearles",
+      "campus_ids": [
+        1
+      ],
+      "custom_university_name": null,
+      "source_label": "ZimCompass house share",
+      "source_url": "https://bw.zimcompass.com/product?id=64346",
+      "detail_url": "https://bw.zimcompass.com/product?id=64346",
+      "photo_urls": [
+        "/data/web-rental-photos/auto-26778439391-servant-s-quarters-0.png"
+      ],
+      "deposit_pula": null,
+      "utilities_included": null,
+      "fetched_at": "2026-08-17T10:23:18.126Z",
+      "last_seen_at": "2026-08-17T10:23:28.279Z",
+      "amenities": [
+        "water",
+        "furnished"
+      ],
+      "lat": -24.6118,
+      "lng": 25.9436,
+      "geo_precision": "area"
+    },
+    {
+      "id": "auto-26778439391-rooms-to-rent",
+      "title": "Rooms to Rent",
+      "description": "Servant&#x27;s quarters available, Broadhurst ext 27, near kbl brewery and park 27, rooms are P1,300 that includes water and power, call watsapp for viewing 78439391 (if you want to share with partner or friend a further P400 would be required for utilities) Master bedroom in main house also available, large room with fitted wardrobes, P1,800 that includes water and power, fully furnished optional for additional charge, call 78439491 for viewing",
+      "price": 1300,
+      "price_on_request": false,
+      "room_type": "single",
+      "gender_preference": "any",
+      "area": "Broadhurst ext 27",
+      "city": "Gaborone",
+      "address": "Broadhust Ext 27, Gaborone | 20 May, 2024",
+      "whatsapp_number": "26778439391",
+      "contact_name": "Rancho",
+      "campus_ids": [
+        1
+      ],
+      "custom_university_name": null,
+      "source_label": "ZimCompass house share",
+      "source_url": "https://bw.zimcompass.com/product?id=64299",
+      "detail_url": "https://bw.zimcompass.com/product?id=64299",
+      "photo_urls": [
+        "/data/web-rental-photos/auto-26778439391-rooms-to-rent-0.jpg"
+      ],
+      "deposit_pula": null,
+      "utilities_included": null,
+      "fetched_at": "2026-08-17T10:23:18.126Z",
+      "last_seen_at": "2026-08-17T10:23:28.279Z",
+      "amenities": [
+        "water",
+        "furnished"
+      ],
+      "lat": -24.6118,
+      "lng": 25.9436,
+      "geo_precision": "area"
+    },
+    {
+      "id": "auto-26778439391-rooms-for-rent",
+      "title": "Rooms for rent",
+      "description": "Servant&#x27;s quarters available, Broadhurst ext 27, near kbl brewery and park 27, rooms are P1,300 that includes water and power, call watsapp for viewing 78439391 (if you want to share with partner or friend a further P400 would be required for utilities)",
+      "price": 1300,
+      "price_on_request": false,
+      "room_type": "single",
+      "gender_preference": "any",
+      "area": "Broadhurst ext 27",
+      "city": "Gaborone",
+      "address": "Gaborone | 19 May, 2024",
+      "whatsapp_number": "26778439391",
+      "contact_name": "Matipa",
+      "campus_ids": [
+        1
+      ],
+      "custom_university_name": null,
+      "source_label": "ZimCompass house share",
+      "source_url": "https://bw.zimcompass.com/product?id=64035",
+      "detail_url": "https://bw.zimcompass.com/product?id=64035",
+      "photo_urls": [
+        "/data/web-rental-photos/auto-26778439391-rooms-for-rent-0.png"
+      ],
+      "deposit_pula": null,
+      "utilities_included": null,
+      "fetched_at": "2026-08-17T10:23:18.126Z",
+      "last_seen_at": "2026-08-17T10:23:28.279Z",
+      "amenities": [
+        "water"
+      ],
+      "lat": -24.6118,
+      "lng": 25.9436,
+      "geo_precision": "area"
+    },
+    {
+      "id": "auto-26772862253-am-looking-for-someone-who-can-share-wit",
+      "title": "Am looking for someone who can share with me",
+      "description": "Am looking for someone who can share with me for sale in Botswana bw.zimcompass.com Cars Toyota Benz Nissan Mazda Honda Free Ad Am looking for someone who can share with me Looking for a housemate to share stand alone fitted 2 beds in Mogoditshane block 9. The whole house is 2700 your share is 1350 plus security 1350 WhatsAap 72862253 FREE Name: Plots,houses Location: Gaborone Date: 28 February, 2024 Contact Seller Seller's Profile More Listings Phone Number: 072862253 Notify me when similar items are posted &rarr; You might also like Browse Similar Items Loading recommendations... &copy; 2026",
+      "price": 1350,
+      "price_on_request": false,
+      "room_type": "sharing",
+      "gender_preference": "any",
+      "area": "block 9",
+      "city": "Gaborone",
+      "address": "Gaborone | 28 February, 2024",
+      "whatsapp_number": "26772862253",
+      "contact_name": "Plots,houses",
+      "campus_ids": [
+        1
+      ],
+      "custom_university_name": null,
+      "source_label": "ZimCompass house share",
+      "source_url": "https://bw.zimcompass.com/product?id=51241",
+      "detail_url": "https://bw.zimcompass.com/product?id=51241",
+      "photo_urls": [
+        "/data/web-rental-photos/auto-26772862253-am-looking-for-someone-who-can-share-wit-0.png"
+      ],
+      "deposit_pula": 1350,
+      "utilities_included": null,
+      "fetched_at": "2026-08-17T10:23:18.881Z",
+      "last_seen_at": "2026-08-17T10:23:18.881Z",
+      "amenities": [],
+      "lat": -24.639,
+      "lng": 25.888,
+      "geo_precision": "area"
+    },
+    {
+      "id": "auto-26775072260-need-house-to-rent",
+      "title": "Need house to rent",
+      "description": "Need house to rent for sale in Botswana bw.zimcompass.com Cars Toyota Benz Nissan Mazda Honda Free Ad Need house to rent I need a house budget 1500,or less location, broadhurst, Tsholofelo east, block 3,or block 8.,i don&#x27;t mind to share 75072260 orange, 1st march P1,500 Name: Botswana Location: Gaborone, Botswana Date: 19 February, 2024 Contact Seller Seller's Profile More Listings Phone Number: 075072260 Notify me when similar items are posted &rarr; You might also like Browse Similar Items Loading recommendations... &copy; 2026 - bw.zimcompass.com Terms and Conditions",
+      "price": 1500,
+      "price_on_request": false,
+      "room_type": "sharing",
+      "gender_preference": "any",
+      "area": "block 3",
+      "city": "Gaborone",
+      "address": "Gaborone, Botswana | 19 February, 2024",
+      "whatsapp_number": "26775072260",
+      "contact_name": "Botswana",
+      "campus_ids": [
+        1
+      ],
+      "custom_university_name": null,
+      "source_label": "ZimCompass house share",
+      "source_url": "https://bw.zimcompass.com/product?id=49899",
+      "detail_url": "https://bw.zimcompass.com/product?id=49899",
+      "photo_urls": [
+        "/data/web-rental-photos/auto-26775072260-need-house-to-rent-0.png"
+      ],
+      "deposit_pula": null,
+      "utilities_included": null,
+      "fetched_at": "2026-08-17T10:23:18.881Z",
+      "last_seen_at": "2026-08-17T10:23:18.881Z",
+      "amenities": [],
+      "lat": -24.6459,
+      "lng": 25.9089,
+      "geo_precision": "area"
+    },
+    {
+      "id": "auto-26775671270-3-bedroom-house-with-a-room-to-share",
+      "title": "3 bedroom house with a room to share",
+      "description": "3 bedroom house with a room to share for sale in Botswana bw.zimcompass.com Cars Toyota Benz Nissan Mazda Honda Free Ad 3 bedroom house with a room to share Accommodation available P1100 in Mmopane near senior stop. Whatsup 75671270 $1,100 Name: TswanaHome Location: Molepolole Date: 30 January, 2024 Contact Seller Seller's Profile More Listings Phone Number: 075671270 Product Images Image 1 of 4 Image 2 of 4 Image 3 of 4 Image 4 of 4 Notify me when similar items are posted &rarr; You might also like Browse Similar Items Loading recommendations... &copy; 2026 - bw.zimcompass.com Terms and Condi",
+      "price": 1100,
+      "price_on_request": false,
+      "room_type": "sharing",
+      "gender_preference": "any",
+      "area": "Mmopane",
+      "city": "Gaborone",
+      "address": "Molepolole | 30 January, 2024",
+      "whatsapp_number": "26775671270",
+      "contact_name": "TswanaHome",
+      "campus_ids": [
+        1
+      ],
+      "custom_university_name": null,
+      "source_label": "ZimCompass house share",
+      "source_url": "https://bw.zimcompass.com/product?id=46470",
+      "detail_url": "https://bw.zimcompass.com/product?id=46470",
+      "photo_urls": [
+        "/data/web-rental-photos/auto-26775671270-3-bedroom-house-with-a-room-to-share-0.png"
+      ],
+      "deposit_pula": null,
+      "utilities_included": null,
+      "fetched_at": "2026-08-17T10:23:18.881Z",
+      "last_seen_at": "2026-08-17T10:23:18.881Z",
+      "amenities": [],
+      "lat": -24.5667,
+      "lng": 25.8333,
+      "geo_precision": "area"
+    },
+    {
+      "id": "auto-26772463662-time-project-house-to-share-in-block-6-i",
+      "title": "Time Project house to share in block 6. its a",
+      "description": "Time Project house to share in block 6 its a for sale in Botswana bw.zimcompass.com Cars Toyota Benz Nissan Mazda Honda Free Ad Time Project house to share in block 6 its a Time Project house to share in block 6. its a 3 bedroomed house ,nice security. your share is 1500 inclusive of bills. for details please contact 72463662 P1,500 Name: Botswana Location: Gaborone, Botswana Date: 11 January, 2024 Contact Seller Seller's Profile More Listings Phone Number: 072463662 Notify me when similar items are posted &rarr; You might also like Browse Similar Items Loading recommendations... &copy; 2026 -",
+      "price": 1500,
+      "price_on_request": false,
+      "room_type": "sharing",
+      "gender_preference": "any",
+      "area": "block 6",
+      "city": "Gaborone",
+      "address": "Gaborone, Botswana | 11 January, 2024",
+      "whatsapp_number": "26772463662",
+      "contact_name": "Botswana",
+      "campus_ids": [
+        1
+      ],
+      "custom_university_name": null,
+      "source_label": "ZimCompass house share",
+      "source_url": "https://bw.zimcompass.com/product?id=43148",
+      "detail_url": "https://bw.zimcompass.com/product?id=43148",
+      "photo_urls": [
+        "/data/web-rental-photos/auto-26772463662-time-project-house-to-share-in-block-6-i-0.png"
+      ],
+      "deposit_pula": null,
+      "utilities_included": null,
+      "fetched_at": "2026-08-17T10:23:18.881Z",
+      "last_seen_at": "2026-08-17T10:23:18.881Z",
+      "amenities": [],
+      "lat": -24.6706,
+      "lng": 25.8985,
+      "geo_precision": "area"
+    },
+    {
+      "id": "auto-26772237516-two-bedroom-house-looking-gor-someone-to",
+      "title": "Two bedroom house looking gor someone to share",
+      "description": "Two bedroom house looking gor someone to share for sale in Botswana bw.zimcompass.com Cars Toyota Benz Nissan Mazda Honda Free Ad Two bedroom house looking gor someone to share Two bedroom house open plan kitchen fitted and both bedrooms fitted wardrobes and airconditions.Burglar doors in both sitting room and kitchen. In a secure and spacious multi res with dura wall,electric fence and motor gate. Price P1375 including water bill plus P1250 security. Location Mogoditshane block5 Contacts 72237516 $1,375 Name: Disang Location: Mogoditshane Date: 04 December, 2023 Contact Seller Seller's Profil",
+      "price": 1375,
+      "price_on_request": false,
+      "room_type": "sharing",
+      "gender_preference": "any",
+      "area": "block5",
+      "city": "Gaborone",
+      "address": "Mogoditshane | 04 December, 2023",
+      "whatsapp_number": "26772237516",
+      "contact_name": "Disang",
+      "campus_ids": [
+        1
+      ],
+      "custom_university_name": null,
+      "source_label": "ZimCompass house share",
+      "source_url": "https://bw.zimcompass.com/product?id=37559",
+      "detail_url": "https://bw.zimcompass.com/product?id=37559",
+      "photo_urls": [
+        "/data/web-rental-photos/auto-26772237516-two-bedroom-house-looking-gor-someone-to-0.png"
+      ],
+      "deposit_pula": null,
+      "utilities_included": "included",
+      "fetched_at": "2026-08-17T10:23:18.881Z",
+      "last_seen_at": "2026-08-17T10:23:18.881Z",
+      "amenities": [
+        "water",
+        "security",
+        "kitchen"
+      ],
+      "lat": -24.6614,
+      "lng": 25.9042,
+      "geo_precision": "area"
+    },
+    {
+      "id": "auto-26774549287-house-to-shsre",
+      "title": "House to shsre",
+      "description": "House to shsre for sale in Botswana bw.zimcompass.com Cars Toyota Benz Nissan Mazda Honda Free Ad House to shsre 2 bedroom house to share in Mmopane block 1 for P1200 excluding utilities. Next to the main road. Available. Phone 74549287/72264824 P1,200 Name: Maatla Location: Molepolole Date: 28 November, 2023 Contact Seller Seller's Profile More Listings Product Images Image 1 of 5 Image 2 of 5 Image 3 of 5 Image 4 of 5 Image 5 of 5 Notify me when similar items are posted &rarr; You might also like Browse Similar Items Loading recommendations... &copy; 2026 - bw.zimcompass.com Terms and Condit",
+      "price": 1200,
+      "price_on_request": false,
+      "room_type": "sharing",
+      "gender_preference": "any",
+      "area": "block 1",
+      "city": "Gaborone",
+      "address": "Molepolole | 28 November, 2023",
+      "whatsapp_number": "26774549287",
+      "contact_name": "Maatla",
+      "campus_ids": [
+        1
+      ],
+      "custom_university_name": null,
+      "source_label": "ZimCompass house share",
+      "source_url": "https://bw.zimcompass.com/product?id=36544",
+      "detail_url": "https://bw.zimcompass.com/product?id=36544",
+      "photo_urls": [
+        "/data/web-rental-photos/auto-26774549287-house-to-shsre-0.png"
+      ],
+      "deposit_pula": null,
+      "utilities_included": null,
+      "fetched_at": "2026-08-17T10:23:18.881Z",
+      "last_seen_at": "2026-08-17T10:23:18.881Z",
+      "amenities": [],
+      "lat": -24.4067,
+      "lng": 25.495,
+      "geo_precision": "area"
+    },
+    {
+      "id": "auto-26775362884-house-to-share",
+      "title": "House to share",
+      "description": "House to share for sale in Botswana bw.zimcompass.com Cars Toyota Benz Nissan Mazda Honda Free Ad House to share A room in a 2nd half available for rent in Mogoditshane block 7!5 minutes walk to Mogoditshane route 7 combies!!We share bathroom and kitchen.Very spacious rooms, has ceiling and tiled!The yard is paved.No landlord!!Your share is P1050 plus P500 security.. Call/App 75362884 P1,050 Name: La&#x27;funkie Location: Gaborone Date: 23 November, 2023 Contact Seller Seller's Profile More Listings Phone Number: 075362884 Product Images Image 1 of 4 Image 2 of 4 Image 3 of 4 Image 4 of 4 Noti",
+      "price": 1050,
+      "price_on_request": false,
+      "room_type": "sharing",
+      "gender_preference": "any",
+      "area": "block 7",
+      "city": "Gaborone",
+      "address": "Gaborone | 23 November, 2023",
+      "whatsapp_number": "26775362884",
+      "contact_name": "La&#x27;funkie",
+      "campus_ids": [
+        3,
+        4,
+        1
+      ],
+      "custom_university_name": null,
+      "source_label": "ZimCompass house share",
+      "source_url": "https://bw.zimcompass.com/product?id=35739",
+      "detail_url": "https://bw.zimcompass.com/product?id=35739",
+      "photo_urls": [
+        "/data/web-rental-photos/auto-26775362884-house-to-share-0.png"
+      ],
+      "deposit_pula": null,
+      "utilities_included": null,
+      "fetched_at": "2026-08-17T10:23:18.881Z",
+      "last_seen_at": "2026-08-17T10:23:18.881Z",
+      "amenities": [
+        "kitchen"
+      ],
+      "lat": -24.68,
+      "lng": 25.888,
+      "geo_precision": "area"
+    },
+    {
+      "id": "auto-26775920949-house-for-rent",
+      "title": "House for rent",
+      "description": "House for rent for sale in Botswana bw.zimcompass.com Cars Toyota Benz Nissan Mazda Honda Free Ad House for rent 1 room to share in 2 beds available in Tsholofelo by yellow tuckshop. Your share P1400 Security 500 Call or app 75920949/72806992 Fee 100 See Translation P1,400 Name: Happy Location: Gaborone West Ext 8, Gaborone Date: 02 November, 2023 Contact Seller Seller's Profile More Listings Notify me when similar items are posted &rarr; You might also like Browse Similar Items Loading recommendations... &copy; 2026 - bw.zimcompass.com Terms and Conditions",
+      "price": 1400,
+      "price_on_request": false,
+      "room_type": "sharing",
+      "gender_preference": "any",
+      "area": "Gaborone",
+      "city": "Gaborone",
+      "address": "Gaborone West Ext 8, Gaborone | 02 November, 2023",
+      "whatsapp_number": "26775920949",
+      "contact_name": "Happy",
+      "campus_ids": [
+        1
+      ],
+      "custom_university_name": null,
+      "source_label": "ZimCompass house share",
+      "source_url": "https://bw.zimcompass.com/product?id=33263",
+      "detail_url": "https://bw.zimcompass.com/product?id=33263",
+      "photo_urls": [
+        "/data/web-rental-photos/auto-26775920949-house-for-rent-0.png"
+      ],
+      "deposit_pula": 500,
+      "utilities_included": null,
+      "fetched_at": "2026-08-17T10:23:18.881Z",
+      "last_seen_at": "2026-08-17T10:23:18.881Z",
+      "amenities": [],
+      "lat": -24.652,
+      "lng": 25.883,
+      "geo_precision": "area"
+    },
+    {
+      "id": "auto-26774250032-three-bedroomed-house-to-share-in-block",
+      "title": "Three bedroomed house to share in Block 5 Francistown...call 74250032",
+      "description": "Three bedroomed house to share in Block 5 Francistown call for sale in Botswana bw.zimcompass.com Cars Toyota Benz Nissan Mazda Honda Free Ad Three bedroomed house to share in Block 5 Francistown call Three bedroomed house to share in Block 5 Francistown...call: 74250032 Rent: P 730.00 See Translation $730 Name: Studley Location: Francistown Date: 01 November, 2023 Contact Seller Seller's Profile More Listings Phone Number: 074250032 Notify me when similar items are posted &rarr; You might also like Browse Similar Items Loading recommendations... &copy; 2026 - bw.zimcompass.com Terms and Condi",
+      "price": 730,
+      "price_on_request": false,
+      "room_type": "sharing",
+      "gender_preference": "any",
+      "area": "Block 5",
+      "city": "Francistown",
+      "address": "Francistown | 01 November, 2023",
+      "whatsapp_number": "26774250032",
+      "contact_name": "Studley",
+      "campus_ids": [],
+      "custom_university_name": "University of Botswana — Francistown Campus",
+      "source_label": "ZimCompass house share",
+      "source_url": "https://bw.zimcompass.com/product?id=33158",
+      "detail_url": "https://bw.zimcompass.com/product?id=33158",
+      "photo_urls": [
+        "/data/web-rental-photos/auto-26774250032-three-bedroomed-house-to-share-in-block-0.png"
+      ],
+      "deposit_pula": null,
+      "utilities_included": null,
+      "fetched_at": "2026-08-17T10:23:18.881Z",
+      "last_seen_at": "2026-08-17T10:23:18.881Z",
+      "amenities": [],
+      "lat": -24.6614,
+      "lng": 25.9042,
+      "geo_precision": "area"
+    },
+    {
+      "id": "auto-26778060149-house-to-share",
+      "title": "House to share",
+      "description": "House to share for sale in Botswana bw.zimcompass.com Cars Toyota Benz Nissan Mazda Honda Free Ad House to share House to share 2 rooms available in tloaneng app me 78060149 P750 Name: Gomolemo Location: Gaborone Date: 30 September, 2023 Contact Seller Seller's Profile More Listings Phone Number: 078060149 Product Images Image 1 of 3 Image 2 of 3 Image 3 of 3 Notify me when similar items are posted &rarr; You might also like Browse Similar Items Loading recommendations... &copy; 2026 - bw.zimcompass.com Terms and Conditions",
+      "price": 750,
+      "price_on_request": false,
+      "room_type": "sharing",
+      "gender_preference": "any",
+      "area": "Gaborone",
+      "city": "Gaborone",
+      "address": "Gaborone | 30 September, 2023",
+      "whatsapp_number": "26778060149",
+      "contact_name": "Gomolemo",
+      "campus_ids": [
+        1
+      ],
+      "custom_university_name": null,
+      "source_label": "ZimCompass house share",
+      "source_url": "https://bw.zimcompass.com/product?id=29471",
+      "detail_url": "https://bw.zimcompass.com/product?id=29471",
+      "photo_urls": [
+        "/data/web-rental-photos/auto-26778060149-house-to-share-0.png"
+      ],
+      "deposit_pula": null,
+      "utilities_included": null,
+      "fetched_at": "2026-08-17T10:23:18.882Z",
+      "last_seen_at": "2026-08-17T10:23:18.882Z",
+      "amenities": [],
+      "lat": -24.6282,
+      "lng": 25.9231,
+      "geo_precision": "area"
+    },
+    {
+      "id": "auto-26772354971-house-to-share",
+      "title": "House to share",
+      "description": "House to share for sale in Botswana bw.zimcompass.com Cars Toyota Benz Nissan Mazda Honda Free Ad House to share A room to rent in a house to share. Phase 4, walking distance to game city. Fitted room, paved yard, screen wall, motorized gate. Rent is 1800 per month plus equivalent security. Call or app 72354971. P1,800 Name: Bush Location: Gaborone, Botswana Date: 30 July, 2023 Contact Seller Seller's Profile More Listings Phone Number: 072354971 Notify me when similar items are posted &rarr; You might also like Browse Similar Items Loading recommendations... &copy; 2026 - bw.zimcompass.com Te",
+      "price": 1800,
+      "price_on_request": false,
+      "room_type": "sharing",
+      "gender_preference": "any",
+      "area": "Phase 4",
+      "city": "Gaborone",
+      "address": "Gaborone, Botswana | 30 July, 2023",
+      "whatsapp_number": "26772354971",
+      "contact_name": "Bush",
+      "campus_ids": [
+        1
+      ],
+      "custom_university_name": null,
+      "source_label": "ZimCompass house share",
+      "source_url": "https://bw.zimcompass.com/product?id=22908",
+      "detail_url": "https://bw.zimcompass.com/product?id=22908",
+      "photo_urls": [
+        "/data/web-rental-photos/auto-26772354971-house-to-share-0.png"
+      ],
+      "deposit_pula": null,
+      "utilities_included": null,
+      "fetched_at": "2026-08-17T10:23:18.882Z",
+      "last_seen_at": "2026-08-17T10:23:18.882Z",
+      "amenities": [
+        "security",
+        "parking"
+      ],
+      "lat": -24.676,
+      "lng": 25.906,
+      "geo_precision": "area"
+    },
+    {
+      "id": "auto-26775085701-room-for-rent-in-3-beds-in-bew-naledi-1",
+      "title": "Room for rent in 3 beds in Bew Naledi 1.5",
+      "description": "Room for rent in 3 beds in Bew Naledi 1 for sale in Botswana bw.zimcompass.com Cars Toyota Benz Nissan Mazda Honda Free Ad Room for rent in 3 beds in Bew Naledi 1 Room with fitted wardrobe available in a 3 beds to share. Looking for a female room mate. Security payable in 2 installments Available immediately 75085701 P1,500 Name: Tracey Location: Gaborone, Botswana Date: 04 July, 2023 Contact Seller Seller's Profile More Listings Phone Number: 075085701 Notify me when similar items are posted &rarr; You might also like Browse Similar Items Loading recommendations... &copy; 2026 - bw.zimcompass",
+      "price": 1500,
+      "price_on_request": false,
+      "room_type": "sharing",
+      "gender_preference": "any",
+      "area": "Gaborone",
+      "city": "Gaborone",
+      "address": "Gaborone, Botswana | 04 July, 2023",
+      "whatsapp_number": "26775085701",
+      "contact_name": "Tracey",
+      "campus_ids": [
+        1
+      ],
+      "custom_university_name": null,
+      "source_label": "ZimCompass house share",
+      "source_url": "https://bw.zimcompass.com/product?id=19487",
+      "detail_url": "https://bw.zimcompass.com/product?id=19487",
+      "photo_urls": [
+        "/data/web-rental-photos/auto-26775085701-room-for-rent-in-3-beds-in-bew-naledi-1-0.png"
+      ],
+      "deposit_pula": null,
+      "utilities_included": null,
+      "fetched_at": "2026-08-17T10:23:18.882Z",
+      "last_seen_at": "2026-08-17T10:23:18.882Z",
+      "amenities": [
+        "furnished"
+      ],
+      "lat": -24.6282,
+      "lng": 25.9231,
+      "geo_precision": "area"
+    },
+    {
+      "id": "auto-26774284733-house-to-share",
+      "title": "House to share",
+      "description": "House to share for sale in Botswana bw.zimcompass.com Cars Toyota Benz Nissan Mazda Honda Free Ad House to share House to share near bbs available NOW. Fitted kichen (no stove), closet, geyser, screen wall, secure location, 3 minutes walk into bbs, combi access to most areas. P1700 with equivalent security, bills not included. Call/app 74284733 $1,700 Name: Mma Location: Gaborone Date: 03 July, 2023 Contact Seller Seller's Profile More Listings Phone Number: 074284733 Notify me when similar items are posted &rarr; You might also like Browse Similar Items Loading recommendations... &copy; 2026 ",
+      "price": 1700,
+      "price_on_request": false,
+      "room_type": "sharing",
+      "gender_preference": "any",
+      "area": "Gaborone",
+      "city": "Gaborone",
+      "address": "Gaborone | 03 July, 2023",
+      "whatsapp_number": "26774284733",
+      "contact_name": "Mma",
+      "campus_ids": [
+        1
+      ],
+      "custom_university_name": null,
+      "source_label": "ZimCompass house share",
+      "source_url": "https://bw.zimcompass.com/product?id=19283",
+      "detail_url": "https://bw.zimcompass.com/product?id=19283",
+      "photo_urls": [
+        "/data/web-rental-photos/auto-26774284733-house-to-share-0.png"
+      ],
+      "deposit_pula": null,
+      "utilities_included": null,
+      "fetched_at": "2026-08-17T10:23:18.882Z",
+      "last_seen_at": "2026-08-17T10:23:18.882Z",
+      "amenities": [
+        "kitchen"
+      ],
+      "lat": -24.6282,
+      "lng": 25.9231,
+      "geo_precision": "area"
+    },
+    {
+      "id": "auto-26777105801-3-beds-2-baths-room-only",
+      "title": "3 Beds 2 Baths Room only",
+      "description": "3 Beds 2 Baths Room only for sale in Botswana bw.zimcompass.com Cars Toyota Benz Nissan Mazda Honda Free Ad 3 Beds 2 Baths Room only Three bedroomed house to share in Gabane, Lonaka ward, next to Gabane Primary School. Your share P1000. Call 77105801 for viewing and further info. $1,000 Name: Stanley Location: Gabane, Kweneng, Botswana Date: 22 June, 2023 Contact Seller Seller's Profile More Listings Phone Number: 077105801 Product Images Image 1 of 5 Image 2 of 5 Image 3 of 5 Image 4 of 5 Image 5 of 5 Notify me when similar items are posted &rarr; You might also like Browse Similar Items Load",
+      "price": 1000,
+      "price_on_request": false,
+      "room_type": "sharing",
+      "gender_preference": "any",
+      "area": "Gabane",
+      "city": "Gabane",
+      "address": "Gabane, Kweneng, Botswana | 22 June, 2023",
+      "whatsapp_number": "26777105801",
+      "contact_name": "Stanley",
+      "campus_ids": [],
+      "custom_university_name": null,
+      "source_label": "ZimCompass house share",
+      "source_url": "https://bw.zimcompass.com/product?id=17402",
+      "detail_url": "https://bw.zimcompass.com/product?id=17402",
+      "photo_urls": [
+        "/data/web-rental-photos/auto-26777105801-3-beds-2-baths-room-only-0.png"
+      ],
+      "deposit_pula": null,
+      "utilities_included": null,
+      "fetched_at": "2026-08-17T10:23:19.165Z",
+      "last_seen_at": "2026-08-17T10:23:19.165Z",
+      "amenities": [],
+      "lat": -24.6667,
+      "lng": 25.7833,
+      "geo_precision": "area"
+    },
+    {
+      "id": "auto-26774235150-a-room-in-2beds",
+      "title": "A room in 2beds",
+      "description": "A room in 2beds for sale in Botswana bw.zimcompass.com Cars Toyota Benz Nissan Mazda Honda Free Ad A room in 2beds A big room in a 2beds, near Mogoditshane Clinic, to share kitchen and bathroom. Room is not fitted. Walled with electric gate. P1400 with equal amount of security which can be paid in 2months. Call 74235150/ 74380900 $1,400 Name: Lionel Location: Mogoditshane Date: 20 June, 2023 Contact Seller Seller's Profile More Listings Phone Number: 074235150 Phone Number: 074380900 Notify me when similar items are posted &rarr; You might also like Browse Similar Items Loading recommendations",
+      "price": 1400,
+      "price_on_request": false,
+      "room_type": "sharing",
+      "gender_preference": "any",
+      "area": "Mogoditshane",
+      "city": "Gaborone",
+      "address": "Mogoditshane | 20 June, 2023",
+      "whatsapp_number": "26774235150",
+      "contact_name": "Lionel",
+      "campus_ids": [
+        1
+      ],
+      "custom_university_name": null,
+      "source_label": "ZimCompass house share",
+      "source_url": "https://bw.zimcompass.com/product?id=17048",
+      "detail_url": "https://bw.zimcompass.com/product?id=17048",
+      "photo_urls": [
+        "/data/web-rental-photos/auto-26774235150-a-room-in-2beds-0.png"
+      ],
+      "deposit_pula": null,
+      "utilities_included": null,
+      "fetched_at": "2026-08-17T10:23:19.166Z",
+      "last_seen_at": "2026-08-17T10:23:19.166Z",
+      "amenities": [
+        "kitchen"
+      ],
+      "lat": -24.6272,
+      "lng": 25.8656,
+      "geo_precision": "area"
+    },
+    {
+      "id": "auto-26772514386-gabs-phase-2-1-single-person-needed-to-s",
+      "title": "Gabs Phase 2 1 single person needed to share this",
+      "description": "Gabs Phase 2 1 single person needed to share this for sale in Botswana bw.zimcompass.com Cars Toyota Benz Nissan Mazda Honda Free Ad Gabs Phase 2 1 single person needed to share this Single person needed to share a 3 bedroomed house with another single person occupying 2 bedrooms at Gabs Phase 2. The house has 2 bathrooms, kitchen, lounge & carport. Your share of rental will be P1700/m &#x2B; security call 72514386. P1,700 Name: Roberto Location: Gaborone, Botswana Date: 13 May, 2023 Contact Seller Seller's Profile More Listings Phone Number: 072514386 Product Images Image 1 of 5 Image 2 of 5 ",
+      "price": 1700,
+      "price_on_request": false,
+      "room_type": "single",
+      "gender_preference": "any",
+      "area": "Phase 2",
+      "city": "Gaborone",
+      "address": "Gaborone, Botswana | 13 May, 2023",
+      "whatsapp_number": "26772514386",
+      "contact_name": "Roberto",
+      "campus_ids": [
+        1
+      ],
+      "custom_university_name": null,
+      "source_label": "ZimCompass house share",
+      "source_url": "https://bw.zimcompass.com/product?id=12519",
+      "detail_url": "https://bw.zimcompass.com/product?id=12519",
+      "photo_urls": [
+        "/data/web-rental-photos/auto-26772514386-gabs-phase-2-1-single-person-needed-to-s-0.png"
+      ],
+      "deposit_pula": null,
+      "utilities_included": null,
+      "fetched_at": "2026-08-17T10:23:19.166Z",
+      "last_seen_at": "2026-08-17T10:23:19.166Z",
+      "amenities": [
+        "parking",
+        "kitchen"
+      ],
+      "lat": -24.669,
+      "lng": 25.911,
+      "geo_precision": "area"
+    },
+    {
+      "id": "auto-26777356852-house-to-share-available",
+      "title": "House to share available",
+      "description": "House to share available for sale in Botswana bw.zimcompass.com Cars Toyota Benz Nissan Mazda Honda Free Ad House to share available A clean and mature person wanted to share a bedroomed house in mmopane block1 behind complex...the house is fitted with aircon stove and geyser...bedrooms and kitchen also fitted... Ur share is 1500 plus equivalent security Contact 77356852 P1,500 Name: Obert Location: Mmopane block1 Date: 05 May, 2023 Contact Seller Seller's Profile More Listings Phone Number: 077356852 Product Images Image 1 of 5 Image 2 of 5 Image 3 of 5 Image 4 of 5 Image 5 of 5 Notify me whe",
+      "price": 1500,
+      "price_on_request": false,
+      "room_type": "sharing",
+      "gender_preference": "any",
+      "area": "block1",
+      "city": "Gaborone",
+      "address": "Mmopane block1 | 05 May, 2023",
+      "whatsapp_number": "26777356852",
+      "contact_name": "Obert",
+      "campus_ids": [
+        1
+      ],
+      "custom_university_name": null,
+      "source_label": "ZimCompass house share",
+      "source_url": "https://bw.zimcompass.com/product?id=11253",
+      "detail_url": "https://bw.zimcompass.com/product?id=11253",
+      "photo_urls": [
+        "/data/web-rental-photos/auto-26777356852-house-to-share-available-0.png"
+      ],
+      "deposit_pula": null,
+      "utilities_included": null,
+      "fetched_at": "2026-08-17T10:23:19.166Z",
+      "last_seen_at": "2026-08-17T10:23:19.166Z",
+      "amenities": [
+        "kitchen"
+      ],
+      "lat": -24.5667,
+      "lng": 25.8333,
+      "geo_precision": "area"
+    },
+    {
+      "id": "auto-26774793521",
+      "title": "Student room share — Francistown",
+      "description": "Ntshe, francistown, 3beds house for rent, 1 ensuite, fitted kitchen and wadropes, dinning, sitting, single garage, walled, P3500 plus equivalent security deposit call or whatsup 74793521",
+      "price": 3500,
+      "price_on_request": false,
+      "room_type": "single",
+      "gender_preference": "any",
+      "area": "Francistown",
+      "city": "Francistown",
+      "address": "Francistown, Botswana | 10 August, 2026",
+      "whatsapp_number": "26774793521",
+      "contact_name": "Thenjiwe",
+      "campus_ids": [],
+      "custom_university_name": "University of Botswana — Francistown Campus",
+      "source_label": "ZimCompass houses for rent",
+      "source_url": "https://bw.zimcompass.com/product?id=113970",
+      "detail_url": "https://bw.zimcompass.com/product?id=113970",
+      "photo_urls": [],
+      "deposit_pula": null,
+      "utilities_included": null,
+      "fetched_at": "2026-08-17T10:23:28.684Z",
+      "last_seen_at": "2026-08-17T10:23:28.684Z",
+      "amenities": [
+        "parking",
+        "kitchen"
+      ],
+      "lat": -21.17,
+      "lng": 27.5075,
+      "geo_precision": "area"
+    },
+    {
+      "id": "auto-26772237436",
+      "title": "Student room share — Francistown",
+      "description": "Room available in Extension Somerset. Loja mall sideRent P400Call 72237436",
+      "price": 400,
+      "price_on_request": false,
+      "room_type": "sharing",
+      "gender_preference": "any",
+      "area": "Francistown",
+      "city": "Francistown",
+      "address": "Francistown, Botswana | 04 August, 2026",
+      "whatsapp_number": "26772237436",
+      "contact_name": "Mba",
+      "campus_ids": [],
+      "custom_university_name": "University of Botswana — Francistown Campus",
+      "source_label": "ZimCompass houses for rent",
+      "source_url": "https://bw.zimcompass.com/product?id=113395",
+      "detail_url": "https://bw.zimcompass.com/product?id=113395",
+      "photo_urls": [],
+      "deposit_pula": null,
+      "utilities_included": null,
+      "fetched_at": "2026-08-17T10:23:28.685Z",
+      "last_seen_at": "2026-08-17T10:23:28.685Z",
+      "amenities": [],
+      "lat": -21.17,
+      "lng": 27.5075,
+      "geo_precision": "area"
+    },
+    {
+      "id": "auto-26771775757",
+      "title": "Student room share — Gaborone",
+      "description": "Two bedroom apartment for rent In Gaborone North P5500pmCall 71775757-77632791Ready for occupation",
+      "price": 5500,
+      "price_on_request": false,
+      "room_type": "sharing",
+      "gender_preference": "any",
+      "area": "Gaborone",
+      "city": "Gaborone",
+      "address": "Gaborone, Botswana | 27 March, 2026",
+      "whatsapp_number": "26771775757",
+      "contact_name": "Fridah",
+      "campus_ids": [
+        1
+      ],
+      "custom_university_name": null,
+      "source_label": "ZimCompass houses for rent",
+      "source_url": "https://bw.zimcompass.com/product?id=102775",
+      "detail_url": "https://bw.zimcompass.com/product?id=102775",
+      "photo_urls": [
+        "/data/web-rental-photos/auto-26771775757-0.jpg"
+      ],
+      "deposit_pula": null,
+      "utilities_included": null,
+      "fetched_at": "2026-08-17T10:23:28.685Z",
+      "last_seen_at": "2026-08-17T10:23:32.449Z",
+      "amenities": [],
+      "lat": -24.6282,
+      "lng": 25.9231,
+      "geo_precision": "area"
+    },
+    {
+      "id": "auto-26774285156",
+      "title": "Student room share — Gaborone",
+      "description": "GABORONE~ HOUSES FOR RENT @74285156#Gothic~Ethics#House~PortalsAN EXCLUSIVE 3BEDS BHC house for rent in Gaborone St See more",
+      "price": 4000,
+      "price_on_request": false,
+      "room_type": "sharing",
+      "gender_preference": "any",
+      "area": "Gaborone",
+      "city": "Gaborone",
+      "address": "Gaborone, Botswana | 02 August, 2026",
+      "whatsapp_number": "26774285156",
+      "contact_name": "Nathan",
+      "campus_ids": [
+        1
+      ],
+      "custom_university_name": null,
+      "source_label": "ZimCompass houses for rent",
+      "source_url": "https://bw.zimcompass.com/product?id=113184",
+      "detail_url": "https://bw.zimcompass.com/product?id=113184",
+      "photo_urls": [
+        "/data/web-rental-photos/auto-26774285156-0.jpg"
+      ],
+      "deposit_pula": null,
+      "utilities_included": null,
+      "fetched_at": "2026-08-17T10:23:28.686Z",
+      "last_seen_at": "2026-08-17T10:23:28.686Z",
+      "amenities": [],
+      "lat": -24.6282,
+      "lng": 25.9231,
+      "geo_precision": "area"
+    },
+    {
+      "id": "auto-26776547480",
+      "title": "Student room share — Gaborone",
+      "description": "Room for rent P700clean and painted insideopposite Sekgoma Primarycall me 76547480",
+      "price": 700,
+      "price_on_request": false,
+      "room_type": "sharing",
+      "gender_preference": "any",
+      "area": "Gaborone",
+      "city": "Gaborone",
+      "address": "Maun, Botswana | 30 July, 2026",
+      "whatsapp_number": "26776547480",
+      "contact_name": "Onkamogetse",
+      "campus_ids": [
+        1
+      ],
+      "custom_university_name": null,
+      "source_label": "ZimCompass houses for rent",
+      "source_url": "https://bw.zimcompass.com/product?id=113024",
+      "detail_url": "https://bw.zimcompass.com/product?id=113024",
+      "photo_urls": [],
+      "deposit_pula": null,
+      "utilities_included": null,
+      "fetched_at": "2026-08-17T10:23:28.686Z",
+      "last_seen_at": "2026-08-17T10:23:28.686Z",
+      "amenities": [],
+      "lat": -19.9833,
+      "lng": 23.4167,
+      "geo_precision": "area"
+    },
+    {
+      "id": "auto-26774370630",
+      "title": "Student room share — Gaborone",
+      "description": "2 Beds Fitted Apartment Tsholofelo Flats Available 1st of August 2026 at P5500.00 plus Security Deposit. 74370630",
+      "price": 5500,
+      "price_on_request": false,
+      "room_type": "sharing",
+      "gender_preference": "any",
+      "area": "Gaborone",
+      "city": "Gaborone",
+      "address": "Gaborone, Botswana | 19 July, 2026",
+      "whatsapp_number": "26774370630",
+      "contact_name": "Poster",
+      "campus_ids": [
+        1
+      ],
+      "custom_university_name": null,
+      "source_label": "ZimCompass houses for rent",
+      "source_url": "https://bw.zimcompass.com/product?id=112389",
+      "detail_url": "https://bw.zimcompass.com/product?id=112389",
+      "photo_urls": [
+        "/data/web-rental-photos/auto-26774370630-0.jpg"
+      ],
+      "deposit_pula": null,
+      "utilities_included": null,
+      "fetched_at": "2026-08-17T10:23:29.026Z",
+      "last_seen_at": "2026-08-17T10:23:29.026Z",
+      "amenities": [],
+      "lat": -24.6282,
+      "lng": 25.9231,
+      "geo_precision": "area"
+    },
+    {
+      "id": "auto-26772575343",
+      "title": "Student room share — Francistown",
+      "description": "Room for rent P650,5mins walk to bus rank,somerset east,secure area,with hot shower and screen wall call 72575343",
+      "price": 6505,
+      "price_on_request": false,
+      "room_type": "sharing",
+      "gender_preference": "any",
+      "area": "Francistown",
+      "city": "Francistown",
+      "address": "Francistown, Botswana | 15 July, 2026",
+      "whatsapp_number": "26772575343",
+      "contact_name": "Chedza",
+      "campus_ids": [],
+      "custom_university_name": "University of Botswana — Francistown Campus",
+      "source_label": "ZimCompass houses for rent",
+      "source_url": "https://bw.zimcompass.com/product?id=112022",
+      "detail_url": "https://bw.zimcompass.com/product?id=112022",
+      "photo_urls": [],
+      "deposit_pula": null,
+      "utilities_included": null,
+      "fetched_at": "2026-08-17T10:23:29.027Z",
+      "last_seen_at": "2026-08-17T10:23:29.027Z",
+      "amenities": [],
+      "lat": -21.17,
+      "lng": 27.5075,
+      "geo_precision": "area"
+    },
+    {
+      "id": "auto-26775051677",
+      "title": "Student room share — block 9",
+      "description": "2 bedroomed house available for rent on a multi residential plot in Mogoditshane block 9.fully fitted,electric fence with wall.P3200 rent and deposit .call 75051677",
+      "price": 3200,
+      "price_on_request": false,
+      "room_type": "sharing",
+      "gender_preference": "any",
+      "area": "block 9",
+      "city": "Gaborone",
+      "address": "Kweneng, Botswana | 03 July, 2026",
+      "whatsapp_number": "26775051677",
+      "contact_name": "Kgomotso",
+      "campus_ids": [
+        1
+      ],
+      "custom_university_name": null,
+      "source_label": "ZimCompass houses for rent",
+      "source_url": "https://bw.zimcompass.com/product?id=111139",
+      "detail_url": "https://bw.zimcompass.com/product?id=111139",
+      "photo_urls": [
+        "/data/web-rental-photos/auto-26775051677-0.jpg"
+      ],
+      "deposit_pula": null,
+      "utilities_included": null,
+      "fetched_at": "2026-08-17T10:23:29.027Z",
+      "last_seen_at": "2026-08-17T10:23:29.027Z",
+      "amenities": [
+        "security"
+      ],
+      "lat": -24.639,
+      "lng": 25.888,
+      "geo_precision": "area"
+    },
+    {
+      "id": "auto-26774285156",
+      "title": "Student room share — Block 1",
+      "description": "HOUSES FOR RENT 72942349A nice fully fitted 2beds house for rent in Mmopane Block 1, kitchenette with stovez, bedrooms with closets , Partly paved, walled Motor gate, electric fence, Stunning StarlinkBy tarred road,for only P3400&#x2B;sec74285156/ 72942349 /75963264A See more",
+      "price": 3400,
+      "price_on_request": false,
+      "room_type": "sharing",
+      "gender_preference": "any",
+      "area": "Block 1",
+      "city": "Gaborone",
+      "address": "Gaborone, Botswana | 11 June, 2026",
+      "whatsapp_number": "26774285156",
+      "contact_name": "Nathan",
+      "campus_ids": [
+        1
+      ],
+      "custom_university_name": null,
+      "source_label": "ZimCompass houses for rent",
+      "source_url": "https://bw.zimcompass.com/product?id=109079",
+      "detail_url": "https://bw.zimcompass.com/product?id=109079",
+      "photo_urls": [
+        "/data/web-rental-photos/auto-26774285156-0.jpg"
+      ],
+      "deposit_pula": null,
+      "utilities_included": null,
+      "fetched_at": "2026-08-17T10:23:29.533Z",
+      "last_seen_at": "2026-08-17T10:23:29.534Z",
+      "amenities": [
+        "security"
+      ],
+      "lat": -24.6282,
+      "lng": 25.9231,
+      "geo_precision": "area"
+    },
+    {
+      "id": "auto-26772417037",
+      "title": "Student room share — Gaborone",
+      "description": "A room in a 2 n half to share 72417037",
+      "price": 1300,
+      "price_on_request": false,
+      "room_type": "sharing",
+      "gender_preference": "any",
+      "area": "Gaborone",
+      "city": "Gaborone",
+      "address": "Kweneng, Botswana | 11 June, 2026",
+      "whatsapp_number": "26772417037",
+      "contact_name": "Diana",
+      "campus_ids": [
+        1
+      ],
+      "custom_university_name": null,
+      "source_label": "ZimCompass houses for rent",
+      "source_url": "https://bw.zimcompass.com/product?id=109076",
+      "detail_url": "https://bw.zimcompass.com/product?id=109076",
+      "photo_urls": [
+        "/data/web-rental-photos/auto-26772417037-0.jpg"
+      ],
+      "deposit_pula": null,
+      "utilities_included": null,
+      "fetched_at": "2026-08-17T10:23:31.041Z",
+      "last_seen_at": "2026-08-17T10:23:31.041Z",
+      "amenities": [],
+      "lat": -24.6282,
+      "lng": 25.9231,
+      "geo_precision": "area"
+    },
+    {
+      "id": "auto-26772132179",
+      "title": "Student room share — Gaborone",
+      "description": "Bhc house Phaz2 room for rent price p1200 call 72132179 or 71284914",
+      "price": 1200,
+      "price_on_request": false,
+      "room_type": "sharing",
+      "gender_preference": "any",
+      "area": "Gaborone",
+      "city": "Gaborone",
+      "address": "Botswana | 31 May, 2026",
+      "whatsapp_number": "26772132179",
+      "contact_name": "Leonard",
+      "campus_ids": [
+        1
+      ],
+      "custom_university_name": null,
+      "source_label": "ZimCompass houses for rent",
+      "source_url": "https://bw.zimcompass.com/product?id=108475",
+      "detail_url": "https://bw.zimcompass.com/product?id=108475",
+      "photo_urls": [],
+      "deposit_pula": null,
+      "utilities_included": null,
+      "fetched_at": "2026-08-17T10:23:31.041Z",
+      "last_seen_at": "2026-08-17T10:23:31.041Z",
+      "amenities": [],
+      "lat": -24.6282,
+      "lng": 25.9231,
+      "geo_precision": "area"
+    },
+    {
+      "id": "auto-26774365602",
+      "title": "Student room share — block 5",
+      "description": "Spacious Rooms available Room 1100 security 550 access to route 2,4,6&11 Mgoditshane block 5 app 74365602",
+      "price": 1100,
+      "price_on_request": false,
+      "room_type": "sharing",
+      "gender_preference": "any",
+      "area": "block 5",
+      "city": "Gaborone",
+      "address": "Kweneng, Botswana | 31 May, 2026",
+      "whatsapp_number": "26774365602",
+      "contact_name": "Thenjiwe",
+      "campus_ids": [
+        1
+      ],
+      "custom_university_name": null,
+      "source_label": "ZimCompass houses for rent",
+      "source_url": "https://bw.zimcompass.com/product?id=108440",
+      "detail_url": "https://bw.zimcompass.com/product?id=108440",
+      "photo_urls": [
+        "/data/web-rental-photos/auto-26774365602-0.jpg"
+      ],
+      "deposit_pula": 550,
+      "utilities_included": null,
+      "fetched_at": "2026-08-17T10:23:31.041Z",
+      "last_seen_at": "2026-08-17T10:23:31.041Z",
+      "amenities": [],
+      "lat": -24.6614,
+      "lng": 25.9042,
+      "geo_precision": "area"
+    },
+    {
+      "id": "auto-26775555593",
+      "title": "Student room share — Francistown",
+      "description": "3 Bedroom house for rent in Gerald 25 price P2700.00 &#x2B;security P2700.00 #75555593/72669213",
+      "price": 2700,
+      "price_on_request": false,
+      "room_type": "sharing",
+      "gender_preference": "any",
+      "area": "Francistown",
+      "city": "Francistown",
+      "address": "Francistown, Botswana | 31 May, 2026",
+      "whatsapp_number": "26775555593",
+      "contact_name": "Charles",
+      "campus_ids": [],
+      "custom_university_name": "University of Botswana — Francistown Campus",
+      "source_label": "ZimCompass houses for rent",
+      "source_url": "https://bw.zimcompass.com/product?id=108347",
+      "detail_url": "https://bw.zimcompass.com/product?id=108347",
+      "photo_urls": [
+        "/data/web-rental-photos/auto-26775555593-0.jpg"
+      ],
+      "deposit_pula": 2700,
+      "utilities_included": null,
+      "fetched_at": "2026-08-17T10:23:31.041Z",
+      "last_seen_at": "2026-08-17T10:23:31.041Z",
+      "amenities": [],
+      "lat": -21.17,
+      "lng": 27.5075,
+      "geo_precision": "area"
+    },
+    {
+      "id": "auto-26776242849",
+      "title": "Student room share — Block 1",
+      "description": "FOR RENT: 3 Bedroom House in Mmopane Block 1 near the Mmopane Primary School and Bokamoso Hospital RENTAL: P4500 &#x2B; Equivalent Security Deposit WHATSAPP 76242849 See more",
+      "price": 4500,
+      "price_on_request": false,
+      "room_type": "sharing",
+      "gender_preference": "any",
+      "area": "Block 1",
+      "city": "Gaborone",
+      "address": "Gaborone, Botswana | 22 May, 2026",
+      "whatsapp_number": "26776242849",
+      "contact_name": "Masego",
+      "campus_ids": [
+        1
+      ],
+      "custom_university_name": null,
+      "source_label": "ZimCompass houses for rent",
+      "source_url": "https://bw.zimcompass.com/product?id=107408",
+      "detail_url": "https://bw.zimcompass.com/product?id=107408",
+      "photo_urls": [
+        "/data/web-rental-photos/auto-26776242849-0.jpg"
+      ],
+      "deposit_pula": null,
+      "utilities_included": null,
+      "fetched_at": "2026-08-17T10:23:31.402Z",
+      "last_seen_at": "2026-08-17T10:23:31.402Z",
+      "amenities": [],
+      "lat": -24.6282,
+      "lng": 25.9231,
+      "geo_precision": "area"
+    },
+    {
+      "id": "auto-26774285156",
+      "title": "Student room share — Mmopane",
+      "description": "HOUSES FOR RENT74285156#Excellent~Houses Portal A super 2beds House for P3000&#x2B;sec in Mmopane village ~Full See more",
+      "price": 3000,
+      "price_on_request": false,
+      "room_type": "sharing",
+      "gender_preference": "any",
+      "area": "Mmopane",
+      "city": "Gaborone",
+      "address": "Gaborone, Botswana | 03 May, 2026",
+      "whatsapp_number": "26774285156",
+      "contact_name": "Nathan",
+      "campus_ids": [
+        1
+      ],
+      "custom_university_name": null,
+      "source_label": "ZimCompass houses for rent",
+      "source_url": "https://bw.zimcompass.com/product?id=105907",
+      "detail_url": "https://bw.zimcompass.com/product?id=105907",
+      "photo_urls": [
+        "/data/web-rental-photos/auto-26774285156-0.jpg"
+      ],
+      "deposit_pula": null,
+      "utilities_included": null,
+      "fetched_at": "2026-08-17T10:23:31.830Z",
+      "last_seen_at": "2026-08-17T10:23:31.830Z",
+      "amenities": [],
+      "lat": -24.5667,
+      "lng": 25.8333,
+      "geo_precision": "area"
+    },
+    {
+      "id": "auto-26774285156",
+      "title": "Student room share — LEDUMADUMANE",
+      "description": "HOUSES FOR RENT74285156#Excellent~Houses Portal \"EXCLUSIVE , GOTHIC\"STUNNING 2BEDS HOUSE FOR RENT IN LEDUMADUMANE WIT See more",
+      "price": 4200,
+      "price_on_request": false,
+      "room_type": "sharing",
+      "gender_preference": "any",
+      "area": "LEDUMADUMANE",
+      "city": "Gaborone",
+      "address": "Gaborone, Botswana | 29 April, 2026",
+      "whatsapp_number": "26774285156",
+      "contact_name": "Nathan",
+      "campus_ids": [
+        8,
+        1
+      ],
+      "custom_university_name": null,
+      "source_label": "ZimCompass houses for rent",
+      "source_url": "https://bw.zimcompass.com/product?id=105507",
+      "detail_url": "https://bw.zimcompass.com/product?id=105507",
+      "photo_urls": [
+        "/data/web-rental-photos/auto-26774285156-0.jpg"
+      ],
+      "deposit_pula": null,
+      "utilities_included": null,
+      "fetched_at": "2026-08-17T10:23:31.830Z",
+      "last_seen_at": "2026-08-17T10:23:31.830Z",
+      "amenities": [],
+      "lat": -24.5867,
+      "lng": 25.85,
+      "geo_precision": "area"
+    },
+    {
+      "id": "auto-26778721873",
+      "title": "Student room share — block 3",
+      "description": "Hellos, am looking for a house to rent, budget P2000-P3000Phase 2, block 3, G West, Block 678721873",
+      "price": 3000,
+      "price_on_request": false,
+      "room_type": "sharing",
+      "gender_preference": "any",
+      "area": "block 3",
+      "city": "Gaborone",
+      "address": "Gaborone, Botswana | 22 April, 2026",
+      "whatsapp_number": "26778721873",
+      "contact_name": "Ebrahim",
+      "campus_ids": [
+        1
+      ],
+      "custom_university_name": null,
+      "source_label": "ZimCompass houses for rent",
+      "source_url": "https://bw.zimcompass.com/product?id=104905",
+      "detail_url": "https://bw.zimcompass.com/product?id=104905",
+      "photo_urls": [],
+      "deposit_pula": null,
+      "utilities_included": null,
+      "fetched_at": "2026-08-17T10:23:32.139Z",
+      "last_seen_at": "2026-08-17T10:23:32.139Z",
+      "amenities": [],
+      "lat": -24.6459,
+      "lng": 25.9089,
+      "geo_precision": "area"
+    },
+    {
+      "id": "auto-26776600329",
+      "title": "Student room share — extension 11",
+      "description": "Furnished Apartment to rent per month from P6500 in extesion 9 opposite Avani hotel. P7500 in extension 11 Gaborone.App/call &#x2B;267 76600329",
+      "price": 6500,
+      "price_on_request": false,
+      "room_type": "sharing",
+      "gender_preference": "any",
+      "area": "extension 11",
+      "city": "Gaborone",
+      "address": "Gaborone, Botswana | 22 April, 2026",
+      "whatsapp_number": "26776600329",
+      "contact_name": "Mai",
+      "campus_ids": [
+        1
+      ],
+      "custom_university_name": null,
+      "source_label": "ZimCompass houses for rent",
+      "source_url": "https://bw.zimcompass.com/product?id=104802",
+      "detail_url": "https://bw.zimcompass.com/product?id=104802",
+      "photo_urls": [
+        "/data/web-rental-photos/auto-26776600329-0.jpg"
+      ],
+      "deposit_pula": null,
+      "utilities_included": null,
+      "fetched_at": "2026-08-17T10:23:32.139Z",
+      "last_seen_at": "2026-08-17T10:23:32.139Z",
+      "amenities": [
+        "furnished"
+      ],
+      "lat": -24.6282,
+      "lng": 25.9231,
+      "geo_precision": "area"
+    },
+    {
+      "id": "auto-26774051929",
+      "title": "Student room share — Mogoditshane",
+      "description": "Mogoditshane, 100m from Route1 near Mamelodi/Mogoditshane Fighters Grounds. 2bedroomed flat in a secure multiple family property. Call 74051929/ 71791929",
+      "price": 3870,
+      "price_on_request": false,
+      "room_type": "sharing",
+      "gender_preference": "any",
+      "area": "Mogoditshane",
+      "city": "Gaborone",
+      "address": "Kweneng, Botswana | 10 April, 2026",
+      "whatsapp_number": "26774051929",
+      "contact_name": "Sovereign",
+      "campus_ids": [
+        1
+      ],
+      "custom_university_name": null,
+      "source_label": "ZimCompass houses for rent",
+      "source_url": "https://bw.zimcompass.com/product?id=104207",
+      "detail_url": "https://bw.zimcompass.com/product?id=104207",
+      "photo_urls": [
+        "/data/web-rental-photos/auto-26774051929-0.jpg"
+      ],
+      "deposit_pula": null,
+      "utilities_included": null,
+      "fetched_at": "2026-08-17T10:23:32.139Z",
+      "last_seen_at": "2026-08-17T10:23:32.139Z",
+      "amenities": [],
+      "lat": -24.6272,
+      "lng": 25.8656,
+      "geo_precision": "area"
+    },
+    {
+      "id": "auto-26774800034",
+      "title": "Student room share — Gaborone",
+      "description": "2 bedroomed house for rent in Kopong in a 2 unit multi res .Tiled floors and ceiling Common bathroom Rent is P2000 no security deposit Contact details are-74800034.",
+      "price": 2000,
+      "price_on_request": false,
+      "room_type": "sharing",
+      "gender_preference": "any",
+      "area": "Gaborone",
+      "city": "Gaborone",
+      "address": "Kweneng, Botswana | 27 March, 2026",
+      "whatsapp_number": "26774800034",
+      "contact_name": "Dylan",
+      "campus_ids": [
+        1
+      ],
+      "custom_university_name": null,
+      "source_label": "ZimCompass houses for rent",
+      "source_url": "https://bw.zimcompass.com/product?id=102902",
+      "detail_url": "https://bw.zimcompass.com/product?id=102902",
+      "photo_urls": [
+        "/data/web-rental-photos/auto-26774800034-0.jpg"
+      ],
+      "deposit_pula": null,
+      "utilities_included": null,
+      "fetched_at": "2026-08-17T10:23:32.448Z",
+      "last_seen_at": "2026-08-17T10:23:32.448Z",
+      "amenities": [],
+      "lat": -24.6282,
+      "lng": 25.9231,
+      "geo_precision": "area"
+    },
+    {
+      "id": "auto-26771775757",
+      "title": "Student room share — phase 4",
+      "description": "Two bedroom apartment for rent in phase 4 P6000pm Available nowCall 71775757/77532791",
+      "price": 6000,
+      "price_on_request": false,
+      "room_type": "sharing",
+      "gender_preference": "any",
+      "area": "phase 4",
+      "city": "Gaborone",
+      "address": "Gaborone, Botswana | 16 March, 2026",
+      "whatsapp_number": "26771775757",
+      "contact_name": "Fridah",
+      "campus_ids": [
+        1
+      ],
+      "custom_university_name": null,
+      "source_label": "ZimCompass houses for rent",
+      "source_url": "https://bw.zimcompass.com/product?id=102032",
+      "detail_url": "https://bw.zimcompass.com/product?id=102032",
+      "photo_urls": [
+        "/data/web-rental-photos/auto-26771775757-0.jpg"
+      ],
+      "deposit_pula": null,
+      "utilities_included": null,
+      "fetched_at": "2026-08-17T10:23:32.449Z",
+      "last_seen_at": "2026-08-17T10:23:32.449Z",
+      "amenities": [],
+      "lat": -24.676,
+      "lng": 25.906,
+      "geo_precision": "area"
+    },
     {
       "id": "auto-ezilet-26775920910-bogatsu-ext-10-student-accommodation",
       "title": "Bogatsu Ext 10 - Student Accommodation",
@@ -115,13 +1846,23 @@
       "custom_university_name": null,
       "source_label": "Ezilet student accommodation",
       "source_url": "https://ezilet.net/listing/bogatsu-ext-10-student-accommodation/",
+      "detail_url": null,
       "photo_urls": [
-        "/data/web-rental-photos/auto-ezilet-26775920910-bogatsu-ext-10-student-accommodation-0.jpg"
+        "/data/web-rental-photos/auto-ezilet-26775920910-bogatsu-ext-10-student-accommodation-0.jpg",
+        "/data/web-rental-photos/auto-ezilet-26775920910-bogatsu-ext-10-student-accommodation-1.jpg",
+        "/data/web-rental-photos/auto-ezilet-26775920910-bogatsu-ext-10-student-accommodation-2.png",
+        "/data/web-rental-photos/auto-ezilet-26775920910-bogatsu-ext-10-student-accommodation-3.jpg"
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-17T06:41:03.811Z",
-      "last_seen_at": "2026-08-17T06:41:03.811Z"
+      "fetched_at": "2026-08-17T10:23:49.774Z",
+      "last_seen_at": "2026-08-17T10:23:49.774Z",
+      "amenities": [
+        "wifi"
+      ],
+      "lat": -24.68,
+      "lng": 25.888,
+      "geo_precision": "area"
     },
     {
       "id": "auto-ezilet-26771757272-mohammed-ext-10-student-accommodation",
@@ -146,13 +1887,23 @@
       "custom_university_name": null,
       "source_label": "Ezilet student accommodation",
       "source_url": "https://ezilet.net/listing/mohammed-ext-10-student-accommodation/",
+      "detail_url": null,
       "photo_urls": [
-        "/data/web-rental-photos/auto-ezilet-26771757272-mohammed-ext-10-student-accommodation-0.jpg"
+        "/data/web-rental-photos/auto-ezilet-26771757272-mohammed-ext-10-student-accommodation-0.jpg",
+        "/data/web-rental-photos/auto-ezilet-26771757272-mohammed-ext-10-student-accommodation-1.jpg",
+        "/data/web-rental-photos/auto-ezilet-26771757272-mohammed-ext-10-student-accommodation-2.png",
+        "/data/web-rental-photos/auto-ezilet-26771757272-mohammed-ext-10-student-accommodation-3.jpg"
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-17T06:41:05.120Z",
-      "last_seen_at": "2026-08-17T06:41:05.120Z"
+      "fetched_at": "2026-08-17T10:23:51.059Z",
+      "last_seen_at": "2026-08-17T10:23:51.059Z",
+      "amenities": [
+        "wifi"
+      ],
+      "lat": -24.68,
+      "lng": 25.888,
+      "geo_precision": "area"
     },
     {
       "id": "auto-ezilet-26772816488-tulo-student-residence",
@@ -177,13 +1928,25 @@
       "custom_university_name": null,
       "source_label": "Ezilet student accommodation",
       "source_url": "https://ezilet.net/listing/tulo-student-residence/",
+      "detail_url": null,
       "photo_urls": [
-        "/data/web-rental-photos/auto-ezilet-26772816488-tulo-student-residence-0.jpg"
+        "/data/web-rental-photos/auto-ezilet-26772816488-tulo-student-residence-0.jpg",
+        "/data/web-rental-photos/auto-ezilet-26772816488-tulo-student-residence-1.jpg",
+        "/data/web-rental-photos/auto-ezilet-26772816488-tulo-student-residence-2.png",
+        "/data/web-rental-photos/auto-ezilet-26772816488-tulo-student-residence-3.jpg"
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-17T06:41:06.333Z",
-      "last_seen_at": "2026-08-17T06:41:06.333Z"
+      "fetched_at": "2026-08-17T10:23:52.307Z",
+      "last_seen_at": "2026-08-17T10:23:52.307Z",
+      "amenities": [
+        "wifi",
+        "security",
+        "furnished"
+      ],
+      "lat": -24.68,
+      "lng": 25.888,
+      "geo_precision": "area"
     },
     {
       "id": "auto-ezilet-26776242849-tlokweng-student-accommodation",
@@ -208,13 +1971,23 @@
       "custom_university_name": null,
       "source_label": "Ezilet student accommodation",
       "source_url": "https://ezilet.net/listing/tlokweng-student-accommodation/",
+      "detail_url": null,
       "photo_urls": [
-        "/data/web-rental-photos/auto-ezilet-26776242849-tlokweng-student-accommodation-0.jpg"
+        "/data/web-rental-photos/auto-ezilet-26776242849-tlokweng-student-accommodation-0.jpg",
+        "/data/web-rental-photos/auto-ezilet-26776242849-tlokweng-student-accommodation-1.jpg",
+        "/data/web-rental-photos/auto-ezilet-26776242849-tlokweng-student-accommodation-2.png",
+        "/data/web-rental-photos/auto-ezilet-26776242849-tlokweng-student-accommodation-3.jpg"
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-17T06:41:07.556Z",
-      "last_seen_at": "2026-08-17T06:41:07.556Z"
+      "fetched_at": "2026-08-17T10:23:53.560Z",
+      "last_seen_at": "2026-08-17T10:23:53.560Z",
+      "amenities": [
+        "wifi"
+      ],
+      "lat": -24.68,
+      "lng": 25.888,
+      "geo_precision": "area"
     },
     {
       "id": "auto-ezilet-26772143312-rich-minds-student-accommodation",
@@ -237,13 +2010,24 @@
       "custom_university_name": null,
       "source_label": "Ezilet student accommodation",
       "source_url": "https://ezilet.net/listing/rich-minds-student-accommodation/",
+      "detail_url": null,
       "photo_urls": [
-        "/data/web-rental-photos/auto-ezilet-26772143312-rich-minds-student-accommodation-0.jpg"
+        "/data/web-rental-photos/auto-ezilet-26772143312-rich-minds-student-accommodation-0.jpg",
+        "/data/web-rental-photos/auto-ezilet-26772143312-rich-minds-student-accommodation-1.png",
+        "/data/web-rental-photos/auto-ezilet-26772143312-rich-minds-student-accommodation-2.jpg"
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-17T06:41:08.922Z",
-      "last_seen_at": "2026-08-17T06:41:08.922Z"
+      "fetched_at": "2026-08-17T10:23:54.933Z",
+      "last_seen_at": "2026-08-17T10:23:54.933Z",
+      "amenities": [
+        "wifi",
+        "parking",
+        "laundry"
+      ],
+      "lat": -24.6486,
+      "lng": 25.8964,
+      "geo_precision": "area"
     },
     {
       "id": "auto-ezilet-26772809597-tt-student-house-accommodation",
@@ -259,16 +2043,25 @@
       "whatsapp_number": "26772809597",
       "contact_name": "Ezilet listing",
       "campus_ids": [],
-      "custom_university_name": "University of Botswana ? Francistown Campus",
+      "custom_university_name": "University of Botswana — Francistown Campus",
       "source_label": "Ezilet student accommodation",
       "source_url": "https://ezilet.net/listing/tt-student-house-accommodation/",
+      "detail_url": null,
       "photo_urls": [
-        "/data/web-rental-photos/auto-ezilet-26772809597-tt-student-house-accommodation-0.jpg"
+        "/data/web-rental-photos/auto-ezilet-26772809597-tt-student-house-accommodation-0.jpg",
+        "/data/web-rental-photos/auto-ezilet-26772809597-tt-student-house-accommodation-1.png",
+        "/data/web-rental-photos/auto-ezilet-26772809597-tt-student-house-accommodation-2.jpg"
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-17T06:41:10.136Z",
-      "last_seen_at": "2026-08-17T06:41:10.136Z"
+      "fetched_at": "2026-08-17T10:23:56.364Z",
+      "last_seen_at": "2026-08-17T10:23:56.364Z",
+      "amenities": [
+        "wifi"
+      ],
+      "lat": -24.635,
+      "lng": 25.945,
+      "geo_precision": "area"
     },
     {
       "id": "auto-ezilet-26774104414-leru-boarding-house",
@@ -284,22 +2077,34 @@
       "whatsapp_number": "26774104414",
       "contact_name": "Ezilet listing",
       "campus_ids": [],
-      "custom_university_name": "University of Botswana ? Francistown Campus",
+      "custom_university_name": "University of Botswana — Francistown Campus",
       "source_label": "Ezilet student accommodation",
       "source_url": "https://ezilet.net/listing/leru-boarding-house/",
+      "detail_url": null,
       "photo_urls": [
-        "/data/web-rental-photos/auto-ezilet-26774104414-leru-boarding-house-0.jpg"
+        "/data/web-rental-photos/auto-ezilet-26774104414-leru-boarding-house-0.jpg",
+        "/data/web-rental-photos/auto-ezilet-26774104414-leru-boarding-house-1.png",
+        "/data/web-rental-photos/auto-ezilet-26774104414-leru-boarding-house-2.jpg"
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-17T06:41:19.418Z",
-      "last_seen_at": "2026-08-17T06:41:19.418Z"
+      "fetched_at": "2026-08-17T10:24:06.860Z",
+      "last_seen_at": "2026-08-17T10:24:06.860Z",
+      "amenities": [
+        "wifi",
+        "parking",
+        "laundry"
+      ],
+      "lat": -21.17,
+      "lng": 27.5075,
+      "geo_precision": "area"
     },
     {
       "id": "auto-tswana-26773950399-2-bed-in-gabane-multires-rent-1725",
       "title": "Student-friendly rental — 2 BED IN GABANE MULTIRES RENT 1725",
-      "description": "2 BED IN GABANE MULTIRES RENT 1725 - Find Real Estate in Botswana About WordPress About WordPress Get Involved WordPress.org Documentation Learn WordPress Support Feedback TswanaHome Dashboard Plugins Themes Widgets Menus Customize Theme Options 9 9 updates available 153 153 Comments in moderation New Post Media Page F",
+      "description": "2 BED IN GABANE MULTIRES RENT 1725 - Find Real Estate in Botswana About WordPress About WordPress Get Involved WordPress.org Documentation Learn WordPress Support Feedback TswanaHome Dashboard Plugins Themes Widgets Menus Customize Theme Options 9 9 updates available 153 153 Comments in moderation New Post Media Page Floating Element Template Property Agency Agent Testimonial Partner Review User E",
       "price": 3000,
+      "price_on_request": false,
       "room_type": "sharing",
       "gender_preference": "any",
       "area": "Block 10",
@@ -308,1218 +2113,30 @@
       "whatsapp_number": "26773950399",
       "contact_name": "TswanaHome listing",
       "campus_ids": [],
-      "custom_university_name": "University of Botswana ? Francistown Campus",
+      "custom_university_name": "University of Botswana — Francistown Campus",
       "source_label": "TswanaHome for rent",
       "source_url": "https://www.tswanahome.com/property/2-bed-in-gabane-multires-rent-1725/",
+      "detail_url": null,
       "photo_urls": [
         "/data/web-rental-photos/auto-tswana-26773950399-2-bed-in-gabane-multires-rent-1725-0.jpg",
         "/data/web-rental-photos/auto-tswana-26773950399-2-bed-in-gabane-multires-rent-1725-1.jpg",
         "/data/web-rental-photos/auto-tswana-26773950399-2-bed-in-gabane-multires-rent-1725-2.jpg",
-        "/data/web-rental-photos/auto-tswana-26773950399-2-bed-in-gabane-multires-rent-1725-3.jpg"
+        "/data/web-rental-photos/auto-tswana-26773950399-2-bed-in-gabane-multires-rent-1725-3.jpg",
+        "/data/web-rental-photos/auto-tswana-26773950399-2-bed-in-gabane-multires-rent-1725-4.jpg",
+        "/data/web-rental-photos/auto-tswana-26773950399-2-bed-in-gabane-multires-rent-1725-5.jpg",
+        "/data/web-rental-photos/auto-tswana-26773950399-2-bed-in-gabane-multires-rent-1725-6.jpg",
+        "/data/web-rental-photos/auto-tswana-26773950399-2-bed-in-gabane-multires-rent-1725-7.jpg"
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-17T06:41:21.961Z",
-      "last_seen_at": "2026-08-17T06:41:21.961Z"
-    },
-    {
-      "id": "auto-26772900189-a-room-available-for-rent-in-a-4-beds-to",
-      "title": "A room available for rent in a 4 beds to",
-      "description": "Including bills P1700 (P700 security)72900189",
-      "price": 1700,
-      "room_type": "sharing",
-      "gender_preference": "any",
-      "area": "Gaborone",
-      "city": "Gaborone",
-      "address": "Kweneng, Botswana | 03 July, 2026",
-      "whatsapp_number": "26772900189",
-      "contact_name": "Diana",
-      "campus_ids": [
-        1
-      ],
-      "custom_university_name": null,
-      "source_label": "ZimCompass house share",
-      "source_url": "https://bw.zimcompass.com/product?id=111137",
-      "photo_urls": [
-        "/data/web-rental-photos/auto-26772900189-a-room-available-for-rent-in-a-4-beds-to-0.jpg"
-      ],
-      "deposit_pula": null,
-      "utilities_included": "included",
-      "fetched_at": "2026-08-15T06:27:44.562Z",
-      "last_seen_at": "2026-08-15T06:27:48.291Z"
-    },
-    {
-      "id": "auto-26772417037-a-room-for-rent-in-a-2-and-half-to",
-      "title": "A room for rent in a 2 and half to",
-      "description": "A room in a 2 n half to share 72417037",
-      "price": 1300,
-      "room_type": "sharing",
-      "gender_preference": "any",
-      "area": "Gaborone",
-      "city": "Gaborone",
-      "address": "Kweneng, Botswana | 11 June, 2026",
-      "whatsapp_number": "26772417037",
-      "contact_name": "Diana",
-      "campus_ids": [
-        1
-      ],
-      "custom_university_name": null,
-      "source_label": "ZimCompass house share",
-      "source_url": "https://bw.zimcompass.com/product?id=109076",
-      "photo_urls": [
-        "/data/web-rental-photos/auto-26772417037-a-room-for-rent-in-a-2-and-half-to-0.jpg"
-      ],
-      "deposit_pula": null,
-      "utilities_included": null,
-      "fetched_at": "2026-08-15T06:27:44.563Z",
-      "last_seen_at": "2026-08-15T06:27:48.291Z"
-    },
-    {
-      "id": "auto-26771746344-house-to-share",
-      "title": "House to share",
-      "description": "A room to be shared in a 3 bedroom house by Ledumadumane pula spar . Rent P1330 including water and electricity. Deposit P1100. Call or WhatsApp 71746344. Looking for a See more",
-      "price": 1330,
-      "room_type": "sharing",
-      "gender_preference": "any",
-      "area": "Ledumadumane",
-      "city": "Gaborone",
-      "address": "Botswana | 10 November, 2025",
-      "whatsapp_number": "26771746344",
-      "contact_name": "Carelink",
-      "campus_ids": [
-        8,
-        1
-      ],
-      "custom_university_name": null,
-      "source_label": "ZimCompass house share",
-      "source_url": "https://bw.zimcompass.com/product?id=95818",
-      "photo_urls": [],
-      "deposit_pula": null,
-      "utilities_included": "included",
-      "fetched_at": "2026-08-15T06:27:44.564Z",
-      "last_seen_at": "2026-08-15T06:27:48.291Z"
-    },
-    {
-      "id": "auto-26776001754-1-room-in-a-3-beds-to-share",
-      "title": "1 room in a 3 beds to share.",
-      "description": "room available in 3 beds bhc house at New Canada, walled, air con but not fitted P1500. Available on the 1st of October. Call 76001754.",
-      "price": 1500,
-      "room_type": "sharing",
-      "gender_preference": "any",
-      "area": "New Canada",
-      "city": "Gaborone",
-      "address": "Gaborone | 06 October, 2025",
-      "whatsapp_number": "26776001754",
-      "contact_name": "Boineelo",
-      "campus_ids": [
-        1
-      ],
-      "custom_university_name": null,
-      "source_label": "ZimCompass house share",
-      "source_url": "https://bw.zimcompass.com/product?id=93594",
-      "photo_urls": [
-        "/data/web-rental-photos/auto-26776001754-1-room-in-a-3-beds-to-share-0.jpg"
-      ],
-      "deposit_pula": null,
-      "utilities_included": null,
-      "fetched_at": "2026-08-15T06:27:44.565Z",
-      "last_seen_at": "2026-08-15T06:27:48.291Z"
-    },
-    {
-      "id": "auto-26773458500-house-to-share-p1600-block-8-gaborone",
-      "title": "House to share P1600 Block 8 Gaborone",
-      "description": "Air-conditioned room available in a 3 bedroom house. Tiled and fitted. Yard paved, electric fence. Fitted kitchen, geyser, shower and bathtub. Rent P1600 plus P750 security. Call 73458500",
-      "price": 1600,
-      "room_type": "sharing",
-      "gender_preference": "any",
-      "area": "Gaborone",
-      "city": "Gaborone",
-      "address": "Gaborone | 30 September, 2025",
-      "whatsapp_number": "26773458500",
-      "contact_name": "Mpho",
-      "campus_ids": [
-        1
-      ],
-      "custom_university_name": null,
-      "source_label": "ZimCompass house share",
-      "source_url": "https://bw.zimcompass.com/product?id=93399",
-      "photo_urls": [
-        "/data/web-rental-photos/auto-26773458500-house-to-share-p1600-block-8-gaborone-0.jpg"
-      ],
-      "deposit_pula": null,
-      "utilities_included": null,
-      "fetched_at": "2026-08-15T06:27:44.565Z",
-      "last_seen_at": "2026-08-15T06:27:48.291Z"
-    },
-    {
-      "id": "auto-26776325612-room-to-share-in-bontleng-malema",
-      "title": "Room to share in Bontleng Malema",
-      "description": "Your share is 600 and security is equivalent but payable in 2-3months. 76325612 call or Whatsapp me. Walkable to BAC",
-      "price": 600,
-      "room_type": "sharing",
-      "gender_preference": "any",
-      "area": "Gaborone",
-      "city": "Gaborone",
-      "address": "Gaborone | 28 April, 2025",
-      "whatsapp_number": "26776325612",
-      "contact_name": "Tlamelo",
-      "campus_ids": [
-        9,
-        1
-      ],
-      "custom_university_name": null,
-      "source_label": "ZimCompass house share",
-      "source_url": "https://bw.zimcompass.com/product?id=88406",
-      "photo_urls": [],
-      "deposit_pula": null,
-      "utilities_included": null,
-      "fetched_at": "2026-08-15T06:27:44.566Z",
-      "last_seen_at": "2026-08-15T06:27:48.291Z"
-    },
-    {
-      "id": "auto-26774247384-house-mate-needed",
-      "title": "House mate needed",
-      "description": "2 bedroom apartment to share in Mogoditshane by Tsabong robots Your share is P1750 &#x2B; equivalent securityTo move in Jan endContact 74247384",
-      "price": 1750,
-      "room_type": "sharing",
-      "gender_preference": "any",
-      "area": "Mogoditshane",
-      "city": "Gaborone",
-      "address": "Gaborone | 05 January, 2025",
-      "whatsapp_number": "26774247384",
-      "contact_name": "Kristie",
-      "campus_ids": [
-        1
-      ],
-      "custom_university_name": null,
-      "source_label": "ZimCompass house share",
-      "source_url": "https://bw.zimcompass.com/product?id=83873",
-      "photo_urls": [
-        "/data/web-rental-photos/auto-26774247384-house-mate-needed-0.jpg"
-      ],
-      "deposit_pula": null,
-      "utilities_included": null,
-      "fetched_at": "2026-08-15T06:27:44.566Z",
-      "last_seen_at": "2026-08-15T06:27:48.291Z"
-    },
-    {
-      "id": "auto-26776968183-beds",
-      "title": "Student room share — block 9",
-      "description": "2 beds available Tsolamosese Mogoditshane blk4..fitted and multires, motorised Gates, paved yard and electric fence p3500 plus security. &#xA; Finders fee P250&#xA; Call 76968183 for pics and viewing A room to share with a female in a 2 beds that goes for P3k available in Tlokweng , Letlapeng each paying P1500 plus equivalent security each. It&#x27;s fitted with electric fence. P200 finders fee.&#xA; Call 76968183 for pics and vewing A room in a three beds in Gaborone block 9 available at P1500 rent plus security... More",
-      "price": 3500,
-      "room_type": "sharing",
-      "gender_preference": "any",
-      "area": "block 9",
-      "city": "Gaborone",
-      "address": "Botswana | 06 October, 2024",
-      "whatsapp_number": "26776968183",
-      "contact_name": "Malcolm",
-      "campus_ids": [
-        10,
-        1
-      ],
-      "custom_university_name": null,
-      "source_label": "ZimCompass house share",
-      "source_url": "https://bw.zimcompass.com/product?id=81263",
-      "photo_urls": [],
-      "deposit_pula": null,
-      "utilities_included": null,
-      "fetched_at": "2026-08-15T06:27:44.566Z",
-      "last_seen_at": "2026-08-15T06:27:48.291Z"
-    },
-    {
-      "id": "auto-26776104760-rooms-to-rent",
-      "title": "Rooms to Rent",
-      "description": "Servant&#x27;s quarters available, Broadhurst ext 27, near kbl brewery and park 27, rooms are P1,300 that includes water and power, call watsapp for viewing 76104760 (if you want to share with partner or friend a further P400 would be required for utilities) Master bedroom in main house also available, large room with fitted wardrobes, P1,800 that includes water and power, deposit required equivalent to one month&#x27;s rent, call 76104760 for viewing",
-      "price": 1300,
-      "room_type": "single",
-      "gender_preference": "any",
-      "area": "Broadhurst ext 27",
-      "city": "Gaborone",
-      "address": "Gaborone | 20 August, 2024",
-      "whatsapp_number": "26776104760",
-      "contact_name": "Svitsai",
-      "campus_ids": [
-        1
-      ],
-      "custom_university_name": null,
-      "source_label": "ZimCompass house share",
-      "source_url": "https://bw.zimcompass.com/product?id=76143",
-      "photo_urls": [
-        "/data/web-rental-photos/auto-26776104760-rooms-to-rent-0.jpg"
-      ],
-      "deposit_pula": null,
-      "utilities_included": null,
-      "fetched_at": "2026-08-15T06:27:44.567Z",
-      "last_seen_at": "2026-08-15T06:27:48.291Z"
-    },
-    {
-      "id": "auto-26774215618-room-to-rent-gabane",
-      "title": "Room to rent Gabane",
-      "description": "2 bedroom house to share in a safe, spacious & secure yard in Gabane. Spare room is very spacious...free wardrobe & curtains. Strictly needs a single person...no families. Also close to Gabane routes 1 & 3. Your share shall be P900. We will share kitchen & bathroom...hot water available, geyser is working. Call/app on 74215618.",
-      "price": 900,
-      "room_type": "single",
-      "gender_preference": "any",
-      "area": "Mogoditshane",
-      "city": "Gabane",
-      "address": "Mogoditshane | 12 July, 2024",
-      "whatsapp_number": "26774215618",
-      "contact_name": "Car",
-      "campus_ids": [],
-      "custom_university_name": null,
-      "source_label": "ZimCompass house share",
-      "source_url": "https://bw.zimcompass.com/product?id=71237",
-      "photo_urls": [
-        "/data/web-rental-photos/auto-26774215618-room-to-rent-gabane-0.jpg"
-      ],
-      "deposit_pula": null,
-      "utilities_included": null,
-      "fetched_at": "2026-08-15T06:27:44.567Z",
-      "last_seen_at": "2026-08-15T06:27:48.291Z"
-    },
-    {
-      "id": "auto-26771557655-room-for-rent-in-block-5",
-      "title": "Room for rent in block 5",
-      "description": "Looking for an individual or students( either two females or males) to share a room in Block 5. Room has two single beds available. Rental P1400. Finders fee P300. Call 71557655/74819458",
-      "price": 1400,
-      "room_type": "single",
-      "gender_preference": "any",
-      "area": "Block 5",
-      "city": "Gaborone",
-      "address": "Gaborone | 29 June, 2024",
-      "whatsapp_number": "26771557655",
-      "contact_name": "Botswana",
-      "campus_ids": [
-        1
-      ],
-      "custom_university_name": null,
-      "source_label": "ZimCompass house share",
-      "source_url": "https://bw.zimcompass.com/product?id=69505",
-      "photo_urls": [
-        "/data/web-rental-photos/auto-26771557655-room-for-rent-in-block-5-0.jpg"
-      ],
-      "deposit_pula": null,
-      "utilities_included": null,
-      "fetched_at": "2026-08-15T06:27:44.567Z",
-      "last_seen_at": "2026-08-15T06:27:48.292Z"
-    },
-    {
-      "id": "auto-26774517254-house-to-share",
-      "title": "House to Share",
-      "description": "Looking for someone to share a 3 bed room house in thito side ya tawana primary not far from main road We share fitted open kitchen and bathroom House is fitted, celling, tiles hot water I don&#x27;t mind anyone I spend 3 month in the bush so you will be alone most of the time The house is 3k Your share is 1.5 Plus P500 security Come fr viewing anytime 72 745 765 orange 74517254 mascom",
-      "price": 3000,
-      "room_type": "sharing",
-      "gender_preference": "any",
-      "area": "thito",
-      "city": "Gaborone",
-      "address": "Maun, Botswana | 29 May, 2024",
-      "whatsapp_number": "26774517254",
-      "contact_name": "Christopher",
-      "campus_ids": [
-        1
-      ],
-      "custom_university_name": null,
-      "source_label": "ZimCompass house share",
-      "source_url": "https://bw.zimcompass.com/product?id=65767",
-      "photo_urls": [
-        "/data/web-rental-photos/auto-26774517254-house-to-share-0.jpg"
-      ],
-      "deposit_pula": null,
-      "utilities_included": null,
-      "fetched_at": "2026-08-15T06:27:44.567Z",
-      "last_seen_at": "2026-08-15T06:27:48.292Z"
-    },
-    {
-      "id": "auto-26771557655-room-available-in-block-5-for-rent",
-      "title": "Room available in block 5 for rent",
-      "description": "Looking for an individual or students( either two females or males) to share a room in Block 5. Room has two single beds available. Rental P1400. Finders fee P300. Call 71557655",
-      "price": 1400,
-      "room_type": "single",
-      "gender_preference": "any",
-      "area": "Block 5",
-      "city": "Gaborone",
-      "address": "Gaborone | 22 May, 2024",
-      "whatsapp_number": "26771557655",
-      "contact_name": "Frank",
-      "campus_ids": [
-        1
-      ],
-      "custom_university_name": null,
-      "source_label": "ZimCompass house share",
-      "source_url": "https://bw.zimcompass.com/product?id=64678",
-      "photo_urls": [
-        "/data/web-rental-photos/auto-26771557655-room-available-in-block-5-for-rent-0.jpg"
-      ],
-      "deposit_pula": null,
-      "utilities_included": null,
-      "fetched_at": "2026-08-15T06:27:44.567Z",
-      "last_seen_at": "2026-08-15T06:27:48.292Z"
-    },
-    {
-      "id": "auto-26771817707-3-bedroom-house-to-share",
-      "title": "3 bedroom house to share",
-      "description": "3 bedroom house to share in gabane near gabane primary 2 mins walk to gabane route 3, fitted kitchen and wall wardrobe, boundary wall with electric fence and motorized gate. P1000 per room the house will be available from 1st of June for viewing contact me on 71817707.",
-      "price": 1000,
-      "room_type": "sharing",
-      "gender_preference": "any",
-      "area": "Gabane",
-      "city": "Gabane",
-      "address": "Gabane, Kweneng, Botswana | 22 May, 2024",
-      "whatsapp_number": "26771817707",
-      "contact_name": "Hero",
-      "campus_ids": [],
-      "custom_university_name": null,
-      "source_label": "ZimCompass house share",
-      "source_url": "https://bw.zimcompass.com/product?id=64669",
-      "photo_urls": [
-        "/data/web-rental-photos/auto-26771817707-3-bedroom-house-to-share-0.jpg"
-      ],
-      "deposit_pula": null,
-      "utilities_included": null,
-      "fetched_at": "2026-08-15T06:27:44.567Z",
-      "last_seen_at": "2026-08-15T06:27:48.292Z"
-    },
-    {
-      "id": "auto-26778439391-servant-s-quarters",
-      "title": "Servant s quarters",
-      "description": "Servant&#x27;s quarters FREE Servant&#x27;s quarters available, Broadhurst ext 27, near kbl brewery and park 27, rooms are P1,300 that includes water and power, call watsapp for viewing 78439391 (if you want to share with partner or friend a further P400 would be required for utilities) Master bedroom in main house also available, large room with fitted wardrobes, P1,800 that includes water and power, fully furnished optional for additional charge, call 78439491 for viewing",
-      "price": 1300,
-      "room_type": "single",
-      "gender_preference": "any",
-      "area": "Broadhurst ext 27",
-      "city": "Gaborone",
-      "address": "Botswana | 20 May, 2024",
-      "whatsapp_number": "26778439391",
-      "contact_name": "Fearles",
-      "campus_ids": [
-        1
-      ],
-      "custom_university_name": null,
-      "source_label": "ZimCompass house share",
-      "source_url": "https://bw.zimcompass.com/product?id=64346",
-      "photo_urls": [],
-      "deposit_pula": null,
-      "utilities_included": null,
-      "fetched_at": "2026-08-15T06:27:44.568Z",
-      "last_seen_at": "2026-08-15T06:27:48.292Z"
-    },
-    {
-      "id": "auto-26778439391-rooms-to-rent",
-      "title": "Rooms to Rent",
-      "description": "Servant&#x27;s quarters available, Broadhurst ext 27, near kbl brewery and park 27, rooms are P1,300 that includes water and power, call watsapp for viewing 78439391 (if you want to share with partner or friend a further P400 would be required for utilities) Master bedroom in main house also available, large room with fitted wardrobes, P1,800 that includes water and power, fully furnished optional for additional charge, call 78439491 for viewing",
-      "price": 1300,
-      "room_type": "single",
-      "gender_preference": "any",
-      "area": "Broadhurst ext 27",
-      "city": "Gaborone",
-      "address": "Broadhust Ext 27, Gaborone | 20 May, 2024",
-      "whatsapp_number": "26778439391",
-      "contact_name": "Rancho",
-      "campus_ids": [
-        1
-      ],
-      "custom_university_name": null,
-      "source_label": "ZimCompass house share",
-      "source_url": "https://bw.zimcompass.com/product?id=64299",
-      "photo_urls": [
-        "/data/web-rental-photos/auto-26778439391-rooms-to-rent-0.jpg"
-      ],
-      "deposit_pula": null,
-      "utilities_included": null,
-      "fetched_at": "2026-08-15T06:27:44.568Z",
-      "last_seen_at": "2026-08-15T06:27:48.292Z"
-    },
-    {
-      "id": "auto-26778439391-rooms-for-rent",
-      "title": "Rooms for rent",
-      "description": "Servant&#x27;s quarters available, Broadhurst ext 27, near kbl brewery and park 27, rooms are P1,300 that includes water and power, call watsapp for viewing 78439391 (if you want to share with partner or friend a further P400 would be required for utilities)",
-      "price": 1300,
-      "room_type": "single",
-      "gender_preference": "any",
-      "area": "Broadhurst ext 27",
-      "city": "Gaborone",
-      "address": "Gaborone | 19 May, 2024",
-      "whatsapp_number": "26778439391",
-      "contact_name": "Matipa",
-      "campus_ids": [
-        1
-      ],
-      "custom_university_name": null,
-      "source_label": "ZimCompass house share",
-      "source_url": "https://bw.zimcompass.com/product?id=64035",
-      "photo_urls": [],
-      "deposit_pula": null,
-      "utilities_included": null,
-      "fetched_at": "2026-08-15T06:27:44.568Z",
-      "last_seen_at": "2026-08-15T06:27:48.292Z"
-    },
-    {
-      "id": "auto-26772862253-am-looking-for-someone-who-can-share-wit",
-      "title": "Am looking for someone who can share with me",
-      "description": "Looking for a housemate to share stand alone fitted 2 beds in Mogoditshane block 9. The whole house is 2700 your share is 1350 plus security 1350 WhatsAap 72862253",
-      "price": 1350,
-      "room_type": "sharing",
-      "gender_preference": "any",
-      "area": "block 9",
-      "city": "Gaborone",
-      "address": "Gaborone | 28 February, 2024",
-      "whatsapp_number": "26772862253",
-      "contact_name": "Plots,houses",
-      "campus_ids": [
-        1
-      ],
-      "custom_university_name": null,
-      "source_label": "ZimCompass house share",
-      "source_url": "https://bw.zimcompass.com/product?id=51241",
-      "photo_urls": [],
-      "deposit_pula": 1350,
-      "utilities_included": null,
-      "fetched_at": "2026-08-15T06:27:45.416Z",
-      "last_seen_at": "2026-08-15T06:27:45.416Z"
-    },
-    {
-      "id": "auto-26775072260-need-house-to-rent",
-      "title": "Need house to rent",
-      "description": "I need a house budget 1500,or less location, broadhurst, Tsholofelo east, block 3,or block 8.,i don&#x27;t mind to share 75072260 orange, 1st march",
-      "price": 1500,
-      "room_type": "sharing",
-      "gender_preference": "any",
-      "area": "block 3",
-      "city": "Gaborone",
-      "address": "Gaborone, Botswana | 19 February, 2024",
-      "whatsapp_number": "26775072260",
-      "contact_name": "Botswana",
-      "campus_ids": [
-        1
-      ],
-      "custom_university_name": null,
-      "source_label": "ZimCompass house share",
-      "source_url": "https://bw.zimcompass.com/product?id=49899",
-      "photo_urls": [],
-      "deposit_pula": null,
-      "utilities_included": null,
-      "fetched_at": "2026-08-15T06:27:45.416Z",
-      "last_seen_at": "2026-08-15T06:27:45.416Z"
-    },
-    {
-      "id": "auto-26775671270-3-bedroom-house-with-a-room-to-share",
-      "title": "3 bedroom house with a room to share",
-      "description": "Accommodation available P1100 in Mmopane near senior stop. Whatsup 75671270",
-      "price": 1100,
-      "room_type": "sharing",
-      "gender_preference": "any",
-      "area": "Gaborone",
-      "city": "Gaborone",
-      "address": "Molepolole | 30 January, 2024",
-      "whatsapp_number": "26775671270",
-      "contact_name": "TswanaHome",
-      "campus_ids": [
-        1
-      ],
-      "custom_university_name": null,
-      "source_label": "ZimCompass house share",
-      "source_url": "https://bw.zimcompass.com/product?id=46470",
-      "photo_urls": [
-        "/data/web-rental-photos/auto-26775671270-3-bedroom-house-with-a-room-to-share-0.jpg"
-      ],
-      "deposit_pula": null,
-      "utilities_included": null,
-      "fetched_at": "2026-08-15T06:27:45.416Z",
-      "last_seen_at": "2026-08-15T06:27:45.416Z"
-    },
-    {
-      "id": "auto-26772463662-time-project-house-to-share-in-block-6-i",
-      "title": "Time Project house to share in block 6. its a",
-      "description": "Time Project house to share in block 6. its a 3 bedroomed house ,nice security. your share is 1500 inclusive of bills. for details please contact 72463662",
-      "price": 1500,
-      "room_type": "sharing",
-      "gender_preference": "any",
-      "area": "block 6",
-      "city": "Gaborone",
-      "address": "Gaborone, Botswana | 11 January, 2024",
-      "whatsapp_number": "26772463662",
-      "contact_name": "Botswana",
-      "campus_ids": [
-        1
-      ],
-      "custom_university_name": null,
-      "source_label": "ZimCompass house share",
-      "source_url": "https://bw.zimcompass.com/product?id=43148",
-      "photo_urls": [],
-      "deposit_pula": null,
-      "utilities_included": null,
-      "fetched_at": "2026-08-15T06:27:45.417Z",
-      "last_seen_at": "2026-08-15T06:27:45.417Z"
-    },
-    {
-      "id": "auto-26772237516-two-bedroom-house-looking-gor-someone-to",
-      "title": "Two bedroom house looking gor someone to share",
-      "description": "Two bedroom house open plan kitchen fitted and both bedrooms fitted wardrobes and airconditions.Burglar doors in both sitting room and kitchen. In a secure and spacious multi res with dura wall,electric fence and motor gate. Price P1375 including water bill plus P1250 security. Location Mogoditshane block5 Contacts 72237516",
-      "price": 1375,
-      "room_type": "sharing",
-      "gender_preference": "any",
-      "area": "block5",
-      "city": "Gaborone",
-      "address": "Mogoditshane | 04 December, 2023",
-      "whatsapp_number": "26772237516",
-      "contact_name": "Disang",
-      "campus_ids": [
-        1
-      ],
-      "custom_university_name": null,
-      "source_label": "ZimCompass house share",
-      "source_url": "https://bw.zimcompass.com/product?id=37559",
-      "photo_urls": [
-        "/data/web-rental-photos/auto-26772237516-two-bedroom-house-looking-gor-someone-to-0.jpg"
-      ],
-      "deposit_pula": null,
-      "utilities_included": "included",
-      "fetched_at": "2026-08-15T06:27:45.417Z",
-      "last_seen_at": "2026-08-15T06:27:45.417Z"
-    },
-    {
-      "id": "auto-26774549287-house-to-shsre",
-      "title": "House to shsre",
-      "description": "2 bedroom house to share in Mmopane block 1 for P1200 excluding utilities. Next to the main road. Available. Phone 74549287/72264824",
-      "price": 1200,
-      "room_type": "sharing",
-      "gender_preference": "any",
-      "area": "block 1",
-      "city": "Gaborone",
-      "address": "Molepolole | 28 November, 2023",
-      "whatsapp_number": "26774549287",
-      "contact_name": "Maatla",
-      "campus_ids": [
-        1
-      ],
-      "custom_university_name": null,
-      "source_label": "ZimCompass house share",
-      "source_url": "https://bw.zimcompass.com/product?id=36544",
-      "photo_urls": [
-        "/data/web-rental-photos/auto-26774549287-house-to-shsre-0.jpg"
-      ],
-      "deposit_pula": null,
-      "utilities_included": null,
-      "fetched_at": "2026-08-15T06:27:45.417Z",
-      "last_seen_at": "2026-08-15T06:27:45.417Z"
-    },
-    {
-      "id": "auto-26775362884-house-to-share",
-      "title": "House to share",
-      "description": "A room in a 2nd half available for rent in Mogoditshane block 7!5 minutes walk to Mogoditshane route 7 combies!!We share bathroom and kitchen.Very spacious rooms, has ceiling and tiled!The yard is paved.No landlord!!Your share is P1050 plus P500 security.. Call/App 75362884",
-      "price": 1050,
-      "room_type": "sharing",
-      "gender_preference": "any",
-      "area": "block 7",
-      "city": "Gaborone",
-      "address": "Gaborone | 23 November, 2023",
-      "whatsapp_number": "26775362884",
-      "contact_name": "La&#x27;funkie",
-      "campus_ids": [
-        3,
-        4,
-        1
-      ],
-      "custom_university_name": null,
-      "source_label": "ZimCompass house share",
-      "source_url": "https://bw.zimcompass.com/product?id=35739",
-      "photo_urls": [
-        "/data/web-rental-photos/auto-26775362884-house-to-share-0.jpg"
-      ],
-      "deposit_pula": null,
-      "utilities_included": null,
-      "fetched_at": "2026-08-15T06:27:45.417Z",
-      "last_seen_at": "2026-08-15T06:27:45.417Z"
-    },
-    {
-      "id": "auto-26775920949-house-for-rent",
-      "title": "House for rent",
-      "description": "1 room to share in 2 beds available in Tsholofelo by yellow tuckshop. Your share P1400 Security 500 Call or app 75920949/72806992 Fee 100 See Translation",
-      "price": 1400,
-      "room_type": "sharing",
-      "gender_preference": "any",
-      "area": "Gaborone",
-      "city": "Gaborone",
-      "address": "Gaborone West Ext 8, Gaborone | 02 November, 2023",
-      "whatsapp_number": "26775920949",
-      "contact_name": "Happy",
-      "campus_ids": [
-        1
-      ],
-      "custom_university_name": null,
-      "source_label": "ZimCompass house share",
-      "source_url": "https://bw.zimcompass.com/product?id=33263",
-      "photo_urls": [],
-      "deposit_pula": 500,
-      "utilities_included": null,
-      "fetched_at": "2026-08-15T06:27:45.417Z",
-      "last_seen_at": "2026-08-15T06:27:45.417Z"
-    },
-    {
-      "id": "auto-26774250032-three-bedroomed-house-to-share-in-block",
-      "title": "Three bedroomed house to share in Block 5 Francistown...call 74250032",
-      "description": "Three bedroomed house to share in Block 5 Francistown...call: 74250032 Rent: P 730.00 See Translation",
-      "price": 730,
-      "room_type": "sharing",
-      "gender_preference": "any",
-      "area": "Block 5",
-      "city": "Francistown",
-      "address": "Francistown | 01 November, 2023",
-      "whatsapp_number": "26774250032",
-      "contact_name": "Studley",
-      "campus_ids": [],
-      "custom_university_name": "University of Botswana ? Francistown Campus",
-      "source_label": "ZimCompass house share",
-      "source_url": "https://bw.zimcompass.com/product?id=33158",
-      "photo_urls": [],
-      "deposit_pula": null,
-      "utilities_included": null,
-      "fetched_at": "2026-08-15T06:27:45.417Z",
-      "last_seen_at": "2026-08-15T06:27:45.417Z"
-    },
-    {
-      "id": "auto-26778060149-house-to-share",
-      "title": "House to share",
-      "description": "House to share 2 rooms available in tloaneng app me 78060149",
-      "price": 750,
-      "room_type": "sharing",
-      "gender_preference": "any",
-      "area": "Gaborone",
-      "city": "Gaborone",
-      "address": "Gaborone | 30 September, 2023",
-      "whatsapp_number": "26778060149",
-      "contact_name": "Gomolemo",
-      "campus_ids": [
-        1
-      ],
-      "custom_university_name": null,
-      "source_label": "ZimCompass house share",
-      "source_url": "https://bw.zimcompass.com/product?id=29471",
-      "photo_urls": [
-        "/data/web-rental-photos/auto-26778060149-house-to-share-0.jpg"
-      ],
-      "deposit_pula": null,
-      "utilities_included": null,
-      "fetched_at": "2026-08-15T06:27:45.417Z",
-      "last_seen_at": "2026-08-15T06:27:45.417Z"
-    },
-    {
-      "id": "auto-26772354971-house-to-share",
-      "title": "House to share",
-      "description": "A room to rent in a house to share. Phase 4, walking distance to game city. Fitted room, paved yard, screen wall, motorized gate. Rent is 1800 per month plus equivalent security. Call or app 72354971.",
-      "price": 1800,
-      "room_type": "sharing",
-      "gender_preference": "any",
-      "area": "Phase 4",
-      "city": "Gaborone",
-      "address": "Gaborone, Botswana | 30 July, 2023",
-      "whatsapp_number": "26772354971",
-      "contact_name": "Bush",
-      "campus_ids": [
-        1
-      ],
-      "custom_university_name": null,
-      "source_label": "ZimCompass house share",
-      "source_url": "https://bw.zimcompass.com/product?id=22908",
-      "photo_urls": [],
-      "deposit_pula": null,
-      "utilities_included": null,
-      "fetched_at": "2026-08-15T06:27:45.417Z",
-      "last_seen_at": "2026-08-15T06:27:45.417Z"
-    },
-    {
-      "id": "auto-26775085701-room-for-rent-in-3-beds-in-bew-naledi-1",
-      "title": "Room for rent in 3 beds in Bew Naledi 1.5",
-      "description": "Room with fitted wardrobe available in a 3 beds to share. Looking for a female room mate. Security payable in 2 installments Available immediately 75085701",
-      "price": 1500,
-      "room_type": "sharing",
-      "gender_preference": "any",
-      "area": "Gaborone",
-      "city": "Gaborone",
-      "address": "Gaborone, Botswana | 04 July, 2023",
-      "whatsapp_number": "26775085701",
-      "contact_name": "Tracey",
-      "campus_ids": [
-        1
-      ],
-      "custom_university_name": null,
-      "source_label": "ZimCompass house share",
-      "source_url": "https://bw.zimcompass.com/product?id=19487",
-      "photo_urls": [],
-      "deposit_pula": null,
-      "utilities_included": null,
-      "fetched_at": "2026-08-15T06:27:45.417Z",
-      "last_seen_at": "2026-08-15T06:27:45.417Z"
-    },
-    {
-      "id": "auto-26774284733-house-to-share",
-      "title": "House to share",
-      "description": "House to share near bbs available NOW. Fitted kichen (no stove), closet, geyser, screen wall, secure location, 3 minutes walk into bbs, combi access to most areas. P1700 with equivalent security, bills not included. Call/app 74284733",
-      "price": 1700,
-      "room_type": "sharing",
-      "gender_preference": "any",
-      "area": "Gaborone",
-      "city": "Gaborone",
-      "address": "Gaborone | 03 July, 2023",
-      "whatsapp_number": "26774284733",
-      "contact_name": "Mma",
-      "campus_ids": [
-        1
-      ],
-      "custom_university_name": null,
-      "source_label": "ZimCompass house share",
-      "source_url": "https://bw.zimcompass.com/product?id=19283",
-      "photo_urls": [],
-      "deposit_pula": 0,
-      "utilities_included": null,
-      "fetched_at": "2026-08-15T06:27:45.417Z",
-      "last_seen_at": "2026-08-15T06:27:45.417Z"
-    },
-    {
-      "id": "auto-26777105801-3-beds-2-baths-room-only",
-      "title": "3 Beds 2 Baths Room only",
-      "description": "Three bedroomed house to share in Gabane, Lonaka ward, next to Gabane Primary School. Your share P1000. Call 77105801 for viewing and further info.",
-      "price": 1000,
-      "room_type": "sharing",
-      "gender_preference": "any",
-      "area": "Gabane",
-      "city": "Gabane",
-      "address": "Gabane, Kweneng, Botswana | 22 June, 2023",
-      "whatsapp_number": "26777105801",
-      "contact_name": "Stanley",
-      "campus_ids": [],
-      "custom_university_name": null,
-      "source_label": "ZimCompass house share",
-      "source_url": "https://bw.zimcompass.com/product?id=17402",
-      "photo_urls": [
-        "/data/web-rental-photos/auto-26777105801-3-beds-2-baths-room-only-0.jpg"
-      ],
-      "deposit_pula": null,
-      "utilities_included": null,
-      "fetched_at": "2026-08-15T06:27:45.444Z",
-      "last_seen_at": "2026-08-15T06:27:45.444Z"
-    },
-    {
-      "id": "auto-26774235150-a-room-in-2beds",
-      "title": "A room in 2beds",
-      "description": "A big room in a 2beds, near Mogoditshane Clinic, to share kitchen and bathroom. Room is not fitted. Walled with electric gate. P1400 with equal amount of security which can be paid in 2months. Call 74235150/ 74380900",
-      "price": 1400,
-      "room_type": "sharing",
-      "gender_preference": "any",
-      "area": "Mogoditshane",
-      "city": "Gaborone",
-      "address": "Mogoditshane | 20 June, 2023",
-      "whatsapp_number": "26774235150",
-      "contact_name": "Lionel",
-      "campus_ids": [
-        1
-      ],
-      "custom_university_name": null,
-      "source_label": "ZimCompass house share",
-      "source_url": "https://bw.zimcompass.com/product?id=17048",
-      "photo_urls": [],
-      "deposit_pula": null,
-      "utilities_included": null,
-      "fetched_at": "2026-08-15T06:27:45.444Z",
-      "last_seen_at": "2026-08-15T06:27:45.444Z"
-    },
-    {
-      "id": "auto-26772514386-gabs-phase-2-1-single-person-needed-to-s",
-      "title": "Gabs Phase 2 1 single person needed to share this",
-      "description": "Single person needed to share a 3 bedroomed house with another single person occupying 2 bedrooms at Gabs Phase 2. The house has 2 bathrooms, kitchen, lounge & carport. Your share of rental will be P1700/m &#x2B; security call 72514386.",
-      "price": 1700,
-      "room_type": "single",
-      "gender_preference": "any",
-      "area": "Phase 2",
-      "city": "Gaborone",
-      "address": "Gaborone, Botswana | 13 May, 2023",
-      "whatsapp_number": "26772514386",
-      "contact_name": "Roberto",
-      "campus_ids": [
-        1
-      ],
-      "custom_university_name": null,
-      "source_label": "ZimCompass house share",
-      "source_url": "https://bw.zimcompass.com/product?id=12519",
-      "photo_urls": [
-        "/data/web-rental-photos/auto-26772514386-gabs-phase-2-1-single-person-needed-to-s-0.jpg"
-      ],
-      "deposit_pula": null,
-      "utilities_included": null,
-      "fetched_at": "2026-08-15T06:27:45.444Z",
-      "last_seen_at": "2026-08-15T06:27:45.444Z"
-    },
-    {
-      "id": "auto-26777356852-house-to-share-available",
-      "title": "House to share available",
-      "description": "A clean and mature person wanted to share a bedroomed house in mmopane block1 behind complex...the house is fitted with aircon stove and geyser...bedrooms and kitchen also fitted... Ur share is 1500 plus equivalent security Contact 77356852",
-      "price": 1500,
-      "room_type": "sharing",
-      "gender_preference": "any",
-      "area": "block1",
-      "city": "Gaborone",
-      "address": "Mmopane block1 | 05 May, 2023",
-      "whatsapp_number": "26777356852",
-      "contact_name": "Obert",
-      "campus_ids": [
-        1
-      ],
-      "custom_university_name": null,
-      "source_label": "ZimCompass house share",
-      "source_url": "https://bw.zimcompass.com/product?id=11253",
-      "photo_urls": [
-        "/data/web-rental-photos/auto-26777356852-house-to-share-available-0.jpg"
-      ],
-      "deposit_pula": null,
-      "utilities_included": null,
-      "fetched_at": "2026-08-15T06:27:45.444Z",
-      "last_seen_at": "2026-08-15T06:27:45.444Z"
-    },
-    {
-      "id": "auto-26774793521",
-      "title": "Student room share — Francistown",
-      "description": "Ntshe, francistown, 3beds house for rent, 1 ensuite, fitted kitchen and wadropes, dinning, sitting, single garage, walled, P3500 plus equivalent security deposit call or whatsup 74793521",
-      "price": 3500,
-      "room_type": "single",
-      "gender_preference": "any",
-      "area": "Francistown",
-      "city": "Francistown",
-      "address": "Francistown, Botswana | 10 August, 2026",
-      "whatsapp_number": "26774793521",
-      "contact_name": "Thenjiwe",
-      "campus_ids": [],
-      "custom_university_name": "University of Botswana ? Francistown Campus",
-      "source_label": "ZimCompass houses for rent",
-      "source_url": "https://bw.zimcompass.com/product?id=113970",
-      "photo_urls": [],
-      "deposit_pula": null,
-      "utilities_included": null,
-      "fetched_at": "2026-08-15T06:27:48.381Z",
-      "last_seen_at": "2026-08-15T06:27:48.381Z"
-    },
-    {
-      "id": "auto-26772237436",
-      "title": "Student room share — Francistown",
-      "description": "Room available in Extension Somerset. Loja mall sideRent P400Call 72237436",
-      "price": 400,
-      "room_type": "sharing",
-      "gender_preference": "any",
-      "area": "Francistown",
-      "city": "Francistown",
-      "address": "Francistown, Botswana | 04 August, 2026",
-      "whatsapp_number": "26772237436",
-      "contact_name": "Mba",
-      "campus_ids": [],
-      "custom_university_name": "University of Botswana ? Francistown Campus",
-      "source_label": "ZimCompass houses for rent",
-      "source_url": "https://bw.zimcompass.com/product?id=113395",
-      "photo_urls": [],
-      "deposit_pula": null,
-      "utilities_included": null,
-      "fetched_at": "2026-08-15T06:27:48.382Z",
-      "last_seen_at": "2026-08-15T06:27:48.382Z"
-    },
-    {
-      "id": "auto-26771775757",
-      "title": "Student room share — Gaborone",
-      "description": "Two bedroom apartment for rent In Gaborone North P5500pmCall 71775757-77632791Ready for occupation",
-      "price": 5500,
-      "room_type": "sharing",
-      "gender_preference": "any",
-      "area": "Gaborone",
-      "city": "Gaborone",
-      "address": "Gaborone, Botswana | 27 March, 2026",
-      "whatsapp_number": "26771775757",
-      "contact_name": "Fridah",
-      "campus_ids": [
-        1
-      ],
-      "custom_university_name": null,
-      "source_label": "ZimCompass houses for rent",
-      "source_url": "https://bw.zimcompass.com/product?id=102775",
-      "photo_urls": [
-        "/data/web-rental-photos/auto-26771775757-0.jpg"
-      ],
-      "deposit_pula": null,
-      "utilities_included": null,
-      "fetched_at": "2026-08-15T06:27:48.382Z",
-      "last_seen_at": "2026-08-15T06:27:48.668Z"
-    },
-    {
-      "id": "auto-26774285156",
-      "title": "Student room share — Gaborone",
-      "description": "GABORONE~ HOUSES FOR RENT @74285156#Gothic~Ethics#House~PortalsAN EXCLUSIVE 3BEDS BHC house for rent in Gaborone St See more",
-      "price": 4000,
-      "room_type": "sharing",
-      "gender_preference": "any",
-      "area": "Gaborone",
-      "city": "Gaborone",
-      "address": "Gaborone, Botswana | 02 August, 2026",
-      "whatsapp_number": "26774285156",
-      "contact_name": "Nathan",
-      "campus_ids": [
-        1
-      ],
-      "custom_university_name": null,
-      "source_label": "ZimCompass houses for rent",
-      "source_url": "https://bw.zimcompass.com/product?id=113184",
-      "photo_urls": [
-        "/data/web-rental-photos/auto-26774285156-0.jpg"
-      ],
-      "deposit_pula": null,
-      "utilities_included": null,
-      "fetched_at": "2026-08-15T06:27:48.382Z",
-      "last_seen_at": "2026-08-15T06:27:48.382Z"
-    },
-    {
-      "id": "auto-26776547480",
-      "title": "Student room share — Gaborone",
-      "description": "Room for rent P700clean and painted insideopposite Sekgoma Primarycall me 76547480",
-      "price": 700,
-      "room_type": "sharing",
-      "gender_preference": "any",
-      "area": "Gaborone",
-      "city": "Gaborone",
-      "address": "Maun, Botswana | 30 July, 2026",
-      "whatsapp_number": "26776547480",
-      "contact_name": "Onkamogetse",
-      "campus_ids": [
-        1
-      ],
-      "custom_university_name": null,
-      "source_label": "ZimCompass houses for rent",
-      "source_url": "https://bw.zimcompass.com/product?id=113024",
-      "photo_urls": [],
-      "deposit_pula": null,
-      "utilities_included": null,
-      "fetched_at": "2026-08-15T06:27:48.382Z",
-      "last_seen_at": "2026-08-15T06:27:48.382Z"
-    },
-    {
-      "id": "auto-26774370630",
-      "title": "Student room share — Gaborone",
-      "description": "2 Beds Fitted Apartment Tsholofelo Flats Available 1st of August 2026 at P5500.00 plus Security Deposit. 74370630",
-      "price": 5500,
-      "room_type": "sharing",
-      "gender_preference": "any",
-      "area": "Gaborone",
-      "city": "Gaborone",
-      "address": "Gaborone, Botswana | 19 July, 2026",
-      "whatsapp_number": "26774370630",
-      "contact_name": "Poster",
-      "campus_ids": [
-        1
-      ],
-      "custom_university_name": null,
-      "source_label": "ZimCompass houses for rent",
-      "source_url": "https://bw.zimcompass.com/product?id=112389",
-      "photo_urls": [
-        "/data/web-rental-photos/auto-26774370630-0.jpg"
-      ],
-      "deposit_pula": null,
-      "utilities_included": null,
-      "fetched_at": "2026-08-15T06:27:48.449Z",
-      "last_seen_at": "2026-08-15T06:27:48.449Z"
-    },
-    {
-      "id": "auto-26772575343",
-      "title": "Student room share — Francistown",
-      "description": "Room for rent P650,5mins walk to bus rank,somerset east,secure area,with hot shower and screen wall call 72575343",
-      "price": 6505,
-      "room_type": "sharing",
-      "gender_preference": "any",
-      "area": "Francistown",
-      "city": "Francistown",
-      "address": "Francistown, Botswana | 15 July, 2026",
-      "whatsapp_number": "26772575343",
-      "contact_name": "Chedza",
-      "campus_ids": [],
-      "custom_university_name": "University of Botswana ? Francistown Campus",
-      "source_label": "ZimCompass houses for rent",
-      "source_url": "https://bw.zimcompass.com/product?id=112022",
-      "photo_urls": [],
-      "deposit_pula": null,
-      "utilities_included": null,
-      "fetched_at": "2026-08-15T06:27:48.449Z",
-      "last_seen_at": "2026-08-15T06:27:48.449Z"
-    },
-    {
-      "id": "auto-26775051677",
-      "title": "Student room share — block 9",
-      "description": "2 bedroomed house available for rent on a multi residential plot in Mogoditshane block 9.fully fitted,electric fence with wall.P3200 rent and deposit .call 75051677",
-      "price": 3200,
-      "room_type": "sharing",
-      "gender_preference": "any",
-      "area": "block 9",
-      "city": "Gaborone",
-      "address": "Kweneng, Botswana | 03 July, 2026",
-      "whatsapp_number": "26775051677",
-      "contact_name": "Kgomotso",
-      "campus_ids": [
-        1
-      ],
-      "custom_university_name": null,
-      "source_label": "ZimCompass houses for rent",
-      "source_url": "https://bw.zimcompass.com/product?id=111139",
-      "photo_urls": [
-        "/data/web-rental-photos/auto-26775051677-0.jpg"
-      ],
-      "deposit_pula": null,
-      "utilities_included": null,
-      "fetched_at": "2026-08-15T06:27:48.450Z",
-      "last_seen_at": "2026-08-15T06:27:48.450Z"
-    },
-    {
-      "id": "auto-26774285156",
-      "title": "Student room share — Block 1",
-      "description": "HOUSES FOR RENT 72942349A nice fully fitted 2beds house for rent in Mmopane Block 1, kitchenette with stovez, bedrooms with closets , Partly paved, walled Motor gate, electric fence, Stunning StarlinkBy tarred road,for only P3400&#x2B;sec74285156/ 72942349 /75963264A See more",
-      "price": 3400,
-      "room_type": "sharing",
-      "gender_preference": "any",
-      "area": "Block 1",
-      "city": "Gaborone",
-      "address": "Gaborone, Botswana | 11 June, 2026",
-      "whatsapp_number": "26774285156",
-      "contact_name": "Nathan",
-      "campus_ids": [
-        1
-      ],
-      "custom_university_name": null,
-      "source_label": "ZimCompass houses for rent",
-      "source_url": "https://bw.zimcompass.com/product?id=109079",
-      "photo_urls": [
-        "/data/web-rental-photos/auto-26774285156-0.jpg"
-      ],
-      "deposit_pula": null,
-      "utilities_included": null,
-      "fetched_at": "2026-08-15T06:27:48.504Z",
-      "last_seen_at": "2026-08-15T06:27:48.505Z"
-    },
-    {
-      "id": "auto-26772417037",
-      "title": "Student room share — Gaborone",
-      "description": "A room in a 2 n half to share 72417037",
-      "price": 1300,
-      "room_type": "sharing",
-      "gender_preference": "any",
-      "area": "Gaborone",
-      "city": "Gaborone",
-      "address": "Kweneng, Botswana | 11 June, 2026",
-      "whatsapp_number": "26772417037",
-      "contact_name": "Diana",
-      "campus_ids": [
-        1
-      ],
-      "custom_university_name": null,
-      "source_label": "ZimCompass houses for rent",
-      "source_url": "https://bw.zimcompass.com/product?id=109076",
-      "photo_urls": [
-        "/data/web-rental-photos/auto-26772417037-0.jpg"
-      ],
-      "deposit_pula": null,
-      "utilities_included": null,
-      "fetched_at": "2026-08-15T06:27:48.531Z",
-      "last_seen_at": "2026-08-15T06:27:48.531Z"
-    },
-    {
-      "id": "auto-26772132179",
-      "title": "Student room share — Gaborone",
-      "description": "Bhc house Phaz2 room for rent price p1200 call 72132179 or 71284914",
-      "price": 1200,
-      "room_type": "sharing",
-      "gender_preference": "any",
-      "area": "Gaborone",
-      "city": "Gaborone",
-      "address": "Botswana | 31 May, 2026",
-      "whatsapp_number": "26772132179",
-      "contact_name": "Leonard",
-      "campus_ids": [
-        1
-      ],
-      "custom_university_name": null,
-      "source_label": "ZimCompass houses for rent",
-      "source_url": "https://bw.zimcompass.com/product?id=108475",
-      "photo_urls": [],
-      "deposit_pula": null,
-      "utilities_included": null,
-      "fetched_at": "2026-08-15T06:27:48.532Z",
-      "last_seen_at": "2026-08-15T06:27:48.532Z"
-    },
-    {
-      "id": "auto-26774365602",
-      "title": "Student room share — block 5",
-      "description": "Spacious Rooms available Room 1100 security 550 access to route 2,4,6&11 Mgoditshane block 5 app 74365602",
-      "price": 1100,
-      "room_type": "sharing",
-      "gender_preference": "any",
-      "area": "block 5",
-      "city": "Gaborone",
-      "address": "Kweneng, Botswana | 31 May, 2026",
-      "whatsapp_number": "26774365602",
-      "contact_name": "Thenjiwe",
-      "campus_ids": [
-        1
-      ],
-      "custom_university_name": null,
-      "source_label": "ZimCompass houses for rent",
-      "source_url": "https://bw.zimcompass.com/product?id=108440",
-      "photo_urls": [
-        "/data/web-rental-photos/auto-26774365602-0.jpg"
-      ],
-      "deposit_pula": 550,
-      "utilities_included": null,
-      "fetched_at": "2026-08-15T06:27:48.532Z",
-      "last_seen_at": "2026-08-15T06:27:48.532Z"
-    },
-    {
-      "id": "auto-26775555593",
-      "title": "Student room share — Francistown",
-      "description": "3 Bedroom house for rent in Gerald 25 price P2700.00 &#x2B;security P2700.00 #75555593/72669213",
-      "price": 2700,
-      "room_type": "sharing",
-      "gender_preference": "any",
-      "area": "Francistown",
-      "city": "Francistown",
-      "address": "Francistown, Botswana | 31 May, 2026",
-      "whatsapp_number": "26775555593",
-      "contact_name": "Charles",
-      "campus_ids": [],
-      "custom_university_name": "University of Botswana ? Francistown Campus",
-      "source_label": "ZimCompass houses for rent",
-      "source_url": "https://bw.zimcompass.com/product?id=108347",
-      "photo_urls": [
-        "/data/web-rental-photos/auto-26775555593-0.jpg"
-      ],
-      "deposit_pula": 2700,
-      "utilities_included": null,
-      "fetched_at": "2026-08-15T06:27:48.532Z",
-      "last_seen_at": "2026-08-15T06:27:48.532Z"
-    },
-    {
-      "id": "auto-26776242849",
-      "title": "Student room share — Block 1",
-      "description": "FOR RENT: 3 Bedroom House in Mmopane Block 1 near the Mmopane Primary School and Bokamoso Hospital RENTAL: P4500 &#x2B; Equivalent Security Deposit WHATSAPP 76242849 See more",
-      "price": 4500,
-      "room_type": "sharing",
-      "gender_preference": "any",
-      "area": "Block 1",
-      "city": "Gaborone",
-      "address": "Gaborone, Botswana | 22 May, 2026",
-      "whatsapp_number": "26776242849",
-      "contact_name": "Masego",
-      "campus_ids": [
-        1
-      ],
-      "custom_university_name": null,
-      "source_label": "ZimCompass houses for rent",
-      "source_url": "https://bw.zimcompass.com/product?id=107408",
-      "photo_urls": [
-        "/data/web-rental-photos/auto-26776242849-0.jpg"
-      ],
-      "deposit_pula": null,
-      "utilities_included": null,
-      "fetched_at": "2026-08-15T06:27:48.557Z",
-      "last_seen_at": "2026-08-15T06:27:48.557Z"
+      "fetched_at": "2026-08-17T10:24:09.761Z",
+      "last_seen_at": "2026-08-17T10:24:09.761Z",
+      "amenities": [
+        "kitchen"
+      ],
+      "lat": -24.63,
+      "lng": 25.899,
+      "geo_precision": "area"
     },
     {
       "id": "auto-26774285156",
@@ -1544,163 +2161,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-08-15T06:27:48.584Z",
-      "last_seen_at": "2026-08-15T06:27:48.584Z"
-    },
-    {
-      "id": "auto-26774285156",
-      "title": "Student room share — LEDUMADUMANE",
-      "description": "HOUSES FOR RENT74285156#Excellent~Houses Portal \"EXCLUSIVE , GOTHIC\"STUNNING 2BEDS HOUSE FOR RENT IN LEDUMADUMANE WIT See more",
-      "price": 4200,
-      "room_type": "sharing",
-      "gender_preference": "any",
-      "area": "LEDUMADUMANE",
-      "city": "Gaborone",
-      "address": "Gaborone, Botswana | 29 April, 2026",
-      "whatsapp_number": "26774285156",
-      "contact_name": "Nathan",
-      "campus_ids": [
-        8,
-        1
-      ],
-      "custom_university_name": null,
-      "source_label": "ZimCompass houses for rent",
-      "source_url": "https://bw.zimcompass.com/product?id=105507",
-      "photo_urls": [
-        "/data/web-rental-photos/auto-26774285156-0.jpg"
-      ],
-      "deposit_pula": null,
-      "utilities_included": null,
-      "fetched_at": "2026-08-15T06:27:48.585Z",
-      "last_seen_at": "2026-08-15T06:27:48.585Z"
-    },
-    {
-      "id": "auto-26778721873",
-      "title": "Student room share — block 3",
-      "description": "Hellos, am looking for a house to rent, budget P2000-P3000Phase 2, block 3, G West, Block 678721873",
-      "price": 3000,
-      "room_type": "sharing",
-      "gender_preference": "any",
-      "area": "block 3",
-      "city": "Gaborone",
-      "address": "Gaborone, Botswana | 22 April, 2026",
-      "whatsapp_number": "26778721873",
-      "contact_name": "Ebrahim",
-      "campus_ids": [
-        1
-      ],
-      "custom_university_name": null,
-      "source_label": "ZimCompass houses for rent",
-      "source_url": "https://bw.zimcompass.com/product?id=104905",
-      "photo_urls": [],
-      "deposit_pula": null,
-      "utilities_included": null,
-      "fetched_at": "2026-08-15T06:27:48.611Z",
-      "last_seen_at": "2026-08-15T06:27:48.611Z"
-    },
-    {
-      "id": "auto-26776600329",
-      "title": "Student room share — extension 11",
-      "description": "Furnished Apartment to rent per month from P6500 in extesion 9 opposite Avani hotel. P7500 in extension 11 Gaborone.App/call &#x2B;267 76600329",
-      "price": 6500,
-      "room_type": "sharing",
-      "gender_preference": "any",
-      "area": "extension 11",
-      "city": "Gaborone",
-      "address": "Gaborone, Botswana | 22 April, 2026",
-      "whatsapp_number": "26776600329",
-      "contact_name": "Mai",
-      "campus_ids": [
-        1
-      ],
-      "custom_university_name": null,
-      "source_label": "ZimCompass houses for rent",
-      "source_url": "https://bw.zimcompass.com/product?id=104802",
-      "photo_urls": [
-        "/data/web-rental-photos/auto-26776600329-0.jpg"
-      ],
-      "deposit_pula": null,
-      "utilities_included": null,
-      "fetched_at": "2026-08-15T06:27:48.611Z",
-      "last_seen_at": "2026-08-15T06:27:48.611Z"
-    },
-    {
-      "id": "auto-26774051929",
-      "title": "Student room share — Mogoditshane",
-      "description": "Mogoditshane, 100m from Route1 near Mamelodi/Mogoditshane Fighters Grounds. 2bedroomed flat in a secure multiple family property. Call 74051929/ 71791929",
-      "price": 3870,
-      "room_type": "sharing",
-      "gender_preference": "any",
-      "area": "Mogoditshane",
-      "city": "Gaborone",
-      "address": "Kweneng, Botswana | 10 April, 2026",
-      "whatsapp_number": "26774051929",
-      "contact_name": "Sovereign",
-      "campus_ids": [
-        1
-      ],
-      "custom_university_name": null,
-      "source_label": "ZimCompass houses for rent",
-      "source_url": "https://bw.zimcompass.com/product?id=104207",
-      "photo_urls": [
-        "/data/web-rental-photos/auto-26774051929-0.jpg"
-      ],
-      "deposit_pula": null,
-      "utilities_included": null,
-      "fetched_at": "2026-08-15T06:27:48.611Z",
-      "last_seen_at": "2026-08-15T06:27:48.611Z"
-    },
-    {
-      "id": "auto-26774800034",
-      "title": "Student room share — Gaborone",
-      "description": "2 bedroomed house for rent in Kopong in a 2 unit multi res .Tiled floors and ceiling Common bathroom Rent is P2000 no security deposit Contact details are-74800034.",
-      "price": 2000,
-      "room_type": "sharing",
-      "gender_preference": "any",
-      "area": "Gaborone",
-      "city": "Gaborone",
-      "address": "Kweneng, Botswana | 27 March, 2026",
-      "whatsapp_number": "26774800034",
-      "contact_name": "Dylan",
-      "campus_ids": [
-        1
-      ],
-      "custom_university_name": null,
-      "source_label": "ZimCompass houses for rent",
-      "source_url": "https://bw.zimcompass.com/product?id=102902",
-      "photo_urls": [
-        "/data/web-rental-photos/auto-26774800034-0.jpg"
-      ],
-      "deposit_pula": null,
-      "utilities_included": null,
-      "fetched_at": "2026-08-15T06:27:48.668Z",
-      "last_seen_at": "2026-08-15T06:27:48.668Z"
-    },
-    {
-      "id": "auto-26771775757",
-      "title": "Student room share — phase 4",
-      "description": "Two bedroom apartment for rent in phase 4 P6000pm Available nowCall 71775757/77532791",
-      "price": 6000,
-      "room_type": "sharing",
-      "gender_preference": "any",
-      "area": "phase 4",
-      "city": "Gaborone",
-      "address": "Gaborone, Botswana | 16 March, 2026",
-      "whatsapp_number": "26771775757",
-      "contact_name": "Fridah",
-      "campus_ids": [
-        1
-      ],
-      "custom_university_name": null,
-      "source_label": "ZimCompass houses for rent",
-      "source_url": "https://bw.zimcompass.com/product?id=102032",
-      "photo_urls": [
-        "/data/web-rental-photos/auto-26771775757-0.jpg"
-      ],
-      "deposit_pula": null,
-      "utilities_included": null,
-      "fetched_at": "2026-08-15T06:27:48.669Z",
-      "last_seen_at": "2026-08-15T06:27:48.669Z"
+      "fetched_at": "2026-08-17T10:07:16.009Z",
+      "last_seen_at": "2026-08-17T10:07:16.009Z"
     },
     {
       "id": "auto-26776968183-beds",
@@ -1752,5 +2214,7 @@
       "last_seen_at": "2026-08-11T09:58:52.214Z"
     }
   ],
-  "photos_mirrored": 46
+  "photos_mirrored": 83,
+  "with_amenities": 30,
+  "with_coords": 63
 }

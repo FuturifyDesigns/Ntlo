@@ -13,6 +13,8 @@ dist-ssr
 *.local
 .env
 public/auth/config.js
+supabase/.temp/
+scripts/_tmp-run-sql.mjs
 
 # Editor directories and files
 .vscode/*

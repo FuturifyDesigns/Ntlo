@@ -15,6 +15,7 @@ export default function NotificationBell() {
   const [open, setOpen] = useState(false)
   const [selectedId, setSelectedId] = useState(null)
   const [busy, setBusy] = useState(false)
+  const [markAllBusy, setMarkAllBusy] = useState(false)
   const ref = useRef(null)
 
   const selected = items.find((item) => item.id === selectedId) || null
@@ -49,6 +50,18 @@ export default function NotificationBell() {
       } catch {
         // Already attempted on open; ignore.
       }
+    }
+  }
+
+  async function handleMarkAllRead() {
+    if (markAllBusy) return
+    setMarkAllBusy(true)
+    try {
+      await readAll()
+    } catch {
+      // Badge stays until a successful mark-all; user can retry.
+    } finally {
+      setMarkAllBusy(false)
     }
   }
 
@@ -87,7 +100,12 @@ export default function NotificationBell() {
             <div className="flex items-center justify-between border-b border-border px-4 py-3">
               <p className="text-sm font-semibold text-primary">{t('notifications.title')}</p>
               {unreadCount > 0 && (
-                <button type="button" onClick={() => readAll()} className="text-xs font-medium text-accent hover:underline">
+                <button
+                  type="button"
+                  onClick={handleMarkAllRead}
+                  disabled={markAllBusy}
+                  className="text-xs font-medium text-accent hover:underline disabled:opacity-60"
+                >
                   {t('notifications.markAllRead')}
                 </button>
               )}

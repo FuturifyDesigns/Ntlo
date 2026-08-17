@@ -1,7 +1,16 @@
 import { supabase } from './supabase'
 import { uploadApplicationDoc, APPLICATION_DOC_TYPES } from './applicationDocs'
+import { isDatabaseListingId } from '../data/webRentals'
+
+/** Web-feed listings have slug ids and cannot participate in on-platform housing flows. */
+function assertDatabaseListing(listingId) {
+  if (!isDatabaseListingId(listingId)) {
+    throw new Error('EXTERNAL_LISTING: Contact this landlord on WhatsApp — web listings do not support in-app applications.')
+  }
+}
 
 export async function getOrCreateConversation(listingId) {
+  assertDatabaseListing(listingId)
   const { data, error } = await supabase.rpc('get_or_create_conversation', {
     p_listing_id: listingId,
   })
@@ -35,6 +44,7 @@ export async function markMessagesRead(conversationId) {
 }
 
 export async function createViewingRequest({ listingId, landlordId, preferredAt, message }) {
+  assertDatabaseListing(listingId)
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Not authenticated')
 
@@ -65,6 +75,7 @@ export async function updateViewingRequest(id, updates) {
 }
 
 export async function submitApplication({ listingId, landlordId, moveInDate, durationMonths, introMessage, documents }) {
+  assertDatabaseListing(listingId)
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Not authenticated')
 
@@ -195,6 +206,8 @@ export async function cancelViewingRequestByListing(listingId) {
 }
 
 export async function fetchStudentListingStatus(listingId) {
+  if (!isDatabaseListingId(listingId)) return { viewing: null, application: null }
+
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { viewing: null, application: null }
 

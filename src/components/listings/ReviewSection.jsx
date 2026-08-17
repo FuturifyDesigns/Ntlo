@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Star, Trash2, Pencil } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
+import { isDatabaseListingId } from '../../data/webRentals'
 import { useAuth } from '../../hooks/useAuth'
 import { useTranslation } from '../../hooks/useTranslation'
 import Button from '../ui/Button'
@@ -20,6 +21,11 @@ export default function ReviewSection({ listingId }) {
   const [editComment, setEditComment] = useState('')
 
   const fetchReviews = useCallback(async () => {
+    if (!isDatabaseListingId(listingId)) {
+      setReviews([])
+      setLoading(false)
+      return
+    }
     const { data } = await supabase
       .from('reviews')
       .select('id, rating, comment, created_at, student_id, student:profiles(full_name)')
@@ -34,6 +40,7 @@ export default function ReviewSection({ listingId }) {
   }, [fetchReviews])
 
   useEffect(() => {
+    if (!isDatabaseListingId(listingId)) return undefined
     const channel = supabase
       .channel(`reviews-${listingId}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'reviews', filter: `listing_id=eq.${listingId}` }, fetchReviews)

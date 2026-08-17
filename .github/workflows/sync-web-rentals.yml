@@ -1,3 +1,11 @@
+# Fallback feed generator.
+#
+# The live sync is the `sync-web-rentals` Supabase Edge Function, scheduled by
+# pg_cron (see supabase/setup-web-rental-cron.sql). It writes straight to
+# public.web_rental_listings so new rooms appear without a redeploy.
+#
+# This workflow keeps public/data/web-rentals-feed.json fresh as the offline
+# fallback the app uses before the Edge Function has populated the table.
 name: Sync web student rentals
 
 on:
@@ -8,6 +16,7 @@ on:
   push:
     paths:
       - 'scripts/sync-web-rentals.mjs'
+      - 'supabase/functions/_shared/rental-parser.js'
       - '.github/workflows/sync-web-rentals.yml'
 
 permissions:

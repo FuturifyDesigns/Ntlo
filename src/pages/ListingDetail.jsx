@@ -197,7 +197,14 @@ export default function ListingDetail() {
             <div>
               <h2 className="mb-3 font-display text-lg font-semibold">{t('listingDetail.location')}</h2>
               {listing.lat != null && listing.lng != null ? (
-                <SingleListingMap listing={listing} lat={listing.lat} lng={listing.lng} title={listing.title} />
+                <div className="space-y-2">
+                  <SingleListingMap listing={listing} lat={listing.lat} lng={listing.lng} title={listing.title} />
+                  {listing.geo_precision === 'area' && (
+                    <p className="text-xs leading-relaxed text-muted">
+                      {external ? t('listings.mapExternalApproxPin') : t('listings.mapApproxPin')}
+                    </p>
+                  )}
+                </div>
               ) : (
                 <div className="space-y-2">
                   <div className="flex min-h-[180px] flex-col items-center justify-center rounded-xl border border-border bg-[linear-gradient(145deg,#F8F7F4_0%,#EDE9DF_55%,#E2C97E33_100%)] px-6 py-10 text-center">
