@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-09-01T10:57:04.532Z",
+  "updated_at": "2026-09-02T10:25:05.956Z",
   "source_count": 18,
   "sources": [
     "zimcompass-house-share-p1",
@@ -120,8 +120,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-09-01T10:56:47.195Z",
-      "last_seen_at": "2026-09-01T10:56:47.195Z",
+      "fetched_at": "2026-09-02T10:24:48.229Z",
+      "last_seen_at": "2026-09-02T10:24:48.229Z",
       "amenities": [
         "wifi"
       ],
@@ -157,8 +157,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-09-01T10:56:48.227Z",
-      "last_seen_at": "2026-09-01T10:56:48.227Z",
+      "fetched_at": "2026-09-02T10:24:49.315Z",
+      "last_seen_at": "2026-09-02T10:24:49.315Z",
       "amenities": [
         "wifi"
       ],
@@ -196,8 +196,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-09-01T10:56:50.373Z",
-      "last_seen_at": "2026-09-01T10:56:52.400Z",
+      "fetched_at": "2026-09-02T10:24:51.538Z",
+      "last_seen_at": "2026-09-02T10:24:53.581Z",
       "amenities": [
         "wifi",
         "security",
@@ -235,8 +235,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-09-01T10:56:51.386Z",
-      "last_seen_at": "2026-09-01T10:56:51.386Z",
+      "fetched_at": "2026-09-02T10:24:52.569Z",
+      "last_seen_at": "2026-09-02T10:24:52.569Z",
       "amenities": [
         "wifi"
       ],
@@ -271,8 +271,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-09-01T10:56:53.563Z",
-      "last_seen_at": "2026-09-01T10:56:53.563Z",
+      "fetched_at": "2026-09-02T10:24:54.767Z",
+      "last_seen_at": "2026-09-02T10:24:54.767Z",
       "amenities": [
         "wifi",
         "parking",
@@ -305,8 +305,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-09-01T10:56:54.656Z",
-      "last_seen_at": "2026-09-01T10:56:54.656Z",
+      "fetched_at": "2026-09-02T10:24:55.778Z",
+      "last_seen_at": "2026-09-02T10:24:55.778Z",
       "amenities": [
         "wifi"
       ],
@@ -337,8 +337,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-09-01T10:57:02.393Z",
-      "last_seen_at": "2026-09-01T10:57:02.393Z",
+      "fetched_at": "2026-09-02T10:25:03.768Z",
+      "last_seen_at": "2026-09-02T10:25:03.768Z",
       "amenities": [
         "wifi",
         "parking",
@@ -378,8 +378,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-09-01T10:57:04.417Z",
-      "last_seen_at": "2026-09-01T10:57:04.417Z",
+      "fetched_at": "2026-09-02T10:25:05.857Z",
+      "last_seen_at": "2026-09-02T10:25:05.857Z",
       "amenities": [
         "water",
         "kitchen"
@@ -416,8 +416,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-09-01T10:57:04.444Z",
-      "last_seen_at": "2026-09-01T10:57:04.444Z",
+      "fetched_at": "2026-09-02T10:25:05.882Z",
+      "last_seen_at": "2026-09-02T10:25:05.882Z",
       "amenities": [
         "security",
         "kitchen"
