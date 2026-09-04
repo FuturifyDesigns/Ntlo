@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-09-03T10:32:51.604Z",
+  "updated_at": "2026-09-04T10:23:03.844Z",
   "source_count": 18,
   "sources": [
     "zimcompass-house-share-p1",
@@ -22,9 +22,9 @@
     "tswanahome-for-rent"
   ],
   "keep_days": 21,
-  "listing_count": 63,
+  "listing_count": 64,
   "fresh_count": 9,
-  "carried_count": 54,
+  "carried_count": 55,
   "errors": [
     {
       "source": "zimcompass-house-share-p1",
@@ -120,8 +120,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-09-03T10:32:32.686Z",
-      "last_seen_at": "2026-09-03T10:32:32.686Z",
+      "fetched_at": "2026-09-04T10:22:44.380Z",
+      "last_seen_at": "2026-09-04T10:22:44.380Z",
       "amenities": [
         "wifi"
       ],
@@ -157,8 +157,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-09-03T10:32:33.763Z",
-      "last_seen_at": "2026-09-03T10:32:33.763Z",
+      "fetched_at": "2026-09-04T10:22:45.523Z",
+      "last_seen_at": "2026-09-04T10:22:45.523Z",
       "amenities": [
         "wifi"
       ],
@@ -196,8 +196,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-09-03T10:32:36.187Z",
-      "last_seen_at": "2026-09-03T10:32:38.463Z",
+      "fetched_at": "2026-09-04T10:22:48.080Z",
+      "last_seen_at": "2026-09-04T10:22:50.473Z",
       "amenities": [
         "wifi",
         "security",
@@ -235,8 +235,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-09-03T10:32:37.369Z",
-      "last_seen_at": "2026-09-03T10:32:37.369Z",
+      "fetched_at": "2026-09-04T10:22:49.305Z",
+      "last_seen_at": "2026-09-04T10:22:49.305Z",
       "amenities": [
         "wifi"
       ],
@@ -271,8 +271,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-09-03T10:32:39.639Z",
-      "last_seen_at": "2026-09-03T10:32:39.639Z",
+      "fetched_at": "2026-09-04T10:22:51.710Z",
+      "last_seen_at": "2026-09-04T10:22:51.710Z",
       "amenities": [
         "wifi",
         "parking",
@@ -305,8 +305,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-09-03T10:32:40.705Z",
-      "last_seen_at": "2026-09-03T10:32:40.705Z",
+      "fetched_at": "2026-09-04T10:22:52.838Z",
+      "last_seen_at": "2026-09-04T10:22:52.838Z",
       "amenities": [
         "wifi"
       ],
@@ -337,8 +337,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-09-03T10:32:48.625Z",
-      "last_seen_at": "2026-09-03T10:32:48.625Z",
+      "fetched_at": "2026-09-04T10:23:01.260Z",
+      "last_seen_at": "2026-09-04T10:23:01.260Z",
       "amenities": [
         "wifi",
         "parking",
@@ -378,10 +378,48 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-09-03T10:32:50.514Z",
-      "last_seen_at": "2026-09-03T10:32:50.514Z",
+      "fetched_at": "2026-09-04T10:23:03.450Z",
+      "last_seen_at": "2026-09-04T10:23:03.450Z",
       "amenities": [
         "water",
+        "kitchen"
+      ],
+      "lat": -24.63,
+      "lng": 25.899,
+      "geo_precision": "area"
+    },
+    {
+      "id": "auto-tswana-26771607703-2-bed-in-sese-multires-rent-1734",
+      "title": "Student-friendly rental — 2 BED IN SESE MULTIRES RENT 1734",
+      "description": "2 BED IN SESE MULTIRES RENT 1734 - Find Real Estate in Botswana Properties For Sale For Rent Services Property Valuations Property Management Estate Agency Support Services Services &#038; Forms Articles About Us Contact Us Create a Listing Login Register Favorites 0 Buy, Sell, & Rent Property in Botswana Properties For Sale For Rent Services Property Valuations Property Management Estate Agency S",
+      "price": 4000,
+      "price_on_request": false,
+      "room_type": "sharing",
+      "gender_preference": "any",
+      "area": "Block 10",
+      "city": "Francistown",
+      "address": "Block 10, Francistown",
+      "whatsapp_number": "26771607703",
+      "contact_name": "TswanaHome listing",
+      "campus_ids": [],
+      "custom_university_name": "University of Botswana — Francistown Campus",
+      "source_label": "TswanaHome for rent",
+      "source_url": "https://www.tswanahome.com/property/2-bed-in-sese-multires-rent-1734/",
+      "detail_url": null,
+      "photo_urls": [
+        "/data/web-rental-photos/auto-tswana-26771607703-2-bed-in-sese-multires-rent-1734-0.jpg",
+        "/data/web-rental-photos/auto-tswana-26771607703-2-bed-in-sese-multires-rent-1734-1.jpg",
+        "/data/web-rental-photos/auto-tswana-26771607703-2-bed-in-sese-multires-rent-1734-2.jpg",
+        "/data/web-rental-photos/auto-tswana-26771607703-2-bed-in-sese-multires-rent-1734-3.jpg",
+        "/data/web-rental-photos/auto-tswana-26771607703-2-bed-in-sese-multires-rent-1734-4.jpg",
+        "/data/web-rental-photos/auto-tswana-26771607703-2-bed-in-sese-multires-rent-1734-5.jpg"
+      ],
+      "deposit_pula": null,
+      "utilities_included": null,
+      "fetched_at": "2026-09-04T10:23:03.482Z",
+      "last_seen_at": "2026-09-04T10:23:03.482Z",
+      "amenities": [
+        "security",
         "kitchen"
       ],
       "lat": -24.63,
@@ -2210,7 +2248,7 @@
       "geo_precision": "area"
     }
   ],
-  "photos_mirrored": 84,
-  "with_amenities": 34,
-  "with_coords": 63
+  "photos_mirrored": 90,
+  "with_amenities": 35,
+  "with_coords": 64
 }
