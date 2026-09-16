@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-09-15T10:51:57.329Z",
+  "updated_at": "2026-09-16T10:41:15.393Z",
   "source_count": 18,
   "sources": [
     "zimcompass-house-share-p1",
@@ -23,8 +23,8 @@
   ],
   "keep_days": 21,
   "listing_count": 14,
-  "fresh_count": 11,
-  "carried_count": 3,
+  "fresh_count": 10,
+  "carried_count": 4,
   "errors": [
     {
       "source": "zimcompass-house-share-p1",
@@ -120,8 +120,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-09-15T10:51:38.194Z",
-      "last_seen_at": "2026-09-15T10:51:38.194Z",
+      "fetched_at": "2026-09-16T10:40:54.296Z",
+      "last_seen_at": "2026-09-16T10:40:54.296Z",
       "amenities": [
         "wifi"
       ],
@@ -157,8 +157,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-09-15T10:51:39.307Z",
-      "last_seen_at": "2026-09-15T10:51:39.307Z",
+      "fetched_at": "2026-09-16T10:40:55.415Z",
+      "last_seen_at": "2026-09-16T10:40:55.415Z",
       "amenities": [
         "wifi"
       ],
@@ -196,8 +196,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-09-15T10:51:41.748Z",
-      "last_seen_at": "2026-09-15T10:51:44.031Z",
+      "fetched_at": "2026-09-16T10:40:57.955Z",
+      "last_seen_at": "2026-09-16T10:41:00.334Z",
       "amenities": [
         "wifi",
         "security",
@@ -235,8 +235,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-09-15T10:51:42.850Z",
-      "last_seen_at": "2026-09-15T10:51:42.850Z",
+      "fetched_at": "2026-09-16T10:40:59.182Z",
+      "last_seen_at": "2026-09-16T10:40:59.182Z",
       "amenities": [
         "wifi"
       ],
@@ -271,8 +271,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-09-15T10:51:45.273Z",
-      "last_seen_at": "2026-09-15T10:51:45.273Z",
+      "fetched_at": "2026-09-16T10:41:01.550Z",
+      "last_seen_at": "2026-09-16T10:41:01.550Z",
       "amenities": [
         "wifi",
         "parking",
@@ -305,8 +305,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-09-15T10:51:46.453Z",
-      "last_seen_at": "2026-09-15T10:51:46.453Z",
+      "fetched_at": "2026-09-16T10:41:02.761Z",
+      "last_seen_at": "2026-09-16T10:41:02.761Z",
       "amenities": [
         "wifi"
       ],
@@ -337,8 +337,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-09-15T10:51:54.895Z",
-      "last_seen_at": "2026-09-15T10:51:54.895Z",
+      "fetched_at": "2026-09-16T10:41:10.870Z",
+      "last_seen_at": "2026-09-16T10:41:10.870Z",
       "amenities": [
         "wifi",
         "parking",
@@ -346,41 +346,6 @@
       ],
       "lat": -21.17,
       "lng": 27.5075,
-      "geo_precision": "area"
-    },
-    {
-      "id": "auto-tswana-26778657206-gnorth-2-bed-in-multires-rent-1738",
-      "title": "Student-friendly rental — GNORTH 2 BED IN MULTIRES RENT 1738",
-      "description": "GNORTH 2 BED IN MULTIRES RENT 1738 - Find Real Estate in Botswana Properties For Sale For Rent Services Property Valuations Property Management Estate Agency Support Services Services &#038; Forms Articles About Us Contact Us Create a Listing Login Register Favorites 0 Buy, Sell, & Rent Property in Botswana Properties For Sale For Rent Services Property Valuations Property Management Estate Agency",
-      "price": 3500,
-      "price_on_request": false,
-      "room_type": "sharing",
-      "gender_preference": "any",
-      "area": "Block 10",
-      "city": "Francistown",
-      "address": "Block 10, Francistown",
-      "whatsapp_number": "26778657206",
-      "contact_name": "TswanaHome listing",
-      "campus_ids": [],
-      "custom_university_name": "University of Botswana — Francistown Campus",
-      "source_label": "TswanaHome for rent",
-      "source_url": "https://www.tswanahome.com/property/gnorth-2-bed-in-multires-rent-1738/",
-      "detail_url": null,
-      "photo_urls": [
-        "/data/web-rental-photos/auto-tswana-26778657206-gnorth-2-bed-in-multires-rent-1738-0.jpg",
-        "/data/web-rental-photos/auto-tswana-26778657206-gnorth-2-bed-in-multires-rent-1738-1.jpg",
-        "/data/web-rental-photos/auto-tswana-26778657206-gnorth-2-bed-in-multires-rent-1738-2.jpg",
-        "/data/web-rental-photos/auto-tswana-26778657206-gnorth-2-bed-in-multires-rent-1738-3.jpg"
-      ],
-      "deposit_pula": null,
-      "utilities_included": null,
-      "fetched_at": "2026-09-15T10:51:56.943Z",
-      "last_seen_at": "2026-09-15T10:51:56.943Z",
-      "amenities": [
-        "kitchen"
-      ],
-      "lat": -24.63,
-      "lng": 25.899,
       "geo_precision": "area"
     },
     {
@@ -409,8 +374,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-09-15T10:51:56.971Z",
-      "last_seen_at": "2026-09-15T10:51:56.971Z",
+      "fetched_at": "2026-09-16T10:41:15.013Z",
+      "last_seen_at": "2026-09-16T10:41:15.120Z",
       "amenities": [
         "kitchen"
       ],
@@ -448,8 +413,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-09-15T10:51:57.188Z",
-      "last_seen_at": "2026-09-15T10:51:57.188Z",
+      "fetched_at": "2026-09-16T10:41:15.296Z",
+      "last_seen_at": "2026-09-16T10:41:15.296Z",
       "amenities": [
         "water",
         "kitchen"
@@ -484,10 +449,45 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-09-15T10:51:57.327Z",
-      "last_seen_at": "2026-09-15T10:51:57.327Z",
+      "fetched_at": "2026-09-16T10:41:15.392Z",
+      "last_seen_at": "2026-09-16T10:41:15.392Z",
       "amenities": [
         "security",
+        "kitchen"
+      ],
+      "lat": -24.63,
+      "lng": 25.899,
+      "geo_precision": "area"
+    },
+    {
+      "id": "auto-tswana-26778657206-gnorth-2-bed-in-multires-rent-1738",
+      "title": "Student-friendly rental — GNORTH 2 BED IN MULTIRES RENT 1738",
+      "description": "GNORTH 2 BED IN MULTIRES RENT 1738 - Find Real Estate in Botswana Properties For Sale For Rent Services Property Valuations Property Management Estate Agency Support Services Services &#038; Forms Articles About Us Contact Us Create a Listing Login Register Favorites 0 Buy, Sell, & Rent Property in Botswana Properties For Sale For Rent Services Property Valuations Property Management Estate Agency",
+      "price": 3500,
+      "price_on_request": false,
+      "room_type": "sharing",
+      "gender_preference": "any",
+      "area": "Block 10",
+      "city": "Francistown",
+      "address": "Block 10, Francistown",
+      "whatsapp_number": "26778657206",
+      "contact_name": "TswanaHome listing",
+      "campus_ids": [],
+      "custom_university_name": "University of Botswana — Francistown Campus",
+      "source_label": "TswanaHome for rent",
+      "source_url": "https://www.tswanahome.com/property/gnorth-2-bed-in-multires-rent-1738/",
+      "detail_url": null,
+      "photo_urls": [
+        "/data/web-rental-photos/auto-tswana-26778657206-gnorth-2-bed-in-multires-rent-1738-0.jpg",
+        "/data/web-rental-photos/auto-tswana-26778657206-gnorth-2-bed-in-multires-rent-1738-1.jpg",
+        "/data/web-rental-photos/auto-tswana-26778657206-gnorth-2-bed-in-multires-rent-1738-2.jpg",
+        "/data/web-rental-photos/auto-tswana-26778657206-gnorth-2-bed-in-multires-rent-1738-3.jpg"
+      ],
+      "deposit_pula": null,
+      "utilities_included": null,
+      "fetched_at": "2026-09-15T10:51:56.943Z",
+      "last_seen_at": "2026-09-15T10:51:56.943Z",
+      "amenities": [
         "kitchen"
       ],
       "lat": -24.63,
