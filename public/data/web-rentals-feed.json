@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-09-19T10:09:12.962Z",
+  "updated_at": "2026-09-20T10:27:13.068Z",
   "source_count": 18,
   "sources": [
     "zimcompass-house-share-p1",
@@ -120,8 +120,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-09-19T10:08:47.386Z",
-      "last_seen_at": "2026-09-19T10:08:47.386Z",
+      "fetched_at": "2026-09-20T10:26:55.015Z",
+      "last_seen_at": "2026-09-20T10:26:55.015Z",
       "amenities": [
         "wifi"
       ],
@@ -157,8 +157,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-09-19T10:08:48.812Z",
-      "last_seen_at": "2026-09-19T10:08:48.812Z",
+      "fetched_at": "2026-09-20T10:26:56.177Z",
+      "last_seen_at": "2026-09-20T10:26:56.177Z",
       "amenities": [
         "wifi"
       ],
@@ -196,8 +196,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-09-19T10:08:51.707Z",
-      "last_seen_at": "2026-09-19T10:08:54.224Z",
+      "fetched_at": "2026-09-20T10:26:58.430Z",
+      "last_seen_at": "2026-09-20T10:27:00.642Z",
       "amenities": [
         "wifi",
         "security",
@@ -235,8 +235,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-09-19T10:08:52.930Z",
-      "last_seen_at": "2026-09-19T10:08:52.930Z",
+      "fetched_at": "2026-09-20T10:26:59.560Z",
+      "last_seen_at": "2026-09-20T10:26:59.560Z",
       "amenities": [
         "wifi"
       ],
@@ -271,8 +271,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-09-19T10:08:55.696Z",
-      "last_seen_at": "2026-09-19T10:08:55.696Z",
+      "fetched_at": "2026-09-20T10:27:01.863Z",
+      "last_seen_at": "2026-09-20T10:27:01.863Z",
       "amenities": [
         "wifi",
         "parking",
@@ -305,8 +305,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-09-19T10:08:57.069Z",
-      "last_seen_at": "2026-09-19T10:08:57.069Z",
+      "fetched_at": "2026-09-20T10:27:02.968Z",
+      "last_seen_at": "2026-09-20T10:27:02.968Z",
       "amenities": [
         "wifi"
       ],
@@ -337,8 +337,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-09-19T10:09:09.256Z",
-      "last_seen_at": "2026-09-19T10:09:09.256Z",
+      "fetched_at": "2026-09-20T10:27:10.992Z",
+      "last_seen_at": "2026-09-20T10:27:10.992Z",
       "amenities": [
         "wifi",
         "parking",
@@ -378,8 +378,8 @@
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-09-19T10:09:11.784Z",
-      "last_seen_at": "2026-09-19T10:09:12.960Z",
+      "fetched_at": "2026-09-20T10:27:12.927Z",
+      "last_seen_at": "2026-09-20T10:27:13.066Z",
       "amenities": [
         "security",
         "kitchen"
@@ -410,15 +410,53 @@
         "/data/web-rental-photos/auto-tswana-26773950399-new-2-bed-molepolole-multires-rent-1737-0.jpg",
         "/data/web-rental-photos/auto-tswana-26773950399-new-2-bed-molepolole-multires-rent-1737-1.jpg",
         "/data/web-rental-photos/auto-tswana-26773950399-new-2-bed-molepolole-multires-rent-1737-2.jpg",
-        "/data/web-rental-photos/auto-tswana-26773950399-new-2-bed-molepolole-multires-rent-1737-3.jpg",
-        "/data/web-rental-photos/auto-tswana-26773950399-new-2-bed-molepolole-multires-rent-1737-4.jpg",
-        "/data/web-rental-photos/auto-tswana-26773950399-new-2-bed-molepolole-multires-rent-1737-5.jpg"
+        "/data/web-rental-photos/auto-tswana-26773950399-new-2-bed-molepolole-multires-rent-1737-3.jpg"
       ],
       "deposit_pula": null,
       "utilities_included": null,
-      "fetched_at": "2026-09-19T10:09:12.588Z",
-      "last_seen_at": "2026-09-19T10:09:12.680Z",
+      "fetched_at": "2026-09-20T10:27:12.950Z",
+      "last_seen_at": "2026-09-20T10:27:12.971Z",
       "amenities": [
+        "kitchen"
+      ],
+      "lat": -24.63,
+      "lng": 25.899,
+      "geo_precision": "area"
+    },
+    {
+      "id": "auto-tswana-26773950399-1-bed-tlokweng-near-bordergate-mall-rent",
+      "title": "Student-friendly rental — 1 BED TLOKWENG NEAR BORDERGATE MALL RENT 1735",
+      "description": "1 BED TLOKWENG NEAR BORDERGATE MALL RENT 1735 - Find Real Estate in Botswana Properties For Sale For Rent Services Property Valuations Property Management Estate Agency Support Services Services &#038; Forms Articles About Us Contact Us Create a Listing Login Register Favorites 0 Buy, Sell, & Rent Property in Botswana Properties For Sale For Rent Services Property Valuations Property Management Es",
+      "price": 1900,
+      "price_on_request": false,
+      "room_type": "single",
+      "gender_preference": "any",
+      "area": "Block 10",
+      "city": "Francistown",
+      "address": "Block 10, Francistown",
+      "whatsapp_number": "26773950399",
+      "contact_name": "TswanaHome listing",
+      "campus_ids": [],
+      "custom_university_name": "University of Botswana — Francistown Campus",
+      "source_label": "TswanaHome for rent",
+      "source_url": "https://www.tswanahome.com/property/1-bed-tlokweng-near-bordergate-mall-rent-1735/",
+      "detail_url": null,
+      "photo_urls": [
+        "/data/web-rental-photos/auto-tswana-26773950399-1-bed-tlokweng-near-bordergate-mall-rent-0.jpg",
+        "/data/web-rental-photos/auto-tswana-26773950399-1-bed-tlokweng-near-bordergate-mall-rent-1.jpg",
+        "/data/web-rental-photos/auto-tswana-26773950399-1-bed-tlokweng-near-bordergate-mall-rent-2.jpg",
+        "/data/web-rental-photos/auto-tswana-26773950399-1-bed-tlokweng-near-bordergate-mall-rent-3.jpg",
+        "/data/web-rental-photos/auto-tswana-26773950399-1-bed-tlokweng-near-bordergate-mall-rent-4.jpg",
+        "/data/web-rental-photos/auto-tswana-26773950399-1-bed-tlokweng-near-bordergate-mall-rent-5.jpg",
+        "/data/web-rental-photos/auto-tswana-26773950399-1-bed-tlokweng-near-bordergate-mall-rent-6.jpg",
+        "/data/web-rental-photos/auto-tswana-26773950399-1-bed-tlokweng-near-bordergate-mall-rent-7.jpg"
+      ],
+      "deposit_pula": null,
+      "utilities_included": null,
+      "fetched_at": "2026-09-20T10:27:13.044Z",
+      "last_seen_at": "2026-09-20T10:27:13.044Z",
+      "amenities": [
+        "water",
         "kitchen"
       ],
       "lat": -24.63,
@@ -457,46 +495,6 @@
       "utilities_included": null,
       "fetched_at": "2026-09-19T10:09:12.868Z",
       "last_seen_at": "2026-09-19T10:09:12.868Z",
-      "amenities": [
-        "water",
-        "kitchen"
-      ],
-      "lat": -24.63,
-      "lng": 25.899,
-      "geo_precision": "area"
-    },
-    {
-      "id": "auto-tswana-26773950399-1-bed-tlokweng-near-bordergate-mall-rent",
-      "title": "Student-friendly rental — 1 BED TLOKWENG NEAR BORDERGATE MALL RENT 1735",
-      "description": "1 BED TLOKWENG NEAR BORDERGATE MALL RENT 1735 - Find Real Estate in Botswana Properties For Sale For Rent Services Property Valuations Property Management Estate Agency Support Services Services &#038; Forms Articles About Us Contact Us Create a Listing Login Register Favorites 0 Buy, Sell, & Rent Property in Botswana Properties For Sale For Rent Services Property Valuations Property Management Es",
-      "price": 1900,
-      "price_on_request": false,
-      "room_type": "single",
-      "gender_preference": "any",
-      "area": "Block 10",
-      "city": "Francistown",
-      "address": "Block 10, Francistown",
-      "whatsapp_number": "26773950399",
-      "contact_name": "TswanaHome listing",
-      "campus_ids": [],
-      "custom_university_name": "University of Botswana — Francistown Campus",
-      "source_label": "TswanaHome for rent",
-      "source_url": "https://www.tswanahome.com/property/1-bed-tlokweng-near-bordergate-mall-rent-1735/",
-      "detail_url": null,
-      "photo_urls": [
-        "/data/web-rental-photos/auto-tswana-26773950399-1-bed-tlokweng-near-bordergate-mall-rent-0.jpg",
-        "/data/web-rental-photos/auto-tswana-26773950399-1-bed-tlokweng-near-bordergate-mall-rent-1.jpg",
-        "/data/web-rental-photos/auto-tswana-26773950399-1-bed-tlokweng-near-bordergate-mall-rent-2.jpg",
-        "/data/web-rental-photos/auto-tswana-26773950399-1-bed-tlokweng-near-bordergate-mall-rent-3.jpg",
-        "/data/web-rental-photos/auto-tswana-26773950399-1-bed-tlokweng-near-bordergate-mall-rent-4.jpg",
-        "/data/web-rental-photos/auto-tswana-26773950399-1-bed-tlokweng-near-bordergate-mall-rent-5.jpg",
-        "/data/web-rental-photos/auto-tswana-26773950399-1-bed-tlokweng-near-bordergate-mall-rent-6.jpg",
-        "/data/web-rental-photos/auto-tswana-26773950399-1-bed-tlokweng-near-bordergate-mall-rent-7.jpg"
-      ],
-      "deposit_pula": null,
-      "utilities_included": null,
-      "fetched_at": "2026-09-18T10:24:55.674Z",
-      "last_seen_at": "2026-09-18T10:24:55.674Z",
       "amenities": [
         "water",
         "kitchen"
@@ -692,7 +690,7 @@
       "geo_precision": "area"
     }
   ],
-  "photos_mirrored": 61,
+  "photos_mirrored": 59,
   "with_amenities": 16,
   "with_coords": 16
 }
