@@ -33,7 +33,8 @@ export default function ListingCard({
     const url = typeof p === 'string' ? p : p?.url
     if (typeof url !== 'string') return false
     const trimmed = url.trim()
-    return /^https?:\/\//i.test(trimmed) || trimmed.startsWith('/data/')
+    if (/logo|icon|avatar|silhouette|placeholder|sprite|favicon|pixel/i.test(trimmed)) return false
+    return /^https?:\/\//i.test(trimmed) || trimmed.startsWith('/data/') || trimmed.startsWith('/images/')
   })
   const hasMultiplePhotos = listingPhotos.length > 1
   const saved = isSaved(listing.id)
@@ -141,9 +142,13 @@ export default function ListingCard({
             {listing.title}
           </h3>
           <p className="mt-2 font-mono text-xl font-bold text-primary">
-            {formatPrice(listing.price)}
-            {listing.price != null && (
-              <span className="ml-1 text-sm font-normal text-muted">{t('listings.perMo')}</span>
+            {listing.price != null ? (
+              <>
+                {formatPrice(listing.price)}
+                <span className="ml-1 text-sm font-normal text-muted">{t('listings.perMo')}</span>
+              </>
+            ) : (
+              <span className="font-sans text-base font-semibold text-muted">{t('listings.askPrice')}</span>
             )}
           </p>
           <p className="mt-1.5 flex items-center gap-1 text-sm text-muted">

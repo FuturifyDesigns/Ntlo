@@ -75,7 +75,7 @@ function PinPopup({ listing, approximate, t }) {
     <div className="max-w-[220px] space-y-1.5 p-0.5 font-sans">
       <p className="font-semibold text-primary">{listing.title}</p>
       <p className="text-sm font-mono font-semibold text-accent">
-        {formatPrice(listing.price)}{t('listings.perMo')}
+        {listing.price != null ? `${formatPrice(listing.price)}${t('listings.perMo')}` : t('listings.askPrice')}
       </p>
       <p className="text-xs text-muted">
         {[listing.area, listing.city].filter(Boolean).join(', ')}

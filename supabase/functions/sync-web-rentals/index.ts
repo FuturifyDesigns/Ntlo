@@ -16,6 +16,7 @@ import {
   fetchSource,
   hydrateZimcompassDetails,
   dedupe,
+  preparePublicListings,
 } from '../_shared/rental-parser.js'
 
 type SyncError = { source: string; error: string }
@@ -170,7 +171,7 @@ Deno.serve(async (req) => {
     errors.push({ source: 'zimcompass-detail', error: String((err as Error)?.message ?? err) })
   }
 
-  const listings = dedupe(collected)
+  const listings = preparePublicListings(dedupe(collected))
 
   if (dryRun) {
     return json({

@@ -22,6 +22,7 @@ import {
   hydrateZimcompassDetails,
   dedupe,
   mergeWithPrevious,
+  preparePublicListings,
 } from '../supabase/functions/_shared/rental-parser.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -145,8 +146,8 @@ async function main() {
   })
 
   const previous = loadPreviousFeed()
-  const freshUnique = dedupe(collected)
-  const listings = mergeWithPrevious(freshUnique, previous)
+  const freshUnique = preparePublicListings(dedupe(collected))
+  const listings = preparePublicListings(mergeWithPrevious(freshUnique, previous))
 
   const payload = {
     updated_at: new Date().toISOString(),

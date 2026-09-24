@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { cn } from '../../lib/utils'
+import { cn, LISTING_PLACEHOLDER_IMAGE } from '../../lib/utils'
 import { getStorageImageVariants, CARD_IMAGE_OPTS, DETAIL_IMAGE_OPTS } from '../../lib/storageImages'
 
 const DEFAULT_INTERVAL = 3500
@@ -30,7 +30,7 @@ function CoverPlaceholder({ compact }) {
   return (
     <div className="absolute inset-0 flex items-center justify-center bg-white" aria-hidden>
       <img
-        src="/images/listing-placeholder.png"
+        src={LISTING_PLACEHOLDER_IMAGE}
         alt=""
         className={cn(
           'h-full w-full object-contain p-4 sm:p-6',

@@ -117,9 +117,13 @@ export default function ListingDetail() {
               </div>
 
               <p className="mt-2 font-mono text-2xl font-bold text-primary">
-                {formatPrice(listing.price)}
-                {listing.price != null && (
-                  <span className="text-base font-normal text-muted"> {t('listings.perMonth')}</span>
+                {listing.price != null ? (
+                  <>
+                    {formatPrice(listing.price)}
+                    <span className="text-base font-normal text-muted"> {t('listings.perMonth')}</span>
+                  </>
+                ) : (
+                  <span className="font-sans text-lg font-semibold text-muted">{t('listings.askPrice')}</span>
                 )}
               </p>
 

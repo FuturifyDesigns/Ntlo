@@ -21,6 +21,95 @@ export const AMENITY_IDS = [
   'dstv', 'borehole', 'braai', 'laundry', 'kitchen',
 ]
 
+/** Public-facing source label — never name the scrape site on Ntlo. */
+export const PUBLIC_SOURCE_LABEL = 'Student web listing'
+
+const COMPANY_CONTACT = /\b(ezilet|tswanahome|tswana\s*home|agency|estate\s*agent|realty|properties|property\s*group|pty\.?\s*ltd|limited|multires|boarding\s*house|student\s*residence|accommodation\s*(?:ltd|group|services)|zimcompass|listing)\b/i
+const COMPANY_TITLE = /\b(boarding\s*house|student\s*(?:house\s*)?accommodation|student\s*residence|multires|pty\.?\s*ltd|estate\s*agents?|realty|property\s*(?:group|management)|rich\s*minds|tulo\s*student|leru\s*boarding|bogatsu\s*(?:ext|student)|mohammed\s*(?:ext|student)|tt\s*student\s*house)\b/i
+const PERSON_NAME = /^[A-Za-z][A-Za-z'’\-]*(?:\s+[A-Za-z][A-Za-z'’\-]*){0,3}$/
+
+const ROOM_LABELS = {
+  single: 'Single room',
+  sharing: 'Shared room',
+  self_contained: 'Self-contained room',
+  cottage: 'Cottage',
+  house: 'House share',
+}
+
+/** Private person with a personal WhatsApp — not an agency or boarding brand. */
+export function isIndividualListing(row) {
+  if (!row) return false
+  const phone = String(row.whatsapp_number || '').replace(/\D/g, '')
+  if (!/^2677[1-9]\d{6}$/.test(phone)) return false
+  const contact = String(row.contact_name || '').trim()
+  if (!contact || COMPANY_CONTACT.test(contact)) return false
+  if (!PERSON_NAME.test(contact) && !/^[A-Za-z]{2,}$/.test(contact)) return false
+  if (COMPANY_TITLE.test(String(row.title || ''))) return false
+  return true
+}
+
+function titleCaseWords(words) {
+  return words
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((w) => {
+      if (/^(ub|bac|buan|biust)$/i.test(w)) return w.toUpperCase()
+      if (w.length <= 2 && /^(in|at|to|of|on|a|an)$/i.test(w)) return w.toLowerCase()
+      return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()
+    })
+    .join(' ')
+}
+
+export function polishListingTitle(row) {
+  let raw = String(row.title || '')
+    .replace(/^Student-friendly rental\s*[—–\-:]?\s*/i, '')
+    .replace(/^Student room share\s*[—–\-:]\s*/i, '')
+    .replace(/^(Shared|Single|Self-contained|Student) room in\s+/i, '')
+    .replace(/^House share in\s+/i, '')
+    .replace(/\b(?:BWP|P)\s*[\d,]+\b/gi, ' ')
+    .replace(/\brent\s*[\d,]+\b/gi, ' ')
+    .replace(/\bMULTIRES\b/gi, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+
+  const uniquePlaces = []
+  for (const part of [row.area, row.city].map((v) => String(v || '').trim()).filter(Boolean)) {
+    const pretty = titleCaseWords(part.toLowerCase())
+    if (!uniquePlaces.some((p) => p.toLowerCase() === pretty.toLowerCase())) uniquePlaces.push(pretty)
+  }
+  const place = uniquePlaces.join(', ')
+  const roomLabel = ROOM_LABELS[row.room_type] || 'Student room'
+  const looksLikeDump =
+    !raw
+    || raw.length < 12
+    || /\b(to|in|a|the|for)$/i.test(raw)
+    || /^(house|room|rooms|beds?|house\s*mate)\b/i.test(raw)
+    || /room (available )?for rent/i.test(raw)
+    || /\d+\s*(and\s*half|beds?)\s+to/i.test(raw)
+    || (/^[A-Z0-9\s\-/,.]{18,}$/.test(raw) && raw === raw.toUpperCase())
+
+  if (place) return `${roomLabel} in ${place}`
+  if (looksLikeDump) return roomLabel
+  if (raw === raw.toUpperCase() && /[A-Z]/.test(raw)) raw = titleCaseWords(raw.toLowerCase())
+  raw = raw.replace(/\s+/g, ' ').trim()
+  if (raw.length > 72) raw = `${raw.slice(0, 69).trim()}…`
+  return raw || roomLabel
+}
+
+/** Strip scrape-site branding and polish titles before upsert / JSON write. */
+export function preparePublicListings(rows) {
+  return (rows || [])
+    .filter(isIndividualListing)
+    .map((row) => ({
+      ...row,
+      title: polishListingTitle(row),
+      source_label: PUBLIC_SOURCE_LABEL,
+      // Keep detail_url for gallery hydration only; do not treat as public source branding.
+      source_url: null,
+      contact_name: String(row.contact_name || 'Contact').trim(),
+    }))
+}
+
 /* ────────────────────────────── sources ────────────────────────────── */
 
 function zimcompassCategorySources(path, label) {
@@ -402,12 +491,15 @@ export function parseZimcompass(html, source) {
     const title = stripTags((body.match(/<h3 class="heading">([\s\S]*?)<\/h3>/i) || [])[1] || '')
     const priceText = stripTags((body.match(/<p class="price">([\s\S]*?)<\/p>/i) || [])[1] || '')
     const details = stripTags((body.match(/<p class="details">([\s\S]*?)<\/p>/i) || [])[1] || '')
-    const seller = stripTags((body.match(/Private Seller:\s*([^<]+)/i) || [])[1] || 'Contact')
     const location = stripTags((body.match(/<div class="location">([\s\S]*?)<\/div>/i) || [])[1] || '')
     const img = ((body.match(/<img[^>]+src="([^"]+)"[^>]*class="[^"]*img-fluid/i) || body.match(/<img[^>]+class="[^"]*img-fluid[^"]*"[^>]+src="([^"]+)"/i) || [])[1] || '').trim()
     const href = ((body.match(/<a[^>]+href="([^"]+)"[^>]*>\s*<h3/i) || body.match(/href="(\/[^"]+)"/i) || [])[1] || '').trim()
 
     if (!isStudentRentable(title, details, location)) continue
+    // Agencies / dealers — skip; Ntlo only surfaces private individuals.
+    if (/Agency\s*Seller|Dealer\s*:/i.test(body) && !/Private Seller:/i.test(body)) continue
+    const seller = stripTags((body.match(/Private Seller:\s*([^<]+)/i) || [])[1] || '')
+    if (!seller || COMPANY_CONTACT.test(seller)) continue
     const phone = extractPhone(`${details} ${title}`)
     if (!phone) continue
     const price = extractPrice(priceText, details)
@@ -425,13 +517,14 @@ export function parseZimcompass(html, source) {
       : source.url
 
     const now = new Date().toISOString()
+    const roomType = /single|servant|sq\b/i.test(`${title} ${details}`) ? 'single' : 'sharing'
     out.push(enrich({
       id: `auto-${slugify(phone, title)}`,
-      title: title.length > 8 ? title : `Student room share — ${area}`,
+      title: title.length > 8 ? title : `Shared room in ${area}`,
       description: details || title,
       price,
       price_on_request: false,
-      room_type: /single|servant|sq\b/i.test(`${title} ${details}`) ? 'single' : 'sharing',
+      room_type: roomType,
       gender_preference: /female only|ladies only|girls only/i.test(details)
         ? 'female'
         : /male only|gents only/i.test(details) ? 'male' : 'any',
@@ -439,11 +532,11 @@ export function parseZimcompass(html, source) {
       city,
       address: location || `${area}, ${city}`,
       whatsapp_number: phone,
-      contact_name: seller || 'Contact',
+      contact_name: seller,
       campus_ids: campus.campus_ids,
       custom_university_name: campus.custom_university_name,
-      source_label: source.label,
-      source_url: sourceUrl,
+      source_label: PUBLIC_SOURCE_LABEL,
+      source_url: null,
       detail_url: sourceUrl !== source.url ? sourceUrl : null,
       photo_urls: photo && !IMAGE_NOISE.test(photo) ? [photo] : [],
       deposit_pula: extractDeposit(details),
@@ -452,7 +545,7 @@ export function parseZimcompass(html, source) {
       last_seen_at: now,
     }, location))
   }
-  return out
+  return out.filter(isIndividualListing)
 }
 
 /**

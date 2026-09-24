@@ -174,6 +174,16 @@ export default function Footer() {
           className="mt-8 border-t border-white/8 pt-5 text-center text-xs text-white/40 sm:mt-10 sm:pt-6"
         >
           <p>{t('footer.copyright')}</p>
+          <p className="mt-2">
+            <a
+              href="https://futurifydesigns.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-white/50 underline-offset-2 transition-colors hover:text-accent hover:underline"
+            >
+              {t('footer.builtBy')}
+            </a>
+          </p>
           <button
             type="button"
             onClick={openPreferences}

@@ -11,6 +11,7 @@ import { getUniversityById, getUniversityMapViewport, getUniversityDisplayName }
 import { pickPrimaryUniversityMatch } from '../lib/universitySearch'
 import { listingFiltersFromSearchParams, listingFiltersToSearchParams } from '../lib/listingFilters'
 import { useTranslation } from '../hooks/useTranslation'
+import WebListingsNotice from '../components/listings/WebListingsNotice'
 
 export default function Browse() {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -70,6 +71,7 @@ export default function Browse() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 sm:py-8 lg:px-8">
+      <WebListingsNotice />
       <div className="mb-5 flex flex-wrap items-start justify-between gap-4 sm:mb-8">
         <div>
           <h1 className="font-display text-2xl font-bold text-primary sm:text-3xl">{t('listings.browseTitle')}</h1>

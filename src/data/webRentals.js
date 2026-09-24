@@ -2,6 +2,12 @@
 import { isUniversityNameQuery, pickPrimaryUniversityMatch } from '../lib/universitySearch'
 import { listingDedupeKey, resolveLiveCampusId } from '../lib/campusAttribution'
 import { getUniversityById } from '../lib/universities'
+import {
+  WEB_LISTING_PUBLIC_SOURCE,
+  isIndividualWebListing,
+  polishWebListingTitle,
+  sanitizeWebPhotoUrls,
+} from '../lib/webListingPresentation'
 
 const NOW = '2026-08-01T09:00:00.000Z'
 
@@ -86,8 +92,6 @@ function webListing({
   campus = null,
   campus_ids = null,
   custom_university_name = null,
-  source_label = 'Botswana student classifieds',
-  source_url = 'https://bw.zimcompass.com/house-share',
   amenities = [],
   deposit_pula = null,
   utilities_included = null,
@@ -99,10 +103,12 @@ function webListing({
 }) {
   const primary = campus || null
   const ids = campus_ids || (primary ? [primary.id] : [])
+  const photos = sanitizeWebPhotoUrls(photo_urls)
+  const polishedTitle = polishWebListingTitle({ title, area, city, room_type })
   return {
     id: `web-${id}`,
     landlord_id: null,
-    title,
+    title: polishedTitle,
     description,
     price,
     room_type,
@@ -129,8 +135,9 @@ function webListing({
     verification_status: 'approved',
     listing_origin: 'external',
     external_contact_name: contact_name,
-    external_source_label: source_label,
-    external_source_url: source_url,
+    // Never expose the scrape site name or URL on the public listing.
+    external_source_label: WEB_LISTING_PUBLIC_SOURCE,
+    external_source_url: null,
     deposit_pula,
     utilities_included,
     house_rules: 'Confirm availability, rent, and viewing with the contact on WhatsApp. Ntlo does not process payments for web listings.',
@@ -139,7 +146,7 @@ function webListing({
     updated_at: NOW,
     nearest_university: primary,
     landlord: null,
-    listing_photos: photo_urls.map((url, i) => ({
+    listing_photos: photos.map((url, i) => ({
       id: `web-photo-${id}-${i}`,
       url,
       is_cover: i === 0,
@@ -476,6 +483,12 @@ export function getAllWebRentals() {
   const byId = new Map()
   for (const row of [...WEB_RENTALS, ...liveWebCatalog]) {
     if (!row?.id) continue
+    if (row.listing_origin === 'external' && !isIndividualWebListing({
+      ...row,
+      contact_name: row.external_contact_name || row.landlord_display_name || row.contact_name,
+      whatsapp_number: row.whatsapp_number,
+      title: row.title,
+    })) continue
     byId.set(row.id, row)
   }
   // Collapse same room across seed + feed (different ids, same WhatsApp + price).
@@ -499,9 +512,11 @@ CAMPUS_BY_ID[6] = { id: 6, short_name: 'ABM University College', name: 'ABM Univ
 CAMPUS_BY_ID[7] = { id: 7, short_name: 'Gaborone University College', name: 'Gaborone University College', slug: 'guc', city: 'Gaborone', lat: -24.6732, lng: 25.9221 }
 CAMPUS_BY_ID[8] = { id: 8, short_name: 'BUAN', name: 'Botswana University of Agriculture and Natural Resources', slug: 'botswana-university-of-agriculture-and-natural-resources', city: 'Gaborone', lat: -24.5900, lng: 25.9410 }
 
-/** Convert auto-sync feed JSON rows into listing objects. */
+/** Convert auto-sync feed JSON / DB rows into listing objects. */
 export function feedItemToListing(item) {
   if (!item?.whatsapp_number || !item?.title) return null
+  if (!isIndividualWebListing(item)) return null
+
   const priceOnRequest = Boolean(item.price_on_request) || item.price == null || item.price === ''
   const price = priceOnRequest ? null : Number(item.price)
   if (!priceOnRequest && (!Number.isFinite(price) || price <= 0)) return null
@@ -527,8 +542,6 @@ export function feedItemToListing(item) {
     campus,
     campus_ids: campusIds,
     custom_university_name: item.custom_university_name || null,
-    source_label: item.source_label || 'Auto-synced Botswana classifieds',
-    source_url: item.source_url || 'https://bw.zimcompass.com/house-share',
     amenities: item.amenities || [],
     deposit_pula: item.deposit_pula ?? null,
     utilities_included: item.utilities_included ?? null,

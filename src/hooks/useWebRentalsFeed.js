@@ -8,7 +8,7 @@ import { supabase } from '../lib/supabase'
 import { listingDedupeKey } from '../lib/campusAttribution'
 
 const FEED_URL = '/data/web-rentals-feed.json'
-const CACHE_KEY = 'ntlo_web_rentals_feed_v4'
+const CACHE_KEY = 'ntlo_web_rentals_feed_v5'
 const CACHE_TTL_MS = 30 * 60 * 1000
 const DB_LIMIT = 500
 
